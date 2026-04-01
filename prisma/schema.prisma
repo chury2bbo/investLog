@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── 금융기관 마스터 ──────────────────────────────────────────
+
+model BrokerageCompany {
+  code          String   @id
+  name          String
+  financialCode String
+  createdAt     DateTime @default(now())
+
+  accounts      Account[]
+}
+
+// ─── 인증 ────────────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  password       String?
+  provider       String?
+  onboardingDone Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  oauthAccounts  OAuthAccount[]
+}
+
+model OAuthAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("nextauth_accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── 서비스 도메인 ───────────────────────────────────────────
+
+model Account {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  accountCode  String
+  memo         String?
+  createdAt    DateTime @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brokerageCompany BrokerageCompany  @relation(fields: [accountCode], references: [code])
+  holdings         Holding[]
+  tradeLogs        TradeLog[]
+  cashBalances     CashBalance[]
+  cashLogs         CashLog[]
+
+  @@index([userId])
+}
+
+model Holding {
+  id           Int      @id @default(autoincrement())
+  accountId    Int
+  ticker       String
+  name         String
+  country      String
+  avgPrice     Float
+  quantity     Int
+  sectorAuto   String?
+  sectorManual String?
+  tags         String[]
+  updatedAt    DateTime @updatedAt
+
+  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, ticker])
+  @@index([accountId])
+}
+
+model TradeLog {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  accountId   Int
+  ticker      String
+  name        String
+  type        String
+  price       Float
+  quantity    Int
+  reasonTags  String[]
+  emotion     String?
+  reasonMemo  String?
+  memo        String?
+  createdAt   DateTime @default(now())
+
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([date])
+}
+
+model CashBalance {
+  id        Int     @id @default(autoincrement())
+  accountId Int
+  currency  String
+  amount    Float
+
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, currency])
+}
+
+model CashLog {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  accountId Int
+  type      String
+  currency  String
+  amount    Float
+  memo      String?
+  createdAt DateTime @default(now())
+
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+// ─── 종목 검색 마스터 ────────────────────────────────────────
+
+model StockMaster {
+  ticker    String   @id
+  name      String
+  market    String
+  country   String
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("stock_master")
+}
+
+// ─── 캐시 ────────────────────────────────────────────────────
+
+model TickerSummaryCache {
+  ticker    String   @id
+  summaryKo String
+  updatedAt DateTime @updatedAt
+
+  @@map("ticker_summary_cache")
+}
+
+model TickerAnalysisCache {
+  ticker          String   @id
+  recommendation  String
+  targetBuy       String
+  targetSell      String
+  swotStrength    String
+  swotWeakness    String
+  swotOpportunity String
+  swotThreat      String
+  reasoning       String
+  cachedDate      String
+  updatedAt       DateTime @updatedAt
+
+  @@map("ticker_analysis_cache")
+}
+
+model ApiUsageLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  type      String
+  date      String
+  count     Int      @default(0)
+
+  @@unique([userId, type, date])
+  @@map("api_usage_log")
+}
