@@ -5,6 +5,13 @@ import { prisma } from "@/lib/prisma";
 export async function POST(req: Request) {
   const { email, password, name } = await req.json();
 
+  if (!name || name.trim().length === 0) {
+    return NextResponse.json(
+      { error: "이름을 입력해주세요." },
+      { status: 400 }
+    );
+  }
+
   if (!email || !password) {
     return NextResponse.json(
       { error: "이메일과 비밀번호를 입력해주세요." },

@@ -25,6 +25,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
+    if (!name.trim()) {
+      setError("이름을 입력해주세요.");
+      return;
+    }
+
     const pwError = validatePassword(password);
     if (pwError) {
       setError(pwError);
@@ -47,7 +52,7 @@ export default function RegisterPage() {
     }
 
     await signIn("credentials", { email, password, redirect: false });
-    router.push("/");
+    router.push("/onboarding");
   }
 
   return (
@@ -83,6 +88,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="홍길동"
+              required
               className="w-full pb-2 text-sm bg-transparent outline-none border-b"
               style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
             />
