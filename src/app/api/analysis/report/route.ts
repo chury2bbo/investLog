@@ -1,49 +1,35 @@
-// AI 종목 분석 리포트 — 당일 캐시 + 사용자 10회/일 제한
-// POST /api/analysis/report  { ticker, name, price, per, pbr, high52w, low52w, sector }
-
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const DAILY_LIMIT = 10;
 
-function todayStr() {
-  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-}
-
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.id;
-  const today = todayStr();
 
-  const { ticker, name, price, per, pbr, high52w, low52w, sector, currency } =
-    await req.json();
-  if (!ticker) return Response.json({ error: "ticker required" }, { status: 400 });
+  const { searchParams } = new URL(req.url);
+  const ticker = searchParams.get("ticker");
 
-  // ── 당일 캐시 확인 ─────────────────────────────────────
-  const cached = await prisma.tickerAnalysisCache.findUnique({ where: { ticker } });
-  if (cached && cached.cachedDate === today) {
-    return Response.json({
-      ticker,
-      recommendation: cached.recommendation,
-      targetBuy: cached.targetBuy,
-      targetSell: cached.targetSell,
-      swot: {
-        strength: cached.swotStrength,
-        weakness: cached.swotWeakness,
-        opportunity: cached.swotOpportunity,
-        threat: cached.swotThreat,
-      },
-      reasoning: cached.reasoning,
-      cached: true,
-    });
+  if (!ticker) {
+    return Response.json({ error: "ticker 파라미터가 필요합니다." }, { status: 400 });
   }
 
-  // ── 사용자 일일 한도 확인 ──────────────────────────────
+  const today = new Date().toISOString().slice(0, 10);
+
+  // 당일 캐시 확인 (캐시 히트 시 한도 차감 없음)
+  const cached = await prisma.tickerAnalysisCache.findUnique({
+    where: { ticker },
+  });
+
+  if (cached && cached.cachedDate === today) {
+    return Response.json({ ticker, report: cached, cached: true });
+  }
+
+  // 사용자 일일 한도 확인
   const usage = await prisma.apiUsageLog.findUnique({
     where: { userId_type_date: { userId, type: "analysis", date: today } },
   });
@@ -54,66 +40,75 @@ export async function POST(req: Request) {
     );
   }
 
-  // ── Claude API 호출 ────────────────────────────────────
-  const sym = currency === "USD" ? "$" : "₩";
-  const prompt = `
-다음 주식 종목을 분석하고 JSON 형식으로 응답해줘.
-
-종목명: ${name}
-티커: ${ticker}
-현재가: ${sym}${price?.toLocaleString() ?? "N/A"}
-${per != null ? `PER: ${per}` : ""}
-${pbr != null ? `PBR: ${pbr}` : ""}
-${high52w != null ? `52주 최고: ${sym}${high52w.toLocaleString()}` : ""}
-${low52w != null ? `52주 최저: ${sym}${low52w.toLocaleString()}` : ""}
-${sector ? `섹터: ${sector}` : ""}
-
-아래 JSON 형식으로만 응답해줘 (다른 텍스트 없이):
-{
-  "recommendation": "BUY" | "HOLD" | "SELL",
-  "targetBuy": "적정 매수가 (예: ₩65,000~70,000 또는 $140~150)",
-  "targetSell": "적정 매도가 (예: ₩90,000 이상 또는 $200 이상)",
-  "swot": {
-    "strength": "강점 1~2줄",
-    "weakness": "약점 1~2줄",
-    "opportunity": "기회 1~2줄",
-    "threat": "위협 1~2줄"
-  },
-  "reasoning": "투자 의견 근거 2~3줄"
-}
-`.trim();
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return Response.json({ error: "AI API 키가 설정되지 않았습니다." }, { status: 500 });
+  }
 
   try {
+    const anthropic = new Anthropic({ apiKey });
+
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 800,
-      messages: [{ role: "user", content: prompt }],
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: `주식 종목 "${ticker}"에 대해 투자 분석을 해줘.
+다음 항목을 포함해서 JSON으로 응답해:
+
+{
+  "recommendation": "BUY" | "HOLD" | "SELL",
+  "targetBuy": "적정 매수가 (숫자 문자열)",
+  "targetSell": "적정 매도가 (숫자 문자열)",
+  "swotStrength": "강점 1~2줄",
+  "swotWeakness": "약점 1~2줄",
+  "swotOpportunity": "기회 1~2줄",
+  "swotThreat": "위협 1~2줄",
+  "reasoning": "종합 투자 의견 3~4줄"
+}
+
+한국어로 작성하고, JSON만 응답해줘.`,
+        },
+      ],
     });
 
-    const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "{}";
+    const text =
+      message.content[0].type === "text" ? message.content[0].text : "";
 
-    // JSON 파싱
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("JSON parse failed");
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
+    }
+
     const parsed = JSON.parse(jsonMatch[0]);
 
-    const result = {
-      recommendation: parsed.recommendation ?? "HOLD",
-      targetBuy: parsed.targetBuy ?? "-",
-      targetSell: parsed.targetSell ?? "-",
-      swotStrength: parsed.swot?.strength ?? "-",
-      swotWeakness: parsed.swot?.weakness ?? "-",
-      swotOpportunity: parsed.swot?.opportunity ?? "-",
-      swotThreat: parsed.swot?.threat ?? "-",
-      reasoning: parsed.reasoning ?? "-",
-      cachedDate: today,
-    };
-
     // 당일 캐시 저장
-    await prisma.tickerAnalysisCache.upsert({
+    const report = await prisma.tickerAnalysisCache.upsert({
       where: { ticker },
-      update: result,
-      create: { ticker, ...result },
+      create: {
+        ticker,
+        recommendation: parsed.recommendation ?? "HOLD",
+        targetBuy: parsed.targetBuy ?? "",
+        targetSell: parsed.targetSell ?? "",
+        swotStrength: parsed.swotStrength ?? "",
+        swotWeakness: parsed.swotWeakness ?? "",
+        swotOpportunity: parsed.swotOpportunity ?? "",
+        swotThreat: parsed.swotThreat ?? "",
+        reasoning: parsed.reasoning ?? "",
+        cachedDate: today,
+      },
+      update: {
+        recommendation: parsed.recommendation ?? "HOLD",
+        targetBuy: parsed.targetBuy ?? "",
+        targetSell: parsed.targetSell ?? "",
+        swotStrength: parsed.swotStrength ?? "",
+        swotWeakness: parsed.swotWeakness ?? "",
+        swotOpportunity: parsed.swotOpportunity ?? "",
+        swotThreat: parsed.swotThreat ?? "",
+        reasoning: parsed.reasoning ?? "",
+        cachedDate: today,
+      },
     });
 
     // 사용량 카운트 증가
@@ -123,22 +118,9 @@ ${sector ? `섹터: ${sector}` : ""}
       create: { userId, type: "analysis", date: today, count: 1 },
     });
 
-    return Response.json({
-      ticker,
-      recommendation: result.recommendation,
-      targetBuy: result.targetBuy,
-      targetSell: result.targetSell,
-      swot: {
-        strength: result.swotStrength,
-        weakness: result.swotWeakness,
-        opportunity: result.swotOpportunity,
-        threat: result.swotThreat,
-      },
-      reasoning: result.reasoning,
-      cached: false,
-    });
-  } catch (e) {
-    console.error("analysis/report error:", e);
-    return Response.json({ error: "분석 생성에 실패했습니다." }, { status: 500 });
+    return Response.json({ ticker, report, cached: false });
+  } catch (err) {
+    console.error("Report API error:", err);
+    return Response.json({ error: "AI 분석 생성에 실패했습니다." }, { status: 500 });
   }
 }
