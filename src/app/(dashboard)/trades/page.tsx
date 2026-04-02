@@ -116,6 +116,7 @@ export default function TradesPage() {
   const [filterAccount, setFilterAccount] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterTag, setFilterTag] = useState<string>("all");
+  const [filterCountry, setFilterCountry] = useState<"all" | "KR" | "US">("all");
 
   // 매매 등록 폼
   const [formAccountId, setFormAccountId] = useState<number | null>(null);
@@ -143,6 +144,10 @@ export default function TradesPage() {
   // 계좌 필터 드롭다운
   const [filterAccDropOpen, setFilterAccDropOpen] = useState(false);
   const filterAccDropRef = useRef<HTMLDivElement>(null);
+
+  // 태그 필터 드롭다운
+  const [filterTagDropOpen, setFilterTagDropOpen] = useState(false);
+  const filterTagDropRef = useRef<HTMLDivElement>(null);
 
   // 가격 자동조회
   const [formPriceLoading, setFormPriceLoading] = useState(false);
@@ -212,6 +217,17 @@ export default function TradesPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!filterTagDropOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (filterTagDropRef.current && !filterTagDropRef.current.contains(e.target as Node)) {
+        setFilterTagDropOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterTagDropOpen]);
 
   // ─── 매매 등록 ─────────────────────────────────────────
 
@@ -407,6 +423,10 @@ export default function TradesPage() {
 
   // ─── 필터용 태그 목록 ──────────────────────────────────
 
+  const filteredTrades = filterCountry === "all"
+    ? trades
+    : trades.filter((t) => getCountryFromTicker(t.ticker) === filterCountry);
+
   const allReasonTags = Array.from(
     new Set(trades.flatMap((t) => t.reasonTags))
   );
@@ -472,6 +492,7 @@ export default function TradesPage() {
 
       {/* 필터 */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
+        {/* 좌측: 계좌·태그 */}
         {/* 계좌 필터 — 커스텀 드롭다운 */}
         <div ref={filterAccDropRef} className="relative">
           <button
@@ -518,6 +539,53 @@ export default function TradesPage() {
           )}
         </div>
 
+        {/* 이유 태그 필터 — 커스텀 드롭다운 */}
+        {allReasonTags.length > 0 && (
+          <div ref={filterTagDropRef} className="relative">
+            <button
+              onClick={() => setFilterTagDropOpen((v) => !v)}
+              className={`flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-colors ${
+                filterTag !== "all"
+                  ? "border-[#05C072] bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072]"
+                  : "border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+              }`}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              <span>{filterTag === "all" ? "전체 태그" : filterTag}</span>
+              <svg
+                width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                className={`transition-transform ${filterTagDropOpen ? "rotate-180" : ""}`}
+              >
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+
+            {filterTagDropOpen && (
+              <div className="absolute top-full left-0 mt-1.5 min-w-[140px] rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 overflow-hidden">
+                {[{ value: "all", label: "전체 태그" }, ...allReasonTags.map((t) => ({ value: t, label: t }))].map((item) => (
+                  <button
+                    key={item.value}
+                    onClick={() => { setFilterTag(item.value); setFilterTagDropOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors flex items-center justify-between ${
+                      filterTag === item.value
+                        ? "text-[#05C072] bg-[#E8FAF2] dark:bg-[#0D2A1D]"
+                        : "text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                    }`}
+                  >
+                    {item.label}
+                    {filterTag === item.value && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 우측: 매수/매도·국내/해외 */}
+        <div className="ml-auto flex items-center gap-2">
+
         {/* 매수/매도 필터 — pill 토글 */}
         <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
           {(["all", "BUY", "SELL"] as const).map((type) => {
@@ -545,32 +613,36 @@ export default function TradesPage() {
           })}
         </div>
 
-        {/* 이유 태그 필터 */}
-        {allReasonTags.length > 0 && (
-          <div className="relative">
-            <select
-              value={filterTag}
-              onChange={(e) => setFilterTag(e.target.value)}
-              className="appearance-none pl-3 pr-7 py-1.5 text-xs font-medium rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none cursor-pointer"
-            >
-              <option value="all">전체 태그</option>
-              {allReasonTags.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </select>
-            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[#9AA99A] dark:text-[#5A6A5A]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-        )}
+        {/* 국내/해외 필터 — pill 토글 */}
+        <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+          {(["all", "KR", "US"] as const).map((c) => {
+            const active = filterCountry === c;
+            const label = c === "all" ? "전체" : c === "KR" ? "국내" : "해외";
+            return (
+              <button
+                key={c}
+                onClick={() => setFilterCountry(c)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A]"
+                    : "bg-white dark:bg-[#1D2720] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        </div>{/* 우측 그룹 끝 */}
       </div>
 
       {/* 매매 기록 카드 목록 */}
-      {trades.length === 0 ? (
-        <EmptyState message="아직 매매 기록이 없어요. 첫 매매를 등록해보세요." />
+      {filteredTrades.length === 0 ? (
+        <EmptyState message={trades.length === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
       ) : (
         <div className="space-y-3">
-          {trades.map((trade) => {
+          {filteredTrades.map((trade) => {
             const isBuy = trade.type === "BUY";
             const country = getCountryFromTicker(trade.ticker);
             const totalAmount = trade.price * trade.quantity;
