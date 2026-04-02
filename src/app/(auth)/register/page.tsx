@@ -4,22 +4,17 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { LoadingSpinner } from "@/components/ui";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  function validatePassword(pw: string): string | null {
-    if (pw.length < 8 || pw.length > 15) return "비밀번호는 8자 이상 15자 이하로 입력해주세요.";
-    if (!/[a-zA-Z]/.test(pw)) return "영문을 포함해주세요.";
-    if (!/[0-9]/.test(pw)) return "숫자를 포함해주세요.";
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) return "특수문자를 포함해주세요.";
-    return null;
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,143 +24,225 @@ export default function RegisterPage() {
       setError("이름을 입력해주세요.");
       return;
     }
-
-    const pwError = validatePassword(password);
-    if (pwError) {
-      setError(pwError);
+    if (password.length < 8) {
+      setError("비밀번호는 8자 이상이어야 해요.");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError("비밀번호가 일치하지 않아요.");
       return;
     }
 
     setLoading(true);
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
-    });
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
 
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "회원가입에 실패했습니다.");
+      if (!res.ok) {
+        const data = await res.json();
+        if (res.status === 409) {
+          setError("이미 사용 중인 이메일이에요.");
+        } else {
+          setError(data.error || "회원가입에 실패했습니다.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 성공 → Step 2 완료 화면
+      setStep(2);
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
       setLoading(false);
-      return;
     }
+  }
 
-    await signIn("credentials", { email, password, redirect: false });
+  async function handleStart() {
+    setLoading(true);
+    // 자동 로그인 후 온보딩으로 이동
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
     router.push("/onboarding");
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: "#F5F7F5" }}
-    >
-      <div
-        className="w-full max-w-sm bg-white rounded-2xl p-8"
-        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
-      >
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#F5F7F5] dark:bg-[#0D1210]">
+      <div className="w-full max-w-sm">
         {/* 로고 */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold" style={{ color: "#1A221A" }}>
+        <div className="text-center mb-8">
+          <div
+            className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl mx-auto mb-2.5"
+            style={{
+              backgroundColor: "#05C072",
+              boxShadow: "0 6px 20px rgba(5,192,114,0.25)",
+            }}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
+          </div>
+          <h1 className="text-[22px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
             InvestLog
           </h1>
-          <p className="text-sm mt-1" style={{ color: "#6B7B6B" }}>
-            투자 기록을 시작해보세요
-          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 이름 */}
-          <div>
-            <label
-              className="block text-xs font-medium mb-1"
-              style={{ color: "#6B7B6B" }}
+        {step === 1 ? (
+          <>
+            {/* Step 1 — 입력 카드 */}
+            <div
+              className="rounded-2xl p-7 bg-white dark:bg-[#1D2720]"
+              style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
             >
-              이름
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="홍길동"
-              required
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-              style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
-            />
-          </div>
+              <h2 className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-1">
+                회원가입
+              </h2>
+              <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] mb-6">
+                투자 기록을 시작해보세요
+              </p>
 
-          {/* 이메일 */}
-          <div>
-            <label
-              className="block text-xs font-medium mb-1"
-              style={{ color: "#6B7B6B" }}
-            >
-              이메일
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
-              required
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-              style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
-            />
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* 이름 */}
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="홍길동"
+                    required
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                </div>
 
-          {/* 비밀번호 */}
-          <div>
-            <label
-              className="block text-xs font-medium mb-1"
-              style={{ color: "#6B7B6B" }}
-            >
-              비밀번호
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="영문,숫자,특수문자 포함 8~15자"
-              required
-              minLength={8}
-              maxLength={15}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-              style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
-            />
-            <p className="text-xs mt-1" style={{ color: "#9AA99A" }}>
-              영문, 숫자, 특수문자 포함 8~15자
+                {/* 이메일 */}
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                    이메일
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="example@email.com"
+                    required
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                </div>
+
+                {/* 비밀번호 */}
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                    비밀번호
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="8자 이상 입력"
+                    required
+                    minLength={8}
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                </div>
+
+                {/* 비밀번호 확인 */}
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                    비밀번호 확인
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    placeholder="비밀번호를 다시 입력"
+                    required
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                </div>
+
+                {/* 에러 메시지 — 빨간 배경 배너 */}
+                {error && (
+                  <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">
+                    {error}
+                  </div>
+                )}
+
+                {/* 가입하기 버튼 */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
+                  style={{
+                    backgroundColor: "#05C072",
+                    opacity: loading ? 0.6 : 1,
+                  }}
+                >
+                  {loading && <LoadingSpinner size={16} />}
+                  {loading ? "처리 중..." : "가입하기"}
+                </button>
+              </form>
+            </div>
+
+            {/* 로그인 링크 */}
+            <p className="text-center text-sm mt-5 text-[#9AA99A] dark:text-[#5A6A5A]">
+              이미 계정이 있으신가요?{" "}
+              <Link
+                href="/login"
+                className="font-bold text-[#05C072] hover:underline"
+              >
+                로그인
+              </Link>
             </p>
-          </div>
-
-          {/* 에러 메시지 */}
-          {error && (
-            <p className="text-xs" style={{ color: "#F04452" }}>
-              {error}
+          </>
+        ) : (
+          /* Step 2 — 완료 카드 */
+          <div
+            className="rounded-2xl px-6 py-10 text-center bg-white dark:bg-[#1D2720]"
+            style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
+          >
+            <div className="text-5xl mb-4">🎉</div>
+            <h2 className="text-xl font-extrabold text-[#1A221A] dark:text-[#E8EEE8] mb-2">
+              가입 완료!
+            </h2>
+            <p className="text-sm leading-7 text-[#6B7B6B] dark:text-[#7A8A7A] mb-7">
+              InvestLog에 오신 걸 환영해요.
+              <br />
+              나만의 투자 기록을 시작해볼까요?
             </p>
-          )}
-
-          {/* 회원가입 버튼 */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity"
-            style={{ backgroundColor: "#05C072", opacity: loading ? 0.6 : 1 }}
-          >
-            {loading ? "처리 중..." : "회원가입"}
-          </button>
-        </form>
-
-        {/* 로그인 링크 */}
-        <p className="text-center text-xs mt-6" style={{ color: "#9AA99A" }}>
-          이미 계정이 있으신가요?{" "}
-          <Link
-            href="/login"
-            className="font-semibold"
-            style={{ color: "#05C072" }}
-          >
-            로그인
-          </Link>
-        </p>
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
+              style={{
+                backgroundColor: "#05C072",
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading && <LoadingSpinner size={16} />}
+              {loading ? "로그인 중..." : "시작하기 →"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
