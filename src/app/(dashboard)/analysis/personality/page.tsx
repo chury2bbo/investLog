@@ -249,7 +249,7 @@ export default function PersonalityPage() {
               />
               <Tooltip
                 contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
-                formatter={(v: number) => [`${v.toFixed(2)}%`, "평균 수익률"]}
+                formatter={(v: unknown) => [`${(v as number).toFixed(2)}%`, "평균 수익률"]}
               />
               <Bar dataKey="avgPnl" radius={[0, 4, 4, 0]}>
                 {tagPnl.map((entry, i) => (

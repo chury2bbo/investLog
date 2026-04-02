@@ -106,7 +106,7 @@ export default function AnalysisPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searching, setSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 선택된 종목
   const [selected, setSelected] = useState<SearchResult | null>(null);
@@ -453,7 +453,7 @@ export default function AnalysisPage() {
                     />
                     <Tooltip
                       contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
-                      formatter={(v: number) => [formatPrice(v, selected.country), "주가"]}
+                      formatter={(v: unknown) => [formatPrice(v as number, selected.country), "주가"]}
                       labelFormatter={(l) => l}
                     />
                     <Line
@@ -483,7 +483,7 @@ export default function AnalysisPage() {
                     />
                     <Tooltip
                       contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
-                      formatter={(v: number) => [`${v.toFixed(2)}%`, "MDD"]}
+                      formatter={(v: unknown) => [`${(v as number).toFixed(2)}%`, "MDD"]}
                       labelFormatter={(l) => l}
                     />
                     <ReferenceLine y={0} stroke="#E8EEE8" />
