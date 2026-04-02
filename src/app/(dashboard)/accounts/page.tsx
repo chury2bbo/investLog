@@ -36,20 +36,12 @@ interface AccountData {
   cashBalances: CashBalance[];
 }
 
-// ─── 증권사 목록 ─────────────────────────────────────────
+// ─── 타입 (증권사) ────────────────────────────────────────
 
-const BROKERAGES = [
-  { code: "KI", name: "키움증권" },
-  { code: "MI", name: "미래에셋증권" },
-  { code: "SA", name: "삼성증권" },
-  { code: "NH", name: "NH투자증권" },
-  { code: "KB", name: "KB증권" },
-  { code: "HI", name: "한국투자증권" },
-  { code: "TO", name: "토스증권" },
-  { code: "SH", name: "신한투자증권" },
-  { code: "DA", name: "대신증권" },
-  { code: "EB", name: "이베스트투자증권" },
-];
+interface Brokerage {
+  code: string;
+  name: string;
+}
 
 // ─── 유틸 ────────────────────────────────────────────────
 
@@ -76,21 +68,30 @@ function formatCash(amount: number, currency: string) {
 export default function AccountsPage() {
   const router = useRouter();
   const [accounts, setAccounts] = useState<AccountData[]>([]);
+  const [brokerages, setBrokerages] = useState<Brokerage[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
   // 모달 폼
-  const [formCode, setFormCode] = useState(BROKERAGES[0].code);
+  const [formCode, setFormCode] = useState("");
   const [formCashKRW, setFormCashKRW] = useState("");
   const [formCashUSD, setFormCashUSD] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const fetchAccounts = useCallback(async () => {
     try {
-      const res = await fetch("/api/accounts");
-      if (res.ok) {
-        const data = await res.json();
+      const [accRes, brRes] = await Promise.all([
+        fetch("/api/accounts"),
+        fetch("/api/brokerages"),
+      ]);
+      if (accRes.ok) {
+        const data = await accRes.json();
         setAccounts(Array.isArray(data) ? data : []);
+      }
+      if (brRes.ok) {
+        const brData: Brokerage[] = await brRes.json();
+        setBrokerages(brData);
+        if (brData.length > 0) setFormCode(brData[0].code);
       }
     } catch {
       /* 조회 실패 */
@@ -118,7 +119,7 @@ export default function AccountsPage() {
 
       if (res.ok) {
         setModalOpen(false);
-        setFormCode(BROKERAGES[0].code);
+        setFormCode(brokerages[0]?.code ?? "");
         setFormCashKRW("");
         setFormCashUSD("");
         fetchAccounts();
@@ -240,7 +241,7 @@ export default function AccountsPage() {
               onChange={(e) => setFormCode(e.target.value)}
               className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] appearance-none"
             >
-              {BROKERAGES.map((b) => (
+              {brokerages.map((b) => (
                 <option key={b.code} value={b.code}>
                   {b.name}
                 </option>

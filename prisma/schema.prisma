@@ -8,33 +8,27 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── 금융기관 마스터 ──────────────────────────────────────────
-
 model BrokerageCompany {
-  code          String   @id
-  name          String
-  financialCode String
-  createdAt     DateTime @default(now())
-
+  code           String          @id
+  name           String
+  financialCode  String
+  createdAt      DateTime        @default(now())
   investAccounts InvestAccount[]
 }
 
-// ─── 인증 ────────────────────────────────────────────────────
-
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
+  id             String          @id @default(cuid())
+  email          String          @unique
   name           String?
-  image          String?
-  emailVerified  DateTime?
   password       String?
   provider       String?
-  onboardingDone Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  investAccounts InvestAccount[]
+  onboardingDone Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  emailVerified  DateTime?
+  image          String?
   sessions       Session[]
+  investAccounts InvestAccount[]
   oauthAccounts  Account[]
 }
 
@@ -51,7 +45,6 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -63,32 +56,28 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ─── 서비스 도메인 ───────────────────────────────────────────
-
 model InvestAccount {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  accountCode  String
-  memo         String?
-  createdAt    DateTime @default(now())
-
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  brokerageCompany BrokerageCompany  @relation(fields: [accountCode], references: [code])
-  holdings         Holding[]
-  tradeLogs        TradeLog[]
+  id               Int              @id @default(autoincrement())
+  userId           String
+  accountCode      String
+  memo             String?
+  createdAt        DateTime         @default(now())
   cashBalances     CashBalance[]
   cashLogs         CashLog[]
+  holdings         Holding[]
+  tradeLogs        TradeLog[]
+  brokerageCompany BrokerageCompany @relation(fields: [accountCode], references: [code])
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("accounts")
 }
 
 model Holding {
-  id           Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   accountId    Int
   ticker       String
   name         String
@@ -98,62 +87,56 @@ model Holding {
   sectorAuto   String?
   sectorManual String?
   tags         String[]
-  updatedAt    DateTime @updatedAt
-
-  account      InvestAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  updatedAt    DateTime      @updatedAt
+  account      InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, ticker])
   @@index([accountId])
 }
 
 model TradeLog {
-  id          Int      @id @default(autoincrement())
-  date        DateTime
-  accountId   Int
-  ticker      String
-  name        String
-  type        String
-  price       Float
-  quantity    Int
-  reasonTags  String[]
-  emotion     String?
-  reasonMemo  String?
-  memo        String?
-  createdAt   DateTime @default(now())
-
-  account     InvestAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  id         Int           @id @default(autoincrement())
+  date       DateTime
+  accountId  Int
+  ticker     String
+  name       String
+  type       String
+  price      Float
+  quantity   Int
+  reasonTags String[]
+  emotion    String?
+  reasonMemo String?
+  memo       String?
+  createdAt  DateTime      @default(now())
+  account    InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId])
   @@index([date])
 }
 
 model CashBalance {
-  id        Int     @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   accountId Int
   currency  String
   amount    Float
-
   account   InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, currency])
 }
 
 model CashLog {
-  id        Int      @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   date      DateTime
   accountId Int
   type      String
   currency  String
   amount    Float
   memo      String?
-  createdAt DateTime @default(now())
-
-  account   InvestAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  account   InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId])
 }
-
-// ─── 종목 검색 마스터 ────────────────────────────────────────
 
 model StockMaster {
   ticker    String   @id
@@ -165,8 +148,6 @@ model StockMaster {
   @@index([name])
   @@map("stock_master")
 }
-
-// ─── 캐시 ────────────────────────────────────────────────────
 
 model TickerSummaryCache {
   ticker    String   @id
@@ -193,11 +174,11 @@ model TickerAnalysisCache {
 }
 
 model ApiUsageLog {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  type      String
-  date      String
-  count     Int      @default(0)
+  id     Int    @id @default(autoincrement())
+  userId String
+  type   String
+  date   String
+  count  Int    @default(0)
 
   @@unique([userId, type, date])
   @@map("api_usage_log")
