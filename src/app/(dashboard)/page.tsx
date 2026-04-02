@@ -65,7 +65,11 @@ interface AccountSummary {
   name: string;
   type: string;
   stockCount: number;
-  cash: string;
+  cashKRW: number;
+  cashUSD: number;
+  evalKRW: number;
+  evalUSD: number;
+  totalKRW: number;
   pnlRate: number;
 }
 
@@ -265,29 +269,37 @@ export default function DashboardPage() {
       const type = hasKR && hasForeign ? "국내·해외" : hasKR ? "국내" : hasForeign ? "해외" : "국내";
 
       let invested = 0;
-      let currentValue = 0;
+      let evalKRW = 0;
+      let evalUSD = 0;
       acc.holdings.forEach((h) => {
         const quote = quotes[h.ticker];
         const curPrice = quote?.price ?? h.avgPrice;
         const isForeign = h.country !== "KR";
         invested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
-        currentValue += curPrice * h.quantity * (isForeign ? usdRate : 1);
+        if (isForeign) {
+          evalUSD += curPrice * h.quantity;
+        } else {
+          evalKRW += curPrice * h.quantity;
+        }
       });
 
+      const currentValue = evalKRW + evalUSD * usdRate;
       const pnlRate = invested > 0 ? ((currentValue - invested) / invested) * 100 : 0;
 
       const cashKRW = acc.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
-      const cashUSDVal = acc.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
-      const cashStr = cashUSDVal > 0
-        ? formatCompact(cashUSDVal, "USD")
-        : formatCompact(cashKRW, "KRW");
+      const cashUSD = acc.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
+      const totalKRW = evalKRW + evalUSD * usdRate + cashKRW + cashUSD * usdRate;
 
       return {
         id: acc.id,
         name: acc.brokerageCompany.name,
         type,
         stockCount: acc.holdings.length,
-        cash: cashStr,
+        cashKRW,
+        cashUSD,
+        evalKRW,
+        evalUSD,
+        totalKRW,
         pnlRate,
       };
     });
@@ -621,7 +633,7 @@ export default function DashboardPage() {
                           {acc.name}
                         </div>
                         <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
-                          {acc.type} · {acc.stockCount}종목 · {acc.cash}
+                          {acc.type} · {acc.stockCount}종목
                         </div>
                       </div>
                     </div>
@@ -632,6 +644,59 @@ export default function DashboardPage() {
                         ›
                       </span>
                     </div>
+                  </div>
+
+                  {/* 예수금 · 평가금 · 합산 */}
+                  <div className="mt-3 pt-3 border-t border-[#F0F4F0] dark:border-[#2D3D30] space-y-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">예수금</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">평가금</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">합산(원화)</div>
+                      </div>
+                    </div>
+                    {/* 국내(원화) 행 */}
+                    {(acc.cashKRW > 0 || acc.evalKRW > 0) && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {acc.cashKRW > 0 ? `₩${formatKRW(acc.cashKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                        </div>
+                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {acc.evalKRW > 0 ? `₩${formatKRW(acc.evalKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                        </div>
+                        <div className="text-xs font-bold text-[#05C072]" rowSpan={2}>
+                          ₩{formatKRW(acc.totalKRW)}
+                        </div>
+                      </div>
+                    )}
+                    {/* 해외(달러) 행 */}
+                    {(acc.cashUSD > 0 || acc.evalUSD > 0) && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {acc.cashUSD > 0 ? `$${acc.cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                        </div>
+                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {acc.evalUSD > 0 ? `$${acc.evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                        </div>
+                        {acc.cashKRW === 0 && acc.evalKRW === 0 && (
+                          <div className="text-xs font-bold text-[#05C072]">
+                            ₩{formatKRW(acc.totalKRW)}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* 예수금·평가금 모두 없는 경우 */}
+                    {acc.cashKRW === 0 && acc.cashUSD === 0 && acc.evalKRW === 0 && acc.evalUSD === 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-xs text-[#9AA99A]">-</div>
+                        <div className="text-xs text-[#9AA99A]">-</div>
+                        <div className="text-xs font-bold text-[#05C072]">₩0</div>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </div>

@@ -86,10 +86,10 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
-            InvestLog
+            버텨일지
           </h1>
           <p className="text-sm mt-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-            나만의 투자 관리 서비스
+            한국 개미의 정신력 관리 및 기록
           </p>
         </div>
 

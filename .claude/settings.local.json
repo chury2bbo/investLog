@@ -13,6 +13,9 @@
       "Bash(curl -s http://localhost:3000/api/accounts)",
       "Bash(git config:*)",
       "Bash(git add:*)"
+    ],
+    "additionalDirectories": [
+      "d:\\project\\investLog\\src\\app\\api\\accounts"
     ]
   }
 }
