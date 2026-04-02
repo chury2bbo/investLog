@@ -105,9 +105,6 @@ export default function AccountDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // 현재가
-  const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
-
   // 종목 등록 모달
   const [holdingModal, setHoldingModal] = useState(false);
   const [hTicker, setHTicker] = useState("");
