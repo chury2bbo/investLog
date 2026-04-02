@@ -39,6 +39,13 @@ interface Holding {
   tags: string[];
 }
 
+interface QuoteResult {
+  ticker: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
+
 interface CashBalance {
   id: number;
   currency: string;
@@ -97,6 +104,9 @@ export default function AccountDetailPage() {
   // 계좌 삭제 모달
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // 현재가
+  const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
 
   // 종목 등록 모달
   const [holdingModal, setHoldingModal] = useState(false);
@@ -504,7 +514,7 @@ export default function AccountDetailPage() {
           {account.holdings.map((h) => {
             const isForeign = h.country !== "KR";
             const quote = quotes[h.ticker];
-            const currentPrice = quote?.price ?? h.avgPrice;
+            const currentPrice = quote?.price || h.avgPrice;
             const evalValue = currentPrice * h.quantity;
             const investedValue = h.avgPrice * h.quantity;
             const pnl = evalValue - investedValue;
@@ -736,17 +746,16 @@ export default function AccountDetailPage() {
             이 작업은 되돌릴 수 없습니다.
           </p>
           <div className="flex gap-2">
-            <Button
-              size="lg"
-              variant="secondary"
+            <button
               onClick={() => setDeleteConfirm(false)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
             >
               취소
-            </Button>
+            </button>
             <button
               onClick={handleDeleteAccount}
               disabled={deleting}
-              className="flex-1 py-3 rounded-xl text-sm font-bold text-white cursor-pointer disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
               style={{ backgroundColor: "#F04452" }}
             >
               {deleting ? "삭제 중..." : "삭제하기"}

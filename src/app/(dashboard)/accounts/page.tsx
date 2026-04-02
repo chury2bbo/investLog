@@ -124,8 +124,7 @@ export default function AccountsPage() {
 
   useEffect(() => {
     fetchAccounts();
-    fetchBrokerages();
-  }, [fetchAccounts, fetchBrokerages]);
+  }, [fetchAccounts]);
 
   async function handleAddAccount() {
     setSubmitting(true);
@@ -285,17 +284,20 @@ export default function AccountsPage() {
                   </div>
 
                   <div className="text-right">
-                    {cashKRW > 0 && (
-                      <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                        {formatCash(cashKRW, "KRW")}
-                      </div>
-                    )}
-                    {cashUSD > 0 && (
-                      <div className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A]">
-                        {formatCash(cashUSD, "USD")}
-                      </div>
-                    )}
-                    {cashKRW === 0 && cashUSD === 0 && (
+                    {cashKRW > 0 || cashUSD > 0 ? (
+                      <>
+                        {cashKRW > 0 && (
+                          <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                            {formatCash(cashKRW, "KRW")}
+                          </div>
+                        )}
+                        {cashUSD > 0 && (
+                          <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                            {formatCash(cashUSD, "USD")}
+                          </div>
+                        )}
+                      </>
+                    ) : (
                       <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">
                         예수금 없음
                       </div>
