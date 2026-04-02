@@ -124,7 +124,8 @@ export default function AccountsPage() {
 
   useEffect(() => {
     fetchAccounts();
-  }, [fetchAccounts]);
+    fetchBrokerages();
+  }, [fetchAccounts, fetchBrokerages]);
 
   async function handleAddAccount() {
     setSubmitting(true);
