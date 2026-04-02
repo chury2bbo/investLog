@@ -91,6 +91,10 @@ export default function AccountDetailPage() {
   const [cashAmount, setCashAmount] = useState("");
   const [cashSubmitting, setCashSubmitting] = useState(false);
 
+  // 계좌 삭제 모달
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   // ─── 데이터 로딩 ───────────────────────────────────────
 
   const fetchAccount = useCallback(async () => {
@@ -160,6 +164,25 @@ export default function AccountDetailPage() {
   }
 
   // ─── 섹터 분포 계산 ───────────────────────────────────
+
+  // ─── 계좌 삭제 처리 ────────────────────────────────────
+
+  async function handleDeleteAccount() {
+    if (!account) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/accounts/${account.id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/accounts");
+      }
+    } catch {
+      /* 삭제 실패 */
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  // ─── 섹터 분포 계산 (원본) ─────────────────────────────
 
   function calcSectorDistribution(type: "auto" | "manual") {
     if (!account) return [];
@@ -463,6 +486,49 @@ export default function AccountDetailPage() {
           </Card>
         )}
       </div>
+
+      {/* ── 계좌 삭제 ── */}
+      <div className="mt-4">
+        <button
+          onClick={() => setDeleteConfirm(true)}
+          className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "#F04452" }}
+        >
+          계좌 삭제
+        </button>
+      </div>
+
+      {/* 삭제 확인 모달 */}
+      <BottomSheet
+        open={deleteConfirm}
+        onClose={() => setDeleteConfirm(false)}
+        title="계좌를 삭제할까요?"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#6B7B6B] leading-relaxed">
+            <strong>{account.brokerageCompany.name}</strong> 계좌와 관련된
+            보유 종목, 예수금, 매매 기록이 모두 삭제됩니다.
+            이 작업은 되돌릴 수 없습니다.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => setDeleteConfirm(false)}
+            >
+              취소
+            </Button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="flex-1 py-3 rounded-xl text-sm font-bold text-white cursor-pointer disabled:opacity-50"
+              style={{ backgroundColor: "#F04452" }}
+            >
+              {deleting ? "삭제 중..." : "삭제하기"}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
 
       {/* ── 입출금 바텀시트 ── */}
       <BottomSheet

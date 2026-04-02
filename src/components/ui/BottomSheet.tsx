@@ -17,25 +17,26 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
 
       {/* 시트: 모바일 바텀 / PC 중앙 */}
       <div
-        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-3xl md:rounded-2xl p-6"
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-3xl md:rounded-2xl overflow-hidden"
         style={{
           backgroundColor: "#FFFFFF",
           maxHeight: "80vh",
-          overflowY: "auto",
         }}
       >
-        {/* 핸들 (모바일만) */}
-        <div
-          className="w-10 h-1 rounded-full mx-auto mb-5 md:hidden"
-          style={{ backgroundColor: "#E8EEE8" }}
-        />
-        <h3
-          className="text-base font-bold mb-4"
-          style={{ color: "#1A221A" }}
-        >
-          {title}
-        </h3>
-        {children}
+        <div className="overflow-y-auto max-h-[80vh] p-6">
+          {/* 핸들 (모바일만) */}
+          <div
+            className="w-10 h-1 rounded-full mx-auto mb-5 md:hidden"
+            style={{ backgroundColor: "#E8EEE8" }}
+          />
+          <h3
+            className="text-base font-bold mb-4"
+            style={{ color: "#1A221A" }}
+          >
+            {title}
+          </h3>
+          {children}
+        </div>
       </div>
     </div>
   );

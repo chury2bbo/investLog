@@ -16,7 +16,11 @@ const NAV_ITEMS = [
 
 function isActive(pathname: string, navId: string) {
   if (navId === "/") return pathname === "/";
-  return pathname.startsWith(navId);
+  if (!pathname.startsWith(navId)) return false;
+  // 더 구체적인 nav item이 매칭되면 상위 경로는 active 제외
+  return !NAV_ITEMS.some(
+    (item) => item.id !== navId && item.id.startsWith(navId) && pathname.startsWith(item.id)
+  );
 }
 
 // ─── PC 아이콘 사이드바 ──────────────────────────────────

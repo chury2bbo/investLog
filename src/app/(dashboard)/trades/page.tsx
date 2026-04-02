@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   Button,
@@ -133,6 +133,13 @@ export default function TradesPage() {
   // 이전 거래 불러오기
   const [showPrevTrades, setShowPrevTrades] = useState(false);
 
+  // 종목 검색 autocomplete
+  const [stockQuery, setStockQuery] = useState("");
+  const [stockResults, setStockResults] = useState<{ ticker: string; name: string; market: string }[]>([]);
+  const [showStockDropdown, setShowStockDropdown] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stockSearchRef = useRef<HTMLDivElement>(null);
+
   // ─── 데이터 로딩 ───────────────────────────────────────
 
   const fetchTrades = useCallback(async () => {
@@ -178,6 +185,16 @@ export default function TradesPage() {
     fetchAccounts();
   }, [fetchAccounts]);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (stockSearchRef.current && !stockSearchRef.current.contains(e.target as Node)) {
+        setShowStockDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // ─── 매매 등록 ─────────────────────────────────────────
 
   function resetForm() {
@@ -192,6 +209,42 @@ export default function TradesPage() {
     setSubmitError("");
     setCashWarning(false);
     setShowPrevTrades(false);
+    setStockQuery("");
+    setStockResults([]);
+    setShowStockDropdown(false);
+  }
+
+  function handleStockQueryChange(val: string) {
+    setStockQuery(val);
+
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    if (!val.trim()) {
+      setStockResults([]);
+      setShowStockDropdown(false);
+      return;
+    }
+
+    setShowStockDropdown(true);
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/market/search?q=${encodeURIComponent(val.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setStockResults(Array.isArray(data) ? data : []);
+        }
+      } catch {
+        /* 검색 실패 */
+      }
+    }, 300);
+  }
+
+  function selectStock(stock: { ticker: string; name: string; market: string }) {
+    setFormName(stock.name);
+    setFormTicker(stock.ticker);
+    setStockQuery("");
+    setShowStockDropdown(false);
+    setStockResults([]);
   }
 
   function openModal() {
@@ -520,32 +573,73 @@ export default function TradesPage() {
               </div>
             )}
 
-            {/* 종목명 / 티커 */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                  종목명 *
-                </label>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="삼성전자"
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                  티커 *
-                </label>
-                <input
-                  type="text"
-                  value={formTicker}
-                  onChange={(e) => setFormTicker(e.target.value)}
-                  placeholder="005930"
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                />
-              </div>
+            {/* 종목 검색 */}
+            <div ref={stockSearchRef} className="relative">
+              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                종목 *
+              </label>
+              {formName && formTicker ? (
+                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                  <div>
+                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                      {formName}
+                    </span>
+                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                      {formTicker}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setFormName(""); setFormTicker(""); }}
+                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={stockQuery}
+                    onChange={(e) => handleStockQueryChange(e.target.value)}
+                    onFocus={() => { if (stockQuery) setShowStockDropdown(true); }}
+                    placeholder="종목명 또는 티커 검색"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                  {showStockDropdown && (
+                    <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                      {stockResults.length > 0 ? (
+                        <div className="max-h-48 overflow-y-auto">
+                          {stockResults.map((s) => (
+                            <button
+                              key={s.ticker}
+                              type="button"
+                              onMouseDown={(e) => { e.preventDefault(); selectStock(s); }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                            >
+                              <div>
+                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">
+                                  {s.name}
+                                </span>
+                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                                  {s.ticker}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">
+                                {s.market}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">
+                          검색 결과가 없습니다
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* 가격 / 수량 */}
