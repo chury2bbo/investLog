@@ -79,6 +79,7 @@ export default function AccountsPage() {
   const [formCashKRW, setFormCashKRW] = useState("");
   const [formCashUSD, setFormCashUSD] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [brokerageDropOpen, setBrokerageDropOpen] = useState(false);
 
   // 수정 모달
   const [editModal, setEditModal] = useState(false);
@@ -86,6 +87,7 @@ export default function AccountsPage() {
   const [editCode, setEditCode] = useState("");
   const [editMemo, setEditMemo] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editDropOpen, setEditDropOpen] = useState(false);
 
   // 삭제 확인
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
@@ -93,18 +95,10 @@ export default function AccountsPage() {
 
   const fetchAccounts = useCallback(async () => {
     try {
-      const [accRes, brRes] = await Promise.all([
-        fetch("/api/accounts"),
-        fetch("/api/brokerages"),
-      ]);
-      if (accRes.ok) {
-        const data = await accRes.json();
+      const res = await fetch("/api/accounts");
+      if (res.ok) {
+        const data = await res.json();
         setAccounts(Array.isArray(data) ? data : []);
-      }
-      if (brRes.ok) {
-        const brData: Brokerage[] = await brRes.json();
-        setBrokerages(brData);
-        if (brData.length > 0) setFormCode(brData[0].code);
       }
     } catch {
       /* 조회 실패 */
@@ -117,17 +111,16 @@ export default function AccountsPage() {
     try {
       const res = await fetch("/api/brokerages");
       if (res.ok) {
-        const data = await res.json();
+        const data: Brokerage[] = await res.json();
         const list = Array.isArray(data) ? data : [];
         setBrokerages(list);
-        if (list.length > 0 && !formCode) {
-          setFormCode(list[0].code);
-        }
+        // 초기 1회만 설정 — 이미 선택된 값이 있으면 덮어쓰지 않음
+        if (list.length > 0) setFormCode((prev) => prev || list[0].code);
       }
     } catch {
       /* 조회 실패 */
     }
-  }, [formCode]);
+  }, []);
 
   useEffect(() => {
     fetchAccounts();
@@ -343,17 +336,35 @@ export default function AccountsPage() {
             <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
               증권사
             </label>
-            <select
-              value={formCode}
-              onChange={(e) => setFormCode(e.target.value)}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] appearance-none"
+            <button
+              type="button"
+              onClick={() => setBrokerageDropOpen(!brokerageDropOpen)}
+              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
             >
-              {brokerages.map((b) => (
-                <option key={b.code} value={b.code}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+              <span>{brokerages.find((b) => b.code === formCode)?.name ?? "증권사를 선택하세요"}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: brokerageDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            {brokerageDropOpen && (
+              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
+                {brokerages.map((b) => (
+                  <button
+                    key={b.code}
+                    type="button"
+                    onClick={() => { setFormCode(b.code); setBrokerageDropOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
+                    style={{
+                      backgroundColor: formCode === b.code ? "#E6F9F1" : "transparent",
+                      color: formCode === b.code ? "#05C072" : "#1A221A",
+                      fontWeight: formCode === b.code ? 600 : 400,
+                      borderBottom: "1px solid #F0F4F0",
+                    }}
+                  >
+                    <span>{b.name}</span>
+                    {formCode === b.code && <span className="text-[#05C072]">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 계좌명 */}
@@ -422,17 +433,35 @@ export default function AccountsPage() {
             <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
               증권사
             </label>
-            <select
-              value={editCode}
-              onChange={(e) => setEditCode(e.target.value)}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] appearance-none"
+            <button
+              type="button"
+              onClick={() => setEditDropOpen(!editDropOpen)}
+              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
             >
-              {brokerages.map((b) => (
-                <option key={b.code} value={b.code}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+              <span>{brokerages.find((b) => b.code === editCode)?.name ?? "증권사를 선택하세요"}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: editDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            {editDropOpen && (
+              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
+                {brokerages.map((b) => (
+                  <button
+                    key={b.code}
+                    type="button"
+                    onClick={() => { setEditCode(b.code); setEditDropOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
+                    style={{
+                      backgroundColor: editCode === b.code ? "#E6F9F1" : "transparent",
+                      color: editCode === b.code ? "#05C072" : "#1A221A",
+                      fontWeight: editCode === b.code ? 600 : 400,
+                      borderBottom: "1px solid #F0F4F0",
+                    }}
+                  >
+                    <span>{b.name}</span>
+                    {editCode === b.code && <span className="text-[#05C072]">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 계좌명 */}

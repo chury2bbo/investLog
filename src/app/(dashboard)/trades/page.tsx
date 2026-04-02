@@ -33,6 +33,7 @@ interface AccountOption {
   id: number;
   brokerageCompany: { code: string; name: string };
   holdings: { ticker: string; name: string; country: string; avgPrice: number; quantity: number }[];
+  cashBalances: { currency: string; amount: number }[];
 }
 
 // ─── 이유 태그 목록 ──────────────────────────────────────
@@ -118,9 +119,11 @@ export default function TradesPage() {
 
   // 매매 등록 폼
   const [formAccountId, setFormAccountId] = useState<number | null>(null);
+  const [accountDropOpen, setAccountDropOpen] = useState(false);
   const [formType, setFormType] = useState<"BUY" | "SELL">("BUY");
   const [formTicker, setFormTicker] = useState("");
   const [formName, setFormName] = useState("");
+  const [formCountry, setFormCountry] = useState("KR");
   const [formPrice, setFormPrice] = useState("");
   const [formQuantity, setFormQuantity] = useState("");
   const [formReasonTags, setFormReasonTags] = useState<string[]>([]);
@@ -135,7 +138,7 @@ export default function TradesPage() {
 
   // 종목 검색 autocomplete
   const [stockQuery, setStockQuery] = useState("");
-  const [stockResults, setStockResults] = useState<{ ticker: string; name: string; market: string }[]>([]);
+  const [stockResults, setStockResults] = useState<{ ticker: string; name: string; market: string; country?: string }[]>([]);
   const [showStockDropdown, setShowStockDropdown] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stockSearchRef = useRef<HTMLDivElement>(null);
@@ -201,6 +204,7 @@ export default function TradesPage() {
     setFormType("BUY");
     setFormTicker("");
     setFormName("");
+    setFormCountry("KR");
     setFormPrice("");
     setFormQuantity("");
     setFormReasonTags([]);
@@ -228,7 +232,8 @@ export default function TradesPage() {
     setShowStockDropdown(true);
     searchTimerRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/market/search?q=${encodeURIComponent(val.trim())}`);
+        // 국내 + 해외 동시 검색, 서버에서 합쳐서 반환
+        const res = await fetch(`/api/market/search?q=${encodeURIComponent(val.trim())}&country=ALL`);
         if (res.ok) {
           const data = await res.json();
           setStockResults(Array.isArray(data) ? data : []);
@@ -239,9 +244,10 @@ export default function TradesPage() {
     }, 300);
   }
 
-  function selectStock(stock: { ticker: string; name: string; market: string }) {
+  function selectStock(stock: { ticker: string; name: string; market: string; country?: string }) {
     setFormName(stock.name);
     setFormTicker(stock.ticker);
+    setFormCountry(stock.country ?? (/^\d{6}$/.test(stock.ticker) ? "KR" : "US"));
     setStockQuery("");
     setShowStockDropdown(false);
     setStockResults([]);
@@ -273,6 +279,30 @@ export default function TradesPage() {
       return;
     }
 
+    const price = parseFloat(formPrice);
+    const quantity = parseInt(formQuantity, 10);
+    const selectedAccount = accounts.find((a) => a.id === formAccountId);
+
+    if (formType === "BUY" && selectedAccount) {
+      const totalAmount = price * quantity;
+      const isForeign = !(/^\d{6}$/.test(formTicker));
+      const currency = isForeign ? "USD" : "KRW";
+      const cashBalance = selectedAccount.cashBalances.find((c) => c.currency === currency)?.amount ?? 0;
+      if (totalAmount > cashBalance) {
+        alert(`예수금이 부족하여 저장할 수 없습니다.\n필요: ${currency === "KRW" ? "₩" : "$"}${totalAmount.toLocaleString()} / 보유: ${currency === "KRW" ? "₩" : "$"}${cashBalance.toLocaleString()}`);
+        return;
+      }
+    }
+
+    if (formType === "SELL" && selectedAccount) {
+      const holding = selectedAccount.holdings.find((h) => h.ticker === formTicker);
+      const holdingQty = holding?.quantity ?? 0;
+      if (quantity > holdingQty) {
+        alert(`보유 수량보다 커서 저장할 수 없습니다.\n매도 수량: ${quantity.toLocaleString()}주 / 보유 수량: ${holdingQty.toLocaleString()}주`);
+        return;
+      }
+    }
+
     setSubmitting(true);
     setSubmitError("");
     setCashWarning(false);
@@ -285,6 +315,7 @@ export default function TradesPage() {
           accountId: formAccountId,
           ticker: formTicker,
           name: formName,
+          country: formCountry,
           type: formType,
           price: parseFloat(formPrice),
           quantity: parseInt(formQuantity, 10),
@@ -491,17 +522,35 @@ export default function TradesPage() {
             <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
               계좌
             </label>
-            <select
-              value={formAccountId ?? ""}
-              onChange={(e) => setFormAccountId(parseInt(e.target.value, 10))}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] appearance-none"
+            <button
+              type="button"
+              onClick={() => setAccountDropOpen(!accountDropOpen)}
+              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
             >
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.brokerageCompany.name}
-                </option>
-              ))}
-            </select>
+              <span>{accounts.find((a) => a.id === formAccountId)?.brokerageCompany.name ?? "계좌를 선택하세요"}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: accountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            {accountDropOpen && (
+              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
+                {accounts.map((acc) => (
+                  <button
+                    key={acc.id}
+                    type="button"
+                    onClick={() => { setFormAccountId(acc.id); setAccountDropOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
+                    style={{
+                      backgroundColor: formAccountId === acc.id ? "#E6F9F1" : "transparent",
+                      color: formAccountId === acc.id ? "#05C072" : "#1A221A",
+                      fontWeight: formAccountId === acc.id ? 600 : 400,
+                      borderBottom: "1px solid #F0F4F0",
+                    }}
+                  >
+                    <span>{acc.brokerageCompany.name}</span>
+                    {formAccountId === acc.id && <span className="text-[#05C072]">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 매수/매도 토글 */}

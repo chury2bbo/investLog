@@ -16,7 +16,7 @@ export function Button({
   onClick,
 }: ButtonProps) {
   const base =
-    "rounded-xl font-semibold transition-opacity inline-flex items-center justify-center";
+    "rounded-xl font-semibold transition-opacity inline-flex items-center justify-center cursor-pointer";
 
   const sizes = {
     sm: "px-3 py-1.5 text-xs",

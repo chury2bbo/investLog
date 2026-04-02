@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Card,
@@ -83,6 +83,8 @@ export default function AccountDetailPage() {
 
   const [account, setAccount] = useState<AccountDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [quotes, setQuotes] = useState<Record<string, { price: number; change: number; changePercent: number }>>({});
+  const [quotesLoading, setQuotesLoading] = useState(false);
   const [sectorTab, setSectorTab] = useState<"auto" | "manual">("auto");
 
   // 입출금 모달
@@ -104,6 +106,15 @@ export default function AccountDetailPage() {
   const [hQuantity, setHQuantity] = useState("");
   const [hSubmitting, setHSubmitting] = useState(false);
   const [hError, setHError] = useState("");
+  const [hPriceLoading, setHPriceLoading] = useState(false);
+
+  // 국내 종목 검색 autocomplete
+  const [hStockQuery, setHStockQuery] = useState("");
+  const [hStockResults, setHStockResults] = useState<{ ticker: string; name: string; market: string }[]>([]);
+  const [hShowDropdown, setHShowDropdown] = useState(false);
+  const hSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hStockSearchRef = useRef<HTMLDivElement>(null);
+  const hAvgPriceRef = useRef<HTMLInputElement>(null);
 
   // ─── 데이터 로딩 ───────────────────────────────────────
 
@@ -124,11 +135,33 @@ export default function AccountDetailPage() {
       const cashLogsRes = await fetch(`/api/cash?accountId=${accountId}`);
       const cashLogs = cashLogsRes.ok ? await cashLogsRes.json() : [];
 
-      setAccount({
+      const accountData = {
         ...acc,
         tradeLogs: Array.isArray(trades) ? trades.slice(0, 5) : [],
         cashLogs: Array.isArray(cashLogs) ? cashLogs : [],
-      });
+      };
+      setAccount(accountData);
+
+      // 현재가 조회
+      const tickers = acc.holdings.map((h: Holding) => h.ticker);
+      if (tickers.length > 0) {
+        setQuotesLoading(true);
+        try {
+          const qRes = await fetch(`/api/market/quote?tickers=${tickers.join(",")}`);
+          if (qRes.ok) {
+            const qData = await qRes.json();
+            const map: Record<string, { price: number; change: number; changePercent: number }> = {};
+            (qData.quotes ?? []).forEach((q: { ticker: string; price: number; change: number; changePercent: number }) => {
+              map[q.ticker] = q;
+            });
+            setQuotes(map);
+          }
+        } catch {
+          /* 현재가 조회 실패 */
+        } finally {
+          setQuotesLoading(false);
+        }
+      }
     } catch {
       /* 조회 실패 */
     } finally {
@@ -139,6 +172,16 @@ export default function AccountDetailPage() {
   useEffect(() => {
     fetchAccount();
   }, [fetchAccount]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (hStockSearchRef.current && !hStockSearchRef.current.contains(e.target as Node)) {
+        setHShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // ─── 입출금 처리 ───────────────────────────────────────
 
@@ -182,6 +225,63 @@ export default function AccountDetailPage() {
     setHAvgPrice("");
     setHQuantity("");
     setHError("");
+    setHStockQuery("");
+    setHStockResults([]);
+    setHShowDropdown(false);
+    setHPriceLoading(false);
+  }
+
+  function handleHStockQueryChange(val: string) {
+    setHStockQuery(val);
+
+    if (hSearchTimerRef.current) clearTimeout(hSearchTimerRef.current);
+
+    if (!val.trim()) {
+      setHStockResults([]);
+      setHShowDropdown(false);
+      return;
+    }
+
+    setHShowDropdown(true);
+    hSearchTimerRef.current = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ q: val.trim() });
+        if (hCountry === "US") params.set("country", "US");
+        const res = await fetch(`/api/market/search?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setHStockResults(Array.isArray(data) ? data : []);
+        }
+      } catch {
+        /* 검색 실패 */
+      }
+    }, 300);
+  }
+
+  async function selectHStock(stock: { ticker: string; name: string; market: string }) {
+    setHTicker(stock.ticker);
+    setHName(stock.name);
+    setHStockQuery("");
+    setHShowDropdown(false);
+    setHStockResults([]);
+
+    // 현재가 조회 → 평단가 자동 입력
+    setHPriceLoading(true);
+    try {
+      const res = await fetch(`/api/market/quote?tickers=${encodeURIComponent(stock.ticker)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const quote = (data.quotes ?? [])[0];
+        if (quote?.price && quote.price > 0) {
+          setHAvgPrice(String(quote.price));
+        }
+      }
+    } catch {
+      /* 현재가 조회 실패 시 빈칸 유지 */
+    } finally {
+      setHPriceLoading(false);
+      setTimeout(() => hAvgPriceRef.current?.focus(), 50);
+    }
   }
 
   async function handleAddHolding() {
@@ -382,13 +482,22 @@ export default function AccountDetailPage() {
       ) : (
         <div className="space-y-2.5 mb-4">
           {account.holdings.map((h) => {
-            const evalValue = h.avgPrice * h.quantity;
             const isForeign = h.country !== "KR";
-            const unit = isForeign ? "$" : "₩";
+            const quote = quotes[h.ticker];
+            const currentPrice = quote?.price ?? h.avgPrice;
+            const evalValue = currentPrice * h.quantity;
+            const investedValue = h.avgPrice * h.quantity;
+            const pnl = evalValue - investedValue;
+            const pnlRate = investedValue > 0 ? (pnl / investedValue) * 100 : 0;
+            const hasQuote = !!quote;
+
             const fmtPrice = (v: number) =>
               isForeign
                 ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : `₩${v.toLocaleString()}`;
+
+            const pnlColor = pnl > 0 ? "#F04452" : pnl < 0 ? "#4285F4" : "#9AA99A";
+
             return (
               <Card key={h.id}>
                 <div className="flex justify-between items-start mb-2.5">
@@ -400,17 +509,33 @@ export default function AccountDetailPage() {
                       <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
                     </div>
                     <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
-                      {h.ticker} · {h.quantity}주 · 평단 {fmtPrice(h.avgPrice)}
+                      {h.ticker} · {h.quantity}주
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                      {fmtPrice(evalValue)}
+                    {/* 현재가 */}
+                    <div className="flex items-center gap-1.5 justify-end">
+                      {quotesLoading ? (
+                        <div className="w-16 h-4 rounded bg-[#E8EEE8] dark:bg-[#2D3D30] animate-pulse" />
+                      ) : (
+                        <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {fmtPrice(currentPrice)}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">
-                      {fmtPrice(h.avgPrice)}
-                    </div>
+                    {/* 수익률 */}
+                    {hasQuote && !quotesLoading && (
+                      <div className="text-xs font-semibold mt-0.5" style={{ color: pnlColor }}>
+                        {pnl >= 0 ? "+" : ""}{fmtPrice(pnl)} ({pnlRate >= 0 ? "+" : ""}{pnlRate.toFixed(2)}%)
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                {/* 평단가 · 평가금액 */}
+                <div className="flex justify-between text-xs text-[#9AA99A] dark:text-[#5A6A5A] mb-2.5">
+                  <span>평단가 {fmtPrice(h.avgPrice)}</span>
+                  <span>평가금액 {fmtPrice(evalValue)}</span>
                 </div>
 
                 <Divider />
@@ -482,7 +607,7 @@ export default function AccountDetailPage() {
 
           <button
             onClick={() => router.push(`/trades?accountId=${account.id}`)}
-            className="w-full text-sm font-bold pt-3 pb-1 text-center"
+            className="w-full text-sm font-bold pt-3 pb-1 text-center cursor-pointer"
             style={{ color: "#05C072" }}
           >
             전체 매매일지 보기 →
@@ -675,7 +800,7 @@ export default function AccountDetailPage() {
           <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
             <button
               type="button"
-              onClick={() => setHCountry("KR")}
+              onClick={() => { setHCountry("KR"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 hCountry === "KR"
                   ? "bg-[#05C072] text-white"
@@ -686,7 +811,7 @@ export default function AccountDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => setHCountry("US")}
+              onClick={() => { setHCountry("US"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 hCountry === "US"
                   ? "bg-[#4285F4] text-white"
@@ -697,47 +822,160 @@ export default function AccountDetailPage() {
             </button>
           </div>
 
-          {/* 종목명 / 티커 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+          {/* 종목 검색 (국내: autocomplete / 해외: 직접 입력) */}
+          {hCountry === "KR" ? (
+            <div ref={hStockSearchRef}>
               <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                종목명 *
+                종목 *
               </label>
-              <input
-                type="text"
-                value={hName}
-                onChange={(e) => setHName(e.target.value)}
-                placeholder={hCountry === "KR" ? "삼성전자" : "NVIDIA"}
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-              />
+              {hName && hTicker ? (
+                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                  <div>
+                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                      {hName}
+                    </span>
+                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                      {hTicker}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setHName(""); setHTicker(""); setHAvgPrice(""); setHQuantity(""); }}
+                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={hStockQuery}
+                    onChange={(e) => handleHStockQueryChange(e.target.value)}
+                    onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                    placeholder="종목명 또는 티커 검색 (예: 삼성전자, 005930)"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                  {hShowDropdown && (
+                    <div className="mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                      {hStockResults.length > 0 ? (
+                        <div className="max-h-48 overflow-y-auto">
+                          {hStockResults.map((s) => (
+                            <button
+                              key={s.ticker}
+                              type="button"
+                              onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                            >
+                              <div>
+                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">
+                                  {s.name}
+                                </span>
+                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                                  {s.ticker}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">
+                                {s.market}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">
+                          검색 결과가 없습니다
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-            <div>
+          ) : (
+            <div ref={hStockSearchRef}>
               <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                티커 *
+                종목 *
               </label>
-              <input
-                type="text"
-                value={hTicker}
-                onChange={(e) => setHTicker(e.target.value)}
-                placeholder={hCountry === "KR" ? "005930" : "NVDA"}
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-              />
+              {hName && hTicker ? (
+                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                  <div>
+                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                      {hName}
+                    </span>
+                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                      {hTicker}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setHName(""); setHTicker(""); setHAvgPrice(""); setHQuantity(""); }}
+                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={hStockQuery}
+                    onChange={(e) => handleHStockQueryChange(e.target.value)}
+                    onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                    placeholder="종목명 또는 티커 검색 (예: NVIDIA, NVDA)"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  />
+                  {hShowDropdown && (
+                    <div className="mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                      {hStockResults.length > 0 ? (
+                        <div className="max-h-48 overflow-y-auto">
+                          {hStockResults.map((s) => (
+                            <button
+                              key={s.ticker}
+                              type="button"
+                              onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                            >
+                              <div>
+                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">
+                                  {s.name}
+                                </span>
+                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                                  {s.ticker}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">
+                                {s.market}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">
+                          검색 결과가 없습니다
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          </div>
+          )}
 
           {/* 평단가 / 수량 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                평단가 *
+                평단가 * {hPriceLoading && <span className="text-[#9AA99A]">조회 중...</span>}
               </label>
               <input
+                ref={hAvgPriceRef}
                 type="text"
                 inputMode="decimal"
                 value={fmtNum(hAvgPrice)}
                 onChange={(e) => setHAvgPrice(stripNum(e.target.value, true))}
-                placeholder={hCountry === "KR" ? "72,000" : "120.50"}
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                placeholder={hPriceLoading ? "" : hCountry === "KR" ? "72,000" : "120.50"}
+                disabled={hPriceLoading}
+                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] disabled:opacity-50"
               />
             </div>
             <div>
