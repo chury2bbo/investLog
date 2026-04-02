@@ -272,7 +272,7 @@ export type HoldingWhereInput = {
   sectorManual?: Prisma.StringNullableFilter<"Holding"> | string | null
   tags?: Prisma.StringNullableListFilter<"Holding">
   updatedAt?: Prisma.DateTimeFilter<"Holding"> | Date | string
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }
 
 export type HoldingOrderByWithRelationInput = {
@@ -287,7 +287,7 @@ export type HoldingOrderByWithRelationInput = {
   sectorManual?: Prisma.SortOrderInput | Prisma.SortOrder
   tags?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  account?: Prisma.AccountOrderByWithRelationInput
+  account?: Prisma.InvestAccountOrderByWithRelationInput
 }
 
 export type HoldingWhereUniqueInput = Prisma.AtLeast<{
@@ -306,7 +306,7 @@ export type HoldingWhereUniqueInput = Prisma.AtLeast<{
   sectorManual?: Prisma.StringNullableFilter<"Holding"> | string | null
   tags?: Prisma.StringNullableListFilter<"Holding">
   updatedAt?: Prisma.DateTimeFilter<"Holding"> | Date | string
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }, "id" | "accountId_ticker">
 
 export type HoldingOrderByWithAggregationInput = {
@@ -355,7 +355,7 @@ export type HoldingCreateInput = {
   sectorManual?: string | null
   tags?: Prisma.HoldingCreatetagsInput | string[]
   updatedAt?: Date | string
-  account: Prisma.AccountCreateNestedOneWithoutHoldingsInput
+  account: Prisma.InvestAccountCreateNestedOneWithoutHoldingsInput
 }
 
 export type HoldingUncheckedCreateInput = {
@@ -382,7 +382,7 @@ export type HoldingUpdateInput = {
   sectorManual?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.HoldingUpdatetagsInput | string[]
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  account?: Prisma.AccountUpdateOneRequiredWithoutHoldingsNestedInput
+  account?: Prisma.InvestAccountUpdateOneRequiredWithoutHoldingsNestedInput
 }
 
 export type HoldingUncheckedUpdateInput = {
@@ -708,7 +708,7 @@ export type HoldingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   sectorManual?: boolean
   tags?: boolean
   updatedAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["holding"]>
 
 export type HoldingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -723,7 +723,7 @@ export type HoldingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   sectorManual?: boolean
   tags?: boolean
   updatedAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["holding"]>
 
 export type HoldingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -738,7 +738,7 @@ export type HoldingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   sectorManual?: boolean
   tags?: boolean
   updatedAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["holding"]>
 
 export type HoldingSelectScalar = {
@@ -757,19 +757,19 @@ export type HoldingSelectScalar = {
 
 export type HoldingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "ticker" | "name" | "country" | "avgPrice" | "quantity" | "sectorAuto" | "sectorManual" | "tags" | "updatedAt", ExtArgs["result"]["holding"]>
 export type HoldingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type HoldingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type HoldingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 
 export type $HoldingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Holding"
   objects: {
-    account: Prisma.$AccountPayload<ExtArgs>
+    account: Prisma.$InvestAccountPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1177,7 +1177,7 @@ readonly fields: HoldingFieldRefs;
  */
 export interface Prisma__HoldingClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  account<T extends Prisma.InvestAccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InvestAccountDefaultArgs<ExtArgs>>): Prisma.Prisma__InvestAccountClient<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

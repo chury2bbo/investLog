@@ -288,7 +288,7 @@ export type TradeLogWhereInput = {
   reasonMemo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   memo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TradeLog"> | Date | string
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }
 
 export type TradeLogOrderByWithRelationInput = {
@@ -305,7 +305,7 @@ export type TradeLogOrderByWithRelationInput = {
   reasonMemo?: Prisma.SortOrderInput | Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  account?: Prisma.AccountOrderByWithRelationInput
+  account?: Prisma.InvestAccountOrderByWithRelationInput
 }
 
 export type TradeLogWhereUniqueInput = Prisma.AtLeast<{
@@ -325,7 +325,7 @@ export type TradeLogWhereUniqueInput = Prisma.AtLeast<{
   reasonMemo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   memo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TradeLog"> | Date | string
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }, "id">
 
 export type TradeLogOrderByWithAggregationInput = {
@@ -380,7 +380,7 @@ export type TradeLogCreateInput = {
   reasonMemo?: string | null
   memo?: string | null
   createdAt?: Date | string
-  account: Prisma.AccountCreateNestedOneWithoutTradeLogsInput
+  account: Prisma.InvestAccountCreateNestedOneWithoutTradeLogsInput
 }
 
 export type TradeLogUncheckedCreateInput = {
@@ -411,7 +411,7 @@ export type TradeLogUpdateInput = {
   reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  account?: Prisma.AccountUpdateOneRequiredWithoutTradeLogsNestedInput
+  account?: Prisma.InvestAccountUpdateOneRequiredWithoutTradeLogsNestedInput
 }
 
 export type TradeLogUncheckedUpdateInput = {
@@ -746,7 +746,7 @@ export type TradeLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   reasonMemo?: boolean
   memo?: boolean
   createdAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLog"]>
 
 export type TradeLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -763,7 +763,7 @@ export type TradeLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   reasonMemo?: boolean
   memo?: boolean
   createdAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLog"]>
 
 export type TradeLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -780,7 +780,7 @@ export type TradeLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   reasonMemo?: boolean
   memo?: boolean
   createdAt?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLog"]>
 
 export type TradeLogSelectScalar = {
@@ -801,19 +801,19 @@ export type TradeLogSelectScalar = {
 
 export type TradeLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "accountId" | "ticker" | "name" | "type" | "price" | "quantity" | "reasonTags" | "emotion" | "reasonMemo" | "memo" | "createdAt", ExtArgs["result"]["tradeLog"]>
 export type TradeLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type TradeLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type TradeLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 
 export type $TradeLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TradeLog"
   objects: {
-    account: Prisma.$AccountPayload<ExtArgs>
+    account: Prisma.$InvestAccountPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1223,7 +1223,7 @@ readonly fields: TradeLogFieldRefs;
  */
 export interface Prisma__TradeLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  account<T extends Prisma.InvestAccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InvestAccountDefaultArgs<ExtArgs>>): Prisma.Prisma__InvestAccountClient<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

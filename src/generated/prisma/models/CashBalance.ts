@@ -216,7 +216,7 @@ export type CashBalanceWhereInput = {
   accountId?: Prisma.IntFilter<"CashBalance"> | number
   currency?: Prisma.StringFilter<"CashBalance"> | string
   amount?: Prisma.FloatFilter<"CashBalance"> | number
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }
 
 export type CashBalanceOrderByWithRelationInput = {
@@ -224,7 +224,7 @@ export type CashBalanceOrderByWithRelationInput = {
   accountId?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
-  account?: Prisma.AccountOrderByWithRelationInput
+  account?: Prisma.InvestAccountOrderByWithRelationInput
 }
 
 export type CashBalanceWhereUniqueInput = Prisma.AtLeast<{
@@ -236,7 +236,7 @@ export type CashBalanceWhereUniqueInput = Prisma.AtLeast<{
   accountId?: Prisma.IntFilter<"CashBalance"> | number
   currency?: Prisma.StringFilter<"CashBalance"> | string
   amount?: Prisma.FloatFilter<"CashBalance"> | number
-  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
+  account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
 }, "id" | "accountId_currency">
 
 export type CashBalanceOrderByWithAggregationInput = {
@@ -264,7 +264,7 @@ export type CashBalanceScalarWhereWithAggregatesInput = {
 export type CashBalanceCreateInput = {
   currency: string
   amount: number
-  account: Prisma.AccountCreateNestedOneWithoutCashBalancesInput
+  account: Prisma.InvestAccountCreateNestedOneWithoutCashBalancesInput
 }
 
 export type CashBalanceUncheckedCreateInput = {
@@ -277,7 +277,7 @@ export type CashBalanceUncheckedCreateInput = {
 export type CashBalanceUpdateInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  account?: Prisma.AccountUpdateOneRequiredWithoutCashBalancesNestedInput
+  account?: Prisma.InvestAccountUpdateOneRequiredWithoutCashBalancesNestedInput
 }
 
 export type CashBalanceUncheckedUpdateInput = {
@@ -473,7 +473,7 @@ export type CashBalanceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   accountId?: boolean
   currency?: boolean
   amount?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cashBalance"]>
 
 export type CashBalanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -481,7 +481,7 @@ export type CashBalanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   accountId?: boolean
   currency?: boolean
   amount?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cashBalance"]>
 
 export type CashBalanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -489,7 +489,7 @@ export type CashBalanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   accountId?: boolean
   currency?: boolean
   amount?: boolean
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cashBalance"]>
 
 export type CashBalanceSelectScalar = {
@@ -501,19 +501,19 @@ export type CashBalanceSelectScalar = {
 
 export type CashBalanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "currency" | "amount", ExtArgs["result"]["cashBalance"]>
 export type CashBalanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type CashBalanceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 export type CashBalanceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
 }
 
 export type $CashBalancePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CashBalance"
   objects: {
-    account: Prisma.$AccountPayload<ExtArgs>
+    account: Prisma.$InvestAccountPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -914,7 +914,7 @@ readonly fields: CashBalanceFieldRefs;
  */
 export interface Prisma__CashBalanceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  account<T extends Prisma.InvestAccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InvestAccountDefaultArgs<ExtArgs>>): Prisma.Prisma__InvestAccountClient<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   }
 
   // 계좌 소유권 확인
-  const account = await prisma.account.findFirst({
+  const account = await prisma.investAccount.findFirst({
     where: { id: parseInt(accountId, 10), userId: session.user.id },
   });
   if (!account) {
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   // 계좌 소유권 확인
-  const account = await prisma.account.findFirst({
+  const account = await prisma.investAccount.findFirst({
     where: { id: accountId, userId: session.user.id },
     include: { cashBalances: true },
   });

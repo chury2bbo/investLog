@@ -174,7 +174,7 @@ export type BrokerageCompanyWhereInput = {
   name?: Prisma.StringFilter<"BrokerageCompany"> | string
   financialCode?: Prisma.StringFilter<"BrokerageCompany"> | string
   createdAt?: Prisma.DateTimeFilter<"BrokerageCompany"> | Date | string
-  accounts?: Prisma.AccountListRelationFilter
+  investAccounts?: Prisma.InvestAccountListRelationFilter
 }
 
 export type BrokerageCompanyOrderByWithRelationInput = {
@@ -182,7 +182,7 @@ export type BrokerageCompanyOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   financialCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  accounts?: Prisma.AccountOrderByRelationAggregateInput
+  investAccounts?: Prisma.InvestAccountOrderByRelationAggregateInput
 }
 
 export type BrokerageCompanyWhereUniqueInput = Prisma.AtLeast<{
@@ -193,7 +193,7 @@ export type BrokerageCompanyWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"BrokerageCompany"> | string
   financialCode?: Prisma.StringFilter<"BrokerageCompany"> | string
   createdAt?: Prisma.DateTimeFilter<"BrokerageCompany"> | Date | string
-  accounts?: Prisma.AccountListRelationFilter
+  investAccounts?: Prisma.InvestAccountListRelationFilter
 }, "code">
 
 export type BrokerageCompanyOrderByWithAggregationInput = {
@@ -221,7 +221,7 @@ export type BrokerageCompanyCreateInput = {
   name: string
   financialCode: string
   createdAt?: Date | string
-  accounts?: Prisma.AccountCreateNestedManyWithoutBrokerageCompanyInput
+  investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutBrokerageCompanyInput
 }
 
 export type BrokerageCompanyUncheckedCreateInput = {
@@ -229,7 +229,7 @@ export type BrokerageCompanyUncheckedCreateInput = {
   name: string
   financialCode: string
   createdAt?: Date | string
-  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutBrokerageCompanyInput
+  investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutBrokerageCompanyInput
 }
 
 export type BrokerageCompanyUpdateInput = {
@@ -237,7 +237,7 @@ export type BrokerageCompanyUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   financialCode?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  accounts?: Prisma.AccountUpdateManyWithoutBrokerageCompanyNestedInput
+  investAccounts?: Prisma.InvestAccountUpdateManyWithoutBrokerageCompanyNestedInput
 }
 
 export type BrokerageCompanyUncheckedUpdateInput = {
@@ -245,7 +245,7 @@ export type BrokerageCompanyUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   financialCode?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  accounts?: Prisma.AccountUncheckedUpdateManyWithoutBrokerageCompanyNestedInput
+  investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutBrokerageCompanyNestedInput
 }
 
 export type BrokerageCompanyCreateManyInput = {
@@ -303,58 +303,58 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type BrokerageCompanyCreateNestedOneWithoutAccountsInput = {
-  create?: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutAccountsInput>
-  connectOrCreate?: Prisma.BrokerageCompanyCreateOrConnectWithoutAccountsInput
+export type BrokerageCompanyCreateNestedOneWithoutInvestAccountsInput = {
+  create?: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutInvestAccountsInput>
+  connectOrCreate?: Prisma.BrokerageCompanyCreateOrConnectWithoutInvestAccountsInput
   connect?: Prisma.BrokerageCompanyWhereUniqueInput
 }
 
-export type BrokerageCompanyUpdateOneRequiredWithoutAccountsNestedInput = {
-  create?: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutAccountsInput>
-  connectOrCreate?: Prisma.BrokerageCompanyCreateOrConnectWithoutAccountsInput
-  upsert?: Prisma.BrokerageCompanyUpsertWithoutAccountsInput
+export type BrokerageCompanyUpdateOneRequiredWithoutInvestAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutInvestAccountsInput>
+  connectOrCreate?: Prisma.BrokerageCompanyCreateOrConnectWithoutInvestAccountsInput
+  upsert?: Prisma.BrokerageCompanyUpsertWithoutInvestAccountsInput
   connect?: Prisma.BrokerageCompanyWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.BrokerageCompanyUpdateToOneWithWhereWithoutAccountsInput, Prisma.BrokerageCompanyUpdateWithoutAccountsInput>, Prisma.BrokerageCompanyUncheckedUpdateWithoutAccountsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BrokerageCompanyUpdateToOneWithWhereWithoutInvestAccountsInput, Prisma.BrokerageCompanyUpdateWithoutInvestAccountsInput>, Prisma.BrokerageCompanyUncheckedUpdateWithoutInvestAccountsInput>
 }
 
-export type BrokerageCompanyCreateWithoutAccountsInput = {
+export type BrokerageCompanyCreateWithoutInvestAccountsInput = {
   code: string
   name: string
   financialCode: string
   createdAt?: Date | string
 }
 
-export type BrokerageCompanyUncheckedCreateWithoutAccountsInput = {
+export type BrokerageCompanyUncheckedCreateWithoutInvestAccountsInput = {
   code: string
   name: string
   financialCode: string
   createdAt?: Date | string
 }
 
-export type BrokerageCompanyCreateOrConnectWithoutAccountsInput = {
+export type BrokerageCompanyCreateOrConnectWithoutInvestAccountsInput = {
   where: Prisma.BrokerageCompanyWhereUniqueInput
-  create: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutAccountsInput>
+  create: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutInvestAccountsInput>
 }
 
-export type BrokerageCompanyUpsertWithoutAccountsInput = {
-  update: Prisma.XOR<Prisma.BrokerageCompanyUpdateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedUpdateWithoutAccountsInput>
-  create: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutAccountsInput>
+export type BrokerageCompanyUpsertWithoutInvestAccountsInput = {
+  update: Prisma.XOR<Prisma.BrokerageCompanyUpdateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedUpdateWithoutInvestAccountsInput>
+  create: Prisma.XOR<Prisma.BrokerageCompanyCreateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedCreateWithoutInvestAccountsInput>
   where?: Prisma.BrokerageCompanyWhereInput
 }
 
-export type BrokerageCompanyUpdateToOneWithWhereWithoutAccountsInput = {
+export type BrokerageCompanyUpdateToOneWithWhereWithoutInvestAccountsInput = {
   where?: Prisma.BrokerageCompanyWhereInput
-  data: Prisma.XOR<Prisma.BrokerageCompanyUpdateWithoutAccountsInput, Prisma.BrokerageCompanyUncheckedUpdateWithoutAccountsInput>
+  data: Prisma.XOR<Prisma.BrokerageCompanyUpdateWithoutInvestAccountsInput, Prisma.BrokerageCompanyUncheckedUpdateWithoutInvestAccountsInput>
 }
 
-export type BrokerageCompanyUpdateWithoutAccountsInput = {
+export type BrokerageCompanyUpdateWithoutInvestAccountsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   financialCode?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type BrokerageCompanyUncheckedUpdateWithoutAccountsInput = {
+export type BrokerageCompanyUncheckedUpdateWithoutInvestAccountsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   financialCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -367,11 +367,11 @@ export type BrokerageCompanyUncheckedUpdateWithoutAccountsInput = {
  */
 
 export type BrokerageCompanyCountOutputType = {
-  accounts: number
+  investAccounts: number
 }
 
 export type BrokerageCompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  accounts?: boolean | BrokerageCompanyCountOutputTypeCountAccountsArgs
+  investAccounts?: boolean | BrokerageCompanyCountOutputTypeCountInvestAccountsArgs
 }
 
 /**
@@ -387,8 +387,8 @@ export type BrokerageCompanyCountOutputTypeDefaultArgs<ExtArgs extends runtime.T
 /**
  * BrokerageCompanyCountOutputType without action
  */
-export type BrokerageCompanyCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AccountWhereInput
+export type BrokerageCompanyCountOutputTypeCountInvestAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvestAccountWhereInput
 }
 
 
@@ -397,7 +397,7 @@ export type BrokerageCompanySelect<ExtArgs extends runtime.Types.Extensions.Inte
   name?: boolean
   financialCode?: boolean
   createdAt?: boolean
-  accounts?: boolean | Prisma.BrokerageCompany$accountsArgs<ExtArgs>
+  investAccounts?: boolean | Prisma.BrokerageCompany$investAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.BrokerageCompanyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["brokerageCompany"]>
 
@@ -424,7 +424,7 @@ export type BrokerageCompanySelectScalar = {
 
 export type BrokerageCompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "financialCode" | "createdAt", ExtArgs["result"]["brokerageCompany"]>
 export type BrokerageCompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  accounts?: boolean | Prisma.BrokerageCompany$accountsArgs<ExtArgs>
+  investAccounts?: boolean | Prisma.BrokerageCompany$investAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.BrokerageCompanyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BrokerageCompanyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -433,7 +433,7 @@ export type BrokerageCompanyIncludeUpdateManyAndReturn<ExtArgs extends runtime.T
 export type $BrokerageCompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BrokerageCompany"
   objects: {
-    accounts: Prisma.$AccountPayload<ExtArgs>[]
+    investAccounts: Prisma.$InvestAccountPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     code: string
@@ -834,7 +834,7 @@ readonly fields: BrokerageCompanyFieldRefs;
  */
 export interface Prisma__BrokerageCompanyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  accounts<T extends Prisma.BrokerageCompany$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BrokerageCompany$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  investAccounts<T extends Prisma.BrokerageCompany$investAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BrokerageCompany$investAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1261,27 +1261,27 @@ export type BrokerageCompanyDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
- * BrokerageCompany.accounts
+ * BrokerageCompany.investAccounts
  */
-export type BrokerageCompany$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type BrokerageCompany$investAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Account
+   * Select specific fields to fetch from the InvestAccount
    */
-  select?: Prisma.AccountSelect<ExtArgs> | null
+  select?: Prisma.InvestAccountSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Account
+   * Omit specific fields from the InvestAccount
    */
-  omit?: Prisma.AccountOmit<ExtArgs> | null
+  omit?: Prisma.InvestAccountOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AccountInclude<ExtArgs> | null
-  where?: Prisma.AccountWhereInput
-  orderBy?: Prisma.AccountOrderByWithRelationInput | Prisma.AccountOrderByWithRelationInput[]
-  cursor?: Prisma.AccountWhereUniqueInput
+  include?: Prisma.InvestAccountInclude<ExtArgs> | null
+  where?: Prisma.InvestAccountWhereInput
+  orderBy?: Prisma.InvestAccountOrderByWithRelationInput | Prisma.InvestAccountOrderByWithRelationInput[]
+  cursor?: Prisma.InvestAccountWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+  distinct?: Prisma.InvestAccountScalarFieldEnum | Prisma.InvestAccountScalarFieldEnum[]
 }
 
 /**

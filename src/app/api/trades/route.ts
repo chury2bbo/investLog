@@ -74,7 +74,7 @@ export async function POST(req: Request) {
   }
 
   // 계좌 소유권 확인
-  const account = await prisma.account.findFirst({
+  const account = await prisma.investAccount.findFirst({
     where: { id: accountId, userId: session.user.id },
     include: {
       holdings: { where: { ticker } },

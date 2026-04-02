@@ -53,9 +53,9 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   BrokerageCompany: 'BrokerageCompany',
   User: 'User',
-  OAuthAccount: 'OAuthAccount',
-  Session: 'Session',
   Account: 'Account',
+  Session: 'Session',
+  InvestAccount: 'InvestAccount',
   Holding: 'Holding',
   TradeLog: 'TradeLog',
   CashBalance: 'CashBalance',
@@ -96,6 +96,8 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  image: 'image',
+  emailVerified: 'emailVerified',
   password: 'password',
   provider: 'provider',
   onboardingDone: 'onboardingDone',
@@ -106,7 +108,7 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const OAuthAccountScalarFieldEnum = {
+export const AccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   type: 'type',
@@ -121,7 +123,7 @@ export const OAuthAccountScalarFieldEnum = {
   session_state: 'session_state'
 } as const
 
-export type OAuthAccountScalarFieldEnum = (typeof OAuthAccountScalarFieldEnum)[keyof typeof OAuthAccountScalarFieldEnum]
+export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -134,7 +136,7 @@ export const SessionScalarFieldEnum = {
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
-export const AccountScalarFieldEnum = {
+export const InvestAccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   accountCode: 'accountCode',
@@ -142,7 +144,7 @@ export const AccountScalarFieldEnum = {
   createdAt: 'createdAt'
 } as const
 
-export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
+export type InvestAccountScalarFieldEnum = (typeof InvestAccountScalarFieldEnum)[keyof typeof InvestAccountScalarFieldEnum]
 
 
 export const HoldingScalarFieldEnum = {

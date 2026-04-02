@@ -10,9 +10,9 @@
  */
 export type * from './models/BrokerageCompany'
 export type * from './models/User'
-export type * from './models/OAuthAccount'
-export type * from './models/Session'
 export type * from './models/Account'
+export type * from './models/Session'
+export type * from './models/InvestAccount'
 export type * from './models/Holding'
 export type * from './models/TradeLog'
 export type * from './models/CashBalance'

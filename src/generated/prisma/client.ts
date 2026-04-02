@@ -52,20 +52,20 @@ export type BrokerageCompany = Prisma.BrokerageCompanyModel
  */
 export type User = Prisma.UserModel
 /**
- * Model OAuthAccount
+ * Model Account
  * 
  */
-export type OAuthAccount = Prisma.OAuthAccountModel
+export type Account = Prisma.AccountModel
 /**
  * Model Session
  * 
  */
 export type Session = Prisma.SessionModel
 /**
- * Model Account
+ * Model InvestAccount
  * 
  */
-export type Account = Prisma.AccountModel
+export type InvestAccount = Prisma.InvestAccountModel
 /**
  * Model Holding
  * 

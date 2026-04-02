@@ -9,7 +9,7 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const accounts = await prisma.account.findMany({
+  const accounts = await prisma.investAccount.findMany({
     where: { userId: session.user.id },
     include: {
       brokerageCompany: { select: { code: true, name: true } },
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const account = await prisma.account.create({
+  const account = await prisma.investAccount.create({
     data: {
       userId: session.user.id,
       accountCode,
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   if (cashPromises.length > 0) await Promise.all(cashPromises);
 
   // 생성된 계좌 재조회 (cashBalances 포함)
-  const result = await prisma.account.findUnique({
+  const result = await prisma.investAccount.findUnique({
     where: { id: account.id },
     include: {
       brokerageCompany: { select: { code: true, name: true } },
