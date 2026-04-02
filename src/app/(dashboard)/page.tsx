@@ -82,7 +82,7 @@ function formatKRW(value: number): string {
   if (Math.abs(value) >= 1_0000) {
     return `${(value / 10000).toFixed(1)}만`;
   }
-  return value.toLocaleString();
+  return Math.round(value).toLocaleString();
 }
 
 function formatCompact(value: number, currency: string): string {
@@ -459,7 +459,7 @@ export default function DashboardPage() {
           </button>
         </div>
         <div className="text-[32px] md:text-[40px] font-extrabold text-white tracking-tight leading-tight">
-          {summary.totalAsset.toLocaleString()}
+          {Math.round(summary.totalAsset).toLocaleString()}
           <span className="text-lg md:text-[22px] font-normal">원</span>
         </div>
 

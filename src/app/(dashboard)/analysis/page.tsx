@@ -1,19 +1,603 @@
 "use client";
 
-import { EmptyState } from "@/components/ui";
+import { useState, useCallback, useRef, useEffect } from "react";
+import {
+  Card,
+  Button,
+  Tag,
+  SectionTitle,
+  LoadingSpinner,
+  EmptyState,
+  Divider,
+} from "@/components/ui";
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
+
+// ─── 타입 ────────────────────────────────────────────────
+
+interface SearchResult {
+  ticker: string;
+  name: string;
+  market: string;
+  country: string;
+}
+
+interface QuoteData {
+  ticker: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
+
+interface SummaryData {
+  name: string;
+  exchange: string;
+  sector: string;
+  industry: string;
+  summary: string;
+}
+
+interface ReportData {
+  recommendation: string;
+  targetBuy: string;
+  targetSell: string;
+  swotStrength: string;
+  swotWeakness: string;
+  swotOpportunity: string;
+  swotThreat: string;
+  reasoning: string;
+}
+
+interface HistoryPoint {
+  date: string;
+  close: number;
+}
+
+interface MddPoint {
+  date: string;
+  close: number;
+  mdd: number;
+}
+
+// ─── 유틸 ────────────────────────────────────────────────
+
+function formatPrice(value: number, country: string) {
+  if (country !== "KR") {
+    return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `₩${value.toLocaleString()}`;
+}
+
+function calcMdd(data: HistoryPoint[]): MddPoint[] {
+  if (data.length === 0) return [];
+  let peak = data[0].close;
+  return data.map((d) => {
+    if (d.close > peak) peak = d.close;
+    const mdd = ((d.close - peak) / peak) * 100;
+    return { date: d.date, close: d.close, mdd: Math.round(mdd * 100) / 100 };
+  });
+}
+
+function getDefaultDates() {
+  const end = new Date();
+  const start = new Date();
+  start.setFullYear(start.getFullYear() - 1);
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+  };
+}
+
+// ─── 메인 페이지 ─────────────────────────────────────────
 
 export default function AnalysisPage() {
+  // 검색
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // 선택된 종목
+  const [selected, setSelected] = useState<SearchResult | null>(null);
+
+  // 데이터
+  const [quote, setQuote] = useState<QuoteData | null>(null);
+  const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [history, setHistory] = useState<MddPoint[]>([]);
+
+  // 로딩
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // MDD 기간
+  const defaults = getDefaultDates();
+  const [startDate, setStartDate] = useState(defaults.start);
+  const [endDate, setEndDate] = useState(defaults.end);
+
+  // ─── 검색 자동완성 ────────────────────────────────────
+
+  const handleSearch = useCallback((val: string) => {
+    setQuery(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!val.trim()) {
+      setResults([]);
+      setShowDropdown(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(`/api/market/search?q=${encodeURIComponent(val)}&country=ALL`);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(Array.isArray(data) ? data : []);
+          setShowDropdown(true);
+        }
+      } catch { /* ignore */ }
+      finally { setSearching(false); }
+    }, 300);
+  }, []);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // ─── 종목 선택 → 데이터 로딩 ─────────────────────────
+
+  async function selectStock(stock: SearchResult) {
+    setSelected(stock);
+    setQuery(stock.name);
+    setShowDropdown(false);
+    setReport(null);
+
+    // 현재가 조회
+    setQuoteLoading(true);
+    fetch(`/api/market/quote?tickers=${stock.ticker}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const q = (d.quotes ?? [])[0];
+        if (q) setQuote(q);
+      })
+      .catch(() => {})
+      .finally(() => setQuoteLoading(false));
+
+    // AI 기업 소개
+    setSummaryLoading(true);
+    setSummary(null);
+    fetch(`/api/analysis/summary?ticker=${stock.ticker}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.summary) {
+          try {
+            const parsed = typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary;
+            setSummary(parsed);
+          } catch {
+            setSummary(null);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSummaryLoading(false));
+
+    // MDD 차트 데이터
+    fetchHistory(stock.ticker, startDate, endDate);
+  }
+
+  async function fetchHistory(ticker: string, start: string, end: string) {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/market/history?ticker=${ticker}&start=${start}&end=${end}`);
+      if (res.ok) {
+        const d = await res.json();
+        setHistory(calcMdd(d.data ?? []));
+      }
+    } catch { /* ignore */ }
+    finally { setHistoryLoading(false); }
+  }
+
+  // ─── AI 분석 리포트 생성 ──────────────────────────────
+
+  async function generateReport() {
+    if (!selected) return;
+    setReportLoading(true);
+    try {
+      const res = await fetch(`/api/analysis/report?ticker=${selected.ticker}`);
+      if (res.ok) {
+        const d = await res.json();
+        setReport(d.report ?? null);
+      }
+    } catch { /* ignore */ }
+    finally { setReportLoading(false); }
+  }
+
+  // ─── MDD 차트 기간 변경 ───────────────────────────────
+
+  function handleDateChange() {
+    if (selected) {
+      fetchHistory(selected.ticker, startDate, endDate);
+    }
+  }
+
+  // MDD 최솟값
+  const minMdd = history.length > 0 ? Math.min(...history.map((h) => h.mdd)) : 0;
+
+  // 추천 색상
+  const recColor =
+    report?.recommendation === "BUY"
+      ? "#05C072"
+      : report?.recommendation === "SELL"
+        ? "#F04452"
+        : "#F07D05";
+
+  // ─── 렌더 ──────────────────────────────────────────────
+
   return (
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+      {/* 헤더 */}
       <div className="flex items-center gap-2 mb-6">
-        <button onClick={() => window.history.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+        <button
+          onClick={() => window.history.back()}
+          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </button>
         <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
           종목 분석
         </h1>
       </div>
-      <EmptyState message="종목 분석 화면은 준비 중입니다." />
+
+      {/* ── ① 종목 검색 ── */}
+      <div ref={searchRef} className="relative mb-6">
+        <div className="flex items-center gap-2 border-b-2 border-[#05C072] pb-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => handleSearch(e.target.value)}
+            onFocus={() => results.length > 0 && setShowDropdown(true)}
+            placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)"
+            className="flex-1 text-sm bg-transparent outline-none text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+          />
+          {searching && <LoadingSpinner size={16} />}
+        </div>
+
+        {showDropdown && results.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 max-h-64 overflow-y-auto">
+            {results.map((r) => (
+              <button
+                key={`${r.ticker}-${r.country}`}
+                onClick={() => selectStock(r)}
+                className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0"
+              >
+                <div>
+                  <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{r.name}</span>
+                  <span className="ml-2 text-xs text-[#9AA99A]">{r.ticker}</span>
+                </div>
+                <Tag label={r.country === "KR" ? "국내" : "해외"} color={r.country === "KR" ? "green" : "blue"} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 미선택 시 */}
+      {!selected && (
+        <EmptyState message="분석할 종목을 검색해주세요." icon="🔍" />
+      )}
+
+      {/* ── ② 기업 소개 카드 ── */}
+      {selected && (
+        <div className="mb-4">
+          <SectionTitle title="기업 소개" />
+          <Card>
+            {summaryLoading ? (
+              <div className="flex justify-center py-6">
+                <LoadingSpinner size={24} />
+              </div>
+            ) : summary ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                    {summary.name || selected.name}
+                  </span>
+                  <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
+                </div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {summary.exchange && <Tag label={summary.exchange} color="gray" />}
+                  {summary.sector && <Tag label={summary.sector} color="gray" />}
+                  {summary.industry && <Tag label={summary.industry} color="gray" />}
+                </div>
+                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed">
+                  {summary.summary}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                    {selected.name}
+                  </span>
+                  <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Tag label={selected.ticker} color="gray" />
+                  <Tag label={selected.market} color="gray" />
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* ── ③ 기본 지표 ── */}
+      {selected && (
+        <div className="mb-4">
+          <SectionTitle title="기본 지표" />
+          <Card>
+            {quoteLoading ? (
+              <div className="flex justify-center py-6">
+                <LoadingSpinner size={24} />
+              </div>
+            ) : quote ? (
+              <div className="grid grid-cols-2 gap-4">
+                {/* 현재가 */}
+                <div>
+                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">현재가</div>
+                  <div className="text-xl font-extrabold text-[#1A221A] dark:text-[#E8EEE8]">
+                    {formatPrice(quote.price, selected.country)}
+                  </div>
+                </div>
+                {/* 등락률 */}
+                <div>
+                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">등락률</div>
+                  <div className={`text-xl font-extrabold ${quote.changePercent >= 0 ? "text-[#F04452]" : "text-[#4285F4]"}`}>
+                    {quote.changePercent >= 0 ? "+" : ""}
+                    {quote.changePercent.toFixed(2)}%
+                  </div>
+                </div>
+                {/* 전일대비 */}
+                <div>
+                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">전일대비</div>
+                  <div className={`text-sm font-bold ${quote.change >= 0 ? "text-[#F04452]" : "text-[#4285F4]"}`}>
+                    {quote.change >= 0 ? "+" : ""}
+                    {formatPrice(Math.abs(quote.change), selected.country)}
+                  </div>
+                </div>
+                {/* 52주 MDD */}
+                <div>
+                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">
+                    기간 내 MDD
+                  </div>
+                  <div className="text-sm font-bold text-[#F04452]">
+                    {minMdd.toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-center text-[#9AA99A] py-4">시세 정보를 불러올 수 없습니다.</p>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* ── ④ MDD 차트 ── */}
+      {selected && (
+        <div className="mb-4">
+          <SectionTitle title="MDD 차트" />
+          <Card>
+            {/* 기간 입력 */}
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+              />
+              <span className="text-xs text-[#9AA99A]">~</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+              />
+              <Button size="sm" onClick={handleDateChange}>
+                조회
+              </Button>
+            </div>
+
+            {historyLoading ? (
+              <div className="flex justify-center py-10">
+                <LoadingSpinner size={24} />
+              </div>
+            ) : history.length > 0 ? (
+              <>
+                {/* 주가 라인 차트 */}
+                <div className="text-[11px] text-[#9AA99A] mb-1">주가</div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart data={history} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tickFormatter={(v) => v.slice(5)}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tickFormatter={(v) => selected.country === "KR" ? `${(v / 1000).toFixed(0)}K` : `$${v}`}
+                      domain={["auto", "auto"]}
+                    />
+                    <Tooltip
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
+                      formatter={(v: number) => [formatPrice(v, selected.country), "주가"]}
+                      labelFormatter={(l) => l}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="close"
+                      stroke="#05C072"
+                      strokeWidth={1.5}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+
+                {/* MDD 영역 차트 */}
+                <div className="text-[11px] text-[#9AA99A] mb-1 mt-3">MDD (최대 낙폭)</div>
+                <ResponsiveContainer width="100%" height={120}>
+                  <AreaChart data={history} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tickFormatter={(v) => v.slice(5)}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tickFormatter={(v) => `${v}%`}
+                      domain={["auto", 0]}
+                    />
+                    <Tooltip
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
+                      formatter={(v: number) => [`${v.toFixed(2)}%`, "MDD"]}
+                      labelFormatter={(l) => l}
+                    />
+                    <ReferenceLine y={0} stroke="#E8EEE8" />
+                    <Area
+                      type="monotone"
+                      dataKey="mdd"
+                      stroke="#F04452"
+                      fill="#F04452"
+                      fillOpacity={0.15}
+                      strokeWidth={1.5}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+
+                {/* 자연어 해석 */}
+                <div className="mt-3 px-3 py-2.5 rounded-xl bg-[#FEE8EA] dark:bg-[#3D1519]">
+                  <p className="text-sm text-[#F04452] font-medium">
+                    이 기간 내 최대 <strong>{minMdd.toFixed(1)}%</strong> 하락한 적이 있어요
+                  </p>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-center text-[#9AA99A] py-8">차트 데이터를 불러올 수 없습니다.</p>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* ── ⑤ AI 종목 분석 리포트 ── */}
+      {selected && (
+        <div className="mb-4">
+          <SectionTitle title="AI 종목 분석" />
+
+          {!report && !reportLoading && (
+            <Card>
+              <div className="text-center py-4">
+                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] mb-4">
+                  AI가 {selected.name}({selected.ticker})을 분석합니다
+                </p>
+                <Button size="lg" onClick={generateReport}>
+                  분석 생성
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {reportLoading && (
+            <Card>
+              <div className="flex flex-col items-center py-8 gap-3">
+                <LoadingSpinner size={28} />
+                <p className="text-sm text-[#9AA99A]">AI가 분석 중입니다...</p>
+              </div>
+            </Card>
+          )}
+
+          {report && !reportLoading && (
+            <div className="space-y-2.5">
+              {/* 추천 + 적정가 */}
+              <Card>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">투자 의견</span>
+                  <span
+                    className="px-3 py-1 rounded-full text-sm font-bold text-white"
+                    style={{ backgroundColor: recColor }}
+                  >
+                    {report.recommendation}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl p-3 bg-[#E6F9F1] dark:bg-[#0D2A1D]">
+                    <div className="text-[11px] text-[#05C072] mb-1">적정 매수가</div>
+                    <div className="text-base font-bold text-[#05C072]">{report.targetBuy}</div>
+                  </div>
+                  <div className="rounded-xl p-3 bg-[#FEE8EA] dark:bg-[#3D1519]">
+                    <div className="text-[11px] text-[#F04452] mb-1">적정 매도가</div>
+                    <div className="text-base font-bold text-[#F04452]">{report.targetSell}</div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* SWOT */}
+              <Card>
+                <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3">SWOT 분석</div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="rounded-xl p-3 bg-[#E6F9F1] dark:bg-[#0D2A1D]">
+                    <div className="text-[11px] font-bold text-[#05C072] mb-1">S 강점</div>
+                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotStrength}</p>
+                  </div>
+                  <div className="rounded-xl p-3 bg-[#FEE8EA] dark:bg-[#3D1519]">
+                    <div className="text-[11px] font-bold text-[#F04452] mb-1">W 약점</div>
+                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotWeakness}</p>
+                  </div>
+                  <div className="rounded-xl p-3 bg-[#E8F0FE] dark:bg-[#0D1A2A]">
+                    <div className="text-[11px] font-bold text-[#4285F4] mb-1">O 기회</div>
+                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotOpportunity}</p>
+                  </div>
+                  <div className="rounded-xl p-3 bg-[#FFF3E8] dark:bg-[#2A1D0D]">
+                    <div className="text-[11px] font-bold text-[#F07D05] mb-1">T 위협</div>
+                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotThreat}</p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* 종합 의견 */}
+              <Card>
+                <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-2">종합 투자 의견</div>
+                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed">
+                  {report.reasoning}
+                </p>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

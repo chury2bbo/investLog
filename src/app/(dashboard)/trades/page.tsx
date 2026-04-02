@@ -122,6 +122,7 @@ export default function TradesPage() {
   // 매매 등록 폼
   const [formAccountId, setFormAccountId] = useState<number | null>(null);
   const [accountDropOpen, setAccountDropOpen] = useState(false);
+  const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [formType, setFormType] = useState<"BUY" | "SELL">("BUY");
   const [formTicker, setFormTicker] = useState("");
   const [formName, setFormName] = useState("");
@@ -239,6 +240,7 @@ export default function TradesPage() {
   }
 
   function resetForm() {
+    setFormDate(new Date().toISOString().slice(0, 10));
     setFormType("BUY");
     setFormTicker("");
     setFormName("");
@@ -392,6 +394,7 @@ export default function TradesPage() {
           ticker: formTicker,
           name: formName,
           country: formCountry,
+          date: formDate,
           type: formType,
           price: parseFloat(formPrice),
           quantity: parseInt(formQuantity, 10),
@@ -756,6 +759,19 @@ export default function TradesPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* 매매 날짜 */}
+          <div>
+            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+              매매 날짜
+            </label>
+            <input
+              type="date"
+              value={formDate}
+              onChange={(e) => setFormDate(e.target.value)}
+              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8]"
+            />
           </div>
 
           {/* 매수/매도 토글 */}

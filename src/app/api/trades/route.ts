@@ -51,6 +51,7 @@ export async function POST(req: Request) {
     type, // "BUY" | "SELL"
     price,
     quantity,
+    date: bodyDate,
     country: bodyCountry,
     reasonTags = [],
     emotion,
@@ -193,7 +194,7 @@ export async function POST(req: Request) {
   // 매매 기록 저장
   const tradeLog = await prisma.tradeLog.create({
     data: {
-      date: new Date(),
+      date: bodyDate ? new Date(bodyDate) : new Date(),
       accountId,
       ticker,
       name,
@@ -210,7 +211,7 @@ export async function POST(req: Request) {
   // 예수금 변동 로그
   await prisma.cashLog.create({
     data: {
-      date: new Date(),
+      date: bodyDate ? new Date(bodyDate) : new Date(),
       accountId,
       type: type === "BUY" ? "TRADE_BUY" : "TRADE_SELL",
       currency,
