@@ -67,6 +67,7 @@ interface CashLog {
 interface AccountDetail {
   id: number;
   accountCode: string;
+  memo: string | null;
   brokerageCompany: { code: string; name: string };
   holdings: Holding[];
   cashBalances: CashBalance[];
@@ -390,6 +391,9 @@ export default function AccountDetailPage() {
 
   const cashKRW = account.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
   const cashUSD = account.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
+  // TODO: 환율 API 완성 후 실시간 환율로 교체
+  const usdRate = 1400;
+  const totalCashKRW = cashKRW + cashUSD * usdRate;
   const hasManualSector = account.holdings.some((h) => h.sectorManual);
   const sectorData = calcSectorDistribution(sectorTab);
 
@@ -407,6 +411,11 @@ export default function AccountDetailPage() {
             <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">계좌 상세</p>
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
               {account.brokerageCompany.name}
+              {account.memo && (
+                <span className="ml-2 text-sm font-normal text-[#9AA99A] dark:text-[#5A6A5A]">
+                  {account.memo}
+                </span>
+              )}
             </h1>
           </div>
         </div>
@@ -428,16 +437,27 @@ export default function AccountDetailPage() {
         }}
       >
         <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-          원화 예수금
+          총 예수금
         </div>
         <div className="text-[28px] font-extrabold text-white tracking-tight">
-          {cashKRW.toLocaleString()}원
+          ₩{totalCashKRW.toLocaleString()}
         </div>
-        {cashUSD > 0 && (
-          <div className="text-sm text-white/60 mt-1">
-            ${cashUSD.toLocaleString()} USD
-          </div>
-        )}
+
+        {/* 원화 / 외화 내역 */}
+        <div className="flex gap-3 mt-2">
+          {cashKRW > 0 && (
+            <div className="rounded-lg px-3 py-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <span className="text-[11px] text-white/50">원화</span>
+              <span className="text-xs font-bold text-white ml-1.5">₩{cashKRW.toLocaleString()}</span>
+            </div>
+          )}
+          {cashUSD > 0 && (
+            <div className="rounded-lg px-3 py-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <span className="text-[11px] text-white/50">외화</span>
+              <span className="text-xs font-bold text-white ml-1.5">${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          )}
+        </div>
 
         <div className="flex gap-2 mt-3.5">
           <button
@@ -503,10 +523,10 @@ export default function AccountDetailPage() {
                 <div className="flex justify-between items-start mb-2.5">
                   <div>
                     <div className="flex items-center gap-1.5">
+                      <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
                       <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
                         {h.name}
                       </span>
-                      <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
                     </div>
                     <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
                       {h.ticker} · {h.quantity}주
