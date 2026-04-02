@@ -29,6 +29,7 @@ export type StockMasterMinAggregateOutputType = {
   name: string | null
   market: string | null
   country: string | null
+  assetType: string | null
   updatedAt: Date | null
 }
 
@@ -37,6 +38,7 @@ export type StockMasterMaxAggregateOutputType = {
   name: string | null
   market: string | null
   country: string | null
+  assetType: string | null
   updatedAt: Date | null
 }
 
@@ -45,6 +47,7 @@ export type StockMasterCountAggregateOutputType = {
   name: number
   market: number
   country: number
+  assetType: number
   updatedAt: number
   _all: number
 }
@@ -55,6 +58,7 @@ export type StockMasterMinAggregateInputType = {
   name?: true
   market?: true
   country?: true
+  assetType?: true
   updatedAt?: true
 }
 
@@ -63,6 +67,7 @@ export type StockMasterMaxAggregateInputType = {
   name?: true
   market?: true
   country?: true
+  assetType?: true
   updatedAt?: true
 }
 
@@ -71,6 +76,7 @@ export type StockMasterCountAggregateInputType = {
   name?: true
   market?: true
   country?: true
+  assetType?: true
   updatedAt?: true
   _all?: true
 }
@@ -152,6 +158,7 @@ export type StockMasterGroupByOutputType = {
   name: string
   market: string
   country: string
+  assetType: string
   updatedAt: Date
   _count: StockMasterCountAggregateOutputType | null
   _min: StockMasterMinAggregateOutputType | null
@@ -181,6 +188,7 @@ export type StockMasterWhereInput = {
   name?: Prisma.StringFilter<"StockMaster"> | string
   market?: Prisma.StringFilter<"StockMaster"> | string
   country?: Prisma.StringFilter<"StockMaster"> | string
+  assetType?: Prisma.StringFilter<"StockMaster"> | string
   updatedAt?: Prisma.DateTimeFilter<"StockMaster"> | Date | string
 }
 
@@ -189,6 +197,7 @@ export type StockMasterOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   market?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  assetType?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -200,6 +209,7 @@ export type StockMasterWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"StockMaster"> | string
   market?: Prisma.StringFilter<"StockMaster"> | string
   country?: Prisma.StringFilter<"StockMaster"> | string
+  assetType?: Prisma.StringFilter<"StockMaster"> | string
   updatedAt?: Prisma.DateTimeFilter<"StockMaster"> | Date | string
 }, "ticker">
 
@@ -208,6 +218,7 @@ export type StockMasterOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   market?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  assetType?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.StockMasterCountOrderByAggregateInput
   _max?: Prisma.StockMasterMaxOrderByAggregateInput
@@ -222,6 +233,7 @@ export type StockMasterScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"StockMaster"> | string
   market?: Prisma.StringWithAggregatesFilter<"StockMaster"> | string
   country?: Prisma.StringWithAggregatesFilter<"StockMaster"> | string
+  assetType?: Prisma.StringWithAggregatesFilter<"StockMaster"> | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StockMaster"> | Date | string
 }
 
@@ -230,6 +242,7 @@ export type StockMasterCreateInput = {
   name: string
   market: string
   country: string
+  assetType?: string
   updatedAt?: Date | string
 }
 
@@ -238,6 +251,7 @@ export type StockMasterUncheckedCreateInput = {
   name: string
   market: string
   country: string
+  assetType?: string
   updatedAt?: Date | string
 }
 
@@ -246,6 +260,7 @@ export type StockMasterUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   market?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
+  assetType?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -254,6 +269,7 @@ export type StockMasterUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   market?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
+  assetType?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -262,6 +278,7 @@ export type StockMasterCreateManyInput = {
   name: string
   market: string
   country: string
+  assetType?: string
   updatedAt?: Date | string
 }
 
@@ -270,6 +287,7 @@ export type StockMasterUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   market?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
+  assetType?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -278,6 +296,7 @@ export type StockMasterUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   market?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
+  assetType?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -286,6 +305,7 @@ export type StockMasterCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   market?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  assetType?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -294,6 +314,7 @@ export type StockMasterMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   market?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  assetType?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -302,6 +323,7 @@ export type StockMasterMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   market?: Prisma.SortOrder
   country?: Prisma.SortOrder
+  assetType?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -312,6 +334,7 @@ export type StockMasterSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   name?: boolean
   market?: boolean
   country?: boolean
+  assetType?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["stockMaster"]>
 
@@ -320,6 +343,7 @@ export type StockMasterSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   name?: boolean
   market?: boolean
   country?: boolean
+  assetType?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["stockMaster"]>
 
@@ -328,6 +352,7 @@ export type StockMasterSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   name?: boolean
   market?: boolean
   country?: boolean
+  assetType?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["stockMaster"]>
 
@@ -336,10 +361,11 @@ export type StockMasterSelectScalar = {
   name?: boolean
   market?: boolean
   country?: boolean
+  assetType?: boolean
   updatedAt?: boolean
 }
 
-export type StockMasterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ticker" | "name" | "market" | "country" | "updatedAt", ExtArgs["result"]["stockMaster"]>
+export type StockMasterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ticker" | "name" | "market" | "country" | "assetType" | "updatedAt", ExtArgs["result"]["stockMaster"]>
 
 export type $StockMasterPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StockMaster"
@@ -349,6 +375,7 @@ export type $StockMasterPayload<ExtArgs extends runtime.Types.Extensions.Interna
     name: string
     market: string
     country: string
+    assetType: string
     updatedAt: Date
   }, ExtArgs["result"]["stockMaster"]>
   composites: {}
@@ -777,6 +804,7 @@ export interface StockMasterFieldRefs {
   readonly name: Prisma.FieldRef<"StockMaster", 'String'>
   readonly market: Prisma.FieldRef<"StockMaster", 'String'>
   readonly country: Prisma.FieldRef<"StockMaster", 'String'>
+  readonly assetType: Prisma.FieldRef<"StockMaster", 'String'>
   readonly updatedAt: Prisma.FieldRef<"StockMaster", 'DateTime'>
 }
     

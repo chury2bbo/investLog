@@ -1547,6 +1547,7 @@ export const StockMasterScalarFieldEnum = {
   name: 'name',
   market: 'market',
   country: 'country',
+  assetType: 'assetType',
   updatedAt: 'updatedAt'
 } as const
 

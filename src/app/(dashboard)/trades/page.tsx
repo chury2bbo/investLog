@@ -31,6 +31,7 @@ interface TradeLog {
 
 interface AccountOption {
   id: number;
+  memo: string | null;
   brokerageCompany: { code: string; name: string };
   holdings: { ticker: string; name: string; country: string; avgPrice: number; quantity: number }[];
   cashBalances: { currency: string; amount: number }[];
@@ -486,7 +487,7 @@ export default function TradesPage() {
             <span>
               {filterAccount === "all"
                 ? "전체 계좌"
-                : accounts.find((a) => String(a.id) === filterAccount)?.brokerageCompany.name ?? "전체 계좌"}
+                : (() => { const a = accounts.find((a) => String(a.id) === filterAccount); return a ? `${a.brokerageCompany.name}${a.memo ? ` · ${a.memo}` : ""}` : "전체 계좌"; })()}
             </span>
             <svg
               width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -498,7 +499,7 @@ export default function TradesPage() {
 
           {filterAccDropOpen && (
             <div className="absolute top-full left-0 mt-1.5 min-w-[140px] rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 overflow-hidden">
-              {[{ id: "all", name: "전체 계좌" }, ...accounts.map((a) => ({ id: String(a.id), name: a.brokerageCompany.name }))].map((item) => (
+              {[{ id: "all", name: "전체 계좌" }, ...accounts.map((a) => ({ id: String(a.id), name: `${a.brokerageCompany.name}${a.memo ? ` · ${a.memo}` : ""}` }))].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => { setFilterAccount(item.id); setFilterAccDropOpen(false); }}
@@ -659,7 +660,7 @@ export default function TradesPage() {
               onClick={() => setAccountDropOpen(!accountDropOpen)}
               className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
             >
-              <span>{accounts.find((a) => a.id === formAccountId)?.brokerageCompany.name ?? "계좌를 선택하세요"}</span>
+              <span>{(() => { const a = accounts.find((a) => a.id === formAccountId); return a ? `${a.brokerageCompany.name}${a.memo ? ` · ${a.memo}` : ""}` : "계좌를 선택하세요"; })()}</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: accountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
             </button>
             {accountDropOpen && (
@@ -677,7 +678,7 @@ export default function TradesPage() {
                       borderBottom: "1px solid #F0F4F0",
                     }}
                   >
-                    <span>{acc.brokerageCompany.name}</span>
+                    <span>{acc.brokerageCompany.name}{acc.memo ? ` · ${acc.memo}` : ""}</span>
                     {formAccountId === acc.id && <span className="text-[#05C072]">✓</span>}
                   </button>
                 ))}

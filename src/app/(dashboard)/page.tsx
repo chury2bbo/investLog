@@ -97,7 +97,7 @@ function formatCompact(value: number, currency: string): string {
 
 const ALLOC_COLORS = {
   domestic: "#05C072",
-  foreign: "#34D399",
+  foreign: "#4285F4",
   cashKRW: "#F07D05",
   cashUSD: "#9AA99A",
 };
@@ -217,7 +217,7 @@ export default function DashboardPage() {
       acc.holdings.forEach((h) => {
         holdingCount++;
         const quote = quotes[h.ticker];
-        const currentPrice = quote?.price ?? h.avgPrice;
+        const currentPrice = quote?.price || h.avgPrice;
         const value = currentPrice * h.quantity;
         const invested = h.avgPrice * h.quantity;
 
@@ -273,7 +273,7 @@ export default function DashboardPage() {
       let evalUSD = 0;
       acc.holdings.forEach((h) => {
         const quote = quotes[h.ticker];
-        const curPrice = quote?.price ?? h.avgPrice;
+        const curPrice = quote?.price || h.avgPrice;
         const isForeign = h.country !== "KR";
         invested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
         if (isForeign) {
