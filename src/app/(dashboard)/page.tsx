@@ -109,6 +109,7 @@ export default function DashboardPage() {
   // TODO: /api/market/quote API 완성 후 실시간 환율 조회로 교체
   const [usdRate, setUsdRate] = useState(1400);
   const [loading, setLoading] = useState(true);
+  const [quotesRefreshing, setQuotesRefreshing] = useState(false);
   const [staleQuote, setStaleQuote] = useState(false);
   const [fxRefreshing, setFxRefreshing] = useState(false);
 
@@ -116,8 +117,9 @@ export default function DashboardPage() {
 
   // ─── 데이터 로딩 ───────────────────────────────────────
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isManual = false) => {
+    if (isManual) setQuotesRefreshing(true);
+    else setLoading(true);
     try {
       // 계좌 목록 조회
       const accRes = await fetch("/api/accounts");
@@ -165,6 +167,7 @@ export default function DashboardPage() {
       // 조회 실패 시 빈 상태
     } finally {
       setLoading(false);
+      setQuotesRefreshing(false);
     }
   }, []);
 
@@ -375,7 +378,7 @@ export default function DashboardPage() {
           <button
             onClick={refreshFx}
             disabled={fxRefreshing}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:cursor-default"
             style={{ opacity: fxRefreshing ? 0.5 : 1 }}
           >
             <svg
@@ -411,11 +414,37 @@ export default function DashboardPage() {
           style={{ background: "rgba(255,255,255,0.06)" }}
         />
 
-        <div
-          className="text-sm mb-1.5"
-          style={{ color: "rgba(255,255,255,0.55)" }}
-        >
-          총 보유 자산
+        <div className="flex items-center gap-2 mb-1.5">
+          <span
+            className="text-sm"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+          >
+            총 보유 자산
+          </span>
+          <button
+            onClick={() => fetchData(true)}
+            disabled={quotesRefreshing}
+            className="w-5 h-5 rounded flex items-center justify-center transition-opacity cursor-pointer disabled:cursor-default"
+            style={{ opacity: quotesRefreshing ? 0.4 : 0.6 }}
+            title="주가 새로고침"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={quotesRefreshing ? "animate-spin" : ""}
+            >
+              <path d="M21 2v6h-6" />
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+              <path d="M3 22v-6h6" />
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+          </button>
         </div>
         <div className="text-[32px] md:text-[40px] font-extrabold text-white tracking-tight leading-tight">
           {summary.totalAsset.toLocaleString()}
@@ -528,10 +557,11 @@ export default function DashboardPage() {
             자산 배분
           </span>
           <button
-            onClick={fetchData}
-            className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+            onClick={() => fetchData(true)}
+            disabled={quotesRefreshing}
+            className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
           >
-            새로고침
+            {quotesRefreshing ? "조회 중..." : "새로고침"}
           </button>
         </div>
 
