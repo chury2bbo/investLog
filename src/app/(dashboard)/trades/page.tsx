@@ -133,8 +133,20 @@ export default function TradesPage() {
   const [submitError, setSubmitError] = useState("");
   const [cashWarning, setCashWarning] = useState(false);
 
+  // 토스트
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // 이전 거래 불러오기
   const [showPrevTrades, setShowPrevTrades] = useState(false);
+
+  // 계좌 필터 드롭다운
+  const [filterAccDropOpen, setFilterAccDropOpen] = useState(false);
+  const filterAccDropRef = useRef<HTMLDivElement>(null);
+
+  // 가격 자동조회
+  const [formPriceLoading, setFormPriceLoading] = useState(false);
+  const formPriceRef = useRef<HTMLInputElement>(null);
 
   // 종목 검색 autocomplete
   const [stockQuery, setStockQuery] = useState("");
@@ -193,12 +205,21 @@ export default function TradesPage() {
       if (stockSearchRef.current && !stockSearchRef.current.contains(e.target as Node)) {
         setShowStockDropdown(false);
       }
+      if (filterAccDropRef.current && !filterAccDropRef.current.contains(e.target as Node)) {
+        setFilterAccDropOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // ─── 매매 등록 ─────────────────────────────────────────
+
+  function showToast(title: string, message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
 
   function resetForm() {
     setFormType("BUY");
@@ -216,6 +237,7 @@ export default function TradesPage() {
     setStockQuery("");
     setStockResults([]);
     setShowStockDropdown(false);
+    setFormPriceLoading(false);
   }
 
   function handleStockQueryChange(val: string) {
@@ -244,13 +266,31 @@ export default function TradesPage() {
     }, 300);
   }
 
-  function selectStock(stock: { ticker: string; name: string; market: string; country?: string }) {
+  async function selectStock(stock: { ticker: string; name: string; market: string; country?: string }) {
     setFormName(stock.name);
     setFormTicker(stock.ticker);
     setFormCountry(stock.country ?? (/^\d{6}$/.test(stock.ticker) ? "KR" : "US"));
     setStockQuery("");
     setShowStockDropdown(false);
     setStockResults([]);
+
+    // 현재가 자동 조회
+    setFormPriceLoading(true);
+    try {
+      const res = await fetch(`/api/market/quote?tickers=${encodeURIComponent(stock.ticker)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const quote = data.quotes?.[0] ?? null;
+        if (quote?.price) {
+          setFormPrice(String(quote.price));
+        }
+      }
+    } catch {
+      /* 조회 실패 시 수동 입력 */
+    } finally {
+      setFormPriceLoading(false);
+      setTimeout(() => formPriceRef.current?.focus(), 50);
+    }
   }
 
   function openModal() {
@@ -267,10 +307,25 @@ export default function TradesPage() {
     );
   }
 
-  function loadPrevTrade(trade: TradeLog) {
+  async function loadPrevTrade(trade: TradeLog) {
     setFormTicker(trade.ticker);
     setFormName(trade.name);
     setShowPrevTrades(false);
+
+    setFormPriceLoading(true);
+    try {
+      const res = await fetch(`/api/market/quote?tickers=${encodeURIComponent(trade.ticker)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const quote = data.quotes?.[0] ?? null;
+        if (quote?.price) setFormPrice(String(quote.price));
+      }
+    } catch {
+      /* 조회 실패 시 수동 입력 */
+    } finally {
+      setFormPriceLoading(false);
+      setTimeout(() => formPriceRef.current?.focus(), 50);
+    }
   }
 
   async function handleSubmit() {
@@ -289,16 +344,20 @@ export default function TradesPage() {
       const currency = isForeign ? "USD" : "KRW";
       const cashBalance = selectedAccount.cashBalances.find((c) => c.currency === currency)?.amount ?? 0;
       if (totalAmount > cashBalance) {
-        alert(`예수금이 부족하여 저장할 수 없습니다.\n필요: ${currency === "KRW" ? "₩" : "$"}${totalAmount.toLocaleString()} / 보유: ${currency === "KRW" ? "₩" : "$"}${cashBalance.toLocaleString()}`);
+        const sym = currency === "KRW" ? "₩" : "$";
+        showToast("예수금 부족", `필요 ${sym}${totalAmount.toLocaleString()} · 보유 ${sym}${cashBalance.toLocaleString()}`);
         return;
       }
     }
 
     if (formType === "SELL" && selectedAccount) {
       const holding = selectedAccount.holdings.find((h) => h.ticker === formTicker);
-      const holdingQty = holding?.quantity ?? 0;
-      if (quantity > holdingQty) {
-        alert(`보유 수량보다 커서 저장할 수 없습니다.\n매도 수량: ${quantity.toLocaleString()}주 / 보유 수량: ${holdingQty.toLocaleString()}주`);
+      if (!holding) {
+        showToast("미보유 종목", `${formName}(${formTicker})`);
+        return;
+      }
+      if (quantity > holding.quantity) {
+        showToast("보유 수량 부족", `매도 ${quantity.toLocaleString()}주 · 보유 ${holding.quantity.toLocaleString()}주`);
         return;
       }
     }
@@ -372,6 +431,28 @@ export default function TradesPage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+
+      {/* 토스트 */}
+      <div
+        className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${
+          toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
+        }`}
+      >
+        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
+          <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
+        </div>
+        <button
+          onClick={() => setToast((p) => ({ ...p, visible: false }))}
+          className="text-white/60 hover:text-white transition-colors shrink-0"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -390,46 +471,97 @@ export default function TradesPage() {
       </div>
 
       {/* 필터 */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        {/* 계좌 필터 */}
-        <select
-          value={filterAccount}
-          onChange={(e) => setFilterAccount(e.target.value)}
-          className="px-3 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
-        >
-          <option value="all">전체 계좌</option>
-          {accounts.map((acc) => (
-            <option key={acc.id} value={acc.id}>
-              {acc.brokerageCompany.name}
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        {/* 계좌 필터 — 커스텀 드롭다운 */}
+        <div ref={filterAccDropRef} className="relative">
+          <button
+            onClick={() => setFilterAccDropOpen((v) => !v)}
+            className={`flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-colors ${
+              filterAccount !== "all"
+                ? "border-[#05C072] bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072]"
+                : "border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+            }`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            <span>
+              {filterAccount === "all"
+                ? "전체 계좌"
+                : accounts.find((a) => String(a.id) === filterAccount)?.brokerageCompany.name ?? "전체 계좌"}
+            </span>
+            <svg
+              width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className={`transition-transform ${filterAccDropOpen ? "rotate-180" : ""}`}
+            >
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
 
-        {/* 매수/매도 필터 */}
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="px-3 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
-        >
-          <option value="all">전체</option>
-          <option value="BUY">매수</option>
-          <option value="SELL">매도</option>
-        </select>
+          {filterAccDropOpen && (
+            <div className="absolute top-full left-0 mt-1.5 min-w-[140px] rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 overflow-hidden">
+              {[{ id: "all", name: "전체 계좌" }, ...accounts.map((a) => ({ id: String(a.id), name: a.brokerageCompany.name }))].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => { setFilterAccount(item.id); setFilterAccDropOpen(false); }}
+                  className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors flex items-center justify-between ${
+                    filterAccount === item.id
+                      ? "text-[#05C072] bg-[#E8FAF2] dark:bg-[#0D2A1D]"
+                      : "text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                  }`}
+                >
+                  {item.name}
+                  {filterAccount === item.id && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 매수/매도 필터 — pill 토글 */}
+        <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+          {(["all", "BUY", "SELL"] as const).map((type) => {
+            const active = filterType === type;
+            const label = type === "all" ? "전체" : type === "BUY" ? "매수" : "매도";
+            const activeClass =
+              type === "BUY"
+                ? "bg-[#05C072] text-white"
+                : type === "SELL"
+                ? "bg-[#F04452] text-white"
+                : "bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A]";
+            return (
+              <button
+                key={type}
+                onClick={() => setFilterType(type)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? activeClass
+                    : "bg-white dark:bg-[#1D2720] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
 
         {/* 이유 태그 필터 */}
         {allReasonTags.length > 0 && (
-          <select
-            value={filterTag}
-            onChange={(e) => setFilterTag(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
-          >
-            <option value="all">전체 태그</option>
-            {allReasonTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={filterTag}
+              onChange={(e) => setFilterTag(e.target.value)}
+              className="appearance-none pl-3 pr-7 py-1.5 text-xs font-medium rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none cursor-pointer"
+            >
+              <option value="all">전체 태그</option>
+              {allReasonTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[#9AA99A] dark:text-[#5A6A5A]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
         )}
       </div>
 
@@ -560,6 +692,8 @@ export default function TradesPage() {
               onClick={() => {
                 setFormType("BUY");
                 setFormReasonTags([]);
+                setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity("");
+                setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 formType === "BUY"
@@ -574,6 +708,8 @@ export default function TradesPage() {
               onClick={() => {
                 setFormType("SELL");
                 setFormReasonTags([]);
+                setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity("");
+                setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 formType === "SELL"
@@ -591,19 +727,19 @@ export default function TradesPage() {
               <span className="text-[11px] font-bold text-[#05C072] tracking-wider uppercase">
                 필수
               </span>
-              {/* 이전 거래 불러오기 */}
+              {/* 이전/보유 종목 불러오기 */}
               {selectedAccount && selectedAccount.holdings.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowPrevTrades(!showPrevTrades)}
                   className="text-[11px] font-medium text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#05C072] transition-colors"
                 >
-                  이전 종목 불러오기
+                  {formType === "SELL" ? "보유 종목 불러오기" : "이전 종목 불러오기"}
                 </button>
               )}
             </div>
 
-            {/* 이전 종목 목록 */}
+            {/* 종목 목록 */}
             {showPrevTrades && selectedAccount && (
               <div className="rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] p-2 max-h-32 overflow-y-auto space-y-1">
                 {selectedAccount.holdings.map((h) => (
@@ -616,12 +752,17 @@ export default function TradesPage() {
                         name: h.name,
                       } as TradeLog)
                     }
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors text-[#1A221A] dark:text-[#E8EEE8]"
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors text-[#1A221A] dark:text-[#E8EEE8] flex items-center justify-between"
                   >
-                    <span className="font-medium">{h.name}</span>
-                    <span className="text-[#9AA99A] dark:text-[#5A6A5A] ml-2 text-xs">
-                      {h.ticker}
-                    </span>
+                    <div>
+                      <span className="font-medium">{h.name}</span>
+                      <span className="text-[#9AA99A] dark:text-[#5A6A5A] ml-2 text-xs">{h.ticker}</span>
+                    </div>
+                    {formType === "SELL" && (
+                      <span className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] shrink-0">
+                        {h.quantity.toLocaleString()}주
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -644,7 +785,7 @@ export default function TradesPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => { setFormName(""); setFormTicker(""); }}
+                    onClick={() => { setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity(""); }}
                     className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
                   >
                     ×
@@ -703,12 +844,14 @@ export default function TradesPage() {
                   가격 *
                 </label>
                 <input
+                  ref={formPriceRef}
                   type="text"
                   inputMode="decimal"
                   value={fmtNum(formPrice)}
                   onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
-                  placeholder="72,000"
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                  placeholder={formPriceLoading ? "조회 중..." : "72,000"}
+                  disabled={formPriceLoading}
+                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] disabled:opacity-50"
                 />
               </div>
               <div>
