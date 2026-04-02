@@ -4,6 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Tag, LoadingSpinner } from "@/components/ui";
 
+function fmtNum(val: string) {
+  if (!val) return "";
+  const [int, dec] = val.split(".");
+  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return dec !== undefined ? `${formatted}.${dec}` : formatted;
+}
+
+function stripNum(val: string, allowDot = false) {
+  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
+}
+
 // ─── 타입 ────────────────────────────────────────────────
 
 interface SearchResult {
@@ -492,9 +503,9 @@ export default function OnboardingPage() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={acc.cashKRW}
+                    value={fmtNum(acc.cashKRW)}
                     onChange={(e) =>
-                      updateAccount(accIdx, "cashKRW", e.target.value)
+                      updateAccount(accIdx, "cashKRW", stripNum(e.target.value))
                     }
                     placeholder="선택사항"
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b"
@@ -511,9 +522,9 @@ export default function OnboardingPage() {
                   <input
                     type="text"
                     inputMode="decimal"
-                    value={acc.cashUSD}
+                    value={fmtNum(acc.cashUSD)}
                     onChange={(e) =>
-                      updateAccount(accIdx, "cashUSD", e.target.value)
+                      updateAccount(accIdx, "cashUSD", stripNum(e.target.value, true))
                     }
                     placeholder="선택사항"
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b"
@@ -561,9 +572,9 @@ export default function OnboardingPage() {
                         <input
                           type="text"
                           inputMode="numeric"
-                          value={getHoldingForm(accIdx).avgPrice}
+                          value={fmtNum(getHoldingForm(accIdx).avgPrice)}
                           onChange={(e) =>
-                            updateHoldingForm(accIdx, "avgPrice", e.target.value)
+                            updateHoldingForm(accIdx, "avgPrice", stripNum(e.target.value, true))
                           }
                           placeholder="72,000"
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
@@ -583,9 +594,9 @@ export default function OnboardingPage() {
                         <input
                           type="text"
                           inputMode="numeric"
-                          value={getHoldingForm(accIdx).quantity}
+                          value={fmtNum(getHoldingForm(accIdx).quantity)}
                           onChange={(e) =>
-                            updateHoldingForm(accIdx, "quantity", e.target.value)
+                            updateHoldingForm(accIdx, "quantity", stripNum(e.target.value))
                           }
                           placeholder="50"
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
@@ -807,9 +818,9 @@ export default function OnboardingPage() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={trade.price}
+                value={fmtNum(trade.price)}
                 onChange={(e) =>
-                  setTrade((prev) => ({ ...prev, price: e.target.value }))
+                  setTrade((prev) => ({ ...prev, price: stripNum(e.target.value, true) }))
                 }
                 placeholder="72,000"
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b"
@@ -826,9 +837,9 @@ export default function OnboardingPage() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={trade.quantity}
+                value={fmtNum(trade.quantity)}
                 onChange={(e) =>
-                  setTrade((prev) => ({ ...prev, quantity: e.target.value }))
+                  setTrade((prev) => ({ ...prev, quantity: stripNum(e.target.value) }))
                 }
                 placeholder="50"
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b"

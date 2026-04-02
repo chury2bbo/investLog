@@ -53,6 +53,17 @@ const BROKERAGES = [
 
 // ─── 유틸 ────────────────────────────────────────────────
 
+function fmtNum(val: string) {
+  if (!val) return "";
+  const [int, dec] = val.split(".");
+  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return dec !== undefined ? `${formatted}.${dec}` : formatted;
+}
+
+function stripNum(val: string, allowDot = false) {
+  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
+}
+
 function formatCash(amount: number, currency: string) {
   if (currency === "USD") {
     return `$${amount.toLocaleString()}`;
@@ -246,8 +257,8 @@ export default function AccountsPage() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={formCashKRW}
-                onChange={(e) => setFormCashKRW(e.target.value)}
+                value={fmtNum(formCashKRW)}
+                onChange={(e) => setFormCashKRW(stripNum(e.target.value))}
                 placeholder="선택사항"
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
               />
@@ -259,8 +270,8 @@ export default function AccountsPage() {
               <input
                 type="text"
                 inputMode="decimal"
-                value={formCashUSD}
-                onChange={(e) => setFormCashUSD(e.target.value)}
+                value={fmtNum(formCashUSD)}
+                onChange={(e) => setFormCashUSD(stripNum(e.target.value, true))}
                 placeholder="선택사항"
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
               />

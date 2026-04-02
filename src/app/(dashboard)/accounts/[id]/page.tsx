@@ -14,6 +14,17 @@ import {
   Divider,
 } from "@/components/ui";
 
+function fmtNum(val: string) {
+  if (!val) return "";
+  const [int, dec] = val.split(".");
+  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return dec !== undefined ? `${formatted}.${dec}` : formatted;
+}
+
+function stripNum(val: string, allowDot = false) {
+  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
+}
+
 // ─── 타입 ────────────────────────────────────────────────
 
 interface Holding {
@@ -486,8 +497,8 @@ export default function AccountDetailPage() {
             <input
               type="text"
               inputMode="numeric"
-              value={cashAmount}
-              onChange={(e) => setCashAmount(e.target.value)}
+              value={fmtNum(cashAmount)}
+              onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
               placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
               className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
             />
