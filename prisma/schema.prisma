@@ -143,6 +143,7 @@ model StockMaster {
   name      String
   market    String
   country   String
+  assetType String   @default("STOCK")
   updatedAt DateTime @updatedAt
 
   @@index([name])
