@@ -37,6 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Kakao({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET ?? "",
+      checks: ["state"],  // PKCE 비활성화 — middleware 이중 인스턴스 쿠키 충돌 방지
     }),
   ],
 });
