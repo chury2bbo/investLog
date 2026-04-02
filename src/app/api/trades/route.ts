@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     orderBy: { date: "desc" },
     include: {
       account: {
-        select: { brokerageCompany: { select: { name: true } } },
+        select: { memo: true, brokerageCompany: { select: { name: true } } },
       },
     },
   });

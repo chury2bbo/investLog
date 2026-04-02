@@ -29,6 +29,64 @@
 
 ---
 
+## 2026-04-02 (팀원 B)
+
+### ✅ 완료
+- 대시보드 UI 개선
+  - 자산배분 해외주식 색상 계좌상세 태그 색상과 통일 (#34D399 → #4285F4)
+  - 시세 조회 실패 시 평단가 폴백 수정 (외화 평가금 미표시 버그)
+  - 총보유자산·수익금 원화 소수점 제거
+- 계좌상세 페이지 개선
+  - 종목 카드에 현재가 조회 + 평가금(수량×현재가) + 수익률 표시
+  - 삭제 모달 버튼 크기 통일
+  - quotes 중복 선언 제거
+- 계좌관리 페이지 개선
+  - 예수금 원화/외화 동일 스타일 표시
+  - 계좌추가 증권사 선택 초기화 버그 수정
+- 매매일지 페이지 개선
+  - 매매등록 모달에 날짜 입력 추가 (기본 오늘, 변경 가능)
+  - 매매등록/필터 드롭다운에 증권사+계좌명 표시
+  - 매매 카드 컴팩트 레이아웃 (2줄 구성, 패딩·폰트 축소)
+  - 카드에 매매일자·증권사명·계좌명 표시
+- 종목 분석 페이지 (`/analysis`) — 신규 구현
+  - 종목 검색 자동완성 (국내 DB + 해외 yahoo, 디바운스 300ms)
+  - AI 기업 소개 카드 (종목명·거래소·섹터·산업·요약, 영구 캐시)
+  - 기본 지표 (현재가·등락률·전일대비·기간 내 MDD)
+  - MDD 차트 (Recharts LineChart + AreaChart 2단 구성, 날짜 직접 입력, 자연어 해석)
+  - AI 종목 분석 리포트 (적정 매수·매도가 / SWOT / BUY·HOLD·SELL, 당일 캐시)
+- 투자성향 분석 페이지 (`/analysis/personality`) — 신규 구현
+  - 매매 10건 미만 잠금 화면 ("N건 더 필요해요")
+  - 이유 태그 분포 바 차트
+  - 이유별 평균 수익률 (Recharts 수평 BarChart)
+  - 감정별 수익률 (이모지 + 수익률 리스트)
+  - 보유 기간 패턴 (평균 보유일수 + 구간별 비율)
+  - AI 투자 성향 리포트 (투자자 유형·잘하는 패턴·반복 실수·개선 권고, 3회/일 제한)
+- 다크모드 지원 추가
+  - next-themes 설치 및 ThemeProvider 적용 (class 기반)
+  - globals.css Tailwind v4 `@custom-variant dark` 설정
+  - ThemeToggle 컴포넌트 생성 (대시보드 헤더 환율 리프레시 옆 배치)
+  - Card 컴포넌트 다크모드 배경 적용
+
+### API 작업
+- `GET /api/market/history` — MDD 차트용 히스토리컬 주가 (yahoo-finance2 chart)
+- `GET /api/analysis/summary` — AI 기업 소개 요약 (Claude API, 영구 캐시)
+- `GET /api/analysis/report` — AI 종목 분석 리포트 (Claude API, 당일 캐시)
+- `GET /api/trades/analysis` — 매매 통계 (태그분포·이유별/감정별 수익률·보유기간)
+- `GET /api/trades/analysis/ai-report` — AI 투자성향 리포트 (Claude API, 3회/일 제한)
+- `POST /api/trades` — date 파라미터 지원 추가
+- `GET /api/trades` — account.memo 포함하도록 수정
+
+### 패키지 추가
+- recharts (차트 라이브러리)
+- @anthropic-ai/sdk (Claude API)
+- next-themes (다크모드)
+
+### 📌 다음 작업
+- 반응형 마무리 및 UX 개선
+- 버그 수정 및 테스트
+
+---
+
 ## 2026-04-01 (팀원 B)
 
 ### ✅ 완료

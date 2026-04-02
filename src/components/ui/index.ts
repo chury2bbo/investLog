@@ -8,3 +8,4 @@ export { LoadingSpinner } from "./LoadingSpinner";
 export { EmptyState } from "./EmptyState";
 export { SectionTitle } from "./SectionTitle";
 export { BottomSheet } from "./BottomSheet";
+export { ThemeToggle } from "./ThemeToggle";

@@ -10,6 +10,7 @@ import {
   Tag,
   LoadingSpinner,
   EmptyState,
+  ThemeToggle,
 } from "@/components/ui";
 
 // ─── 타입 ────────────────────────────────────────────────
@@ -380,7 +381,7 @@ export default function DashboardPage() {
             내 투자 현황
           </h1>
         </div>
-        <div className="flex items-center gap-1.5 mt-1">
+        <div className="flex items-center gap-2 mt-1">
           <div className="text-right">
             <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">USD/KRW</div>
             <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
@@ -410,6 +411,7 @@ export default function DashboardPage() {
               <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
             </svg>
           </button>
+          <ThemeToggle />
         </div>
       </div>
 

@@ -25,6 +25,7 @@ interface TradeLog {
   emotion: string | null;
   memo: string | null;
   account: {
+    memo: string | null;
     brokerageCompany: { name: string };
   };
 }
@@ -645,64 +646,59 @@ export default function TradesPage() {
       {filteredTrades.length === 0 ? (
         <EmptyState message={trades.length === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {filteredTrades.map((trade) => {
             const isBuy = trade.type === "BUY";
             const country = getCountryFromTicker(trade.ticker);
             const totalAmount = trade.price * trade.quantity;
 
             return (
-              <Card key={trade.id}>
-                <div className="flex items-start justify-between">
-                  {/* 좌측: 종목 정보 */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      {/* 매수/매도 태그 */}
-                      <Tag
-                        label={isBuy ? "매수" : "매도"}
-                        color={isBuy ? "green" : "orange"}
-                      />
-                      <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8] truncate">
-                        {trade.name}
+              <Card key={trade.id} className="!p-3 !rounded-xl">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Tag
+                      label={isBuy ? "매수" : "매도"}
+                      color={isBuy ? "green" : "orange"}
+                    />
+                    <span className="text-[13px] font-bold text-[#1A221A] dark:text-[#E8EEE8] truncate">
+                      {trade.name}
+                    </span>
+                  </div>
+                  <span className="text-[13px] font-bold text-[#1A221A] dark:text-[#E8EEE8] shrink-0 ml-2">
+                    {formatPrice(totalAmount, country)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">
+                    {formatDate(trade.date)} · {trade.account.brokerageCompany.name}{trade.account.memo ? ` · ${trade.account.memo}` : ""}
+                  </span>
+                  <span className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">
+                    {formatPrice(trade.price, country)} × {trade.quantity.toLocaleString()}주
+                  </span>
+                </div>
+
+                {/* 이유 태그 + 심리 */}
+                {(trade.reasonTags.length > 0 || trade.emotion) && (
+                  <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                    {trade.reasonTags.map((tag) => (
+                      <Tag key={tag} label={tag} color="gray" />
+                    ))}
+                    {trade.emotion && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#F5F0FF] dark:bg-[#2A1D3D] text-[#8B5CF6]">
+                        {EMOTIONS.find((e) => e.label === trade.emotion)?.emoji}{" "}
+                        {trade.emotion}
                       </span>
-                    </div>
-
-                    {/* 날짜 · 계좌 */}
-                    <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mb-2">
-                      {formatDate(trade.date)} · {trade.account.brokerageCompany.name}
-                    </div>
-
-                    {/* 가격 · 수량 · 금액 */}
-                    <div className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
-                      {formatPrice(trade.price, country)} × {trade.quantity.toLocaleString()}주
-                      <span className="ml-2 font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
-                        = {formatPrice(totalAmount, country)}
-                      </span>
-                    </div>
-
-                    {/* 이유 태그 + 심리 */}
-                    {(trade.reasonTags.length > 0 || trade.emotion) && (
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                        {trade.reasonTags.map((tag) => (
-                          <Tag key={tag} label={tag} color="gray" />
-                        ))}
-                        {trade.emotion && (
-                          <span className="text-xs px-2 py-0.5 rounded-md bg-[#F5F0FF] dark:bg-[#2A1D3D] text-[#8B5CF6]">
-                            {EMOTIONS.find((e) => e.label === trade.emotion)?.emoji}{" "}
-                            {trade.emotion}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 메모 */}
-                    {trade.memo && (
-                      <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-2 line-clamp-2">
-                        💬 {trade.memo}
-                      </p>
                     )}
                   </div>
-                </div>
+                )}
+
+                {/* 메모 */}
+                {trade.memo && (
+                  <p className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mt-1 line-clamp-1">
+                    💬 {trade.memo}
+                  </p>
+                )}
               </Card>
             );
           })}
