@@ -91,7 +91,7 @@ export default function AccountDetailPage() {
 
   const [account, setAccount] = useState<AccountDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [quotes, setQuotes] = useState<Record<string, { price: number; change: number; changePercent: number }>>({});
+  const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [sectorTab, setSectorTab] = useState<"auto" | "manual">("auto");
 
@@ -104,9 +104,6 @@ export default function AccountDetailPage() {
   // 계좌 삭제 모달
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  // 현재가
-  const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
 
   // 종목 등록 모달
   const [holdingModal, setHoldingModal] = useState(false);
@@ -161,8 +158,8 @@ export default function AccountDetailPage() {
           const qRes = await fetch(`/api/market/quote?tickers=${tickers.join(",")}`);
           if (qRes.ok) {
             const qData = await qRes.json();
-            const map: Record<string, { price: number; change: number; changePercent: number }> = {};
-            (qData.quotes ?? []).forEach((q: { ticker: string; price: number; change: number; changePercent: number }) => {
+            const map: Record<string, QuoteResult> = {};
+            (qData.quotes ?? []).forEach((q: QuoteResult) => {
               map[q.ticker] = q;
             });
             setQuotes(map);

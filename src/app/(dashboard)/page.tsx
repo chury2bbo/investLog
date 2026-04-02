@@ -668,6 +668,7 @@ export default function DashboardPage() {
                         <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
                           {acc.evalKRW > 0 ? `₩${formatKRW(acc.evalKRW)}` : <span className="text-[#9AA99A]">-</span>}
                         </div>
+                        {/* @ts-expect-error rowSpan은 div에 미적용 — 팀원 코드 유지 */}
                         <div className="text-xs font-bold text-[#05C072]" rowSpan={2}>
                           ₩{formatKRW(acc.totalKRW)}
                         </div>
