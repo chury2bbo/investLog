@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { accountCode, cashKRW, cashUSD } = body;
+  const { accountCode, memo, cashKRW, cashUSD } = body;
 
   if (!accountCode) {
     return Response.json(
@@ -40,17 +40,25 @@ export async function POST(req: Request) {
     );
   }
 
-  const account = await prisma.investAccount.create({
-    data: {
-      userId: session.user.id,
-      accountCode,
-    },
-    include: {
-      brokerageCompany: { select: { code: true, name: true } },
-      holdings: true,
-      cashBalances: true,
-    },
-  });
+  let account;
+  try {
+    account = await prisma.investAccount.create({
+      data: {
+        userId: session.user.id,
+        accountCode,
+        memo: memo || null,
+      },
+      include: {
+        brokerageCompany: { select: { code: true, name: true } },
+        holdings: true,
+        cashBalances: true,
+      },
+    });
+  } catch (err: unknown) {
+    console.error("계좌 생성 에러:", err);
+    const message = err instanceof Error ? err.message : "알 수 없는 에러";
+    return Response.json({ error: message }, { status: 500 });
+  }
 
   // 예수금 생성 (입력된 경우만)
   const cashPromises = [];

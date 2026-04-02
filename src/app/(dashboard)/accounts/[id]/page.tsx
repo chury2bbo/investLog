@@ -95,6 +95,16 @@ export default function AccountDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // 종목 등록 모달
+  const [holdingModal, setHoldingModal] = useState(false);
+  const [hTicker, setHTicker] = useState("");
+  const [hName, setHName] = useState("");
+  const [hCountry, setHCountry] = useState("KR");
+  const [hAvgPrice, setHAvgPrice] = useState("");
+  const [hQuantity, setHQuantity] = useState("");
+  const [hSubmitting, setHSubmitting] = useState(false);
+  const [hError, setHError] = useState("");
+
   // ─── 데이터 로딩 ───────────────────────────────────────
 
   const fetchAccount = useCallback(async () => {
@@ -160,6 +170,57 @@ export default function AccountDetailPage() {
       /* 실패 */
     } finally {
       setCashSubmitting(false);
+    }
+  }
+
+  // ─── 종목 등록 처리 ────────────────────────────────────
+
+  function resetHoldingForm() {
+    setHTicker("");
+    setHName("");
+    setHCountry("KR");
+    setHAvgPrice("");
+    setHQuantity("");
+    setHError("");
+  }
+
+  async function handleAddHolding() {
+    if (!hTicker || !hName || !hAvgPrice || !hQuantity) {
+      setHError("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    setHSubmitting(true);
+    setHError("");
+
+    try {
+      const res = await fetch("/api/holdings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: parseInt(accountId, 10),
+          ticker: hTicker,
+          name: hName,
+          country: hCountry,
+          avgPrice: parseFloat(hAvgPrice),
+          quantity: parseInt(hQuantity, 10),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setHError(data.error || "등록에 실패했습니다.");
+        return;
+      }
+
+      setHoldingModal(false);
+      resetHoldingForm();
+      fetchAccount();
+    } catch {
+      setHError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setHSubmitting(false);
     }
   }
 
@@ -238,11 +299,16 @@ export default function AccountDetailPage() {
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">계좌 상세</p>
-          <h1 className="text-[26px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
-            {account.brokerageCompany.name}
-          </h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">계좌 상세</p>
+            <h1 className="text-[26px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+              {account.brokerageCompany.name}
+            </h1>
+          </div>
         </div>
         <Tag
           label={
@@ -304,7 +370,12 @@ export default function AccountDetailPage() {
       </div>
 
       {/* ── ① 보유 종목 리스트 ── */}
-      <SectionTitle title="보유 종목" />
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">보유 종목</span>
+        <Button size="sm" onClick={() => { resetHoldingForm(); setHoldingModal(true); }}>
+          + 종목 등록
+        </Button>
+      </div>
 
       {account.holdings.length === 0 ? (
         <EmptyState message="보유 종목이 없습니다." />
@@ -312,23 +383,32 @@ export default function AccountDetailPage() {
         <div className="space-y-2.5 mb-4">
           {account.holdings.map((h) => {
             const evalValue = h.avgPrice * h.quantity;
+            const isForeign = h.country !== "KR";
+            const unit = isForeign ? "$" : "₩";
+            const fmtPrice = (v: number) =>
+              isForeign
+                ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : `₩${v.toLocaleString()}`;
             return (
               <Card key={h.id}>
                 <div className="flex justify-between items-start mb-2.5">
                   <div>
-                    <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                      {h.name}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        {h.name}
+                      </span>
+                      <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
                     </div>
                     <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
-                      {h.ticker} · {h.quantity}주 · 평단 {h.avgPrice.toLocaleString()}원
+                      {h.ticker} · {h.quantity}주 · 평단 {fmtPrice(h.avgPrice)}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                      {evalValue.toLocaleString()}원
+                      {fmtPrice(evalValue)}
                     </div>
                     <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">
-                      {h.avgPrice.toLocaleString()}원
+                      {fmtPrice(h.avgPrice)}
                     </div>
                   </div>
                 </div>
@@ -388,7 +468,7 @@ export default function AccountDetailPage() {
                       {t.name}
                     </div>
                     <div className="text-[11px] text-[#9AA99A]">
-                      {t.quantity}주 · {t.price.toLocaleString()}원
+                      {t.quantity}주 · {t.ticker.length <= 6 && /^\d+$/.test(t.ticker) ? `₩${t.price.toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </div>
                   </div>
                 </div>
@@ -580,6 +660,110 @@ export default function AccountDetailPage() {
               : cashModal === "deposit"
                 ? "입금하기"
                 : "출금하기"}
+          </Button>
+        </div>
+      </BottomSheet>
+
+      {/* ── 종목 등록 바텀시트 ── */}
+      <BottomSheet
+        open={holdingModal}
+        onClose={() => setHoldingModal(false)}
+        title="보유 종목 등록"
+      >
+        <div className="space-y-5">
+          {/* 국내/해외 토글 */}
+          <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+            <button
+              type="button"
+              onClick={() => setHCountry("KR")}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                hCountry === "KR"
+                  ? "bg-[#05C072] text-white"
+                  : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+              }`}
+            >
+              국내
+            </button>
+            <button
+              type="button"
+              onClick={() => setHCountry("US")}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                hCountry === "US"
+                  ? "bg-[#4285F4] text-white"
+                  : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+              }`}
+            >
+              해외
+            </button>
+          </div>
+
+          {/* 종목명 / 티커 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                종목명 *
+              </label>
+              <input
+                type="text"
+                value={hName}
+                onChange={(e) => setHName(e.target.value)}
+                placeholder={hCountry === "KR" ? "삼성전자" : "NVIDIA"}
+                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                티커 *
+              </label>
+              <input
+                type="text"
+                value={hTicker}
+                onChange={(e) => setHTicker(e.target.value)}
+                placeholder={hCountry === "KR" ? "005930" : "NVDA"}
+                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+              />
+            </div>
+          </div>
+
+          {/* 평단가 / 수량 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                평단가 *
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={fmtNum(hAvgPrice)}
+                onChange={(e) => setHAvgPrice(stripNum(e.target.value, true))}
+                placeholder={hCountry === "KR" ? "72,000" : "120.50"}
+                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+                수량 *
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={fmtNum(hQuantity)}
+                onChange={(e) => setHQuantity(stripNum(e.target.value))}
+                placeholder="50"
+                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+              />
+            </div>
+          </div>
+
+          {/* 에러 */}
+          {hError && (
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">
+              {hError}
+            </div>
+          )}
+
+          <Button size="lg" onClick={handleAddHolding} disabled={hSubmitting}>
+            {hSubmitting ? "등록 중..." : "종목 등록"}
           </Button>
         </div>
       </BottomSheet>

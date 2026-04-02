@@ -106,9 +106,11 @@ export default function DashboardPage() {
 
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
-  const [usdRate, setUsdRate] = useState(1350);
+  // TODO: /api/market/quote API 완성 후 실시간 환율 조회로 교체
+  const [usdRate, setUsdRate] = useState(1400);
   const [loading, setLoading] = useState(true);
   const [staleQuote, setStaleQuote] = useState(false);
+  const [fxRefreshing, setFxRefreshing] = useState(false);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -169,6 +171,24 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ─── 환율 새로고침 ──────────────────────────────────────
+  // TODO: /api/market/quote API 완성 후 실제 환율 조회로 교체
+
+  async function refreshFx() {
+    setFxRefreshing(true);
+    try {
+      const res = await fetch("/api/market/quote?ticker=USDKRW");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.price) setUsdRate(data.price);
+      }
+    } catch {
+      /* 실패 */
+    } finally {
+      setFxRefreshing(false);
+    }
+  }
 
   // ─── 자산 계산 ─────────────────────────────────────────
 
@@ -335,14 +355,47 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── 섹션 1: 인사말 + 히어로 카드 ── */}
-      <div className="mb-6">
-        <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
-          안녕하세요, {userName}님 👋
-        </p>
-        <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8] mt-0.5">
-          내 투자 현황
-        </h1>
+      {/* ── 섹션 1: 인사말 + 환율 ── */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
+            안녕하세요, {userName}님 👋
+          </p>
+          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8] mt-0.5">
+            내 투자 현황
+          </h1>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <div className="text-right">
+            <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">USD/KRW</div>
+            <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+              {usdRate.toLocaleString()}
+            </div>
+          </div>
+          <button
+            onClick={refreshFx}
+            disabled={fxRefreshing}
+            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+            style={{ opacity: fxRefreshing ? 0.5 : 1 }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`text-[#6B7B6B] dark:text-[#7A8A7A] ${fxRefreshing ? "animate-spin" : ""}`}
+            >
+              <path d="M21 2v6h-6" />
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+              <path d="M3 22v-6h6" />
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* 히어로 그라디언트 카드 */}

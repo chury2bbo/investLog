@@ -343,9 +343,14 @@ export default function TradesPage() {
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
-          매매일지
-        </h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => window.history.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+            매매일지
+          </h1>
+        </div>
         <div className="hidden md:block">
           <Button size="sm" onClick={openModal}>
             + 매매 등록
