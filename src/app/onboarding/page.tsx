@@ -276,6 +276,7 @@ export default function OnboardingPage() {
   ]);
 
   const avgPriceRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const quantityRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const stockSearchRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const tradePriceRef = useRef<HTMLInputElement | null>(null);
   const [tradePriceLoading, setTradePriceLoading] = useState(false);
@@ -508,30 +509,34 @@ export default function OnboardingPage() {
 
   // ─── 제출 ──────────────────────────────────────────────
 
+  function buildAccountsPayload() {
+    return accounts.map((acc) => ({
+      accountCode: acc.accountCode,
+      cashBalances: [
+        ...(acc.cashKRW
+          ? [{ currency: "KRW", amount: parseFloat(acc.cashKRW.replace(/,/g, "")) }]
+          : []),
+        ...(acc.cashUSD
+          ? [{ currency: "USD", amount: parseFloat(acc.cashUSD.replace(/,/g, "")) }]
+          : []),
+      ],
+      holdings: acc.holdings.map((h) => ({
+        ticker: h.ticker,
+        name: h.name,
+        country: h.country,
+        avgPrice: h.avgPrice,
+        quantity: h.quantity,
+        sectorManual: h.sectorManual || undefined,
+        tags: h.tags.length > 0 ? h.tags : undefined,
+      })),
+    }));
+  }
+
   async function handleSubmit() {
     setSubmitting(true);
     try {
       const payload = {
-        accounts: accounts.map((acc) => ({
-          accountCode: acc.accountCode,
-          cashBalances: [
-            ...(acc.cashKRW
-              ? [{ currency: "KRW", amount: parseFloat(acc.cashKRW.replace(/,/g, "")) }]
-              : []),
-            ...(acc.cashUSD
-              ? [{ currency: "USD", amount: parseFloat(acc.cashUSD.replace(/,/g, "")) }]
-              : []),
-          ],
-          holdings: acc.holdings.map((h) => ({
-            ticker: h.ticker,
-            name: h.name,
-            country: h.country,
-            avgPrice: h.avgPrice,
-            quantity: h.quantity,
-            sectorManual: h.sectorManual || undefined,
-            tags: h.tags.length > 0 ? h.tags : undefined,
-          })),
-        })),
+        accounts: buildAccountsPayload(),
         trade:
           trade.ticker && trade.price && trade.quantity
             ? {
@@ -754,6 +759,7 @@ export default function OnboardingPage() {
                           수량
                         </label>
                         <input
+                          ref={(el) => { quantityRefs.current[accIdx] = el; }}
                           type="text"
                           inputMode="numeric"
                           value={fmtNum(getHoldingForm(accIdx).quantity)}
@@ -1158,31 +1164,41 @@ export default function OnboardingPage() {
               <Button
                 variant="secondary"
                 size="lg"
-                onClick={() => {
-                  // 건너뛰기 → 계좌/종목 초기화 후 Step 2로
-                  setAccounts([{
-                    accountCode: "",
-                    accountName: "",
-                    cashKRW: "",
-                    cashUSD: "",
-                    holdings: [],
-                  }]);
-                  setHoldingForms({});
-                  setStep(2);
+                onClick={async () => {
+                  await fetch("/api/onboarding/bulk", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ accounts: [], trade: undefined }),
+                  });
+                  router.push("/");
                 }}
+                disabled={submitting}
               >
                 건너뛰기
               </Button>
               <Button size="lg" onClick={() => {
+                  // 종목 선택 후 추가 버튼 없이 가격/수량 미입력인 경우 차단
                   const incomplete = accounts.findIndex((_, i) => {
                     const form = getHoldingForm(i);
                     return form.ticker && (!form.avgPrice || !form.quantity);
                   });
                   if (incomplete !== -1) {
                     const form = getHoldingForm(incomplete);
-                    showToast("입력 필요", `${form.name}의 ${!form.avgPrice ? "평단가" : "수량"}를 입력해주세요.`);
+                    const missingAvgPrice = !form.avgPrice;
+                    showToast("입력 필요", `${form.name}의 ${missingAvgPrice ? "평단가" : "수량"}를 입력해주세요.`);
+                    setTimeout(() => {
+                      if (missingAvgPrice) avgPriceRefs.current[incomplete]?.focus();
+                      else quantityRefs.current[incomplete]?.focus();
+                    }, 50);
                     return;
                   }
+                  // 추가 버튼을 누르지 않은 완성된 form은 자동으로 추가
+                  accounts.forEach((_, i) => {
+                    const form = getHoldingForm(i);
+                    if (form.ticker && form.avgPrice && form.quantity) {
+                      addHolding(i);
+                    }
+                  });
                   setStep(2);
                 }}>
                 다음
@@ -1201,11 +1217,16 @@ export default function OnboardingPage() {
                 variant="secondary"
                 size="lg"
                 onClick={async () => {
-                  await fetch("/api/onboarding/bulk", {
+                  const res = await fetch("/api/onboarding/bulk", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ accounts: [], trade: undefined }),
+                    body: JSON.stringify({ accounts: buildAccountsPayload(), trade: undefined }),
                   });
+                  if (!res.ok) {
+                    const err = await res.json();
+                    showToast("저장 오류", err.error ?? "저장에 실패했습니다.");
+                    return;
+                  }
                   router.push("/");
                 }}
                 disabled={submitting}
