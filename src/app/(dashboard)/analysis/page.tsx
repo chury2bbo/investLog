@@ -111,6 +111,10 @@ export default function AnalysisPage() {
   // 선택된 종목
   const [selected, setSelected] = useState<SearchResult | null>(null);
 
+  // 이전 분석 이력
+  const [prevAnalyses, setPrevAnalyses] = useState<{ ticker: string; name: string; country: string; createdAt: string }[]>([]);
+  const [showPrevAnalyses, setShowPrevAnalyses] = useState(false);
+
   // 데이터
   const [quote, setQuote] = useState<QuoteData | null>(null);
   const [summary, setSummary] = useState<SummaryData | null>(null);
@@ -165,11 +169,31 @@ export default function AnalysisPage() {
 
   // ─── 종목 선택 → 데이터 로딩 ─────────────────────────
 
+  function clearStock() {
+    setSelected(null);
+    setQuery("");
+    setResults([]);
+    setShowDropdown(false);
+    setQuote(null);
+    setSummary(null);
+    setReport(null);
+    setHistory([]);
+  }
+
   async function selectStock(stock: SearchResult) {
     setSelected(stock);
-    setQuery(stock.name);
+    setQuery("");
     setShowDropdown(false);
     setReport(null);
+
+    // 사용자 분석 이력 기록
+    fetch("/api/analysis/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticker: stock.ticker, name: stock.name, country: stock.country ?? "KR" }),
+    }).then(async (r) => {
+      if (!r.ok) console.error("[history POST]", await r.json());
+    }).catch((e) => console.error("[history POST error]", e));
 
     // 현재가 조회
     setQuoteLoading(true);
@@ -222,7 +246,7 @@ export default function AnalysisPage() {
     if (!selected) return;
     setReportLoading(true);
     try {
-      const res = await fetch(`/api/analysis/report?ticker=${selected.ticker}`);
+      const res = await fetch(`/api/analysis/report?ticker=${selected.ticker}&name=${encodeURIComponent(selected.name)}&country=${selected.country ?? "KR"}`);
       if (res.ok) {
         const d = await res.json();
         setReport(d.report ?? null);
@@ -269,39 +293,116 @@ export default function AnalysisPage() {
         </h1>
       </div>
 
+      {/* ── 이전 분석 불러오기 ── */}
+      {!selected && (
+        <div className="mb-3">
+          <button
+            type="button"
+            onClick={async () => {
+              if (showPrevAnalyses) {
+                setShowPrevAnalyses(false);
+                return;
+              }
+              try {
+                const res = await fetch("/api/analysis/history");
+                if (res.ok) {
+                  const data = await res.json();
+                  setPrevAnalyses(Array.isArray(data) ? data : []);
+                }
+              } catch { /* ignore */ }
+              setShowPrevAnalyses(true);
+            }}
+            className="text-sm font-semibold cursor-pointer"
+            style={{ color: "#05C072" }}
+          >
+            {showPrevAnalyses ? "닫기" : "이전 분석 불러오기 →"}
+          </button>
+
+          {showPrevAnalyses && prevAnalyses.length > 0 && (
+            <div className="mt-2 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] overflow-hidden">
+              {prevAnalyses.map((item) => (
+                <button
+                  key={item.ticker}
+                  type="button"
+                  onClick={() => {
+                    selectStock({ ticker: item.ticker, name: item.name, market: "", country: item.country });
+                    setShowPrevAnalyses(false);
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0 cursor-pointer"
+                >
+                  <div>
+                    <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{item.name}</span>
+                    <span className="ml-2 text-xs text-[#9AA99A]">{item.ticker}</span>
+                  </div>
+                  <Tag label={item.country === "KR" ? "국내" : "해외"} color={item.country === "KR" ? "green" : "blue"} />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {showPrevAnalyses && prevAnalyses.length === 0 && (
+            <p className="mt-2 text-xs text-[#9AA99A]">이전 분석 이력이 없습니다.</p>
+          )}
+        </div>
+      )}
+
       {/* ── ① 종목 검색 ── */}
       <div ref={searchRef} className="relative mb-6">
-        <div className="flex items-center gap-2 border-b-2 border-[#05C072] pb-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => results.length > 0 && setShowDropdown(true)}
-            placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)"
-            className="flex-1 text-sm bg-transparent outline-none text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-          />
-          {searching && <LoadingSpinner size={16} />}
-        </div>
-
-        {showDropdown && results.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 max-h-64 overflow-y-auto">
-            {results.map((r) => (
-              <button
-                key={`${r.ticker}-${r.country}`}
-                onClick={() => selectStock(r)}
-                className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0"
-              >
-                <div>
-                  <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{r.name}</span>
-                  <span className="ml-2 text-xs text-[#9AA99A]">{r.ticker}</span>
-                </div>
-                <Tag label={r.country === "KR" ? "국내" : "해외"} color={r.country === "KR" ? "green" : "blue"} />
-              </button>
-            ))}
+        {selected ? (
+          /* 선택된 종목 표시 */
+          <div className="flex items-center justify-between pb-2 border-b-2 border-[#05C072]">
+            <div className="flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+              </svg>
+              <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{selected.name}</span>
+              <span className="text-xs text-[#9AA99A]">{selected.ticker}</span>
+              <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
+            </div>
+            <button
+              type="button"
+              onClick={clearStock}
+              className="text-xl leading-none text-[#9AA99A] hover:text-[#F04452] transition-colors"
+            >
+              ×
+            </button>
           </div>
+        ) : (
+          /* 검색 입력 */
+          <>
+            <div className="flex items-center gap-2 border-b-2 border-[#05C072] pb-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => results.length > 0 && setShowDropdown(true)}
+                placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)"
+                className="flex-1 text-sm bg-transparent outline-none text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+              />
+              {searching && <LoadingSpinner size={16} />}
+            </div>
+
+            {showDropdown && results.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 max-h-64 overflow-y-auto">
+                {results.map((r) => (
+                  <button
+                    key={`${r.ticker}-${r.country}`}
+                    onClick={() => selectStock(r)}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0"
+                  >
+                    <div>
+                      <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{r.name}</span>
+                      <span className="ml-2 text-xs text-[#9AA99A]">{r.ticker}</span>
+                    </div>
+                    <Tag label={r.country === "KR" ? "국내" : "해외"} color={r.country === "KR" ? "green" : "blue"} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -555,11 +656,11 @@ export default function AnalysisPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl p-3 bg-[#E6F9F1] dark:bg-[#0D2A1D]">
                     <div className="text-[11px] text-[#05C072] mb-1">적정 매수가</div>
-                    <div className="text-base font-bold text-[#05C072]">{report.targetBuy}</div>
+                    <div className="text-base font-bold text-[#05C072]">{report.targetBuy.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
                   <div className="rounded-xl p-3 bg-[#FEE8EA] dark:bg-[#3D1519]">
                     <div className="text-[11px] text-[#F04452] mb-1">적정 매도가</div>
-                    <div className="text-base font-bold text-[#F04452]">{report.targetSell}</div>
+                    <div className="text-base font-bold text-[#F04452]">{report.targetSell.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
                 </div>
               </Card>

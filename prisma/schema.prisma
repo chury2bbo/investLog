@@ -29,6 +29,7 @@ model User {
   image          String?
   sessions       Session[]
   investAccounts InvestAccount[]
+  analysisLogs   UserAnalysisLog[]
   oauthAccounts  Account[]
 }
 
@@ -172,6 +173,19 @@ model TickerAnalysisCache {
   updatedAt       DateTime @updatedAt
 
   @@map("ticker_analysis_cache")
+}
+
+model UserAnalysisLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  ticker    String
+  name      String
+  country   String   @default("KR")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("user_analysis_logs")
 }
 
 model ApiUsageLog {
