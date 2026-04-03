@@ -72,10 +72,12 @@ function StockSearch({
   onSelect,
   onClear,
   selected,
+  inputRef,
 }: {
   onSelect: (result: SearchResult) => void;
   onClear?: () => void;
   selected?: { name: string; ticker: string };
+  inputRef?: (el: HTMLInputElement | null) => void;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -156,6 +158,7 @@ function StockSearch({
       </label>
       <div className="flex items-center gap-2">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
@@ -273,6 +276,7 @@ export default function OnboardingPage() {
   ]);
 
   const avgPriceRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const stockSearchRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const tradePriceRef = useRef<HTMLInputElement | null>(null);
   const [tradePriceLoading, setTradePriceLoading] = useState(false);
 
@@ -407,6 +411,13 @@ export default function OnboardingPage() {
   }
 
   async function selectStock(accIndex: number, result: SearchResult) {
+    const isDuplicate = accounts[accIndex]?.holdings.some((h) => h.ticker === result.ticker);
+    if (isDuplicate) {
+      showToast("중복 종목", `${result.name}(${result.ticker})은 이미 추가된 종목입니다.`);
+      setTimeout(() => stockSearchRefs.current[accIndex]?.focus(), 50);
+      return;
+    }
+
     setHoldingForms((prev) => ({
       ...prev,
       [accIndex]: {
@@ -691,6 +702,7 @@ export default function OnboardingPage() {
                     [accIdx]: { ticker: "", name: "", country: "", avgPrice: "", quantity: "", sectorManual: "", tags: [] },
                   }))}
                   selected={getHoldingForm(accIdx).ticker ? { name: getHoldingForm(accIdx).name, ticker: getHoldingForm(accIdx).ticker } : undefined}
+                  inputRef={(el) => { stockSearchRefs.current[accIdx] = el; }}
                 />
 
                 {/* 선택된 종목 표시 */}
