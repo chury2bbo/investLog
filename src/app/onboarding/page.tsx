@@ -52,40 +52,30 @@ interface TradeItem {
   reasonTags: string[];
 }
 
-// ─── 증권사 목록 ─────────────────────────────────────────
-
-const BROKERAGES = [
-  { code: "KI", name: "키움증권" },
-  { code: "MI", name: "미래에셋증권" },
-  { code: "SA", name: "삼성증권" },
-  { code: "NH", name: "NH투자증권" },
-  { code: "KB", name: "KB증권" },
-  { code: "HI", name: "한국투자증권" },
-  { code: "TO", name: "토스증권" },
-  { code: "SH", name: "신한투자증권" },
-  { code: "DA", name: "대신증권" },
-  { code: "EB", name: "이베스트투자증권" },
-];
 
 const REASON_TAGS = [
-  "실적 호조",
-  "저평가",
-  "기술적 반등",
-  "배당",
-  "성장주",
-  "FOMO",
-  "분할매수",
-  "손절",
-  "익절",
-  "리밸런싱",
+  { label: "실적호조", desc: "실적 개선 기대" },
+  { label: "저평가", desc: "내재가치 대비 할인" },
+  { label: "기술적분석", desc: "차트·지표 기반" },
+  { label: "배당목적", desc: "배당 수익 목적" },
+  { label: "성장주", desc: "장기 성장 기대" },
+  { label: "테마·트렌드", desc: "산업 트렌드 수혜" },
+  { label: "분할매수", desc: "나눠서 매수" },
+  { label: "포트리밸런싱", desc: "비중 조절" },
+  { label: "뉴스·공시", desc: "뉴스/공시 반응" },
+  { label: "지인추천", desc: "추천 받아 매수" },
 ];
 
 // ─── 종목 검색 컴포넌트 ──────────────────────────────────
 
 function StockSearch({
   onSelect,
+  onClear,
+  selected,
 }: {
   onSelect: (result: SearchResult) => void;
+  onClear?: () => void;
+  selected?: { name: string; ticker: string };
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -120,7 +110,7 @@ function StockSearch({
         );
         if (res.ok) {
           const data = await res.json();
-          setResults(data.results ?? []);
+          setResults(Array.isArray(data) ? data : []);
           setOpen(true);
         }
       } catch {
@@ -129,6 +119,31 @@ function StockSearch({
         setSearching(false);
       }
     }, 300);
+  }
+
+  // 선택된 종목이 있으면 이름+티커+X 표시
+  if (selected?.ticker) {
+    return (
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: "#6B7B6B" }}>
+          종목 검색
+        </label>
+        <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: "#D4DDD4" }}>
+          <div>
+            <span className="text-sm font-semibold" style={{ color: "#1A221A" }}>{selected.name}</span>
+            <span className="text-xs ml-2" style={{ color: "#9AA99A" }}>{selected.ticker}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => { onClear?.(); }}
+            className="text-lg leading-none hover:text-[#F04452] transition-colors"
+            style={{ color: "#9AA99A" }}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -208,19 +223,63 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  // 온보딩 완료 여부 체크 — 이미 완료했으면 대시보드로 리다이렉트
+  useEffect(() => {
+    fetch("/api/user/me")
+      .then((res) => res.ok ? res.json() : { onboardingDone: false })
+      .then((data) => {
+        if (data.onboardingDone) {
+          router.replace("/");
+        } else {
+          setChecking(false);
+        }
+      })
+      .catch(() => setChecking(false));
+  }, [router]);
+
+  // 토스트
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function showToast(title: string, message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
+
+  // 증권사 목록
+  const [brokerages, setBrokerages] = useState<{ code: string; name: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/brokerages")
+      .then((res) => res.ok ? res.json() : [])
+      .then((data) => setBrokerages(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  // 드롭다운 열림 상태 (계좌별 증권사 / Step 2 계좌)
+  const [brokerageDropOpen, setBrokerageDropOpen] = useState<number | null>(null);
+  const [tradeAccountDropOpen, setTradeAccountDropOpen] = useState(false);
 
   // Step 1 — 계좌 & 종목
   const [accounts, setAccounts] = useState<AccountItem[]>([
     {
-      accountCode: BROKERAGES[0].code,
-      accountName: BROKERAGES[0].name,
+      accountCode: "",
+      accountName: "",
       cashKRW: "",
       cashUSD: "",
       holdings: [],
     },
   ]);
 
+  const avgPriceRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const tradePriceRef = useRef<HTMLInputElement | null>(null);
+  const [tradePriceLoading, setTradePriceLoading] = useState(false);
+
   // 종목 추가 폼 상태 (계좌별)
+  const [priceLoadings, setPriceLoadings] = useState<Record<number, boolean>>({});
+  const cashKRWRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
   const [holdingForms, setHoldingForms] = useState<
     Record<
       number,
@@ -231,14 +290,14 @@ export default function OnboardingPage() {
         avgPrice: string;
         quantity: string;
         sectorManual: string;
-        tags: string;
+        tags: string[];
       }
     >
   >({});
 
   // Step 2 — 매매 기록
   const [trade, setTrade] = useState<TradeItem>({
-    accountIndex: 0,
+    accountIndex: -1,
     ticker: "",
     name: "",
     type: "BUY",
@@ -253,8 +312,8 @@ export default function OnboardingPage() {
     setAccounts((prev) => [
       ...prev,
       {
-        accountCode: BROKERAGES[0].code,
-        accountName: BROKERAGES[0].name,
+        accountCode: "",
+        accountName: "",
         cashKRW: "",
         cashUSD: "",
         holdings: [],
@@ -271,7 +330,15 @@ export default function OnboardingPage() {
       prev.map((acc, i) => {
         if (i !== index) return acc;
         if (field === "accountCode") {
-          const brokerage = BROKERAGES.find((b) => b.code === value);
+          const isDuplicate = prev.some((a, j) => j !== index && a.accountCode === value);
+          if (isDuplicate) {
+            const brokerage = brokerages.find((b) => b.code === value);
+            showToast("중복 증권사", `${brokerage?.name ?? value}은 이미 추가된 계좌입니다.`);
+            setBrokerageDropOpen(null);
+            return { ...acc, accountCode: "", accountName: "" };
+          }
+          const brokerage = brokerages.find((b) => b.code === value);
+          setTimeout(() => cashKRWRefs.current[index]?.focus(), 50);
           return {
             ...acc,
             accountCode: value,
@@ -294,7 +361,7 @@ export default function OnboardingPage() {
         avgPrice: "",
         quantity: "",
         sectorManual: "",
-        tags: "",
+        tags: [],
       }
     );
   }
@@ -310,7 +377,36 @@ export default function OnboardingPage() {
     }));
   }
 
-  function selectStock(accIndex: number, result: SearchResult) {
+  async function selectTradeStock(result: SearchResult) {
+    setTrade((prev) => ({ ...prev, ticker: result.ticker, name: result.name, price: "" }));
+    setTradePriceLoading(true);
+    try {
+      const res = await fetch(`/api/market/quote?tickers=${encodeURIComponent(result.ticker)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const quote = data.quotes?.[0] ?? null;
+        if (quote?.price) {
+          setTrade((prev) => ({ ...prev, price: String(quote.price) }));
+        }
+      }
+    } catch {
+      /* 현재가 조회 실패 시 수동 입력 */
+    } finally {
+      setTradePriceLoading(false);
+      setTimeout(() => tradePriceRef.current?.focus(), 50);
+    }
+  }
+
+  function toggleHoldingTag(accIndex: number, tag: string) {
+    const current = getHoldingForm(accIndex).tags;
+    const next = current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag];
+    setHoldingForms((prev) => ({
+      ...prev,
+      [accIndex]: { ...getHoldingForm(accIndex), tags: next },
+    }));
+  }
+
+  async function selectStock(accIndex: number, result: SearchResult) {
     setHoldingForms((prev) => ({
       ...prev,
       [accIndex]: {
@@ -318,13 +414,43 @@ export default function OnboardingPage() {
         ticker: result.ticker,
         name: result.name,
         country: result.country,
+        avgPrice: "",
       },
     }));
+
+    setPriceLoadings((prev) => ({ ...prev, [accIndex]: true }));
+    try {
+      const res = await fetch(`/api/market/quote?tickers=${encodeURIComponent(result.ticker)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const quote = data.quotes?.[0] ?? null;
+        if (quote?.price) {
+          setHoldingForms((prev) => ({
+            ...prev,
+            [accIndex]: {
+              ...prev[accIndex],
+              avgPrice: String(quote.price),
+            },
+          }));
+        }
+      }
+    } catch {
+      /* 현재가 조회 실패 시 수동 입력 */
+    } finally {
+      setPriceLoadings((prev) => ({ ...prev, [accIndex]: false }));
+      setTimeout(() => avgPriceRefs.current[accIndex]?.focus(), 50);
+    }
   }
 
   function addHolding(accIndex: number) {
     const form = getHoldingForm(accIndex);
     if (!form.ticker || !form.avgPrice || !form.quantity) return;
+
+    const isDuplicate = accounts[accIndex]?.holdings.some((h) => h.ticker === form.ticker);
+    if (isDuplicate) {
+      showToast("중복 종목", `${form.name}(${form.ticker})은 이미 추가된 종목입니다.`);
+      return;
+    }
 
     const newHolding: HoldingItem = {
       ticker: form.ticker,
@@ -333,9 +459,7 @@ export default function OnboardingPage() {
       avgPrice: parseFloat(form.avgPrice.replace(/,/g, "")),
       quantity: parseInt(form.quantity.replace(/,/g, ""), 10),
       sectorManual: form.sectorManual,
-      tags: form.tags
-        ? form.tags.split(",").map((t) => t.trim()).filter(Boolean)
-        : [],
+      tags: form.tags,
     };
 
     setAccounts((prev) =>
@@ -356,7 +480,7 @@ export default function OnboardingPage() {
         avgPrice: "",
         quantity: "",
         sectorManual: "",
-        tags: "",
+        tags: [],
       },
     }));
   }
@@ -475,20 +599,36 @@ export default function OnboardingPage() {
                 >
                   증권사
                 </label>
-                <select
-                  value={acc.accountCode}
-                  onChange={(e) =>
-                    updateAccount(accIdx, "accountCode", e.target.value)
-                  }
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b appearance-none"
+                <button
+                  type="button"
+                  onClick={() => setBrokerageDropOpen(brokerageDropOpen === accIdx ? null : accIdx)}
+                  className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b cursor-pointer"
                   style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
                 >
-                  {BROKERAGES.map((b) => (
-                    <option key={b.code} value={b.code}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
+                  <span>{brokerages.find((b) => b.code === acc.accountCode)?.name ?? "증권사를 선택하세요"}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: brokerageDropOpen === accIdx ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                {brokerageDropOpen === accIdx && (
+                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] bg-white shadow-lg">
+                    {brokerages.map((b) => (
+                      <button
+                        key={b.code}
+                        type="button"
+                        onClick={() => { updateAccount(accIdx, "accountCode", b.code); setBrokerageDropOpen(null); }}
+                        className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
+                        style={{
+                          backgroundColor: acc.accountCode === b.code ? "#E6F9F1" : "transparent",
+                          color: acc.accountCode === b.code ? "#05C072" : "#1A221A",
+                          fontWeight: acc.accountCode === b.code ? 600 : 400,
+                          borderBottom: "1px solid #F0F4F0",
+                        }}
+                      >
+                        <span>{b.name}</span>
+                        {acc.accountCode === b.code && <span className="text-[#05C072]">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* 예수금 */}
@@ -501,6 +641,7 @@ export default function OnboardingPage() {
                     예수금 (KRW)
                   </label>
                   <input
+                    ref={(el) => { cashKRWRefs.current[accIdx] = el; }}
                     type="text"
                     inputMode="numeric"
                     value={fmtNum(acc.cashKRW)}
@@ -508,7 +649,8 @@ export default function OnboardingPage() {
                       updateAccount(accIdx, "cashKRW", stripNum(e.target.value))
                     }
                     placeholder="선택사항"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b"
+                    disabled={!acc.accountCode}
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b disabled:opacity-40"
                     style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
                   />
                 </div>
@@ -527,7 +669,8 @@ export default function OnboardingPage() {
                       updateAccount(accIdx, "cashUSD", stripNum(e.target.value, true))
                     }
                     placeholder="선택사항"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b"
+                    disabled={!acc.accountCode}
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b disabled:opacity-40"
                     style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
                   />
                 </div>
@@ -538,11 +681,16 @@ export default function OnboardingPage() {
 
               {/* 종목 검색 & 추가 */}
               <div
-                className="rounded-xl p-4 mb-3"
+                className={`rounded-xl p-4 mb-3 relative ${!acc.accountCode ? "opacity-40 pointer-events-none" : ""}`}
                 style={{ backgroundColor: "#F5F7F5" }}
               >
                 <StockSearch
                   onSelect={(result) => selectStock(accIdx, result)}
+                  onClear={() => setHoldingForms((prev) => ({
+                    ...prev,
+                    [accIdx]: { ticker: "", name: "", country: "", avgPrice: "", quantity: "", sectorManual: "", tags: [] },
+                  }))}
+                  selected={getHoldingForm(accIdx).ticker ? { name: getHoldingForm(accIdx).name, ticker: getHoldingForm(accIdx).ticker } : undefined}
                 />
 
                 {/* 선택된 종목 표시 */}
@@ -570,13 +718,15 @@ export default function OnboardingPage() {
                           평단가
                         </label>
                         <input
+                          ref={(el) => { avgPriceRefs.current[accIdx] = el; }}
                           type="text"
                           inputMode="numeric"
                           value={fmtNum(getHoldingForm(accIdx).avgPrice)}
                           onChange={(e) =>
                             updateHoldingForm(accIdx, "avgPrice", stripNum(e.target.value, true))
                           }
-                          placeholder="72,000"
+                          placeholder={priceLoadings[accIdx] ? "조회 중..." : "72,000"}
+                          disabled={priceLoadings[accIdx]}
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
                           style={{
                             borderColor: "#D4DDD4",
@@ -634,26 +784,31 @@ export default function OnboardingPage() {
                           }}
                         />
                       </div>
-                      <div>
-                        <label
-                          className="block text-xs font-medium mb-1"
-                          style={{ color: "#6B7B6B" }}
-                        >
-                          태그
-                        </label>
-                        <input
-                          type="text"
-                          value={getHoldingForm(accIdx).tags}
-                          onChange={(e) =>
-                            updateHoldingForm(accIdx, "tags", e.target.value)
-                          }
-                          placeholder="쉼표로 구분"
-                          className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-                          style={{
-                            borderColor: "#D4DDD4",
-                            color: "#1A221A",
-                          }}
-                        />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium mb-2" style={{ color: "#6B7B6B" }}>
+                        태그
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {REASON_TAGS.map((tag) => (
+                          <button
+                            key={tag.label}
+                            type="button"
+                            onClick={() => toggleHoldingTag(accIdx, tag.label)}
+                            className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              getHoldingForm(accIdx).tags.includes(tag.label)
+                                ? "bg-[#05C072] text-white"
+                                : "bg-[#E8EEE8] text-[#6B7B6B] hover:bg-[#D4DDD4]"
+                            }`}
+                            title={tag.desc}
+                          >
+                            {tag.label}
+                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1A221A] text-white text-[10px] px-2 py-1 rounded-md z-10">
+                              {tag.desc}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -737,31 +892,57 @@ export default function OnboardingPage() {
 
         <Card>
           {/* 계좌 선택 */}
-          <div className="mb-4">
-            <label
-              className="block text-xs font-medium mb-1"
-              style={{ color: "#6B7B6B" }}
-            >
-              계좌
-            </label>
-            <select
-              value={trade.accountIndex}
-              onChange={(e) =>
-                setTrade((prev) => ({
-                  ...prev,
-                  accountIndex: parseInt(e.target.value, 10),
-                }))
-              }
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b appearance-none"
-              style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
-            >
-              {accounts.map((acc, i) => (
-                <option key={i} value={i}>
-                  {acc.accountName} (계좌 {i + 1})
-                </option>
-              ))}
-            </select>
-          </div>
+          {(() => {
+            const validAccounts = accounts
+              .map((acc, i) => ({ acc, i }))
+              .filter(({ acc }) => acc.accountCode !== "");
+            return (
+              <div className="mb-4">
+                <label className="block text-xs font-medium mb-1" style={{ color: "#6B7B6B" }}>
+                  계좌
+                </label>
+                <button
+                  type="button"
+                  onClick={() => validAccounts.length > 0 && setTradeAccountDropOpen(!tradeAccountDropOpen)}
+                  className={`w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b ${validAccounts.length === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                  style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                >
+                  <span style={{ color: trade.accountIndex === -1 ? "#9AA99A" : "#1A221A" }}>
+                    {validAccounts.length === 0
+                      ? "등록된 계좌가 없습니다"
+                      : trade.accountIndex === -1
+                      ? "계좌를 선택하세요"
+                      : `${accounts[trade.accountIndex]?.accountName} (계좌 ${trade.accountIndex + 1})`}
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: tradeAccountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                {tradeAccountDropOpen && validAccounts.length > 0 && (
+                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] bg-white shadow-lg">
+                    {validAccounts.map(({ acc, i }) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => { setTrade((prev) => ({ ...prev, accountIndex: i })); setTradeAccountDropOpen(false); }}
+                        className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
+                        style={{
+                          backgroundColor: trade.accountIndex === i ? "#E6F9F1" : "transparent",
+                          color: trade.accountIndex === i ? "#05C072" : "#1A221A",
+                          fontWeight: trade.accountIndex === i ? 600 : 400,
+                          borderBottom: "1px solid #F0F4F0",
+                        }}
+                      >
+                        <span>{acc.accountName} (계좌 {i + 1})</span>
+                        {trade.accountIndex === i && <span className="text-[#05C072]">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* 계좌 미선택 시 하위 영역 비활성화 */}
+          <div className={trade.accountIndex === -1 || accounts.length === 0 ? "opacity-40 pointer-events-none" : ""}>
 
           {/* 매수/매도 토글 */}
           <div className="flex gap-2 mb-4">
@@ -788,22 +969,10 @@ export default function OnboardingPage() {
           {/* 종목 검색 */}
           <div className="mb-4">
             <StockSearch
-              onSelect={(result) =>
-                setTrade((prev) => ({
-                  ...prev,
-                  ticker: result.ticker,
-                  name: result.name,
-                }))
-              }
+              onSelect={(result) => selectTradeStock(result)}
+              onClear={() => setTrade((prev) => ({ ...prev, ticker: "", name: "", price: "", quantity: "", reasonTags: [] }))}
+              selected={trade.ticker ? { name: trade.name, ticker: trade.ticker } : undefined}
             />
-            {trade.ticker && (
-              <div className="flex items-center gap-2 mt-2">
-                <Tag label={trade.name} color="green" />
-                <span className="text-xs" style={{ color: "#9AA99A" }}>
-                  {trade.ticker}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* 가격 & 수량 */}
@@ -816,13 +985,15 @@ export default function OnboardingPage() {
                 가격
               </label>
               <input
+                ref={tradePriceRef}
                 type="text"
                 inputMode="numeric"
                 value={fmtNum(trade.price)}
                 onChange={(e) =>
                   setTrade((prev) => ({ ...prev, price: stripNum(e.target.value, true) }))
                 }
-                placeholder="72,000"
+                placeholder={tradePriceLoading ? "조회 중..." : "72,000"}
+                disabled={tradePriceLoading}
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b"
                 style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
               />
@@ -861,16 +1032,16 @@ export default function OnboardingPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {REASON_TAGS.map((tag) => {
-                const selected = trade.reasonTags.includes(tag);
+                const selected = trade.reasonTags.includes(tag.label);
                 return (
                   <button
-                    key={tag}
+                    key={tag.label}
                     onClick={() =>
                       setTrade((prev) => ({
                         ...prev,
                         reasonTags: selected
-                          ? prev.reasonTags.filter((t) => t !== tag)
-                          : [...prev.reasonTags, tag],
+                          ? prev.reasonTags.filter((t) => t !== tag.label)
+                          : [...prev.reasonTags, tag.label],
                       }))
                     }
                     className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
@@ -882,12 +1053,14 @@ export default function OnboardingPage() {
                         : "1px solid transparent",
                     }}
                   >
-                    {tag}
+                    {tag.label}
                   </button>
                 );
               })}
             </div>
           </div>
+
+          </div>{/* 비활성화 wrapper 끝 */}
         </Card>
       </>
     );
@@ -895,11 +1068,33 @@ export default function OnboardingPage() {
 
   // ─── 메인 렌더 ─────────────────────────────────────────
 
+  if (checking) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#F5F7F5" }}>
+        <LoadingSpinner size={32} />
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen flex flex-col items-center"
       style={{ backgroundColor: "#F5F7F5" }}
     >
+      {/* 토스트 */}
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
+        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
+          <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
+        </div>
+        <button onClick={() => setToast((p) => ({ ...p, visible: false }))} className="text-white/60 hover:text-white transition-colors shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
       {/* 상단 헤더 */}
       <div
         className="w-full"
@@ -952,14 +1147,32 @@ export default function OnboardingPage() {
                 variant="secondary"
                 size="lg"
                 onClick={() => {
-                  // 건너뛰기 → 빈 상태로 바로 제출
-                  setAccounts([]);
+                  // 건너뛰기 → 계좌/종목 초기화 후 Step 2로
+                  setAccounts([{
+                    accountCode: "",
+                    accountName: "",
+                    cashKRW: "",
+                    cashUSD: "",
+                    holdings: [],
+                  }]);
+                  setHoldingForms({});
                   setStep(2);
                 }}
               >
                 건너뛰기
               </Button>
-              <Button size="lg" onClick={() => setStep(2)}>
+              <Button size="lg" onClick={() => {
+                  const incomplete = accounts.findIndex((_, i) => {
+                    const form = getHoldingForm(i);
+                    return form.ticker && (!form.avgPrice || !form.quantity);
+                  });
+                  if (incomplete !== -1) {
+                    const form = getHoldingForm(incomplete);
+                    showToast("입력 필요", `${form.name}의 ${!form.avgPrice ? "평단가" : "수량"}를 입력해주세요.`);
+                    return;
+                  }
+                  setStep(2);
+                }}>
                 다음
               </Button>
             </>
@@ -975,7 +1188,14 @@ export default function OnboardingPage() {
               <Button
                 variant="secondary"
                 size="lg"
-                onClick={handleSubmit}
+                onClick={async () => {
+                  await fetch("/api/onboarding/bulk", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ accounts: [], trade: undefined }),
+                  });
+                  router.push("/");
+                }}
                 disabled={submitting}
               >
                 건너뛰기
