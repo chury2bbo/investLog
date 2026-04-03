@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
@@ -178,6 +178,35 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { status } = useSession();
+  const [checked, setChecked] = useState(false);
+
+  // 온보딩 미완료 시 온보딩으로 리다이렉트
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    fetch("/api/user/me")
+      .then((res) => res.ok ? res.json() : { onboardingDone: true })
+      .then((data) => {
+        if (!data.onboardingDone) {
+          router.replace("/onboarding");
+        } else {
+          setChecked(true);
+        }
+      })
+      .catch(() => setChecked(true));
+  }, [status, router]);
+
+  // 체크 완료 전에는 빈 화면 (깜빡임 방지)
+  if (status === "loading" || !checked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7F5] dark:bg-[#0D1210]">
+        <div className="w-8 h-8 border-3 border-[#05C072] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-[#F5F7F5] dark:bg-[#0D1210]">
       <IconSidebar />

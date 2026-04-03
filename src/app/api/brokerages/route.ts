@@ -13,5 +13,12 @@ export async function GET() {
     orderBy: { name: "asc" },
   });
 
-  return Response.json(brokerages);
+  const TOP5 = ["미래에셋증권", "삼성증권", "KB증권", "NH투자증권", "키움증권"];
+
+  const sorted = [
+    ...TOP5.flatMap((top) => brokerages.filter((b) => b.name.includes(top))),
+    ...brokerages.filter((b) => !TOP5.some((top) => b.name.includes(top))),
+  ];
+
+  return Response.json(sorted);
 }
