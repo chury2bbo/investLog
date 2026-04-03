@@ -469,7 +469,7 @@ export default function DashboardPage() {
             style={{ background: "rgba(255,255,255,0.2)" }}
           >
             {dailyPositive ? "+" : ""}
-            {summary.dailyPnl.toLocaleString()}원{" "}
+            {Math.floor(summary.dailyPnl).toLocaleString()}원{" "}
             {dailyPositive ? "+" : ""}
             {summary.dailyPnlRate.toFixed(2)}%
           </span>

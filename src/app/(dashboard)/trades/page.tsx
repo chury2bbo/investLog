@@ -322,6 +322,7 @@ export default function TradesPage() {
   async function loadPrevTrade(trade: { ticker: string; name: string }) {
     setFormTicker(trade.ticker);
     setFormName(trade.name);
+    setFormCountry(/^\d{6}$/.test(trade.ticker) ? "KR" : "US");
     setShowPrevTrades(false);
     setFormPriceLoading(true);
     try {

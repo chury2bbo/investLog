@@ -449,6 +449,15 @@ export default function AccountDetailPage() {
   });
   const totalKRW = cashKRW + cashUSD * usdRate + evalKRW + evalUSD * usdRate;
 
+  // 총 투자금 (원화 환산) + 수익률
+  let totalInvested = 0;
+  account.holdings.forEach((h) => {
+    const isForeign = h.country !== "KR";
+    totalInvested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
+  });
+  const totalEvalKRW = evalKRW + evalUSD * usdRate;
+  const totalPnl = totalEvalKRW - totalInvested;
+  const totalPnlRate = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
 
   // ─── 렌더 ──────────────────────────────────────────────
 
@@ -482,20 +491,41 @@ export default function AccountDetailPage() {
 
       {/* ── ② 자산 요약 카드 ── */}
       <div
-        className="rounded-[20px] p-5 mb-4"
+        className="rounded-[20px] p-5 mb-4 relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #05C072, #34D399)",
+          background: "linear-gradient(135deg, #027A47 0%, #05C072 60%, #34D399 100%)",
         }}
       >
-        <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-          합산 (원화)
-        </div>
-        <div className="text-[28px] font-extrabold text-white tracking-tight">
-          ₩{Math.floor(totalKRW).toLocaleString()}
+        {/* 데코 — 오른쪽 상단 밝은 영역 */}
+        <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} />
+
+        <div className="relative flex justify-between items-start">
+          <div>
+            <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+              합산 (원화)
+            </div>
+            <div className="text-[28px] font-extrabold text-white tracking-tight">
+              ₩{Math.floor(totalKRW).toLocaleString()}
+            </div>
+          </div>
+          <div
+            className="rounded-xl px-3 py-2 text-right"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.35)",
+            }}
+          >
+            <div className="text-[15px] font-bold" style={{ color: totalPnlRate >= 0 ? "#FFFFFF" : "#F04452" }}>
+              {totalPnlRate >= 0 ? "+" : ""}{totalPnlRate.toFixed(2)}%
+            </div>
+            <div className="text-[11px] font-semibold" style={{ color: totalPnlRate >= 0 ? "rgba(255,255,255,0.8)" : "#F04452" }}>
+              {totalPnl >= 0 ? "+" : "-"}₩{Math.floor(Math.abs(totalPnl)).toLocaleString()}
+            </div>
+          </div>
         </div>
 
         {/* 예수금 · 평가금 · 합산 테이블 */}
-        <div className="mt-3 space-y-1.5">
+        <div className="relative mt-3 space-y-1.5">
           {/* 헤더 */}
           <div className="grid grid-cols-3 gap-2">
             <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
