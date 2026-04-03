@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Button,
+  Card,
   LoadingSpinner,
   EmptyState,
   BottomSheet,
@@ -13,6 +14,7 @@ import { TradeTopBar } from "./_components/TradeTopBar";
 import { TradeFilterPanel } from "./_components/TradeFilterPanel";
 import { TradesList } from "./_components/TradesList";
 import { SummaryChips } from "./_components/SummaryChips";
+import TradeCalendar from "@/components/trades/TradeCalendar";
 import {
   type TradeLog,
   type AccountOption,
@@ -86,6 +88,9 @@ export default function TradesPage() {
   const [appliedFilters, setAppliedFilters] = useState<Filters>(INITIAL_FILTERS);
   const [page, setPage] = useState(0);
   const pageSize = 20;
+
+  // 뷰 모드: 리스트 / 캘린더
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
   // 모바일 필터 패널 토글
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -461,35 +466,103 @@ export default function TradesPage() {
               매매일지
             </h1>
           </div>
-          <Button size="sm" onClick={openModal}>
-            + 매매 등록
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* 뷰 전환 아이콘 */}
+            <button
+              onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+              aria-label="뷰 전환"
+            >
+              {viewMode === "list" ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B] dark:text-[#7A8A7A]">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                  <line x1="9" y1="4" x2="9" y2="22" />
+                  <line x1="15" y1="4" x2="15" y2="22" />
+                  <line x1="3" y1="16" x2="21" y2="16" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B] dark:text-[#7A8A7A]">
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              )}
+            </button>
+            <Button size="sm" onClick={openModal}>
+              + 매매 등록
+            </Button>
+          </div>
         </div>
 
-        {/* 필터 — 타이틀 아래 */}
-        <TradeFilterCard
-          filters={draftFilters}
-          onChange={handleFilterChange}
-          onSearch={handleSearch}
-          accounts={accounts}
-        />
+        {viewMode === "list" ? (
+          <>
+            {/* 필터 — 타이틀 아래 */}
+            <TradeFilterCard
+              filters={draftFilters}
+              onChange={handleFilterChange}
+              onSearch={handleSearch}
+              accounts={accounts}
+            />
 
-        {/* 요약 칩 */}
-        <div className="mb-3">
-          <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
-        </div>
+            {/* 요약 칩 */}
+            <div className="mb-3">
+              <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
+            </div>
 
-        {/* 테이블 or 빈 상태 */}
-        {trades.length === 0 ? (
-          <EmptyState message="조건에 맞는 매매 기록이 없어요." />
+            {/* 테이블 or 빈 상태 */}
+            {trades.length === 0 ? (
+              <EmptyState message="조건에 맞는 매매 기록이 없어요." />
+            ) : (
+              <TradesTable
+                trades={trades}
+                page={page}
+                total={total}
+                pageSize={pageSize}
+                onPageChange={setPage}
+              />
+            )}
+          </>
         ) : (
-          <TradesTable
-            trades={trades}
-            page={page}
-            total={total}
-            pageSize={pageSize}
-            onPageChange={setPage}
-          />
+          <>
+            {/* 캘린더용 세그먼트 필터 */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
+                {(["", "BUY", "SELL"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => handleFilterChange({ ...appliedFilters, tradeType: t })}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                      appliedFilters.tradeType === t
+                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
+                        : "text-[#6B7B6B] dark:text-[#7A8A7A]"
+                    }`}
+                  >
+                    {t === "" ? "전체" : t === "BUY" ? "매수" : "매도"}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
+                {(["", "KR", "US"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => handleFilterChange({ ...appliedFilters, market: m })}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                      appliedFilters.market === m
+                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
+                        : "text-[#6B7B6B] dark:text-[#7A8A7A]"
+                    }`}
+                  >
+                    {m === "" ? "전체" : m === "KR" ? "국내" : "해외"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} /></Card>
+          </>
         )}
       </div>
 
@@ -505,31 +578,42 @@ export default function TradesPage() {
           filterOpen={mobileFilterOpen}
           onToggleFilter={() => setMobileFilterOpen((v) => !v)}
           onOpenModal={openModal}
+          viewMode={viewMode}
+          onToggleView={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
         />
 
-        {/* 필터 패널 (토글) */}
-        {mobileFilterOpen && (
-          <TradeFilterPanel
-            filters={draftFilters}
-            onChange={handleFilterChange}
-            onSearch={() => { handleSearch(); setMobileFilterOpen(false); }}
-            accounts={accounts}
-          />
+
+        {viewMode === "list" ? (
+          <>
+            {/* 필터 패널 (토글) */}
+            {mobileFilterOpen && (
+              <TradeFilterPanel
+                filters={draftFilters}
+                onChange={handleFilterChange}
+                onSearch={() => { handleSearch(); setMobileFilterOpen(false); }}
+                accounts={accounts}
+              />
+            )}
+
+            {/* 요약 칩 */}
+            <div className="px-4 py-2.5">
+              <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
+            </div>
+
+            {/* 리스트 or 빈 상태 */}
+            <div className="px-4">
+              {trades.length === 0 ? (
+                <EmptyState message={total === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
+              ) : (
+                <TradesList trades={trades} />
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="px-4 py-2.5">
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} /></Card>
+          </div>
         )}
-
-        {/* 요약 칩 */}
-        <div className="px-4 py-2.5">
-          <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
-        </div>
-
-        {/* 리스트 or 빈 상태 */}
-        <div className="px-4">
-          {trades.length === 0 ? (
-            <EmptyState message={total === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
-          ) : (
-            <TradesList trades={trades} />
-          )}
-        </div>
 
         {/* FAB 버튼 */}
         <button

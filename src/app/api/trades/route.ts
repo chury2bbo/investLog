@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   const reasonTag = searchParams.get("reasonTag");
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
+  const month = searchParams.get("month"); // YYYY-MM (캘린더용)
   const keyword = searchParams.get("keyword");
   const market = searchParams.get("market"); // KR | US
 
@@ -30,7 +31,14 @@ export async function GET(req: Request) {
   if (reasonTag) where.reasonTags = { has: reasonTag };
 
   // 날짜 필터
-  if (dateFrom || dateTo) {
+  if (month) {
+    // YYYY-MM → 해당 월 전체
+    const [y, m] = month.split("-").map(Number);
+    where.date = {
+      gte: new Date(y, m - 1, 1),
+      lt: new Date(y, m, 1),
+    };
+  } else if (dateFrom || dateTo) {
     where.date = {};
     if (dateFrom) where.date.gte = new Date(dateFrom);
     if (dateTo) {
@@ -186,19 +194,19 @@ export async function POST(req: Request) {
       });
     }
 
-    // 예수금 차감
+    // 예수금 차감 (마이너스 시 0으로 처리)
     if (cashBalance) {
       await prisma.cashBalance.update({
         where: { id: cashBalance.id },
-        data: { amount: currentCash - tradeAmount },
+        data: { amount: Math.max(0, currentCash - tradeAmount) },
       });
     } else {
-      // 예수금 레코드가 없으면 마이너스로 생성
+      // 예수금 레코드가 없으면 0으로 생성
       await prisma.cashBalance.create({
         data: {
           accountId,
           currency,
-          amount: -tradeAmount,
+          amount: 0,
         },
       });
     }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TypeBadge } from "./TypeBadge";
 import { MarketBadge } from "./MarketBadge";
+import { ReasonTagChip } from "./ReasonTagChip";
 import { type TradeLog, getCountryFromTicker, formatTradeDate, formatPrice, formatTotal } from "./types";
 
 interface TradesTableProps {
@@ -117,16 +118,7 @@ export function TradesTable({ trades, page, total, pageSize, onPageChange }: Tra
                   </td>
                   <td className="px-2 py-2.5">
                     {trade.reasonTags.length > 0 ? (
-                      <div className="flex items-center gap-1">
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] truncate max-w-[80px]">
-                          {trade.reasonTags[0]}
-                        </span>
-                        {trade.reasonTags.length > 1 && (
-                          <span className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A]">
-                            +{trade.reasonTags.length - 1}
-                          </span>
-                        )}
-                      </div>
+                      <ReasonTagChip tags={trade.reasonTags} />
                     ) : (
                       <span className="text-[11px] text-[#D4DDD4] dark:text-[#3D4D40]">—</span>
                     )}

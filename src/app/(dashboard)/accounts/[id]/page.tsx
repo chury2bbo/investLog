@@ -13,6 +13,7 @@ import {
   BottomSheet,
   Divider,
 } from "@/components/ui";
+import SectorDonutChart from "@/components/SectorDonutChart";
 
 function formatKRW(value: number): string {
   if (Math.abs(value) >= 1_0000_0000) return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
@@ -100,7 +101,7 @@ export default function AccountDetailPage() {
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [usdRate, setUsdRate] = useState(1400);
-  const [sectorTab, setSectorTab] = useState<"auto" | "manual">("auto");
+
 
   // 입출금 모달
   const [cashModal, setCashModal] = useState<"deposit" | "withdraw" | null>(null);
@@ -414,35 +415,7 @@ export default function AccountDetailPage() {
     }
   }
 
-  // ─── 섹터 분포 계산 (원본) ─────────────────────────────
-
-  function calcSectorDistribution(type: "auto" | "manual") {
-    if (!account) return [];
-    const map: Record<string, number> = {};
-    let total = 0;
-
-    account.holdings.forEach((h) => {
-      const sector =
-        type === "auto"
-          ? h.sectorAuto ?? "미분류"
-          : h.sectorManual ?? "미지정";
-      const quote = quotes[h.ticker];
-      const price = quote?.price || h.avgPrice;
-      const isForeign = h.country !== "KR";
-      const value = price * h.quantity * (isForeign ? usdRate : 1);
-      map[sector] = (map[sector] ?? 0) + value;
-      total += value;
-    });
-
-    const colors = ["#05C072", "#34D399", "#F07D05", "#4285F4", "#9AA99A", "#F04452"];
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, value], i) => ({
-        label,
-        pct: total > 0 ? parseFloat(((value / total) * 100).toFixed(1)) : 0,
-        color: colors[i % colors.length],
-      }));
-  }
+  // ─── 섹터 분포: SectorDonutChart 컴포넌트 내부에서 계산 ───
 
   // ─── 로딩 / 에러 ──────────────────────────────────────
 
@@ -476,13 +449,11 @@ export default function AccountDetailPage() {
   });
   const totalKRW = cashKRW + cashUSD * usdRate + evalKRW + evalUSD * usdRate;
 
-  const hasManualSector = account.holdings.some((h) => h.sectorManual);
-  const sectorData = calcSectorDistribution(sectorTab);
 
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -501,14 +472,12 @@ export default function AccountDetailPage() {
             </h1>
           </div>
         </div>
-        <Tag
-          label={
-            account.holdings.some((h) => h.country !== "KR")
-              ? "해외주식"
-              : "국내주식"
-          }
-          color={account.holdings.some((h) => h.country !== "KR") ? "blue" : "green"}
-        />
+        {(() => {
+          const hasKR = account.holdings.some((h) => h.country === "KR");
+          const hasForeign = account.holdings.some((h) => h.country !== "KR");
+          const label = hasKR && hasForeign ? "국내·해외" : hasKR ? "국내" : hasForeign ? "해외" : "";
+          return label ? <Tag label={label} color={hasForeign && hasKR ? "blue" : hasForeign ? "blue" : "green"} /> : null;
+        })()}
       </div>
 
       {/* ── ② 자산 요약 카드 ── */}
@@ -603,6 +572,10 @@ export default function AccountDetailPage() {
         </div>
       </div>
 
+      {/* PC 2컬럼 / 모바일 1컬럼 */}
+      <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5">
+      {/* 좌측: 종목 + 매매 이력 */}
+      <div>
       {/* ── ① 보유 종목 리스트 ── */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">보유 종목</span>
@@ -676,15 +649,16 @@ export default function AccountDetailPage() {
 
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex gap-1 flex-wrap">
+                    {h.sectorManual ? (
+                      <Tag label={h.sectorManual} color="gray" />
+                    ) : (
+                      <span className="text-xs text-[#B4C4B4] dark:text-[#4A5A4A] px-2 py-1 rounded-md border border-dashed border-[#D4DDD4] dark:border-[#3D4D40]">
+                        내섹터 미지정
+                      </span>
+                    )}
                     {h.sectorAuto && (
                       <Tag label={h.sectorAuto} color="gray" />
                     )}
-                    {h.sectorManual && (
-                      <Tag label={h.sectorManual} color="gray" />
-                    )}
-                    {h.tags.map((t) => (
-                      <Tag key={t} label={t} color="blue" />
-                    ))}
                   </div>
                   <button
                     onClick={() => openSectorEdit(h)}
@@ -755,82 +729,25 @@ export default function AccountDetailPage() {
         </Card>
       )}
 
+      </div>{/* 좌측 끝 */}
+
+      {/* 우측: 섹터 분포 (PC) / 하단 (모바일) */}
+      <div>
       {/* ── ④ 섹터 분포 차트 ── */}
-      <div className="mt-4">
+      <div className="mt-4 md:mt-0">
         <SectionTitle title="섹터 분포" />
-
-        {account.holdings.length === 0 ? (
-          <Card>
-            <p className="text-sm text-center py-4 text-[#9AA99A]">보유 종목이 없습니다.</p>
-          </Card>
-        ) : (
-          <Card>
-            {/* 탭 */}
-            <div
-              className="flex rounded-[10px] p-0.5 mb-4"
-              style={{ backgroundColor: "#F0F4F0" }}
-            >
-              <button
-                onClick={() => setSectorTab("auto")}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: sectorTab === "auto" ? "#FFFFFF" : "transparent",
-                  color: sectorTab === "auto" ? "#1A221A" : "#9AA99A",
-                  boxShadow:
-                    sectorTab === "auto"
-                      ? "0 1px 4px rgba(0,0,0,0.08)"
-                      : "none",
-                }}
-              >
-                기본 섹터
-              </button>
-              {hasManualSector && (
-                <button
-                  onClick={() => setSectorTab("manual")}
-                  className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                  style={{
-                    background:
-                      sectorTab === "manual" ? "#FFFFFF" : "transparent",
-                    color: sectorTab === "manual" ? "#1A221A" : "#9AA99A",
-                    boxShadow:
-                      sectorTab === "manual"
-                        ? "0 1px 4px rgba(0,0,0,0.08)"
-                        : "none",
-                  }}
-                >
-                  내 섹터
-                </button>
-              )}
-            </div>
-
-            {/* 바 차트 */}
-            {sectorData.map((item) => (
-              <div key={item.label} className="mb-3">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-sm text-[#1A221A] dark:text-[#E8EEE8]">
-                    {item.label}
-                  </span>
-                  <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                    {item.pct}%
-                  </span>
-                </div>
-                <div
-                  className="h-2 rounded"
-                  style={{ backgroundColor: "#F0F4F0" }}
-                >
-                  <div
-                    className="h-full rounded"
-                    style={{
-                      width: `${item.pct}%`,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </Card>
-        )}
+        <Card>
+          <SectorDonutChart
+            holdings={account.holdings.map((h) => ({
+              ...h,
+              currentPrice: quotes[h.ticker]?.price ?? undefined,
+              exchangeRate: h.country !== "KR" ? usdRate : 1,
+            }))}
+          />
+        </Card>
       </div>
+      </div>{/* 우측 끝 */}
+      </div>{/* 2컬럼 그리드 끝 */}
 
       {/* ── 계좌 삭제 ── */}
       <div className="mt-4">

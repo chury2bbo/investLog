@@ -116,7 +116,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
 
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mr-1">매수/매도</span>
-            <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+            <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
               {(["", "BUY", "SELL"] as const).map((t) => {
                 const active = filters.tradeType === t;
                 const label = t === "" ? "전체" : t === "BUY" ? "매수" : "매도";
@@ -124,10 +124,10 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={t}
                     onClick={() => set("tradeType", t)}
-                    className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       active
-                        ? "bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A]"
-                        : "bg-white dark:bg-[#1D2720] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
+                        : "text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#1A221A] dark:hover:text-[#E8EEE8]"
                     }`}
                   >
                     {label}
@@ -141,7 +141,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
 
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mr-1">국내/해외</span>
-            <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+            <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
               {(["", "KR", "US"] as const).map((m) => {
                 const active = filters.market === m;
                 const label = m === "" ? "전체" : m === "KR" ? "국내" : "해외";
@@ -149,10 +149,10 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={m}
                     onClick={() => set("market", m)}
-                    className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       active
-                        ? "bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A]"
-                        : "bg-white dark:bg-[#1D2720] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
+                        : "text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#1A221A] dark:hover:text-[#E8EEE8]"
                     }`}
                   >
                     {label}

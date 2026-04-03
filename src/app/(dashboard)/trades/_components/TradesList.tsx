@@ -2,6 +2,7 @@
 
 import { TypeBadge } from "./TypeBadge";
 import { MarketBadge } from "./MarketBadge";
+import { ReasonTagChip } from "./ReasonTagChip";
 import { type TradeLog, getCountryFromTicker, formatTradeDate, formatPrice, formatTotal } from "./types";
 
 interface TradesListProps {
@@ -65,8 +66,7 @@ export function TradesList({ trades }: TradesListProps) {
                 {formatTradeDate(trade.date, true)} · {formatPrice(trade)} × {trade.quantity}주 · {accountName}
               </span>
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                {trade.reasonTags[0] && <TagPill>{trade.reasonTags[0]}</TagPill>}
-                {trade.reasonTags.length > 1 && <TagPill>+{trade.reasonTags.length - 1}</TagPill>}
+                <ReasonTagChip tags={trade.reasonTags} />
                 {trade.type === "SELL" && trade.realizedPnlRate != null && (
                   <PnlText value={trade.realizedPnlRate} />
                 )}
