@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { id: "/trades", icon: "📝", label: "매매일지", mobileLabel: "매매" },
   { id: "/analysis", icon: "🔍", label: "종목 분석", mobileLabel: "분석" },
   { id: "/analysis/personality", icon: "🧠", label: "투자 성향", mobileLabel: "성향" },
+  { id: "/profile", icon: "⚙️", label: "회원정보", mobileLabel: "설정" },
 ];
 
 function isActive(pathname: string, navId: string) {
@@ -119,17 +120,38 @@ function IconSidebar() {
 
       {/* 하단: 프로필 */}
       <div className="flex flex-col gap-1 items-center">
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold text-white"
-          style={{
-            backgroundColor: "#05C072",
-            boxShadow: "0 2px 8px rgba(5,192,114,0.25)",
-          }}
-          title="로그아웃"
+        <div
+          className="relative"
+          onMouseEnter={() => setHovered("logout")}
+          onMouseLeave={() => setHovered(null)}
         >
-          {initial}
-        </button>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold text-white cursor-pointer"
+            style={{
+              backgroundColor: "#05C072",
+              boxShadow: "0 2px 8px rgba(5,192,114,0.25)",
+            }}
+          >
+            {initial}
+          </button>
+          {hovered === "logout" && (
+            <div
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1A221A] dark:bg-[#1D2720]"
+              style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+            >
+              로그아웃
+              <div
+                className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-0 h-0"
+                style={{
+                  borderTop: "5px solid transparent",
+                  borderBottom: "5px solid transparent",
+                  borderRight: "5px solid #1A221A",
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
