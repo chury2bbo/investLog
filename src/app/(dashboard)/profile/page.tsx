@@ -175,9 +175,14 @@ export default function ProfilePage() {
               />
             </div>
             <div className="flex justify-center">
-              <Button onClick={handleNameSave} disabled={nameLoading} className="w-40">
+              <button
+                onClick={handleNameSave}
+                disabled={nameLoading}
+                className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
+                style={{ backgroundColor: "#05C072" }}
+              >
                 {nameLoading ? "저장 중..." : "저장"}
-              </Button>
+              </button>
             </div>
           </div>
         </Card>
@@ -206,9 +211,14 @@ export default function ProfilePage() {
               </div>
             ))}
             <div className="flex justify-center">
-              <Button onClick={handlePasswordSave} disabled={pwLoading} className="w-40">
+              <button
+                onClick={handlePasswordSave}
+                disabled={pwLoading}
+                className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
+                style={{ backgroundColor: "#05C072" }}
+              >
                 {pwLoading ? "처리 중..." : pwTitle}
-              </Button>
+              </button>
             </div>
           </div>
         </Card>
