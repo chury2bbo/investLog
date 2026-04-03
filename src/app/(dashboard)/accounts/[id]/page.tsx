@@ -14,6 +14,12 @@ import {
   Divider,
 } from "@/components/ui";
 
+function formatKRW(value: number): string {
+  if (Math.abs(value) >= 1_0000_0000) return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
+  if (Math.abs(value) >= 1_0000) return `${Math.floor((value / 10000) * 10) / 10}만`;
+  return Math.floor(value).toLocaleString();
+}
+
 function fmtNum(val: string) {
   if (!val) return "";
   const [int, dec] = val.split(".");
@@ -161,30 +167,30 @@ export default function AccountDetailPage() {
 
       // 현재가 + 환율 병렬 조회
       const tickers = acc.holdings.map((h: Holding) => h.ticker);
-      if (tickers.length > 0) {
-        setQuotesLoading(true);
-        try {
-          const [qRes, fxRes] = await Promise.all([
-            fetch(`/api/market/quote?tickers=${tickers.join(",")}`),
-            fetch("/api/market/quote?ticker=USDKRW"),
-          ]);
-          if (qRes.ok) {
-            const qData = await qRes.json();
-            const map: Record<string, QuoteResult> = {};
-            (qData.quotes ?? []).forEach((q: QuoteResult) => {
-              map[q.ticker] = q;
-            });
-            setQuotes(map);
-          }
-          if (fxRes.ok) {
-            const fxData = await fxRes.json();
-            if (fxData.price) setUsdRate(fxData.price);
-          }
-        } catch {
-          /* 조회 실패 */
-        } finally {
-          setQuotesLoading(false);
+      setQuotesLoading(true);
+      try {
+        const [qRes, fxRes] = await Promise.all([
+          tickers.length > 0
+            ? fetch(`/api/market/quote?tickers=${tickers.join(",")}`)
+            : null,
+          fetch("/api/market/quote?ticker=USDKRW"),
+        ]);
+        if (qRes?.ok) {
+          const qData = await qRes.json();
+          const map: Record<string, QuoteResult> = {};
+          (qData.quotes ?? []).forEach((q: QuoteResult) => {
+            map[q.ticker] = q;
+          });
+          setQuotes(map);
         }
+        if (fxRes.ok) {
+          const fxData = await fxRes.json();
+          if (fxData.price) setUsdRate(fxData.price);
+        }
+      } catch {
+        /* 조회 실패 */
+      } finally {
+        setQuotesLoading(false);
       }
     } catch {
       /* 조회 실패 */
@@ -458,7 +464,18 @@ export default function AccountDetailPage() {
 
   const cashKRW = account.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
   const cashUSD = account.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
-  const totalCashKRW = cashKRW + cashUSD * usdRate;
+
+  // 평가금 계산
+  let evalKRW = 0;
+  let evalUSD = 0;
+  account.holdings.forEach((h) => {
+    const quote = quotes[h.ticker];
+    const curPrice = quote?.price || h.avgPrice;
+    if (h.country !== "KR") evalUSD += curPrice * h.quantity;
+    else evalKRW += curPrice * h.quantity;
+  });
+  const totalKRW = cashKRW + cashUSD * usdRate + evalKRW + evalUSD * usdRate;
+
   const hasManualSector = account.holdings.some((h) => h.sectorManual);
   const sectorData = calcSectorDistribution(sectorTab);
 
@@ -494,7 +511,7 @@ export default function AccountDetailPage() {
         />
       </div>
 
-      {/* ── ② 예수금 관리 ── */}
+      {/* ── ② 자산 요약 카드 ── */}
       <div
         className="rounded-[20px] p-5 mb-4"
         style={{
@@ -502,24 +519,56 @@ export default function AccountDetailPage() {
         }}
       >
         <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-          총 예수금
+          합산 (원화)
         </div>
         <div className="text-[28px] font-extrabold text-white tracking-tight">
-          ₩{totalCashKRW.toLocaleString()}
+          ₩{Math.floor(totalKRW).toLocaleString()}
         </div>
 
-        {/* 원화 / 외화 내역 */}
-        <div className="flex gap-3 mt-2">
-          {cashKRW > 0 && (
-            <div className="rounded-lg px-3 py-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
-              <span className="text-[11px] text-white/50">원화</span>
-              <span className="text-xs font-bold text-white ml-1.5">₩{cashKRW.toLocaleString()}</span>
+        {/* 예수금 · 평가금 · 합산 테이블 */}
+        <div className="mt-3 space-y-1.5">
+          {/* 헤더 */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
+            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
+            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>합산(원화)</div>
+          </div>
+          {/* 원화 행 */}
+          {(cashKRW > 0 || evalKRW > 0) && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs font-bold text-white">
+                {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
+                {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
+                ₩{formatKRW(Math.floor(totalKRW))}
+              </div>
             </div>
           )}
-          {cashUSD > 0 && (
-            <div className="rounded-lg px-3 py-1.5" style={{ background: "rgba(255,255,255,0.15)" }}>
-              <span className="text-[11px] text-white/50">외화</span>
-              <span className="text-xs font-bold text-white ml-1.5">${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          {/* 달러 행 */}
+          {(cashUSD > 0 || evalUSD > 0) && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs font-bold text-white">
+                {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
+                {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              {cashKRW === 0 && evalKRW === 0 && (
+                <div className="text-xs font-bold text-white">
+                  ₩{formatKRW(Math.floor(totalKRW))}
+                </div>
+              )}
+            </div>
+          )}
+          {/* 모두 없는 경우 */}
+          {cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>-</div>
+              <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>-</div>
+              <div className="text-xs font-bold text-white">₩0</div>
             </div>
           )}
         </div>
@@ -581,7 +630,7 @@ export default function AccountDetailPage() {
                 ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : `₩${v.toLocaleString()}`;
 
-            const pnlColor = pnl > 0 ? "#F04452" : pnl < 0 ? "#4285F4" : "#9AA99A";
+            const pnlColor = pnl > 0 ? "#05C072" : pnl < 0 ? "#F04452" : "#9AA99A";
 
             return (
               <Card key={h.id}>
@@ -631,7 +680,7 @@ export default function AccountDetailPage() {
                       <Tag label={h.sectorAuto} color="gray" />
                     )}
                     {h.sectorManual && (
-                      <Tag label={h.sectorManual} color="green" />
+                      <Tag label={h.sectorManual} color="gray" />
                     )}
                     {h.tags.map((t) => (
                       <Tag key={t} label={t} color="blue" />

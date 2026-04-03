@@ -78,12 +78,12 @@ interface AccountSummary {
 
 function formatKRW(value: number): string {
   if (Math.abs(value) >= 1_0000_0000) {
-    return `${(value / 1_0000_0000).toFixed(1)}억`;
+    return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
   }
   if (Math.abs(value) >= 1_0000) {
-    return `${(value / 10000).toFixed(1)}만`;
+    return `${Math.floor((value / 10000) * 10) / 10}만`;
   }
-  return Math.round(value).toLocaleString();
+  return Math.floor(value).toLocaleString();
 }
 
 function formatCompact(value: number, currency: string): string {
@@ -458,7 +458,7 @@ export default function DashboardPage() {
           </button>
         </div>
         <div className="text-[32px] md:text-[40px] font-extrabold text-white tracking-tight leading-tight">
-          {Math.round(summary.totalAsset).toLocaleString()}
+          {Math.floor(summary.totalAsset).toLocaleString()}
           <span className="text-lg md:text-[22px] font-normal">원</span>
         </div>
 
@@ -519,8 +519,8 @@ export default function DashboardPage() {
 
       {/* ── 섹션 2: 요약 지표 + 자산 배분 ── */}
 
-      {/* 요약 지표 2x2 */}
-      <div className="grid grid-cols-2 gap-2.5 mb-4">
+      {/* 요약 지표 4칸 */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
         {[
           {
             label: "총 수익률",
@@ -543,12 +543,12 @@ export default function DashboardPage() {
             color: undefined,
           },
         ].map((s) => (
-          <Card key={s.label}>
-            <div className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5">
+          <Card key={s.label} className="!p-3">
+            <div className="text-[11px] text-[#6B7B6B] dark:text-[#7A8A7A] mb-1">
               {s.label}
             </div>
             <div
-              className="text-[22px] font-extrabold tracking-tight"
+              className="text-[15px] font-extrabold tracking-tight"
               style={{
                 color: s.color ?? undefined,
               }}
@@ -592,17 +592,17 @@ export default function DashboardPage() {
         </div>
 
         {/* 범례 */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex items-center justify-between">
           {allocation.map((a) => (
-            <div key={a.label} className="flex items-center gap-1.5">
+            <div key={a.label} className="flex items-center gap-1">
               <div
-                className="w-2 h-2 rounded-sm"
+                className="w-1.5 h-1.5 rounded-sm"
                 style={{ backgroundColor: a.color }}
               />
-              <span className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A]">
+              <span className="text-[11px] text-[#6B7B6B] dark:text-[#7A8A7A]">
                 {a.label}
               </span>
-              <span className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+              <span className="text-[11px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
                 {a.pct}%
               </span>
             </div>
@@ -619,11 +619,10 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-2.5">
             {accountSummaries.map((acc) => (
-              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)}>
+              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer">
                 <Card>
-                  <div className="flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {/* 아이콘 */}
                       <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
                         💳
                       </div>
@@ -636,67 +635,10 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <PnlTag value={acc.pnlRate} />
-                      <span className="text-[#9AA99A] dark:text-[#5A6A5A] text-base">
-                        ›
-                      </span>
+                      <span className="text-[#9AA99A] dark:text-[#5A6A5A] text-base">›</span>
                     </div>
-                  </div>
-
-                  {/* 예수금 · 평가금 · 합산 */}
-                  <div className="mt-3 pt-3 border-t border-[#F0F4F0] dark:border-[#2D3D30] space-y-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">예수금</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">평가금</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">합산(원화)</div>
-                      </div>
-                    </div>
-                    {/* 국내(원화) 행 */}
-                    {(acc.cashKRW > 0 || acc.evalKRW > 0) && (
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                          {acc.cashKRW > 0 ? `₩${formatKRW(acc.cashKRW)}` : <span className="text-[#9AA99A]">-</span>}
-                        </div>
-                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                          {acc.evalKRW > 0 ? `₩${formatKRW(acc.evalKRW)}` : <span className="text-[#9AA99A]">-</span>}
-                        </div>
-                        {/* @ts-expect-error rowSpan은 div에 미적용 — 팀원 코드 유지 */}
-                        <div className="text-xs font-bold text-[#05C072]" rowSpan={2}>
-                          ₩{formatKRW(acc.totalKRW)}
-                        </div>
-                      </div>
-                    )}
-                    {/* 해외(달러) 행 */}
-                    {(acc.cashUSD > 0 || acc.evalUSD > 0) && (
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                          {acc.cashUSD > 0 ? `$${acc.cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
-                        </div>
-                        <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                          {acc.evalUSD > 0 ? `$${acc.evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
-                        </div>
-                        {acc.cashKRW === 0 && acc.evalKRW === 0 && (
-                          <div className="text-xs font-bold text-[#05C072]">
-                            ₩{formatKRW(acc.totalKRW)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {/* 예수금·평가금 모두 없는 경우 */}
-                    {acc.cashKRW === 0 && acc.cashUSD === 0 && acc.evalKRW === 0 && acc.evalUSD === 0 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="text-xs text-[#9AA99A]">-</div>
-                        <div className="text-xs text-[#9AA99A]">-</div>
-                        <div className="text-xs font-bold text-[#05C072]">₩0</div>
-                      </div>
-                    )}
                   </div>
                 </Card>
               </div>

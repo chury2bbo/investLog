@@ -10,9 +10,9 @@ interface SummaryChipsProps {
 }
 
 function shortKrw(n: number): string {
-  if (Math.abs(n) >= 1_0000_0000) return `${(n / 1_0000_0000).toFixed(1)}억`;
-  if (Math.abs(n) >= 1_0000) return `${(n / 10000).toFixed(1)}만`;
-  return Math.round(n).toLocaleString();
+  if (Math.abs(n) >= 1_0000_0000) return `${Math.floor((n / 1_0000_0000) * 10) / 10}억`;
+  if (Math.abs(n) >= 1_0000) return `${Math.floor((n / 10000) * 10) / 10}만`;
+  return Math.floor(n).toLocaleString();
 }
 
 function shortUsd(n: number): string {

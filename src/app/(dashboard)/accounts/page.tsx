@@ -44,7 +44,20 @@ interface Brokerage {
   name: string;
 }
 
+interface QuoteResult {
+  ticker: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
+
 // ─── 유틸 ────────────────────────────────────────────────
+
+function formatKRW(value: number): string {
+  if (Math.abs(value) >= 1_0000_0000) return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
+  if (Math.abs(value) >= 1_0000) return `${Math.floor((value / 10000) * 10) / 10}만`;
+  return Math.floor(value).toLocaleString();
+}
 
 function fmtNum(val: string) {
   if (!val) return "";
@@ -70,6 +83,8 @@ export default function AccountsPage() {
   const router = useRouter();
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [brokerages, setBrokerages] = useState<Brokerage[]>([]);
+  const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
+  const [usdRate, setUsdRate] = useState(1400);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -98,7 +113,33 @@ export default function AccountsPage() {
       const res = await fetch("/api/accounts");
       if (res.ok) {
         const data = await res.json();
-        setAccounts(Array.isArray(data) ? data : []);
+        const accList = Array.isArray(data) ? data : [];
+        setAccounts(accList);
+
+        // 현재가 + 환율 병렬 조회
+        const tickers = new Set<string>();
+        accList.forEach((acc: AccountData) =>
+          acc.holdings.forEach((h) => tickers.add(h.ticker))
+        );
+        const tickerList = [...tickers];
+
+        const [qRes, fxRes] = await Promise.all([
+          tickerList.length > 0
+            ? fetch(`/api/market/quote?tickers=${tickerList.join(",")}`)
+            : null,
+          fetch("/api/market/quote?ticker=USDKRW"),
+        ]);
+
+        if (qRes?.ok) {
+          const qData = await qRes.json();
+          const map: Record<string, QuoteResult> = {};
+          (qData.quotes ?? []).forEach((q: QuoteResult) => { map[q.ticker] = q; });
+          setQuotes(map);
+        }
+        if (fxRes.ok) {
+          const fxData = await fxRes.json();
+          if (fxData.price) setUsdRate(fxData.price);
+        }
       }
     } catch {
       /* 조회 실패 */
@@ -241,13 +282,29 @@ export default function AccountsPage() {
       {accounts.length === 0 ? (
         <EmptyState message="아직 등록된 계좌가 없어요. 계좌를 추가해보세요." />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {accounts.map((acc) => {
             const cashKRW = acc.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
             const cashUSD = acc.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
             const hasKR = acc.holdings.some((h) => h.country === "KR");
             const hasForeign = acc.holdings.some((h) => h.country !== "KR");
             const typeLabel = hasKR && hasForeign ? "국내·해외" : hasKR ? "국내" : hasForeign ? "해외" : "";
+
+            // 평가금액 계산
+            let evalKRW = 0;
+            let evalUSD = 0;
+            let invested = 0;
+            acc.holdings.forEach((h) => {
+              const quote = quotes[h.ticker];
+              const curPrice = quote?.price || h.avgPrice;
+              const isForeign = h.country !== "KR";
+              invested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
+              if (isForeign) evalUSD += curPrice * h.quantity;
+              else evalKRW += curPrice * h.quantity;
+            });
+            const totalKRW = evalKRW + evalUSD * usdRate + cashKRW + cashUSD * usdRate;
+            const currentValue = evalKRW + evalUSD * usdRate;
+            const pnlRate = invested > 0 ? ((currentValue - invested) / invested) * 100 : 0;
 
             return (
               <Card key={acc.id}>
@@ -256,7 +313,6 @@ export default function AccountsPage() {
                   onClick={() => router.push(`/accounts/${acc.id}`)}
                 >
                   <div className="flex items-center gap-3">
-                    {/* 아이콘 */}
                     <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
                       💳
                     </div>
@@ -269,41 +325,60 @@ export default function AccountsPage() {
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5 flex items-center gap-1.5">
-                        {typeLabel && (
-                          <>
-                            <Tag
-                              label={typeLabel}
-                              color={hasForeign ? "blue" : "green"}
-                            />
-                            <span>·</span>
-                          </>
-                        )}
-                        <span>{acc.holdings.length}종목</span>
+                      <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
+                        {typeLabel ? `${typeLabel} · ` : ""}{acc.holdings.length}종목
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    {cashKRW > 0 || cashUSD > 0 ? (
-                      <>
-                        {cashKRW > 0 && (
-                          <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                            {formatCash(cashKRW, "KRW")}
-                          </div>
-                        )}
-                        {cashUSD > 0 && (
-                          <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                            {formatCash(cashUSD, "USD")}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">
-                        예수금 없음
-                      </div>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <PnlTag value={pnlRate} />
+                    <span className="text-[#9AA99A] dark:text-[#5A6A5A] text-base">›</span>
                   </div>
+                </div>
+
+                {/* 예수금 · 평가금 · 합산 */}
+                <div className="mt-3 pt-3 border-t border-[#F0F4F0] dark:border-[#2D3D30] space-y-2">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">예수금</div>
+                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">평가금</div>
+                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">합산(원화)</div>
+                  </div>
+                  {(cashKRW > 0 || evalKRW > 0) && (
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[#05C072]">
+                        ₩{formatKRW(totalKRW)}
+                      </div>
+                    </div>
+                  )}
+                  {(cashUSD > 0 || evalUSD > 0) && (
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                      </div>
+                      {cashKRW === 0 && evalKRW === 0 && (
+                        <div className="text-xs font-bold text-[#05C072]">
+                          ₩{formatKRW(totalKRW)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-xs text-[#9AA99A]">-</div>
+                      <div className="text-xs text-[#9AA99A]">-</div>
+                      <div className="text-xs font-bold text-[#05C072]">₩0</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 수정 / 삭제 버튼 */}

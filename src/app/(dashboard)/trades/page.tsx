@@ -71,12 +71,6 @@ function stripNum(val: string, allowDot = false) {
   return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
 }
 
-function formatPriceDisplay(price: number, country?: string) {
-  if (country === "US" || country === "Foreign") {
-    return `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
-  return `₩${price.toLocaleString()}`;
-}
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 
@@ -109,10 +103,11 @@ export default function TradesPage() {
   const [formReasonTags, setFormReasonTags] = useState<string[]>([]);
   const [formEmotion, setFormEmotion] = useState<string>("");
   const [formMemo, setFormMemo] = useState("");
-  const [formSectorManual, setFormSectorManual] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [cashWarning, setCashWarning] = useState(false);
+  const [cashConfirmOpen, setCashConfirmOpen] = useState(false);
+  const [cashConfirmMsg, setCashConfirmMsg] = useState("");
 
   // 토스트
   const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
@@ -256,7 +251,6 @@ export default function TradesPage() {
     setFormReasonTags([]);
     setFormEmotion("");
     setFormMemo("");
-    setFormSectorManual("");
     setSubmitError("");
     setCashWarning(false);
     setShowPrevTrades(false);
@@ -339,7 +333,7 @@ export default function TradesPage() {
     }
   }
 
-  async function handleSubmit() {
+  function checkAndSubmit() {
     if (!formAccountId || !formTicker || !formName || !formPrice || !formQuantity) {
       setSubmitError("필수 항목을 모두 입력해주세요.");
       return;
@@ -361,6 +355,24 @@ export default function TradesPage() {
       }
     }
 
+    // 매수 시 예수금 부족 확인
+    if (formType === "BUY" && selectedAccount) {
+      const totalAmount = price * quantity;
+      const isForeign = !(/^\d{6}$/.test(formTicker));
+      const currency = isForeign ? "USD" : "KRW";
+      const cashBalance = selectedAccount.cashBalances.find((c) => c.currency === currency)?.amount ?? 0;
+      if (totalAmount > cashBalance) {
+        const sym = currency === "KRW" ? "₩" : "$";
+        setCashConfirmMsg(`예수금이 부족합니다.\n필요 ${sym}${totalAmount.toLocaleString()} · 보유 ${sym}${cashBalance.toLocaleString()}\n\n그래도 등록하시겠습니까?`);
+        setCashConfirmOpen(true);
+        return;
+      }
+    }
+
+    doSubmit();
+  }
+
+  async function doSubmit() {
     setSubmitting(true);
     setSubmitError("");
     setCashWarning(false);
@@ -418,10 +430,9 @@ export default function TradesPage() {
   return (
     <>
       {/* 토스트 */}
+      {toast.visible && (
       <div
-        className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${
-          toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
-        }`}
+        className="fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] animate-in fade-in slide-in-from-top-2 duration-300"
       >
         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -434,6 +445,7 @@ export default function TradesPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
+      )}
 
       {/* ══════════════════════════════════════════════════ */}
       {/* PC 버전 (md 이상) */}
@@ -804,11 +816,42 @@ export default function TradesPage() {
           )}
 
           {/* 등록 버튼 */}
-          <Button size="lg" onClick={handleSubmit} disabled={submitting}>
+          <Button size="lg" onClick={checkAndSubmit} disabled={submitting}>
             {submitting ? "등록 중..." : "매매 등록"}
           </Button>
         </div>
       </BottomSheet>
+
+      {/* 예수금 부족 확인 모달 */}
+      {cashConfirmOpen && (
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-6 mx-5 max-w-sm w-full" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#FFF3E8] flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F07D05" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">예수금 부족</span>
+            </div>
+            <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] whitespace-pre-line mb-5">
+              {cashConfirmMsg}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCashConfirmOpen(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => { setCashConfirmOpen(false); doSubmit(); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#05C072] text-white transition-colors"
+              >
+                등록
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
