@@ -7,17 +7,90 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const userId = session.user.id;
+  const { accounts, trade } = await req.json();
 
-  // TODO: 팀원 A — prisma.$transaction으로 Account/Holding/CashBalance/TradeLog 일괄 생성
-  // 현재는 onboardingDone 플래그만 업데이트 (건너뛰기 대응)
+  try {
+  await prisma.$transaction(async (tx) => {
+    // 계좌 생성 + 인덱스 매핑 (trade.accountIndex 대응용)
+    const createdAccounts: { index: number; id: number }[] = [];
 
-  const { accounts, trade } = body;
+    for (let i = 0; i < (accounts ?? []).length; i++) {
+      const acc = accounts[i];
+      if (!acc.accountCode) continue;
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { onboardingDone: true },
+      const created = await tx.investAccount.create({
+        data: { userId, accountCode: acc.accountCode },
+      });
+
+      createdAccounts.push({ index: i, id: created.id });
+
+      // 예수금
+      if (acc.cashBalances?.length > 0) {
+        await tx.cashBalance.createMany({
+          data: acc.cashBalances.map((cb: { currency: string; amount: number }) => ({
+            accountId: created.id,
+            currency: cb.currency,
+            amount: cb.amount,
+          })),
+        });
+      }
+
+      // 보유종목
+      if (acc.holdings?.length > 0) {
+        await tx.holding.createMany({
+          data: acc.holdings.map((h: {
+            ticker: string;
+            name: string;
+            country: string;
+            avgPrice: number;
+            quantity: number;
+            sectorManual?: string;
+            tags?: string[];
+          }) => ({
+            accountId: created.id,
+            ticker: h.ticker,
+            name: h.name,
+            country: h.country,
+            avgPrice: h.avgPrice,
+            quantity: h.quantity,
+            sectorManual: h.sectorManual ?? null,
+            tags: h.tags ?? [],
+          })),
+        });
+      }
+    }
+
+    // 첫 매매 기록
+    if (trade?.ticker && trade?.price && trade?.quantity) {
+      const accountEntry = createdAccounts.find((a) => a.index === trade.accountIndex);
+      if (accountEntry) {
+        await tx.tradeLog.create({
+          data: {
+            accountId: accountEntry.id,
+            date: new Date(),
+            ticker: trade.ticker,
+            name: trade.name,
+            type: trade.type,
+            price: trade.price,
+            quantity: trade.quantity,
+            reasonTags: trade.reasonTags ?? [],
+          },
+        });
+      }
+    }
+
+    // 온보딩 완료 처리
+    await tx.user.update({
+      where: { id: userId },
+      data: { onboardingDone: true },
+    });
   });
+  } catch (err: unknown) {
+    console.error("[onboarding/bulk] 오류:", err);
+    const message = err instanceof Error ? err.message : "알 수 없는 오류";
+    return Response.json({ error: message }, { status: 500 });
+  }
 
   return Response.json({ success: true });
 }
