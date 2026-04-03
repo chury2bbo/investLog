@@ -13,8 +13,13 @@ export async function GET(req: Request) {
   const accountId = searchParams.get("accountId");
   const type = searchParams.get("type"); // BUY | SELL
   const reasonTag = searchParams.get("reasonTag");
+  const dateFrom = searchParams.get("dateFrom");
+  const dateTo = searchParams.get("dateTo");
+  const keyword = searchParams.get("keyword");
+  const market = searchParams.get("market"); // KR | US
 
-  const where: Record<string, unknown> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: Record<string, any> = {
     account: { userId: session.user.id },
   };
 
@@ -22,7 +27,26 @@ export async function GET(req: Request) {
   if (type) where.type = type;
   if (reasonTag) where.reasonTags = { has: reasonTag };
 
-  const trades = await prisma.tradeLog.findMany({
+  // 날짜 필터
+  if (dateFrom || dateTo) {
+    where.date = {};
+    if (dateFrom) where.date.gte = new Date(dateFrom);
+    if (dateTo) {
+      const end = new Date(dateTo);
+      end.setHours(23, 59, 59, 999);
+      where.date.lte = end;
+    }
+  }
+
+  // 종목명/티커 검색
+  if (keyword) {
+    where.OR = [
+      { name: { contains: keyword, mode: "insensitive" } },
+      { ticker: { contains: keyword, mode: "insensitive" } },
+    ];
+  }
+
+  let trades = await prisma.tradeLog.findMany({
     where,
     orderBy: { date: "desc" },
     include: {
@@ -31,6 +55,13 @@ export async function GET(req: Request) {
       },
     },
   });
+
+  // 국내/해외 필터 (DB에서 regex 불가 → 앱 레벨 필터)
+  if (market === "KR") {
+    trades = trades.filter((t) => /^\d{6}$/.test(t.ticker));
+  } else if (market === "US") {
+    trades = trades.filter((t) => !/^\d{6}$/.test(t.ticker));
+  }
 
   return Response.json(trades);
 }

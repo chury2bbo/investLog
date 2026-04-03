@@ -139,34 +139,31 @@ export default function DashboardPage() {
         acc.holdings.forEach((h) => tickers.add(h.ticker))
       );
 
-      // 현재가 + 환율 조회
+      // 현재가 + 환율 병렬 조회
       const tickerList = [...tickers];
-      if (tickerList.length > 0 || true) {
-        try {
-          // 환율 조회
-          const fxRes = await fetch("/api/market/quote?ticker=USDKRW");
-          if (fxRes.ok) {
-            const fxData = await fxRes.json();
-            if (fxData.price) setUsdRate(fxData.price);
-          }
+      try {
+        const [fxRes, quoteRes] = await Promise.all([
+          fetch("/api/market/quote?ticker=USDKRW"),
+          tickerList.length > 0
+            ? fetch(`/api/market/quote?tickers=${tickerList.join(",")}`)
+            : null,
+        ]);
 
-          // 종목 현재가 조회
-          if (tickerList.length > 0) {
-            const quoteRes = await fetch(
-              `/api/market/quote?tickers=${tickerList.join(",")}`
-            );
-            if (quoteRes.ok) {
-              const quoteData = await quoteRes.json();
-              const quoteMap: Record<string, QuoteResult> = {};
-              (quoteData.quotes ?? []).forEach((q: QuoteResult) => {
-                quoteMap[q.ticker] = q;
-              });
-              setQuotes(quoteMap);
-            }
-          }
-        } catch {
-          setStaleQuote(true);
+        if (fxRes.ok) {
+          const fxData = await fxRes.json();
+          if (fxData.price) setUsdRate(fxData.price);
         }
+
+        if (quoteRes?.ok) {
+          const quoteData = await quoteRes.json();
+          const quoteMap: Record<string, QuoteResult> = {};
+          (quoteData.quotes ?? []).forEach((q: QuoteResult) => {
+            quoteMap[q.ticker] = q;
+          });
+          setQuotes(quoteMap);
+        }
+      } catch {
+        setStaleQuote(true);
       }
     } catch {
       // 조회 실패 시 빈 상태

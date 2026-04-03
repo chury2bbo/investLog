@@ -1,0 +1,110 @@
+"use client";
+
+import { useState } from "react";
+import { StockSearchInput } from "./StockSearchInput";
+import { type Filters, type AccountOption, QUICK_DATE_OPTIONS, getDateFrom } from "./types";
+
+interface TradeFilterPanelProps {
+  filters: Filters;
+  onChange: (f: Filters) => void;
+  onSearch: () => void;
+  accounts: AccountOption[];
+}
+
+export function TradeFilterPanel({ filters, onChange, onSearch, accounts }: TradeFilterPanelProps) {
+  const [quickDropOpen, setQuickDropOpen] = useState(false);
+
+  const set = (key: keyof Filters, value: string) =>
+    onChange({ ...filters, [key]: value });
+
+  return (
+    <div className="px-4 py-3 space-y-2.5 border-b border-[#E8EEE8] dark:border-[#2D3D30] bg-[#F8FAF8] dark:bg-[#111A14]">
+      {/* 날짜 */}
+      <div className="flex items-center gap-1.5">
+        <input
+          type="date"
+          value={filters.dateFrom}
+          onChange={(e) => set("dateFrom", e.target.value)}
+          className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+        />
+        <span className="text-xs text-[#9AA99A]">~</span>
+        <input
+          type="date"
+          value={filters.dateTo}
+          onChange={(e) => set("dateTo", e.target.value)}
+          className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+        />
+      </div>
+
+      {/* 빠른선택 + 계좌 */}
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <button
+            onClick={() => setQuickDropOpen((v) => !v)}
+            className="px-2.5 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#6B7B6B] dark:text-[#7A8A7A]"
+          >
+            기간 빠른선택 ▾
+          </button>
+          {quickDropOpen && (
+            <div className="absolute top-full left-0 mt-1 min-w-[120px] rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 overflow-hidden">
+              {QUICK_DATE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => {
+                    onChange({
+                      ...filters,
+                      dateFrom: getDateFrom(opt.days),
+                      dateTo: new Date().toISOString().slice(0, 10),
+                    });
+                    setQuickDropOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] transition-colors"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <select
+          value={filters.accountId}
+          onChange={(e) => set("accountId", e.target.value)}
+          className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+        >
+          <option value="">전체 계좌</option>
+          {accounts.map((a) => (
+            <option key={a.id} value={String(a.id)}>
+              {a.brokerageCompany.name}{a.memo ? ` · ${a.memo}` : ""}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 종목 검색 */}
+      <StockSearchInput
+        value={filters.keyword}
+        onChange={(v) => set("keyword", v)}
+        onEnter={onSearch}
+        placeholder="종목명 또는 티커 검색"
+        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] outline-none"
+      />
+
+      {/* 버튼 */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "" })}
+          className="flex-1 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A]"
+        >
+          초기화
+        </button>
+        <button
+          onClick={onSearch}
+          className="flex-1 py-1.5 text-xs font-medium rounded-lg bg-[#05C072] hover:bg-[#03A862] text-white transition-colors"
+        >
+          조회
+        </button>
+      </div>
+    </div>
+  );
+}
