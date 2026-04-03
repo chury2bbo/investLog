@@ -109,6 +109,7 @@ export default function TradesPage() {
   const [formReasonTags, setFormReasonTags] = useState<string[]>([]);
   const [formEmotion, setFormEmotion] = useState<string>("");
   const [formMemo, setFormMemo] = useState("");
+  const [formSectorManual, setFormSectorManual] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [cashWarning, setCashWarning] = useState(false);
@@ -255,6 +256,7 @@ export default function TradesPage() {
     setFormReasonTags([]);
     setFormEmotion("");
     setFormMemo("");
+    setFormSectorManual("");
     setSubmitError("");
     setCashWarning(false);
     setShowPrevTrades(false);
@@ -346,18 +348,6 @@ export default function TradesPage() {
     const price = parseFloat(formPrice);
     const quantity = parseInt(formQuantity, 10);
     const selectedAccount = accounts.find((a) => a.id === formAccountId);
-
-    if (formType === "BUY" && selectedAccount) {
-      const totalAmount = price * quantity;
-      const isForeign = !(/^\d{6}$/.test(formTicker));
-      const currency = isForeign ? "USD" : "KRW";
-      const cashBalance = selectedAccount.cashBalances.find((c) => c.currency === currency)?.amount ?? 0;
-      if (totalAmount > cashBalance) {
-        const sym = currency === "KRW" ? "₩" : "$";
-        showToast("예수금 부족", `필요 ${sym}${totalAmount.toLocaleString()} · 보유 ${sym}${cashBalance.toLocaleString()}`);
-        return;
-      }
-    }
 
     if (formType === "SELL" && selectedAccount) {
       const holding = selectedAccount.holdings.find((h) => h.ticker === formTicker);

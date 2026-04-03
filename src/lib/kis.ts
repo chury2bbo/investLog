@@ -77,3 +77,39 @@ export async function getKisQuote(ticker: string): Promise<KisQuote> {
 
   return { ticker, price, change, changePercent };
 }
+
+export interface KisSectorInfo {
+  sector: string | null;
+}
+
+export async function getKisSector(ticker: string): Promise<KisSectorInfo> {
+  try {
+    const token = await getToken();
+
+    const params = new URLSearchParams({
+      FID_COND_MRKT_DIV_CODE: "J",
+      FID_INPUT_ISCD: ticker,
+    });
+
+    const res = await fetch(
+      `${KIS_DOMAIN}/uapi/domestic-stock/v1/quotations/inquire-price?${params}`,
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+          appkey: process.env.KIS_APP_KEY!,
+          appsecret: process.env.KIS_APP_SECRET!,
+          tr_id: "FHKST01010100",
+        },
+      }
+    );
+
+    if (!res.ok) return { sector: null };
+
+    const data = await res.json();
+    const sector = data.output?.bstp_kor_isnm ?? null;
+
+    return { sector };
+  } catch {
+    return { sector: null };
+  }
+}

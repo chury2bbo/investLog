@@ -93,6 +93,7 @@ export default function AccountDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
   const [quotesLoading, setQuotesLoading] = useState(false);
+  const [usdRate, setUsdRate] = useState(1400);
   const [sectorTab, setSectorTab] = useState<"auto" | "manual">("auto");
 
   // 입출금 모달
@@ -115,6 +116,14 @@ export default function AccountDetailPage() {
   const [hSubmitting, setHSubmitting] = useState(false);
   const [hError, setHError] = useState("");
   const [hPriceLoading, setHPriceLoading] = useState(false);
+
+  // 섹터 편집 모달
+  const [sectorEditModal, setSectorEditModal] = useState(false);
+  const [sectorEditHolding, setSectorEditHolding] = useState<Holding | null>(null);
+  const [sectorEditValue, setSectorEditValue] = useState("");
+  const [sectorEditTags, setSectorEditTags] = useState<string[]>([]);
+  const [sectorEditTagInput, setSectorEditTagInput] = useState("");
+  const [sectorEditSubmitting, setSectorEditSubmitting] = useState(false);
 
   // 국내 종목 검색 autocomplete
   const [hStockQuery, setHStockQuery] = useState("");
@@ -150,12 +159,15 @@ export default function AccountDetailPage() {
       };
       setAccount(accountData);
 
-      // 현재가 조회
+      // 현재가 + 환율 병렬 조회
       const tickers = acc.holdings.map((h: Holding) => h.ticker);
       if (tickers.length > 0) {
         setQuotesLoading(true);
         try {
-          const qRes = await fetch(`/api/market/quote?tickers=${tickers.join(",")}`);
+          const [qRes, fxRes] = await Promise.all([
+            fetch(`/api/market/quote?tickers=${tickers.join(",")}`),
+            fetch("/api/market/quote?ticker=USDKRW"),
+          ]);
           if (qRes.ok) {
             const qData = await qRes.json();
             const map: Record<string, QuoteResult> = {};
@@ -164,8 +176,12 @@ export default function AccountDetailPage() {
             });
             setQuotes(map);
           }
+          if (fxRes.ok) {
+            const fxData = await fxRes.json();
+            if (fxData.price) setUsdRate(fxData.price);
+          }
         } catch {
-          /* 현재가 조회 실패 */
+          /* 조회 실패 */
         } finally {
           setQuotesLoading(false);
         }
@@ -332,6 +348,47 @@ export default function AccountDetailPage() {
     }
   }
 
+  // ─── 섹터 편집 ─────────────────────────────────────────
+
+  function openSectorEdit(h: Holding) {
+    setSectorEditHolding(h);
+    setSectorEditValue(h.sectorManual ?? "");
+    setSectorEditTags(h.tags ?? []);
+    setSectorEditTagInput("");
+    setSectorEditModal(true);
+  }
+
+  async function handleSectorEditSubmit() {
+    if (!sectorEditHolding) return;
+    setSectorEditSubmitting(true);
+    try {
+      const res = await fetch(`/api/holdings/${sectorEditHolding.id}/sector`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sectorManual: sectorEditValue || null,
+          tags: sectorEditTags,
+        }),
+      });
+      if (res.ok) {
+        setSectorEditModal(false);
+        fetchAccount();
+      }
+    } catch {
+      /* 실패 */
+    } finally {
+      setSectorEditSubmitting(false);
+    }
+  }
+
+  function addSectorTag() {
+    const tag = sectorEditTagInput.trim();
+    if (tag && !sectorEditTags.includes(tag)) {
+      setSectorEditTags([...sectorEditTags, tag]);
+    }
+    setSectorEditTagInput("");
+  }
+
   // ─── 섹터 분포 계산 ───────────────────────────────────
 
   // ─── 계좌 삭제 처리 ────────────────────────────────────
@@ -363,7 +420,10 @@ export default function AccountDetailPage() {
         type === "auto"
           ? h.sectorAuto ?? "미분류"
           : h.sectorManual ?? "미지정";
-      const value = h.avgPrice * h.quantity;
+      const quote = quotes[h.ticker];
+      const price = quote?.price || h.avgPrice;
+      const isForeign = h.country !== "KR";
+      const value = price * h.quantity * (isForeign ? usdRate : 1);
       map[sector] = (map[sector] ?? 0) + value;
       total += value;
     });
@@ -373,7 +433,7 @@ export default function AccountDetailPage() {
       .sort((a, b) => b[1] - a[1])
       .map(([label, value], i) => ({
         label,
-        pct: total > 0 ? Math.round((value / total) * 100) : 0,
+        pct: total > 0 ? parseFloat(((value / total) * 100).toFixed(1)) : 0,
         color: colors[i % colors.length],
       }));
   }
@@ -398,8 +458,6 @@ export default function AccountDetailPage() {
 
   const cashKRW = account.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
   const cashUSD = account.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
-  // TODO: 환율 API 완성 후 실시간 환율로 교체
-  const usdRate = 1400;
   const totalCashKRW = cashKRW + cashUSD * usdRate;
   const hasManualSector = account.holdings.some((h) => h.sectorManual);
   const sectorData = calcSectorDistribution(sectorTab);
@@ -579,6 +637,12 @@ export default function AccountDetailPage() {
                       <Tag key={t} label={t} color="blue" />
                     ))}
                   </div>
+                  <button
+                    onClick={() => openSectorEdit(h)}
+                    className="text-[11px] font-medium text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#05C072] transition-colors shrink-0 ml-2"
+                  >
+                    편집
+                  </button>
                 </div>
               </Card>
             );
@@ -1028,6 +1092,39 @@ export default function AccountDetailPage() {
 
           <Button size="lg" onClick={handleAddHolding} disabled={hSubmitting}>
             {hSubmitting ? "등록 중..." : "종목 등록"}
+          </Button>
+        </div>
+      </BottomSheet>
+
+      {/* ─── 섹터 편집 바텀시트 ───────────────────────────── */}
+      <BottomSheet
+        open={sectorEditModal}
+        onClose={() => setSectorEditModal(false)}
+        title={`섹터 편집 — ${sectorEditHolding?.name ?? ""}`}
+      >
+        <div className="space-y-5">
+          {/* 기본 섹터 (읽기 전용) */}
+          <div>
+            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">기본 섹터</label>
+            <div className="pb-2 text-sm border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#9AA99A] dark:text-[#5A6A5A]">
+              {sectorEditHolding?.sectorAuto ?? "미분류"}
+            </div>
+          </div>
+
+          {/* 내 섹터 */}
+          <div>
+            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">내 섹터</label>
+            <input
+              type="text"
+              value={sectorEditValue}
+              onChange={(e) => setSectorEditValue(e.target.value)}
+              placeholder="예: AI 반도체, 배당주"
+              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+            />
+          </div>
+
+          <Button size="lg" onClick={handleSectorEditSubmit} disabled={sectorEditSubmitting}>
+            {sectorEditSubmitting ? "저장 중..." : "저장"}
           </Button>
         </div>
       </BottomSheet>

@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getYahooSector } from "@/lib/yahoo";
+import { getKisSector } from "@/lib/kis";
 
 export async function GET() {
   return Response.json({});
@@ -40,6 +42,18 @@ export async function POST(req: Request) {
     where: { accountId_ticker: { accountId, ticker } },
   });
 
+  // sectorAuto 자동 조회: 국내 → KIS, 해외 → Yahoo
+  let sectorAuto: string | null = null;
+  if (!existing?.sectorAuto) {
+    try {
+      const isDomestic = /^\d{6}$/.test(ticker);
+      const sectorInfo = isDomestic
+        ? await getKisSector(ticker)
+        : await getYahooSector(ticker);
+      sectorAuto = sectorInfo.sector;
+    } catch { /* 섹터 조회 실패 시 무시 */ }
+  }
+
   let holding;
   if (existing) {
     const totalQty = existing.quantity + quantity;
@@ -48,7 +62,11 @@ export async function POST(req: Request) {
 
     holding = await prisma.holding.update({
       where: { id: existing.id },
-      data: { avgPrice: newAvgPrice, quantity: totalQty },
+      data: {
+        avgPrice: newAvgPrice,
+        quantity: totalQty,
+        ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+      },
     });
   } else {
     holding = await prisma.holding.create({
@@ -59,6 +77,7 @@ export async function POST(req: Request) {
         country: country || (ticker.length <= 6 && /^\d+$/.test(ticker) ? "KR" : "US"),
         avgPrice,
         quantity,
+        ...(sectorAuto ? { sectorAuto } : {}),
       },
     });
   }

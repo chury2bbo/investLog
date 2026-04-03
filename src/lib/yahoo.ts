@@ -59,6 +59,31 @@ export async function getYahooSearch(query: string): Promise<YahooSearchResult[]
     }));
 }
 
+export interface YahooSectorInfo {
+  sector: string | null;
+  industry: string | null;
+}
+
+export async function getYahooSector(ticker: string): Promise<YahooSectorInfo> {
+  const symbol = /^\d{6}$/.test(ticker) ? `${ticker}.KS` : ticker;
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (await yahooFinance.quoteSummary(
+      symbol,
+      { modules: ["assetProfile"] },
+      { validateResult: false }
+    )) as any;
+
+    return {
+      sector: result?.assetProfile?.sector ?? null,
+      industry: result?.assetProfile?.industry ?? null,
+    };
+  } catch {
+    return { sector: null, industry: null };
+  }
+}
+
 export async function getUsdKrwRate(): Promise<number> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = (await yahooFinance.quote("KRW=X", undefined, {

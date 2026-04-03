@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getYahooSector } from "@/lib/yahoo";
+import { getKisSector } from "@/lib/kis";
 
 // ─── GET: 매매 목록 조회 (필터 지원) ─────────────────────
 
@@ -89,6 +91,7 @@ export async function POST(req: Request) {
     reasonMemo,
     memo,
     sectorAuto,
+    sectorManual,
   } = body;
 
   // 필수 필드 검증
@@ -140,6 +143,19 @@ export async function POST(req: Request) {
       cashWarning = true;
     }
 
+    // sectorAuto 자동 조회 (신규 종목이거나 기존에 없는 경우)
+    // 국내(6자리 숫자) → KIS API, 해외 → Yahoo Finance
+    let resolvedSectorAuto = sectorAuto;
+    if (!resolvedSectorAuto && (!holding || !holding.sectorAuto)) {
+      try {
+        const isDomestic = /^\d{6}$/.test(ticker);
+        const sectorInfo = isDomestic
+          ? await getKisSector(ticker)
+          : await getYahooSector(ticker);
+        resolvedSectorAuto = sectorInfo.sector;
+      } catch { /* 섹터 조회 실패 시 무시 */ }
+    }
+
     // holdings upsert: 평단가 재계산
     if (holding) {
       const totalQty = holding.quantity + quantity;
@@ -151,7 +167,8 @@ export async function POST(req: Request) {
         data: {
           avgPrice: newAvgPrice,
           quantity: totalQty,
-          ...(sectorAuto ? { sectorAuto } : {}),
+          ...(resolvedSectorAuto && !holding.sectorAuto ? { sectorAuto: resolvedSectorAuto } : {}),
+          ...(sectorManual ? { sectorManual } : {}),
         },
       });
     } else {
@@ -163,7 +180,8 @@ export async function POST(req: Request) {
           country,
           avgPrice: price,
           quantity,
-          ...(sectorAuto ? { sectorAuto } : {}),
+          ...(resolvedSectorAuto ? { sectorAuto: resolvedSectorAuto } : {}),
+          ...(sectorManual ? { sectorManual } : {}),
         },
       });
     }
