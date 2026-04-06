@@ -83,10 +83,10 @@ import {
 // ─── 자산 배분 바 차트 색상 ──────────────────────────────
 
 const ALLOC_COLORS = {
-  domestic: "var(--color-primary)",
-  foreign: "#4285F4",
-  cashKRW: "#F07D05",
-  cashUSD: "var(--color-g400)",
+  domestic: "var(--color-primary)",      // #2DB87A
+  foreign: "var(--color-primary-mid)",   // #1F9E64
+  cashKRW: "var(--color-g300)",          // #C8D1C8
+  cashUSD: "var(--color-g400)",          // #9DAD9D
 };
 
 // ─── 총 자산 추이 더미 데이터 ─────────────────────────────
@@ -665,17 +665,18 @@ export default function DashboardPage() {
       <SectionTitle title="자산 배분" />
       <Card>
         {/* 가로 바 */}
-        <div className="h-2.5 rounded-full overflow-hidden flex mb-3.5">
+        <div className="flex gap-0.5 mb-3.5">
           {allocation.map((a) =>
             a.pct > 0 ? (
               <div
                 key={a.label}
+                className="h-2 rounded-full"
                 style={{ width: `${a.pct}%`, backgroundColor: a.color }}
               />
             ) : null
           )}
           {summary.totalAsset === 0 && (
-            <div className="w-full bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+            <div className="w-full h-2 rounded-full bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
           )}
         </div>
 
@@ -684,7 +685,7 @@ export default function DashboardPage() {
           {allocation.map((a) => (
             <div key={a.label} className="flex items-center gap-1">
               <div
-                className="w-1.5 h-1.5 rounded-sm shrink-0"
+                className="w-2 h-2 rounded-sm shrink-0"
                 style={{ backgroundColor: a.color }}
               />
               <span className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">

@@ -61,13 +61,14 @@ function formatTotal(price: number, quantity: number, ticker: string): string {
 interface TradeCalendarProps {
   tradeType?: "" | "BUY" | "SELL";
   market?: "" | "KR" | "US";
+  onSelect?: (trade: Trade) => void;
 }
 
-export default function TradeCalendar({ tradeType = "", market = "" }: TradeCalendarProps) {
+export default function TradeCalendar({ tradeType = "", market = "", onSelect }: TradeCalendarProps) {
   const [month, setMonth] = useState(new Date());
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(toDateKey(new Date()));
 
   // 월별 데이터 fetch
   const fetchMonthTrades = useCallback(async (d: Date) => {
@@ -222,7 +223,8 @@ export default function TradeCalendar({ tradeType = "", market = "" }: TradeCale
                     {selectedTrades.map((t) => (
                       <div
                         key={t.id}
-                        className="px-1 py-2.5 border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0"
+                        onClick={() => onSelect?.(t as unknown as Trade)}
+                        className="px-1 py-2.5 border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0 cursor-pointer active:bg-[var(--color-g100)] dark:active:bg-[var(--color-border)] transition-colors rounded-lg"
                       >
                         {/* 1행 */}
                         <div className="flex justify-between items-center mb-1">
