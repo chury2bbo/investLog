@@ -112,6 +112,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [accounts, setAccounts] = useState<AccountData[]>([]);
+  const [hoveredStock, setHoveredStock] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
   // TODO: /api/market/quote API 완성 후 실시간 환율 조회로 교체
   const [usdRate, setUsdRate] = useState(1400);
@@ -445,7 +446,13 @@ export default function DashboardPage() {
         else items.push({ name: h.name, label, country, value: evalKRW });
       });
     });
-    return items.sort((a, b) => b.value - a.value);
+    return items.sort((a, b) => {
+      // 국내(KR) 먼저, 그 다음 해외
+      if (a.country === "KR" && b.country !== "KR") return -1;
+      if (a.country !== "KR" && b.country === "KR") return 1;
+      // 같은 그룹 내에서 비중 큰 순
+      return b.value - a.value;
+    });
   })();
   const holdingTotal = holdingWeights.reduce((s, h) => s + h.value, 0);
 
@@ -804,10 +811,21 @@ export default function DashboardPage() {
                   const pct = holdingTotal > 0 ? Math.round((h.value / holdingTotal) * 100) : 0;
                   return (
                     <div key={h.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: DONUT_COLORS[i % DONUT_COLORS.length] }} />
-                        <span className={`text-[10px] font-bold px-1 py-0.5 rounded ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{h.country === "KR" ? "국내" : "해외"}</span>
-                        <span className="text-xs text-[var(--color-text)] truncate max-w-[80px]">{h.label}</span>
+                        <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{h.country === "KR" ? "국내" : "해외"}</span>
+                        <span
+                          className="text-xs text-[var(--color-text)] truncate max-w-[80px] cursor-default"
+                          onMouseEnter={(e) => {
+                            if (h.name.length > 6) {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredStock(`${h.name}::${rect.left}::${rect.top}`);
+                            }
+                          }}
+                          onMouseLeave={() => setHoveredStock(null)}
+                        >
+                          {h.label}
+                        </span>
                       </div>
                       <span className="text-xs font-bold text-[var(--color-text)]">{pct}%</span>
                     </div>
@@ -883,6 +901,26 @@ export default function DashboardPage() {
 
       </div>{/* 우측 컬럼 끝 */}
       </div>{/* 2컬럼 그리드 끝 */}
+
+      {/* 종목명 커스텀 툴팁 (fixed) */}
+      {hoveredStock && (() => {
+        const [name, left, top] = hoveredStock.split("::");
+        return (
+          <div
+            className="fixed z-[9999] text-[11px] font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap pointer-events-none"
+            style={{
+              left: `${parseFloat(left)}px`,
+              top: `${parseFloat(top) - 32}px`,
+              backgroundColor: "#fff",
+              color: "#1A221A",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+              border: "1px solid #E4EAE4",
+            }}
+          >
+            {name}
+          </div>
+        );
+      })()}
     </div>
   );
 }
