@@ -6,13 +6,34 @@ import { useSession, signOut } from "next-auth/react";
 
 // ─── 네비 항목 ───────────────────────────────────────────
 
+// SVG 아이콘 컴포넌트
+function NavIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
+  const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, className };
+  switch (name) {
+    case "home":
+      return <svg {...props}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>;
+    case "wallet":
+      return <svg {...props}><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>;
+    case "notebook":
+      return <svg {...props}><path d="M12 20h9" /><path d="M16.376 3.622a1 1 0 013.002 3.002L7.368 18.635a2 2 0 01-.855.506l-2.872.838.838-2.872a2 2 0 01.506-.855L16.376 3.622z" /></svg>;
+    case "search":
+      return <svg {...props}><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>;
+    case "brain":
+      return <svg {...props}><path d="M12 2a5 5 0 015 5c0 .9-.3 1.7-.7 2.4" /><path d="M17 7a5 5 0 01-1.5 9.2" /><path d="M12 2a5 5 0 00-5 5c0 .9.3 1.7.7 2.4" /><path d="M7 7a5 5 0 001.5 9.2" /><path d="M12 22v-6" /><path d="M9 19h6" /></svg>;
+    case "settings":
+      return <svg {...props}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>;
+    default:
+      return null;
+  }
+}
+
 const NAV_ITEMS = [
-  { id: "/", icon: "📊", label: "대시보드", mobileLabel: "홈" },
-  { id: "/accounts", icon: "💳", label: "계좌 관리", mobileLabel: "계좌" },
-  { id: "/trades", icon: "📝", label: "매매일지", mobileLabel: "매매" },
-  { id: "/analysis", icon: "🔍", label: "종목 분석", mobileLabel: "분석" },
-  { id: "/analysis/personality", icon: "🧠", label: "투자 성향", mobileLabel: "성향" },
-  { id: "/profile", icon: "⚙️", label: "회원정보", mobileLabel: "설정" },
+  { id: "/", icon: "home", label: "대시보드", mobileLabel: "홈" },
+  { id: "/accounts", icon: "wallet", label: "계좌 관리", mobileLabel: "계좌" },
+  { id: "/trades", icon: "notebook", label: "매매일지", mobileLabel: "매매" },
+  { id: "/analysis", icon: "search", label: "종목 분석", mobileLabel: "분석" },
+  { id: "/analysis/personality", icon: "brain", label: "투자 성향", mobileLabel: "성향" },
+  { id: "/profile", icon: "settings", label: "회원정보", mobileLabel: "설정" },
 ];
 
 function isActive(pathname: string, navId: string) {
@@ -88,11 +109,8 @@ function IconSidebar() {
                     style={{ backgroundColor: "#05C072" }}
                   />
                 )}
-                <span
-                  className="text-xl"
-                  style={{ opacity: active ? 1 : 0.45 }}
-                >
-                  {item.icon}
+                <span style={{ opacity: active ? 1 : 0.45, color: active ? "#05C072" : "#6B7B6B" }}>
+                  <NavIcon name={item.icon} size={22} />
                 </span>
               </button>
 
@@ -176,7 +194,9 @@ function BottomNav() {
             className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-1"
             style={{ opacity: active ? 1 : 0.35 }}
           >
-            <span className="text-[22px]">{item.icon}</span>
+            <span style={{ color: active ? "#05C072" : "#6B7B6B" }}>
+              <NavIcon name={item.icon} size={22} />
+            </span>
             <span
               className="text-[10px]"
               style={{

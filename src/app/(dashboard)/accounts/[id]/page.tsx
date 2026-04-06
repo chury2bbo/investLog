@@ -8,6 +8,7 @@ import {
   Tag,
   PnlTag,
   SectionTitle,
+  Input,
   LoadingSpinner,
   EmptyState,
   BottomSheet,
@@ -15,22 +16,7 @@ import {
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 
-function formatKRW(value: number): string {
-  if (Math.abs(value) >= 1_0000_0000) return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
-  if (Math.abs(value) >= 1_0000) return `${Math.floor((value / 10000) * 10) / 10}만`;
-  return Math.floor(value).toLocaleString();
-}
-
-function fmtNum(val: string) {
-  if (!val) return "";
-  const [int, dec] = val.split(".");
-  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return dec !== undefined ? `${formatted}.${dec}` : formatted;
-}
-
-function stripNum(val: string, allowDot = false) {
-  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
-}
+import { formatKRW, fmtNum, stripNum } from "@/lib/format";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -847,19 +833,13 @@ export default function AccountDetailPage() {
           </div>
 
           {/* 금액 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-              금액
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={fmtNum(cashAmount)}
-              onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
-              placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
-            />
-          </div>
+          <Input
+            label="금액"
+            inputMode="numeric"
+            value={fmtNum(cashAmount)}
+            onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
+            placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
+          />
 
           <Button
             size="lg"
@@ -1049,34 +1029,22 @@ export default function AccountDetailPage() {
 
           {/* 평단가 / 수량 */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                평단가 * {hPriceLoading && <span className="text-[#9AA99A]">조회 중...</span>}
-              </label>
-              <input
-                ref={hAvgPriceRef}
-                type="text"
-                inputMode="decimal"
-                value={fmtNum(hAvgPrice)}
-                onChange={(e) => setHAvgPrice(stripNum(e.target.value, true))}
-                placeholder={hPriceLoading ? "" : hCountry === "KR" ? "72,000" : "120.50"}
-                disabled={hPriceLoading}
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] disabled:opacity-50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                수량 *
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={fmtNum(hQuantity)}
-                onChange={(e) => setHQuantity(stripNum(e.target.value))}
-                placeholder="50"
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-              />
-            </div>
+            <Input
+              ref={hAvgPriceRef}
+              label={`평단가 * ${hPriceLoading ? "조회 중..." : ""}`}
+              inputMode="decimal"
+              value={fmtNum(hAvgPrice)}
+              onChange={(e) => setHAvgPrice(stripNum(e.target.value, true))}
+              placeholder={hPriceLoading ? "" : hCountry === "KR" ? "72,000" : "120.50"}
+              disabled={hPriceLoading}
+            />
+            <Input
+              label="수량 *"
+              inputMode="numeric"
+              value={fmtNum(hQuantity)}
+              onChange={(e) => setHQuantity(stripNum(e.target.value))}
+              placeholder="50"
+            />
           </div>
 
           {/* 에러 */}
@@ -1108,16 +1076,12 @@ export default function AccountDetailPage() {
           </div>
 
           {/* 내 섹터 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">내 섹터</label>
-            <input
-              type="text"
-              value={sectorEditValue}
-              onChange={(e) => setSectorEditValue(e.target.value)}
-              placeholder="예: AI 반도체, 배당주"
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-            />
-          </div>
+          <Input
+            label="내 섹터"
+            value={sectorEditValue}
+            onChange={(e) => setSectorEditValue(e.target.value)}
+            placeholder="예: AI 반도체, 배당주"
+          />
 
           <Button size="lg" onClick={handleSectorEditSubmit} disabled={sectorEditSubmitting}>
             {sectorEditSubmitting ? "저장 중..." : "저장"}

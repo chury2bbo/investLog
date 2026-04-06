@@ -74,25 +74,7 @@ interface AccountSummary {
   pnlRate: number;
 }
 
-// ─── 유틸 ────────────────────────────────────────────────
-
-function formatKRW(value: number): string {
-  if (Math.abs(value) >= 1_0000_0000) {
-    return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
-  }
-  if (Math.abs(value) >= 1_0000) {
-    return `${Math.floor((value / 10000) * 10) / 10}만`;
-  }
-  return Math.floor(value).toLocaleString();
-}
-
-function formatCompact(value: number, currency: string): string {
-  if (currency === "USD") {
-    if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-    return `$${value.toFixed(0)}`;
-  }
-  return `₩${formatKRW(value)}`;
-}
+import { formatKRW, formatCompact } from "@/lib/format";
 
 // ─── 자산 배분 바 차트 색상 ──────────────────────────────
 
@@ -372,7 +354,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
-            안녕하세요, {userName}님 👋
+            안녕하세요, {userName}님
           </p>
           <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8] mt-0.5">
             내 투자 현황
@@ -624,7 +606,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
-                        💳
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                       </div>
                       <div>
                         <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">

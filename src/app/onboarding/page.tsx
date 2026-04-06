@@ -5,16 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Tag, LoadingSpinner, ConfirmDialog } from "@/components/ui";
 import { ImportModal } from "@/components/ImportModal";
 
-function fmtNum(val: string) {
-  if (!val) return "";
-  const [int, dec] = val.split(".");
-  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return dec !== undefined ? `${formatted}.${dec}` : formatted;
-}
-
-function stripNum(val: string, allowDot = false) {
-  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
-}
+import { fmtNum, stripNum } from "@/lib/format";
 
 // ─── 타입 ────────────────────────────────────────────────
 

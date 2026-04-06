@@ -7,6 +7,8 @@ import {
   Button,
   PnlTag,
   Tag,
+  Input,
+  Select,
   LoadingSpinner,
   EmptyState,
   BottomSheet,
@@ -51,31 +53,7 @@ interface QuoteResult {
   changePercent: number;
 }
 
-// ─── 유틸 ────────────────────────────────────────────────
-
-function formatKRW(value: number): string {
-  if (Math.abs(value) >= 1_0000_0000) return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
-  if (Math.abs(value) >= 1_0000) return `${Math.floor((value / 10000) * 10) / 10}만`;
-  return Math.floor(value).toLocaleString();
-}
-
-function fmtNum(val: string) {
-  if (!val) return "";
-  const [int, dec] = val.split(".");
-  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return dec !== undefined ? `${formatted}.${dec}` : formatted;
-}
-
-function stripNum(val: string, allowDot = false) {
-  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
-}
-
-function formatCash(amount: number, currency: string) {
-  if (currency === "USD") {
-    return `$${amount.toLocaleString()}`;
-  }
-  return `₩${amount.toLocaleString()}`;
-}
+import { formatKRW, fmtNum, stripNum, formatCash } from "@/lib/format";
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 
@@ -94,7 +72,6 @@ export default function AccountsPage() {
   const [formCashKRW, setFormCashKRW] = useState("");
   const [formCashUSD, setFormCashUSD] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [brokerageDropOpen, setBrokerageDropOpen] = useState(false);
 
   // 수정 모달
   const [editModal, setEditModal] = useState(false);
@@ -102,7 +79,6 @@ export default function AccountsPage() {
   const [editCode, setEditCode] = useState("");
   const [editMemo, setEditMemo] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
-  const [editDropOpen, setEditDropOpen] = useState(false);
 
   // 삭제 확인
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
@@ -266,7 +242,7 @@ export default function AccountsPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
@@ -314,7 +290,7 @@ export default function AccountsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
-                      💳
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                     </div>
                     <div>
                       <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
@@ -410,83 +386,38 @@ export default function AccountsPage() {
       >
         <div className="space-y-5">
           {/* 증권사 선택 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-              증권사
-            </label>
-            <button
-              type="button"
-              onClick={() => setBrokerageDropOpen(!brokerageDropOpen)}
-              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
-            >
-              <span>{brokerages.find((b) => b.code === formCode)?.name ?? "증권사를 선택하세요"}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: brokerageDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            {brokerageDropOpen && (
-              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
-                {brokerages.map((b) => (
-                  <button
-                    key={b.code}
-                    type="button"
-                    onClick={() => { setFormCode(b.code); setBrokerageDropOpen(false); }}
-                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
-                    style={{
-                      backgroundColor: formCode === b.code ? "#E6F9F1" : "transparent",
-                      color: formCode === b.code ? "#05C072" : "#1A221A",
-                      fontWeight: formCode === b.code ? 600 : 400,
-                      borderBottom: "1px solid #F0F4F0",
-                    }}
-                  >
-                    <span>{b.name}</span>
-                    {formCode === b.code && <span className="text-[#05C072]">✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Select
+            label="증권사"
+            value={formCode}
+            onChange={setFormCode}
+            options={brokerages.map((b) => ({ value: b.code, label: b.name }))}
+            placeholder="증권사를 선택하세요"
+          />
 
           {/* 계좌명 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-              계좌명
-            </label>
-            <input
-              type="text"
-              value={formMemo}
-              onChange={(e) => setFormMemo(e.target.value)}
-              placeholder="예: 연금저축, 미국주식용 (선택사항)"
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
-            />
-          </div>
+          <Input
+            label="계좌명"
+            value={formMemo}
+            onChange={(e) => setFormMemo(e.target.value)}
+            placeholder="예: 연금저축, 미국주식용 (선택사항)"
+          />
 
           {/* 예수금 */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-                예수금 (KRW)
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={fmtNum(formCashKRW)}
-                onChange={(e) => setFormCashKRW(stripNum(e.target.value))}
-                placeholder="선택사항"
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-                예수금 (USD)
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={fmtNum(formCashUSD)}
-                onChange={(e) => setFormCashUSD(stripNum(e.target.value, true))}
-                placeholder="선택사항"
-                className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
-              />
-            </div>
+            <Input
+              label="예수금 (KRW)"
+              inputMode="numeric"
+              value={fmtNum(formCashKRW)}
+              onChange={(e) => setFormCashKRW(stripNum(e.target.value))}
+              placeholder="선택사항"
+            />
+            <Input
+              label="예수금 (USD)"
+              inputMode="decimal"
+              value={fmtNum(formCashUSD)}
+              onChange={(e) => setFormCashUSD(stripNum(e.target.value, true))}
+              placeholder="선택사항"
+            />
           </div>
 
           <Button
@@ -507,54 +438,21 @@ export default function AccountsPage() {
       >
         <div className="space-y-5">
           {/* 증권사 선택 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-              증권사
-            </label>
-            <button
-              type="button"
-              onClick={() => setEditDropOpen(!editDropOpen)}
-              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
-            >
-              <span>{brokerages.find((b) => b.code === editCode)?.name ?? "증권사를 선택하세요"}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: editDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            {editDropOpen && (
-              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
-                {brokerages.map((b) => (
-                  <button
-                    key={b.code}
-                    type="button"
-                    onClick={() => { setEditCode(b.code); setEditDropOpen(false); }}
-                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
-                    style={{
-                      backgroundColor: editCode === b.code ? "#E6F9F1" : "transparent",
-                      color: editCode === b.code ? "#05C072" : "#1A221A",
-                      fontWeight: editCode === b.code ? 600 : 400,
-                      borderBottom: "1px solid #F0F4F0",
-                    }}
-                  >
-                    <span>{b.name}</span>
-                    {editCode === b.code && <span className="text-[#05C072]">✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Select
+            label="증권사"
+            value={editCode}
+            onChange={setEditCode}
+            options={brokerages.map((b) => ({ value: b.code, label: b.name }))}
+            placeholder="증권사를 선택하세요"
+          />
 
           {/* 계좌명 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B]">
-              계좌명
-            </label>
-            <input
-              type="text"
-              value={editMemo}
-              onChange={(e) => setEditMemo(e.target.value)}
-              placeholder="예: 연금저축, 미국주식용 (선택사항)"
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] text-[#1A221A]"
-            />
-          </div>
+          <Input
+            label="계좌명"
+            value={editMemo}
+            onChange={(e) => setEditMemo(e.target.value)}
+            placeholder="예: 연금저축, 미국주식용 (선택사항)"
+          />
 
           <Button size="lg" onClick={handleEditAccount} disabled={editSubmitting}>
             {editSubmitting ? "수정 중..." : "수정 완료"}

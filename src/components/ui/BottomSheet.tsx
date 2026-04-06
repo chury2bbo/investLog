@@ -17,17 +17,11 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
 
       {/* 시트: 모바일 중앙 / PC 중앙 */}
       <div
-        className="relative w-[calc(100%-32px)] md:w-[420px] md:max-w-[90vw] rounded-2xl overflow-hidden mx-4"
-        style={{
-          backgroundColor: "#FFFFFF",
-          maxHeight: "80vh",
-        }}
+        className="relative w-[calc(100%-32px)] md:w-[420px] md:max-w-[90vw] rounded-2xl overflow-hidden mx-4 bg-white dark:bg-[#1D2720]"
+        style={{ maxHeight: "80vh" }}
       >
         <div className="overflow-y-auto max-h-[80vh] p-6">
-          <h3
-            className="text-base font-bold mb-4"
-            style={{ color: "#1A221A" }}
-          >
+          <h3 className="text-base font-bold mb-4 text-[#1A221A] dark:text-[#E8EEE8]">
             {title}
           </h3>
           {children}

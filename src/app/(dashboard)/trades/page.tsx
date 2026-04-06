@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Card,
+  Input,
+  Select,
+  Toast,
   LoadingSpinner,
   EmptyState,
   BottomSheet,
@@ -60,23 +64,13 @@ const EMOTIONS = [
   { label: "기계적", emoji: "🤖" },
 ];
 
-// ─── 유틸 ────────────────────────────────────────────────
-
-function fmtNum(val: string) {
-  if (!val) return "";
-  const [int, dec] = val.split(".");
-  const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return dec !== undefined ? `${formatted}.${dec}` : formatted;
-}
-
-function stripNum(val: string, allowDot = false) {
-  return allowDot ? val.replace(/[^0-9.]/g, "") : val.replace(/[^0-9]/g, "");
-}
+import { fmtNum, stripNum } from "@/lib/format";
 
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 
 export default function TradesPage() {
+  const router = useRouter();
   const [trades, setTrades] = useState<TradeLog[]>([]);
   const [total, setTotal] = useState(0);
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
@@ -97,7 +91,6 @@ export default function TradesPage() {
 
   // 매매 등록 폼
   const [formAccountId, setFormAccountId] = useState<number | null>(null);
-  const [accountDropOpen, setAccountDropOpen] = useState(false);
   const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [formType, setFormType] = useState<"BUY" | "SELL">("BUY");
   const [formTicker, setFormTicker] = useState("");
@@ -436,22 +429,12 @@ export default function TradesPage() {
   return (
     <>
       {/* 토스트 */}
-      {toast.visible && (
-      <div
-        className="fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] animate-in fade-in slide-in-from-top-2 duration-300"
-      >
-        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
-          <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
-        </div>
-        <button onClick={() => setToast((p) => ({ ...p, visible: false }))} className="text-white/60 hover:text-white transition-colors shrink-0">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-      )}
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
 
       {/* ══════════════════════════════════════════════════ */}
       {/* PC 버전 (md 이상) */}
@@ -460,7 +443,7 @@ export default function TradesPage() {
         {/* 타이틀 — 계좌 관리와 동일 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <button onClick={() => window.history.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
@@ -631,49 +614,24 @@ export default function TradesPage() {
       <BottomSheet open={modalOpen} onClose={() => setModalOpen(false)} title="매매 등록">
         <div className="space-y-5">
           {/* 계좌 선택 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">계좌</label>
-            <button
-              type="button"
-              onClick={() => setAccountDropOpen(!accountDropOpen)}
-              className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
-            >
-              <span>{(() => { const a = accounts.find((a) => a.id === formAccountId); return a ? `${a.brokerageCompany.name}${a.memo ? ` · ${a.memo}` : ""}` : "계좌를 선택하세요"; })()}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: accountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            {accountDropOpen && (
-              <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
-                {accounts.map((acc) => (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    onClick={() => { setFormAccountId(acc.id); setAccountDropOpen(false); }}
-                    className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
-                    style={{
-                      backgroundColor: formAccountId === acc.id ? "#E6F9F1" : "transparent",
-                      color: formAccountId === acc.id ? "#05C072" : "#1A221A",
-                      fontWeight: formAccountId === acc.id ? 600 : 400,
-                      borderBottom: "1px solid #F0F4F0",
-                    }}
-                  >
-                    <span>{acc.brokerageCompany.name}{acc.memo ? ` · ${acc.memo}` : ""}</span>
-                    {formAccountId === acc.id && <span className="text-[#05C072]">✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Select
+            label="계좌"
+            value={String(formAccountId ?? "")}
+            onChange={(val) => setFormAccountId(Number(val))}
+            options={accounts.map((acc) => ({
+              value: String(acc.id),
+              label: `${acc.brokerageCompany.name}${acc.memo ? ` · ${acc.memo}` : ""}`,
+            }))}
+            placeholder="계좌를 선택하세요"
+          />
 
           {/* 매매 날짜 */}
-          <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">매매 날짜</label>
-            <input
-              type="date"
-              value={formDate}
-              onChange={(e) => setFormDate(e.target.value)}
-              className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8]"
-            />
-          </div>
+          <Input
+            label="매매 날짜"
+            type="date"
+            value={formDate}
+            onChange={(e) => setFormDate(e.target.value)}
+          />
 
           {/* 매수/매도 토글 */}
           <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
@@ -801,30 +759,22 @@ export default function TradesPage() {
 
             {/* 가격 / 수량 */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">가격 *</label>
-                <input
-                  ref={formPriceRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={fmtNum(formPrice)}
-                  onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
-                  placeholder={formPriceLoading ? "조회 중..." : "72,000"}
-                  disabled={formPriceLoading}
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] disabled:opacity-50"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">수량 *</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={fmtNum(formQuantity)}
-                  onChange={(e) => setFormQuantity(stripNum(e.target.value))}
-                  placeholder="10"
-                  className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                />
-              </div>
+              <Input
+                ref={formPriceRef}
+                label="가격 *"
+                inputMode="decimal"
+                value={fmtNum(formPrice)}
+                onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
+                placeholder={formPriceLoading ? "조회 중..." : "72,000"}
+                disabled={formPriceLoading}
+              />
+              <Input
+                label="수량 *"
+                inputMode="numeric"
+                value={fmtNum(formQuantity)}
+                onChange={(e) => setFormQuantity(stripNum(e.target.value))}
+                placeholder="10"
+              />
             </div>
           </div>
 
