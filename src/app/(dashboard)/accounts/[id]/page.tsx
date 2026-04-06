@@ -465,12 +465,22 @@ export default function AccountDetailPage() {
   const totalKRW = cashKRW + cashUSD * usdRate + evalKRW + evalUSD * usdRate;
 
   // 총 투자금 (원화 환산) + 수익률
-  let totalInvested = 0;
+  let investedKRW = 0;
+  let investedUSD = 0;
   account.holdings.forEach((h) => {
-    const isForeign = h.country !== "KR";
-    totalInvested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
+    if (h.country !== "KR") investedUSD += h.avgPrice * h.quantity;
+    else investedKRW += h.avgPrice * h.quantity;
   });
+  const totalInvested = investedKRW + investedUSD * usdRate;
   const totalEvalKRW = evalKRW + evalUSD * usdRate;
+
+  // KRW 단위 통일: 최대값 기준으로 억/만 결정
+  const maxKRW = Math.max(investedKRW, cashKRW, evalKRW, totalKRW);
+  const useOk = maxKRW >= 1_0000_0000;
+  const fmtKRW = (v: number) =>
+    useOk
+      ? `₩${(Math.floor((v / 1_0000_0000) * 10) / 10).toLocaleString()}억`
+      : `₩${Math.floor(v / 10000).toLocaleString()}만`;
   const totalPnl = totalEvalKRW - totalInvested;
   const totalPnlRate = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
 
@@ -524,7 +534,7 @@ export default function AccountDetailPage() {
               합산 (원화)
             </div>
             <div className="text-[28px] font-extrabold text-white tracking-tight">
-              ₩{Math.floor(totalKRW).toLocaleString()}
+              {fmtKRW(totalKRW)}
             </div>
           </div>
           <div
@@ -550,47 +560,55 @@ export default function AccountDetailPage() {
           </div>
         </div>
 
-        {/* 예수금 · 평가금 · 합산 테이블 */}
+        {/* 매수금 · 예수금 · 평가금 · 합산 테이블 */}
         <div className="relative mt-3 space-y-1.5">
           {/* 헤더 */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
-            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
-            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>합산(원화)</div>
+          <div className="grid grid-cols-4 gap-1.5">
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>매수금</div>
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>합산₩</div>
           </div>
           {/* 원화 행 */}
-          {(cashKRW > 0 || evalKRW > 0) && (
-            <div className="grid grid-cols-3 gap-2">
+          {(investedKRW > 0 || cashKRW > 0 || evalKRW > 0) && (
+            <div className="grid grid-cols-4 gap-1.5">
               <div className="text-xs font-bold text-white">
-                {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+                {investedKRW > 0 ? fmtKRW(investedKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
-                {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+                {cashKRW > 0 ? fmtKRW(cashKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
-                ₩{formatKRW(Math.floor(totalKRW))}
+                {evalKRW > 0 ? fmtKRW(evalKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
+                {fmtKRW(totalKRW)}
               </div>
             </div>
           )}
           {/* 달러 행 */}
-          {(cashUSD > 0 || evalUSD > 0) && (
-            <div className="grid grid-cols-3 gap-2">
+          {(investedUSD > 0 || cashUSD > 0 || evalUSD > 0) && (
+            <div className="grid grid-cols-4 gap-1.5">
+              <div className="text-xs font-bold text-white">
+                {investedUSD > 0 ? `$${investedUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
               <div className="text-xs font-bold text-white">
                 {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
                 {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
-              {cashKRW === 0 && evalKRW === 0 && (
+              {investedKRW === 0 && cashKRW === 0 && evalKRW === 0 && (
                 <div className="text-xs font-bold text-white">
-                  ₩{formatKRW(Math.floor(totalKRW))}
+                  {fmtKRW(totalKRW)}
                 </div>
               )}
             </div>
           )}
           {/* 모두 없는 경우 */}
-          {cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
-            <div className="grid grid-cols-3 gap-2">
+          {investedKRW === 0 && investedUSD === 0 && cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
+            <div className="grid grid-cols-4 gap-1.5">
+              <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>-</div>
               <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>-</div>
               <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>-</div>
               <div className="text-xs font-bold text-white">₩0</div>

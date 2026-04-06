@@ -53,6 +53,8 @@ interface AssetSummary {
   cashUSDinKRW: number;
   totalAsset: number;
   totalInvested: number;
+  investedKRW: number;
+  investedUSD: number;
   totalPnl: number;
   totalPnlRate: number;
   dailyPnl: number;
@@ -279,6 +281,8 @@ export default function DashboardPage() {
     let cashKRW = 0;
     let cashUSD = 0;
     let totalInvested = 0;
+    let investedKRW = 0;
+    let investedUSD = 0;
     let dailyPnl = 0;
     let holdingCount = 0;
 
@@ -297,10 +301,12 @@ export default function DashboardPage() {
 
         if (h.country === "KR") {
           domesticStockValue += value;
+          investedKRW += invested;
           totalInvested += invested;
           if (quote) dailyPnl += quote.change * h.quantity;
         } else {
           foreignStockValue += value;
+          investedUSD += invested;
           totalInvested += invested * usdRate;
           if (quote) dailyPnl += quote.change * h.quantity * usdRate;
         }
@@ -327,6 +333,8 @@ export default function DashboardPage() {
       cashUSDinKRW,
       totalAsset,
       totalInvested,
+      investedKRW,
+      investedUSD,
       totalPnl,
       totalPnlRate,
       dailyPnl,
@@ -585,7 +593,7 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        {/* 미니 카드 3개 */}
+        {/* 미니 카드 4개 */}
         <div className="flex gap-2 mt-5">
           {[
             {
@@ -597,11 +605,14 @@ export default function DashboardPage() {
               value: formatCompact(summary.foreignStockValue, "USD"),
             },
             {
+              label: "매수금",
+              krw: summary.investedKRW > 0 ? formatCompact(summary.investedKRW, "KRW") : null,
+              usd: summary.investedUSD > 0 ? `$${summary.investedUSD >= 1000 ? `${(summary.investedUSD / 1000).toFixed(1)}K` : summary.investedUSD.toFixed(0)}` : null,
+            },
+            {
               label: "예수금",
-              value: formatCompact(
-                summary.cashKRW + summary.cashUSDinKRW,
-                "KRW"
-              ),
+              krw: summary.cashKRW > 0 ? formatCompact(summary.cashKRW, "KRW") : null,
+              usd: summary.cashUSD > 0 ? `$${summary.cashUSD >= 1000 ? `${(summary.cashUSD / 1000).toFixed(1)}K` : summary.cashUSD.toFixed(0)}` : null,
             },
           ].map((item) => (
             <div
@@ -615,7 +626,15 @@ export default function DashboardPage() {
               >
                 {item.label}
               </div>
-              <div className="text-sm font-bold text-white">{item.value}</div>
+              {"value" in item ? (
+                <div className="text-sm font-bold text-white">{item.value}</div>
+              ) : (
+                <div>
+                  {item.krw && <div className="text-sm font-bold text-white leading-tight">{item.krw}</div>}
+                  {item.usd && <div className="text-xs font-semibold leading-tight" style={{ color: "rgba(255,255,255,0.75)" }}>{item.usd}</div>}
+                  {!item.krw && !item.usd && <div className="text-sm font-bold text-white">-</div>}
+                </div>
+              )}
             </div>
           ))}
         </div>

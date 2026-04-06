@@ -290,18 +290,30 @@ export default function AccountsPage() {
             // 평가금액 계산
             let evalKRW = 0;
             let evalUSD = 0;
-            let invested = 0;
+            let investedKRW = 0;
+            let investedUSD = 0;
             acc.holdings.forEach((h) => {
               const quote = quotes[h.ticker];
               const curPrice = quote?.price || h.avgPrice;
               const isForeign = h.country !== "KR";
-              invested += h.avgPrice * h.quantity * (isForeign ? usdRate : 1);
-              if (isForeign) evalUSD += curPrice * h.quantity;
-              else evalKRW += curPrice * h.quantity;
+              if (isForeign) {
+                investedUSD += h.avgPrice * h.quantity;
+                evalUSD += curPrice * h.quantity;
+              } else {
+                investedKRW += h.avgPrice * h.quantity;
+                evalKRW += curPrice * h.quantity;
+              }
             });
+            const invested = investedKRW + investedUSD * usdRate;
             const totalKRW = evalKRW + evalUSD * usdRate + cashKRW + cashUSD * usdRate;
             const currentValue = evalKRW + evalUSD * usdRate;
             const pnlRate = invested > 0 ? ((currentValue - invested) / invested) * 100 : 0;
+            const maxKRW = Math.max(investedKRW, cashKRW, evalKRW, totalKRW);
+            const useOk = maxKRW >= 1_0000_0000;
+            const fmtKRW = (v: number) =>
+              useOk
+                ? `₩${(Math.floor((v / 1_0000_0000) * 10) / 10).toLocaleString()}억`
+                : `₩${Math.floor(v / 10000).toLocaleString()}만`;
 
             return (
               <Card key={acc.id}>
@@ -334,43 +346,51 @@ export default function AccountsPage() {
                   </div>
                 </div>
 
-                {/* 예수금 · 평가금 · 합산 */}
+                {/* 매수금 · 예수금 · 평가금 · 합산 */}
                 <div className="mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)] space-y-2">
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">예수금</div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">평가금</div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">합산(원화)</div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">매수금</div>
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">예수금</div>
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">평가금</div>
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">합산₩</div>
                   </div>
-                  {(cashKRW > 0 || evalKRW > 0) && (
-                    <div className="grid grid-cols-3 gap-2">
+                  {(investedKRW > 0 || cashKRW > 0 || evalKRW > 0) && (
+                    <div className="grid grid-cols-4 gap-1.5">
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span className="text-[var(--color-g400)]">-</span>}
+                        {investedKRW > 0 ? fmtKRW(investedKRW) : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span className="text-[var(--color-g400)]">-</span>}
+                        {cashKRW > 0 ? fmtKRW(cashKRW) : <span className="text-[var(--color-g400)]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalKRW > 0 ? fmtKRW(evalKRW) : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-positive)]">
-                        ₩{formatKRW(totalKRW)}
+                        {fmtKRW(totalKRW)}
                       </div>
                     </div>
                   )}
-                  {(cashUSD > 0 || evalUSD > 0) && (
-                    <div className="grid grid-cols-3 gap-2">
+                  {(investedUSD > 0 || cashUSD > 0 || evalUSD > 0) && (
+                    <div className="grid grid-cols-4 gap-1.5">
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[var(--color-g400)]">-</span>}
+                        {investedUSD > 0 ? `$${investedUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[var(--color-g400)]">-</span>}
+                        {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
-                      {cashKRW === 0 && evalKRW === 0 && (
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
+                      </div>
+                      {investedKRW === 0 && cashKRW === 0 && evalKRW === 0 && (
                         <div className="text-xs font-bold text-[var(--color-positive)]">
-                          ₩{formatKRW(totalKRW)}
+                          {fmtKRW(totalKRW)}
                         </div>
                       )}
                     </div>
                   )}
-                  {cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
-                    <div className="grid grid-cols-3 gap-2">
+                  {investedKRW === 0 && investedUSD === 0 && cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
+                    <div className="grid grid-cols-4 gap-1.5">
+                      <div className="text-xs text-[var(--color-g400)]">-</div>
                       <div className="text-xs text-[var(--color-g400)]">-</div>
                       <div className="text-xs text-[var(--color-g400)]">-</div>
                       <div className="text-xs font-bold text-[var(--color-positive)]">₩0</div>
