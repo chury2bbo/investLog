@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   Button,
@@ -464,10 +465,11 @@ export default function PersonalityPage() {
 // ─── 헤더 컴포넌트 ───────────────────────────────────────
 
 function Header() {
+  const router = useRouter();
   return (
     <div className="flex items-center gap-2 mb-6">
       <button
-        onClick={() => window.history.back()}
+        onClick={() => router.back()}
         className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">

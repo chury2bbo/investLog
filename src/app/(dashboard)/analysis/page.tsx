@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   Button,
@@ -71,12 +72,7 @@ interface MddPoint {
 
 // ─── 유틸 ────────────────────────────────────────────────
 
-function formatPrice(value: number, country: string) {
-  if (country !== "KR") {
-    return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
-  return `₩${value.toLocaleString()}`;
-}
+import { formatPrice } from "@/lib/format";
 
 function calcMdd(data: HistoryPoint[]): MddPoint[] {
   if (data.length === 0) return [];
@@ -101,6 +97,7 @@ function getDefaultDates() {
 // ─── 메인 페이지 ─────────────────────────────────────────
 
 export default function AnalysisPage() {
+  const router = useRouter();
   // 검색
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -282,7 +279,7 @@ export default function AnalysisPage() {
       {/* 헤더 */}
       <div className="flex items-center gap-2 mb-6">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => router.back()}
           className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner } from "@/components/ui";
+import { LoadingSpinner, Input } from "@/components/ui";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -120,65 +120,44 @@ export default function RegisterPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* 이름 */}
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                    이름
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="홍길동"
-                    required
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                  />
-                </div>
+                <Input
+                  label="이름"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="홍길동"
+                  required
+                />
 
                 {/* 이메일 */}
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                    이메일
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="example@email.com"
-                    required
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                  />
-                </div>
+                <Input
+                  label="이메일"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="example@email.com"
+                  required
+                />
 
                 {/* 비밀번호 */}
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                    비밀번호
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="8자 이상 입력"
-                    required
-                    minLength={8}
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                  />
-                </div>
+                <Input
+                  label="비밀번호"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="8자 이상 입력"
+                  required
+                  minLength={8}
+                />
 
                 {/* 비밀번호 확인 */}
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
-                    비밀번호 확인
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    placeholder="비밀번호를 다시 입력"
-                    required
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
-                  />
-                </div>
+                <Input
+                  label="비밀번호 확인"
+                  type="password"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  placeholder="비밀번호를 다시 입력"
+                  required
+                />
 
                 {/* 에러 메시지 — 빨간 배경 배너 */}
                 {error && (

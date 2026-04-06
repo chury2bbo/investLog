@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { type Filters } from "./types";
 
 interface TradeTopBarProps {
@@ -14,6 +15,7 @@ interface TradeTopBarProps {
 }
 
 export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggleFilter, onOpenModal, viewMode, onToggleView }: TradeTopBarProps) {
+  const router = useRouter();
   const set = (key: keyof Filters, value: string) =>
     onChange({ ...filters, [key]: value });
 
@@ -24,7 +26,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
       {/* 타이틀 행 — 계좌 관리와 동일 */}
       <div className="flex items-center justify-between px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => window.history.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">

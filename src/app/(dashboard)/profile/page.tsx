@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Card, SectionTitle, Button, BottomSheet } from "@/components/ui";
+import { Card, SectionTitle, Button, Input, Toast, BottomSheet } from "@/components/ui";
 
 const PW_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,15}$/;
 
@@ -121,26 +121,13 @@ export default function ProfilePage() {
   return (
     <div className="w-full max-w-lg mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 토스트 */}
-      {toast.visible && (
-        <div
-          className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl min-w-[260px] max-w-[calc(100vw-40px)] animate-in fade-in slide-in-from-top-2 duration-300 ${
-            toast.ok ? "bg-[#05C072]" : "bg-[#F04452]"
-          }`}
-        >
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
-            <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
-          </div>
-          <button
-            onClick={() => setToast((p) => ({ ...p, visible: false }))}
-            className="text-white/60 hover:text-white transition-colors shrink-0 cursor-pointer"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      )}
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        variant={toast.ok ? "success" : "error"}
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
 
       {/* 프로필 헤더 */}
       <div className="flex flex-col items-center py-6 mb-6">
@@ -164,16 +151,12 @@ export default function ProfilePage() {
         <SectionTitle title="이름 변경" />
         <Card>
           <div className="space-y-4">
-            <div>
-              <label className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mb-1 block">이름</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-transparent border-b border-[#E0E8E0] dark:border-[#2D3D30] pb-1.5 text-sm text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072]"
-                placeholder="이름을 입력하세요"
-              />
-            </div>
+            <Input
+              label="이름"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="이름을 입력하세요"
+            />
             <div className="flex justify-center">
               <button
                 onClick={handleNameSave}
@@ -199,16 +182,14 @@ export default function ProfilePage() {
         <Card>
           <div className="space-y-4">
             {pwFields.map(({ label, value, setter, placeholder }) => (
-              <div key={label}>
-                <label className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mb-1 block">{label}</label>
-                <input
-                  type="password"
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  className="w-full bg-transparent border-b border-[#E0E8E0] dark:border-[#2D3D30] pb-1.5 text-sm text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072]"
-                  placeholder={placeholder}
-                />
-              </div>
+              <Input
+                key={label}
+                label={label}
+                type="password"
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                placeholder={placeholder}
+              />
             ))}
             <div className="flex justify-center">
               <button
