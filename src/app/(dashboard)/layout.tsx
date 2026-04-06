@@ -58,7 +58,7 @@ function IconSidebar() {
   const initial = userName.charAt(0);
 
   return (
-    <div className="hidden md:flex w-16 shrink-0 flex-col items-center py-[18px] sticky top-0 h-screen border-r bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)]">
+    <div className="hidden md:flex w-16 shrink-0 flex-col items-center py-[18px] sticky top-0 h-screen border-r bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)] z-40">
       {/* 로고 */}
       <div className="mb-7"><Logo size={36} /></div>
 

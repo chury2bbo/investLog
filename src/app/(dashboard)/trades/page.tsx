@@ -796,7 +796,7 @@ export default function TradesPage() {
                   className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     formReasonTags.includes(tag.label)
                       ? "bg-[var(--color-primary)] text-white"
-                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"
+                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"
                   }`}
                   title={tag.desc}
                 >
@@ -818,8 +818,8 @@ export default function TradesPage() {
                   onClick={() => setFormEmotion(formEmotion === em.label ? "" : em.label)}
                   className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors ${
                     formEmotion === em.label
-                      ? "bg-[#F5F0FF] dark:bg-[#2A1D3D] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
-                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]"
+                      ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
+                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
                   }`}
                 >
                   <span>{em.icon}</span>

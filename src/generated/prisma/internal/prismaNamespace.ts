@@ -397,6 +397,7 @@ export const ModelName = {
   TickerSummaryCache: 'TickerSummaryCache',
   TickerAnalysisCache: 'TickerAnalysisCache',
   UserAnalysisLog: 'UserAnalysisLog',
+  MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog'
 } as const
 
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "apiUsageLog"
+    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1379,6 +1380,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MonthlyAssetSnapshot: {
+      payload: Prisma.$MonthlyAssetSnapshotPayload<ExtArgs>
+      fields: Prisma.MonthlyAssetSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MonthlyAssetSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MonthlyAssetSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.MonthlyAssetSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MonthlyAssetSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.MonthlyAssetSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.MonthlyAssetSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.MonthlyAssetSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MonthlyAssetSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.MonthlyAssetSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        update: {
+          args: Prisma.MonthlyAssetSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.MonthlyAssetSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MonthlyAssetSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MonthlyAssetSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.MonthlyAssetSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyAssetSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.MonthlyAssetSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMonthlyAssetSnapshot>
+        }
+        groupBy: {
+          args: Prisma.MonthlyAssetSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyAssetSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MonthlyAssetSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyAssetSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
     ApiUsageLog: {
       payload: Prisma.$ApiUsageLogPayload<ExtArgs>
       fields: Prisma.ApiUsageLogFieldRefs
@@ -1668,6 +1743,19 @@ export const UserAnalysisLogScalarFieldEnum = {
 export type UserAnalysisLogScalarFieldEnum = (typeof UserAnalysisLogScalarFieldEnum)[keyof typeof UserAnalysisLogScalarFieldEnum]
 
 
+export const MonthlyAssetSnapshotScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  cashTotal: 'cashTotal',
+  investedAmount: 'investedAmount',
+  evaluatedAmount: 'evaluatedAmount',
+  usdRate: 'usdRate'
+} as const
+
+export type MonthlyAssetSnapshotScalarFieldEnum = (typeof MonthlyAssetSnapshotScalarFieldEnum)[keyof typeof MonthlyAssetSnapshotScalarFieldEnum]
+
+
 export const ApiUsageLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1879,6 +1967,7 @@ export type GlobalOmitConfig = {
   tickerSummaryCache?: Prisma.TickerSummaryCacheOmit
   tickerAnalysisCache?: Prisma.TickerAnalysisCacheOmit
   userAnalysisLog?: Prisma.UserAnalysisLogOmit
+  monthlyAssetSnapshot?: Prisma.MonthlyAssetSnapshotOmit
   apiUsageLog?: Prisma.ApiUsageLogOmit
 }
 

@@ -228,22 +228,20 @@ export default function TradeCalendar({ tradeType = "", market = "" }: TradeCale
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span
-                              className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap"
-                              style={
+                              className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
                                 t.type === "BUY"
-                                  ? { backgroundColor: "#E6F9F1", color: "#05C072" }
-                                  : { backgroundColor: "#FFF3E8", color: "#F07D05" }
-                              }
+                                  ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
+                                  : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"
+                              }`}
                             >
                               {t.type === "BUY" ? "매수" : "매도"}
                             </span>
                             <span
-                              className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap"
-                              style={
+                              className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
                                 getCountry(t.ticker) === "KR"
-                                  ? { backgroundColor: "#E6F9F1", color: "#05C072" }
-                                  : { backgroundColor: "#E8F0FE", color: "#4285F4" }
-                              }
+                                  ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
+                                  : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"
+                              }`}
                             >
                               {getCountry(t.ticker) === "KR" ? "국내" : "해외"}
                             </span>

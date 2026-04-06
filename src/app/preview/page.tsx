@@ -684,6 +684,37 @@ export default function PreviewPage() {
               </Card>
             </div>
 
+            {/* 다크모드 태그 비교 */}
+            <div>
+              <h2 className="text-[13px] font-bold mb-3" style={{ color: text }}>다크모드 태그 비교</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {/* 현재 (밝은 배경 그대로) */}
+                <div className="rounded-[18px] p-5" style={{ backgroundColor: T.dkCard, border: `1px solid ${T.dkBorder}` }}>
+                  <div className="text-[11px] font-bold mb-3" style={{ color: T.dkMuted }}>현재 (밝은 배경)</div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="text-[11px] font-bold px-[7px] py-[2px] rounded-[5px]" style={{ backgroundColor: T.primarySoft, color: T.primary }}>국내</span>
+                    <span className="text-[11px] font-bold px-[7px] py-[2px] rounded-[5px]" style={{ backgroundColor: "#E8F0FE", color: "#4285F4" }}>해외</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[11px] font-bold px-[10px] py-[3px] rounded-[6px]" style={{ backgroundColor: T.positiveSoft, color: T.positive }}>+12.34%</span>
+                    <span className="text-[11px] font-bold px-[10px] py-[3px] rounded-[6px]" style={{ backgroundColor: T.negativeSoft, color: T.negative }}>-5.67%</span>
+                  </div>
+                </div>
+                {/* B안 (어두운 반투명 배경) */}
+                <div className="rounded-[18px] p-5" style={{ backgroundColor: T.dkCard, border: `1px solid ${T.dkBorder}` }}>
+                  <div className="text-[11px] font-bold mb-3" style={{ color: T.dkMuted }}>B안 (반투명 배경)</div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="text-[11px] font-bold px-[7px] py-[2px] rounded-[5px]" style={{ backgroundColor: "rgba(45,184,122,0.15)", color: T.primary }}>국내</span>
+                    <span className="text-[11px] font-bold px-[7px] py-[2px] rounded-[5px]" style={{ backgroundColor: "rgba(66,133,244,0.15)", color: "#4285F4" }}>해외</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[11px] font-bold px-[10px] py-[3px] rounded-[6px]" style={{ backgroundColor: "rgba(5,192,114,0.15)", color: T.positive }}>+12.34%</span>
+                    <span className="text-[11px] font-bold px-[10px] py-[3px] rounded-[6px]" style={{ backgroundColor: "rgba(240,68,82,0.15)", color: T.negative }}>-5.67%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 컬러 팔레트 */}
             <div>
               <h2 className="text-[13px] font-bold mb-3" style={{ color: text }}>컬러 팔레트</h2>

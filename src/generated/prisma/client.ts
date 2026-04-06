@@ -107,6 +107,11 @@ export type TickerAnalysisCache = Prisma.TickerAnalysisCacheModel
  */
 export type UserAnalysisLog = Prisma.UserAnalysisLogModel
 /**
+ * Model MonthlyAssetSnapshot
+ * 
+ */
+export type MonthlyAssetSnapshot = Prisma.MonthlyAssetSnapshotModel
+/**
  * Model ApiUsageLog
  * 
  */
