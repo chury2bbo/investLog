@@ -6,9 +6,9 @@ interface CardProps {
 export function Card({ children, className = "" }: CardProps) {
   return (
     <div
-      className={`rounded-2xl p-5 bg-white dark:bg-[#1D2720] ${className}`}
+      className={`rounded-[18px] p-[22px] bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)] ${className}`}
       style={{
-        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
       }}
     >
       {children}

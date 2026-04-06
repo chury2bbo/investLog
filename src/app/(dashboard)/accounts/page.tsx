@@ -242,10 +242,10 @@ export default function AccountsPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
             계좌 관리
           </h1>
         </div>
@@ -289,19 +289,19 @@ export default function AccountsPage() {
                   onClick={() => router.push(`/accounts/${acc.id}`)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
+                    <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-[#1D3D2A]">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                     </div>
                     <div>
-                      <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                      <div className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {acc.brokerageCompany.name}
                         {acc.memo && (
-                          <span className="ml-1.5 text-xs font-normal text-[#9AA99A] dark:text-[#5A6A5A]">
+                          <span className="ml-1.5 text-xs font-normal text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                             {acc.memo}
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
+                      <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
                         {typeLabel ? `${typeLabel} · ` : ""}{acc.holdings.length}종목
                       </div>
                     </div>
@@ -309,40 +309,40 @@ export default function AccountsPage() {
 
                   <div className="flex items-center gap-2">
                     <PnlTag value={pnlRate} />
-                    <span className="text-[#9AA99A] dark:text-[#5A6A5A] text-base">›</span>
+                    <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)] text-base">›</span>
                   </div>
                 </div>
 
                 {/* 예수금 · 평가금 · 합산 */}
-                <div className="mt-3 pt-3 border-t border-[#F0F4F0] dark:border-[#2D3D30] space-y-2">
+                <div className="mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)] space-y-2">
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">예수금</div>
-                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">평가금</div>
-                    <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">합산(원화)</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">예수금</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">평가금</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">합산(원화)</div>
                   </div>
                   {(cashKRW > 0 || evalKRW > 0) && (
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                        {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {cashKRW > 0 ? `₩${formatKRW(cashKRW)}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
-                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                        {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span className="text-[#9AA99A]">-</span>}
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalKRW > 0 ? `₩${formatKRW(evalKRW)}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
-                      <div className="text-xs font-bold text-[#05C072]">
+                      <div className="text-xs font-bold text-[var(--color-positive)]">
                         ₩{formatKRW(totalKRW)}
                       </div>
                     </div>
                   )}
                   {(cashUSD > 0 || evalUSD > 0) && (
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                        {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
-                      <div className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[#9AA99A]">-</span>}
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       {cashKRW === 0 && evalKRW === 0 && (
-                        <div className="text-xs font-bold text-[#05C072]">
+                        <div className="text-xs font-bold text-[var(--color-positive)]">
                           ₩{formatKRW(totalKRW)}
                         </div>
                       )}
@@ -350,24 +350,24 @@ export default function AccountsPage() {
                   )}
                   {cashKRW === 0 && cashUSD === 0 && evalKRW === 0 && evalUSD === 0 && (
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="text-xs text-[#9AA99A]">-</div>
-                      <div className="text-xs text-[#9AA99A]">-</div>
-                      <div className="text-xs font-bold text-[#05C072]">₩0</div>
+                      <div className="text-xs text-[var(--color-g400)]">-</div>
+                      <div className="text-xs text-[var(--color-g400)]">-</div>
+                      <div className="text-xs font-bold text-[var(--color-positive)]">₩0</div>
                     </div>
                   )}
                 </div>
 
                 {/* 수정 / 삭제 버튼 */}
-                <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-[#F0F4F0] dark:border-[#2D3D30]">
+                <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
                   <button
                     onClick={(e) => { e.stopPropagation(); openEditModal(acc); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                   >
                     수정
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm(acc.id); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452] hover:bg-[#FDD] dark:hover:bg-[#4D1D22] transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[#4D1D22] transition-colors"
                   >
                     삭제
                   </button>
@@ -464,30 +464,30 @@ export default function AccountsPage() {
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-white dark:bg-[#1D2720] rounded-2xl p-6 w-[340px] max-w-[90vw]">
+          <div className="relative bg-[var(--color-surface)] dark:bg-[var(--color-card)] rounded-2xl p-6 w-[340px] max-w-[90vw]">
             <div className="text-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-[#FEE8EA] dark:bg-[#3D1519] flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] flex items-center justify-center mx-auto mb-3">
                 <span className="text-xl">⚠️</span>
               </div>
-              <h3 className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-1">
+              <h3 className="text-base font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-1">
                 계좌를 삭제하시겠습니까?
               </h3>
-              <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
-                이 계좌의 <strong className="text-[#F04452]">보유 종목, 매매 기록, 예수금</strong>이
+              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+                이 계좌의 <strong className="text-[var(--color-negative)]">보유 종목, 매매 기록, 예수금</strong>이
                 모두 삭제되며 복구할 수 없습니다.
               </p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8]"
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)]"
               >
                 취소
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#F04452] text-white"
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-negative)] text-white"
                 style={{ opacity: deleting ? 0.6 : 1 }}
               >
                 {deleting ? "삭제 중..." : "삭제"}

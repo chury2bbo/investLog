@@ -17,7 +17,7 @@ export function Toast({
 }: ToastProps) {
   if (!visible) return null;
 
-  const bg = variant === "success" ? "bg-[#05C072]" : "bg-[#F04452]";
+  const bg = variant === "success" ? "bg-[var(--color-primary)]" : "bg-[var(--color-negative)]";
 
   return (
     <div

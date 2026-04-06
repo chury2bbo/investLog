@@ -78,6 +78,11 @@ export type TickerSummaryCache = Prisma.TickerSummaryCacheModel
  */
 export type TickerAnalysisCache = Prisma.TickerAnalysisCacheModel
 /**
+ * Model UserAnalysisLog
+ * 
+ */
+export type UserAnalysisLog = Prisma.UserAnalysisLogModel
+/**
  * Model ApiUsageLog
  * 
  */

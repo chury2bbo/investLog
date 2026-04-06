@@ -34,6 +34,7 @@ export type TickerAnalysisCacheMinAggregateOutputType = {
   swotOpportunity: string | null
   swotThreat: string | null
   reasoning: string | null
+  recentIssues: string | null
   cachedDate: string | null
   updatedAt: Date | null
 }
@@ -48,6 +49,7 @@ export type TickerAnalysisCacheMaxAggregateOutputType = {
   swotOpportunity: string | null
   swotThreat: string | null
   reasoning: string | null
+  recentIssues: string | null
   cachedDate: string | null
   updatedAt: Date | null
 }
@@ -62,6 +64,7 @@ export type TickerAnalysisCacheCountAggregateOutputType = {
   swotOpportunity: number
   swotThreat: number
   reasoning: number
+  recentIssues: number
   cachedDate: number
   updatedAt: number
   _all: number
@@ -78,6 +81,7 @@ export type TickerAnalysisCacheMinAggregateInputType = {
   swotOpportunity?: true
   swotThreat?: true
   reasoning?: true
+  recentIssues?: true
   cachedDate?: true
   updatedAt?: true
 }
@@ -92,6 +96,7 @@ export type TickerAnalysisCacheMaxAggregateInputType = {
   swotOpportunity?: true
   swotThreat?: true
   reasoning?: true
+  recentIssues?: true
   cachedDate?: true
   updatedAt?: true
 }
@@ -106,6 +111,7 @@ export type TickerAnalysisCacheCountAggregateInputType = {
   swotOpportunity?: true
   swotThreat?: true
   reasoning?: true
+  recentIssues?: true
   cachedDate?: true
   updatedAt?: true
   _all?: true
@@ -193,6 +199,7 @@ export type TickerAnalysisCacheGroupByOutputType = {
   swotOpportunity: string
   swotThreat: string
   reasoning: string
+  recentIssues: string
   cachedDate: string
   updatedAt: Date
   _count: TickerAnalysisCacheCountAggregateOutputType | null
@@ -228,6 +235,7 @@ export type TickerAnalysisCacheWhereInput = {
   swotOpportunity?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   swotThreat?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   reasoning?: Prisma.StringFilter<"TickerAnalysisCache"> | string
+  recentIssues?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   cachedDate?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   updatedAt?: Prisma.DateTimeFilter<"TickerAnalysisCache"> | Date | string
 }
@@ -242,6 +250,7 @@ export type TickerAnalysisCacheOrderByWithRelationInput = {
   swotOpportunity?: Prisma.SortOrder
   swotThreat?: Prisma.SortOrder
   reasoning?: Prisma.SortOrder
+  recentIssues?: Prisma.SortOrder
   cachedDate?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -259,6 +268,7 @@ export type TickerAnalysisCacheWhereUniqueInput = Prisma.AtLeast<{
   swotOpportunity?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   swotThreat?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   reasoning?: Prisma.StringFilter<"TickerAnalysisCache"> | string
+  recentIssues?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   cachedDate?: Prisma.StringFilter<"TickerAnalysisCache"> | string
   updatedAt?: Prisma.DateTimeFilter<"TickerAnalysisCache"> | Date | string
 }, "ticker">
@@ -273,6 +283,7 @@ export type TickerAnalysisCacheOrderByWithAggregationInput = {
   swotOpportunity?: Prisma.SortOrder
   swotThreat?: Prisma.SortOrder
   reasoning?: Prisma.SortOrder
+  recentIssues?: Prisma.SortOrder
   cachedDate?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TickerAnalysisCacheCountOrderByAggregateInput
@@ -293,6 +304,7 @@ export type TickerAnalysisCacheScalarWhereWithAggregatesInput = {
   swotOpportunity?: Prisma.StringWithAggregatesFilter<"TickerAnalysisCache"> | string
   swotThreat?: Prisma.StringWithAggregatesFilter<"TickerAnalysisCache"> | string
   reasoning?: Prisma.StringWithAggregatesFilter<"TickerAnalysisCache"> | string
+  recentIssues?: Prisma.StringWithAggregatesFilter<"TickerAnalysisCache"> | string
   cachedDate?: Prisma.StringWithAggregatesFilter<"TickerAnalysisCache"> | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TickerAnalysisCache"> | Date | string
 }
@@ -307,6 +319,7 @@ export type TickerAnalysisCacheCreateInput = {
   swotOpportunity: string
   swotThreat: string
   reasoning: string
+  recentIssues?: string
   cachedDate: string
   updatedAt?: Date | string
 }
@@ -321,6 +334,7 @@ export type TickerAnalysisCacheUncheckedCreateInput = {
   swotOpportunity: string
   swotThreat: string
   reasoning: string
+  recentIssues?: string
   cachedDate: string
   updatedAt?: Date | string
 }
@@ -335,6 +349,7 @@ export type TickerAnalysisCacheUpdateInput = {
   swotOpportunity?: Prisma.StringFieldUpdateOperationsInput | string
   swotThreat?: Prisma.StringFieldUpdateOperationsInput | string
   reasoning?: Prisma.StringFieldUpdateOperationsInput | string
+  recentIssues?: Prisma.StringFieldUpdateOperationsInput | string
   cachedDate?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -349,6 +364,7 @@ export type TickerAnalysisCacheUncheckedUpdateInput = {
   swotOpportunity?: Prisma.StringFieldUpdateOperationsInput | string
   swotThreat?: Prisma.StringFieldUpdateOperationsInput | string
   reasoning?: Prisma.StringFieldUpdateOperationsInput | string
+  recentIssues?: Prisma.StringFieldUpdateOperationsInput | string
   cachedDate?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -363,6 +379,7 @@ export type TickerAnalysisCacheCreateManyInput = {
   swotOpportunity: string
   swotThreat: string
   reasoning: string
+  recentIssues?: string
   cachedDate: string
   updatedAt?: Date | string
 }
@@ -377,6 +394,7 @@ export type TickerAnalysisCacheUpdateManyMutationInput = {
   swotOpportunity?: Prisma.StringFieldUpdateOperationsInput | string
   swotThreat?: Prisma.StringFieldUpdateOperationsInput | string
   reasoning?: Prisma.StringFieldUpdateOperationsInput | string
+  recentIssues?: Prisma.StringFieldUpdateOperationsInput | string
   cachedDate?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,6 +409,7 @@ export type TickerAnalysisCacheUncheckedUpdateManyInput = {
   swotOpportunity?: Prisma.StringFieldUpdateOperationsInput | string
   swotThreat?: Prisma.StringFieldUpdateOperationsInput | string
   reasoning?: Prisma.StringFieldUpdateOperationsInput | string
+  recentIssues?: Prisma.StringFieldUpdateOperationsInput | string
   cachedDate?: Prisma.StringFieldUpdateOperationsInput | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -405,6 +424,7 @@ export type TickerAnalysisCacheCountOrderByAggregateInput = {
   swotOpportunity?: Prisma.SortOrder
   swotThreat?: Prisma.SortOrder
   reasoning?: Prisma.SortOrder
+  recentIssues?: Prisma.SortOrder
   cachedDate?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -419,6 +439,7 @@ export type TickerAnalysisCacheMaxOrderByAggregateInput = {
   swotOpportunity?: Prisma.SortOrder
   swotThreat?: Prisma.SortOrder
   reasoning?: Prisma.SortOrder
+  recentIssues?: Prisma.SortOrder
   cachedDate?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +454,7 @@ export type TickerAnalysisCacheMinOrderByAggregateInput = {
   swotOpportunity?: Prisma.SortOrder
   swotThreat?: Prisma.SortOrder
   reasoning?: Prisma.SortOrder
+  recentIssues?: Prisma.SortOrder
   cachedDate?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -449,6 +471,7 @@ export type TickerAnalysisCacheSelect<ExtArgs extends runtime.Types.Extensions.I
   swotOpportunity?: boolean
   swotThreat?: boolean
   reasoning?: boolean
+  recentIssues?: boolean
   cachedDate?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tickerAnalysisCache"]>
@@ -463,6 +486,7 @@ export type TickerAnalysisCacheSelectCreateManyAndReturn<ExtArgs extends runtime
   swotOpportunity?: boolean
   swotThreat?: boolean
   reasoning?: boolean
+  recentIssues?: boolean
   cachedDate?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tickerAnalysisCache"]>
@@ -477,6 +501,7 @@ export type TickerAnalysisCacheSelectUpdateManyAndReturn<ExtArgs extends runtime
   swotOpportunity?: boolean
   swotThreat?: boolean
   reasoning?: boolean
+  recentIssues?: boolean
   cachedDate?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tickerAnalysisCache"]>
@@ -491,11 +516,12 @@ export type TickerAnalysisCacheSelectScalar = {
   swotOpportunity?: boolean
   swotThreat?: boolean
   reasoning?: boolean
+  recentIssues?: boolean
   cachedDate?: boolean
   updatedAt?: boolean
 }
 
-export type TickerAnalysisCacheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ticker" | "recommendation" | "targetBuy" | "targetSell" | "swotStrength" | "swotWeakness" | "swotOpportunity" | "swotThreat" | "reasoning" | "cachedDate" | "updatedAt", ExtArgs["result"]["tickerAnalysisCache"]>
+export type TickerAnalysisCacheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"ticker" | "recommendation" | "targetBuy" | "targetSell" | "swotStrength" | "swotWeakness" | "swotOpportunity" | "swotThreat" | "reasoning" | "recentIssues" | "cachedDate" | "updatedAt", ExtArgs["result"]["tickerAnalysisCache"]>
 
 export type $TickerAnalysisCachePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TickerAnalysisCache"
@@ -510,6 +536,7 @@ export type $TickerAnalysisCachePayload<ExtArgs extends runtime.Types.Extensions
     swotOpportunity: string
     swotThreat: string
     reasoning: string
+    recentIssues: string
     cachedDate: string
     updatedAt: Date
   }, ExtArgs["result"]["tickerAnalysisCache"]>
@@ -944,6 +971,7 @@ export interface TickerAnalysisCacheFieldRefs {
   readonly swotOpportunity: Prisma.FieldRef<"TickerAnalysisCache", 'String'>
   readonly swotThreat: Prisma.FieldRef<"TickerAnalysisCache", 'String'>
   readonly reasoning: Prisma.FieldRef<"TickerAnalysisCache", 'String'>
+  readonly recentIssues: Prisma.FieldRef<"TickerAnalysisCache", 'String'>
   readonly cachedDate: Prisma.FieldRef<"TickerAnalysisCache", 'String'>
   readonly updatedAt: Prisma.FieldRef<"TickerAnalysisCache", 'DateTime'>
 }

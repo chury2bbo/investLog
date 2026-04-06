@@ -3,23 +3,25 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { ThemeToggle } from "@/components/ui";
 
-// ─── 네비 항목 ───────────────────────────────────────────
+// ─── 네비 아이콘 (lucide 스타일) ────────────────────────────
 
-// SVG 아이콘 컴포넌트
-function NavIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
-  const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, className };
+function NavIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
+  const sw = active ? 2 : 1.75;
+  const color = active ? "var(--color-primary)" : "var(--color-g400)";
+  const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: sw, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (name) {
     case "home":
-      return <svg {...props}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>;
+      return <svg {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></svg>;
     case "wallet":
-      return <svg {...props}><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>;
+      return <svg {...props}><path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" /><path d="M2 10h20" /></svg>;
     case "notebook":
-      return <svg {...props}><path d="M12 20h9" /><path d="M16.376 3.622a1 1 0 013.002 3.002L7.368 18.635a2 2 0 01-.855.506l-2.872.838.838-2.872a2 2 0 01.506-.855L16.376 3.622z" /></svg>;
-    case "search":
-      return <svg {...props}><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>;
+      return <svg {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>;
+    case "chart":
+      return <svg {...props}><path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" /></svg>;
     case "brain":
-      return <svg {...props}><path d="M12 2a5 5 0 015 5c0 .9-.3 1.7-.7 2.4" /><path d="M17 7a5 5 0 01-1.5 9.2" /><path d="M12 2a5 5 0 00-5 5c0 .9.3 1.7.7 2.4" /><path d="M7 7a5 5 0 001.5 9.2" /><path d="M12 22v-6" /><path d="M9 19h6" /></svg>;
+      return <svg {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" /></svg>;
     case "settings":
       return <svg {...props}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>;
     default:
@@ -31,7 +33,7 @@ const NAV_ITEMS = [
   { id: "/", icon: "home", label: "대시보드", mobileLabel: "홈" },
   { id: "/accounts", icon: "wallet", label: "계좌 관리", mobileLabel: "계좌" },
   { id: "/trades", icon: "notebook", label: "매매일지", mobileLabel: "매매" },
-  { id: "/analysis", icon: "search", label: "종목 분석", mobileLabel: "분석" },
+  { id: "/analysis", icon: "chart", label: "종목 분석", mobileLabel: "분석" },
   { id: "/analysis/personality", icon: "brain", label: "투자 성향", mobileLabel: "성향" },
   { id: "/profile", icon: "settings", label: "회원정보", mobileLabel: "설정" },
 ];
@@ -39,7 +41,6 @@ const NAV_ITEMS = [
 function isActive(pathname: string, navId: string) {
   if (navId === "/") return pathname === "/";
   if (!pathname.startsWith(navId)) return false;
-  // 더 구체적인 nav item이 매칭되면 상위 경로는 active 제외
   return !NAV_ITEMS.some(
     (item) => item.id !== navId && item.id.startsWith(navId) && pathname.startsWith(item.id)
   );
@@ -57,29 +58,17 @@ function IconSidebar() {
   const initial = userName.charAt(0);
 
   return (
-    <div
-      className="hidden md:flex w-16 shrink-0 flex-col items-center py-5 sticky top-0 h-screen border-r bg-white dark:bg-[#1A2320] border-[#F0F4F0] dark:border-[#2D3D30]"
-    >
+    <div className="hidden md:flex w-16 shrink-0 flex-col items-center py-[18px] sticky top-0 h-screen border-r bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)]">
       {/* 로고 */}
       <div
-        className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg mb-7 shrink-0"
+        className="w-9 h-9 rounded-[11px] flex items-center justify-center mb-7 shrink-0"
         style={{
-          backgroundColor: "#05C072",
-          boxShadow: "0 4px 12px rgba(5,192,114,0.25)",
+          background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+          boxShadow: "0 4px 14px color-mix(in srgb, var(--color-primary) 25%, transparent)",
         }}
       >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-          <polyline points="16 7 22 7 22 13" />
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" />
         </svg>
       </div>
 
@@ -96,28 +85,26 @@ function IconSidebar() {
             >
               <button
                 onClick={() => router.push(item.id)}
-                className="w-full flex items-center justify-center py-2.5 relative"
+                className="w-full flex items-center justify-center py-3 relative cursor-pointer"
                 style={{
                   background: active
-                    ? "rgba(5,192,114,0.1)"
+                    ? "var(--color-primary-soft)"
                     : "transparent",
                 }}
               >
                 {active && (
                   <div
-                    className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r"
-                    style={{ backgroundColor: "#05C072" }}
+                    className="absolute left-0 top-[20%] bottom-[20%] w-[3px]"
+                    style={{ backgroundColor: "var(--color-primary)", borderRadius: "0 3px 3px 0" }}
                   />
                 )}
-                <span style={{ opacity: active ? 1 : 0.45, color: active ? "#05C072" : "#6B7B6B" }}>
-                  <NavIcon name={item.icon} size={22} />
-                </span>
+                <NavIcon name={item.icon} size={19} active={active} />
               </button>
 
               {/* 툴팁 */}
               {hovered === item.id && (
                 <div
-                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1A221A] dark:bg-[#1D2720]"
+                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
                   style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                 >
                   {item.label}
@@ -126,7 +113,7 @@ function IconSidebar() {
                     style={{
                       borderTop: "5px solid transparent",
                       borderBottom: "5px solid transparent",
-                      borderRight: "5px solid #1A221A",
+                      borderRight: "5px solid var(--color-text)",
                     }}
                   />
                 </div>
@@ -136,8 +123,9 @@ function IconSidebar() {
         })}
       </div>
 
-      {/* 하단: 프로필 */}
-      <div className="flex flex-col gap-1 items-center">
+      {/* 하단: 다크모드 + 프로필 */}
+      <div className="flex flex-col gap-2 items-center">
+        <ThemeToggle />
         <div
           className="relative"
           onMouseEnter={() => setHovered("logout")}
@@ -145,17 +133,16 @@ function IconSidebar() {
         >
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold text-white cursor-pointer"
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-extrabold text-white cursor-pointer"
             style={{
-              backgroundColor: "#05C072",
-              boxShadow: "0 2px 8px rgba(5,192,114,0.25)",
+              background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
             }}
           >
             {initial}
           </button>
           {hovered === "logout" && (
             <div
-              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1A221A] dark:bg-[#1D2720]"
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
             >
               로그아웃
@@ -164,7 +151,7 @@ function IconSidebar() {
                 style={{
                   borderTop: "5px solid transparent",
                   borderBottom: "5px solid transparent",
-                  borderRight: "5px solid #1A221A",
+                  borderRight: "5px solid var(--color-text)",
                 }}
               />
             </div>
@@ -182,26 +169,22 @@ function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div
-      className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around pt-2 pb-5 z-50 border-t bg-white dark:bg-[#1A2320] border-[#F0F4F0] dark:border-[#2D3D30]"
-    >
+    <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around pt-2 pb-5 z-50 border-t bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)]">
       {NAV_ITEMS.map((item) => {
         const active = isActive(pathname, item.id);
         return (
           <button
             key={item.id}
             onClick={() => router.push(item.id)}
-            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-1"
-            style={{ opacity: active ? 1 : 0.35 }}
+            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-1 cursor-pointer"
+            style={{ opacity: active ? 1 : 0.4 }}
           >
-            <span style={{ color: active ? "#05C072" : "#6B7B6B" }}>
-              <NavIcon name={item.icon} size={22} />
-            </span>
+            <NavIcon name={item.icon} size={22} active={active} />
             <span
               className="text-[10px]"
               style={{
                 fontWeight: active ? 700 : 400,
-                color: active ? "#05C072" : undefined,
+                color: active ? "var(--color-primary)" : "var(--color-g500)",
               }}
             >
               {item.mobileLabel}
@@ -225,11 +208,9 @@ export default function DashboardLayout({
   const { status } = useSession();
   const [checked, setChecked] = useState(false);
 
-  // 온보딩 미완료 시 온보딩으로 리다이렉트
   useEffect(() => {
     if (status !== "authenticated") return;
 
-    // 온보딩 중 import 페이지 접근은 허용
     if (pathname === "/import") {
       setChecked(true);
       return;
@@ -247,17 +228,16 @@ export default function DashboardLayout({
       .catch(() => setChecked(true));
   }, [status, router, pathname]);
 
-  // 체크 완료 전에는 빈 화면 (깜빡임 방지)
   if (status === "loading" || !checked) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F5F7F5] dark:bg-[#0D1210]">
-        <div className="w-8 h-8 border-3 border-[#05C072] border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-[var(--color-bg)]">
+        <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7F5] dark:bg-[#0D1210]">
+    <div className="flex min-h-screen bg-[var(--color-bg)]">
       <IconSidebar />
       <main className="flex-1 min-w-0">{children}</main>
       <BottomNav />

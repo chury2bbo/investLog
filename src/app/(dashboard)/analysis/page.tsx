@@ -267,10 +267,10 @@ export default function AnalysisPage() {
   // 추천 색상
   const recColor =
     report?.recommendation === "BUY"
-      ? "#05C072"
+      ? "var(--color-positive)"
       : report?.recommendation === "SELL"
-        ? "#F04452"
-        : "#F07D05";
+        ? "var(--color-negative)"
+        : "var(--color-warning)";
 
   // ─── 렌더 ──────────────────────────────────────────────
 
@@ -280,13 +280,13 @@ export default function AnalysisPage() {
       <div className="flex items-center gap-2 mb-6">
         <button
           onClick={() => router.back()}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
           종목 분석
         </h1>
       </div>
@@ -311,13 +311,13 @@ export default function AnalysisPage() {
               setShowPrevAnalyses(true);
             }}
             className="text-sm font-semibold cursor-pointer"
-            style={{ color: "#05C072" }}
+            style={{ color: "var(--color-primary)" }}
           >
             {showPrevAnalyses ? "닫기" : "이전 분석 불러오기 →"}
           </button>
 
           {showPrevAnalyses && prevAnalyses.length > 0 && (
-            <div className="mt-2 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] overflow-hidden">
+            <div className="mt-2 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] overflow-hidden">
               {prevAnalyses.map((item) => (
                 <button
                   key={item.ticker}
@@ -326,11 +326,11 @@ export default function AnalysisPage() {
                     selectStock({ ticker: item.ticker, name: item.name, market: "", country: item.country });
                     setShowPrevAnalyses(false);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0 cursor-pointer"
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0 cursor-pointer"
                 >
                   <div>
-                    <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{item.name}</span>
-                    <span className="ml-2 text-xs text-[#9AA99A]">{item.ticker}</span>
+                    <span className="font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{item.name}</span>
+                    <span className="ml-2 text-xs text-[var(--color-g400)]">{item.ticker}</span>
                   </div>
                   <Tag label={item.country === "KR" ? "국내" : "해외"} color={item.country === "KR" ? "green" : "blue"} />
                 </button>
@@ -339,7 +339,7 @@ export default function AnalysisPage() {
           )}
 
           {showPrevAnalyses && prevAnalyses.length === 0 && (
-            <p className="mt-2 text-xs text-[#9AA99A]">이전 분석 이력이 없습니다.</p>
+            <p className="mt-2 text-xs text-[var(--color-g400)]">이전 분석 이력이 없습니다.</p>
           )}
         </div>
       )}
@@ -348,19 +348,19 @@ export default function AnalysisPage() {
       <div ref={searchRef} className="relative mb-6">
         {selected ? (
           /* 선택된 종목 표시 */
-          <div className="flex items-center justify-between pb-2 border-b-2 border-[#05C072]">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-[var(--color-primary)]">
             <div className="flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
               </svg>
-              <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{selected.name}</span>
-              <span className="text-xs text-[#9AA99A]">{selected.ticker}</span>
+              <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{selected.name}</span>
+              <span className="text-xs text-[var(--color-g400)]">{selected.ticker}</span>
               <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
             </div>
             <button
               type="button"
               onClick={clearStock}
-              className="text-xl leading-none text-[#9AA99A] hover:text-[#F04452] transition-colors"
+              className="text-xl leading-none text-[var(--color-g400)] hover:text-[var(--color-negative)] transition-colors"
             >
               ×
             </button>
@@ -368,8 +368,8 @@ export default function AnalysisPage() {
         ) : (
           /* 검색 입력 */
           <>
-            <div className="flex items-center gap-2 border-b-2 border-[#05C072] pb-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-2 border-b-2 border-[var(--color-primary)] pb-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
               </svg>
               <input
@@ -378,22 +378,22 @@ export default function AnalysisPage() {
                 onChange={(e) => handleSearch(e.target.value)}
                 onFocus={() => results.length > 0 && setShowDropdown(true)}
                 placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)"
-                className="flex-1 text-sm bg-transparent outline-none text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                className="flex-1 text-sm bg-transparent outline-none text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-g600)]"
               />
               {searching && <LoadingSpinner size={16} />}
             </div>
 
             {showDropdown && results.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg z-50 max-h-64 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg z-50 max-h-64 overflow-y-auto">
                 {results.map((r) => (
                   <button
                     key={`${r.ticker}-${r.country}`}
                     onClick={() => selectStock(r)}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0"
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0"
                   >
                     <div>
-                      <span className="font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{r.name}</span>
-                      <span className="ml-2 text-xs text-[#9AA99A]">{r.ticker}</span>
+                      <span className="font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{r.name}</span>
+                      <span className="ml-2 text-xs text-[var(--color-g400)]">{r.ticker}</span>
                     </div>
                     <Tag label={r.country === "KR" ? "국내" : "해외"} color={r.country === "KR" ? "green" : "blue"} />
                   </button>
@@ -406,7 +406,7 @@ export default function AnalysisPage() {
 
       {/* 미선택 시 */}
       {!selected && (
-        <EmptyState message="분석할 종목을 검색해주세요." icon="🔍" />
+        <EmptyState message="분석할 종목을 검색해주세요." />
       )}
 
       {/* ── ② 기업 소개 카드 ── */}
@@ -421,7 +421,7 @@ export default function AnalysisPage() {
             ) : summary ? (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                  <span className="text-lg font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                     {summary.name || selected.name}
                   </span>
                   <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
@@ -431,14 +431,14 @@ export default function AnalysisPage() {
                   {summary.sector && <Tag label={summary.sector} color="gray" />}
                   {summary.industry && <Tag label={summary.industry} color="gray" />}
                 </div>
-                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed">
+                <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
                   {summary.summary}
                 </p>
               </div>
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                  <span className="text-lg font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                     {selected.name}
                   </span>
                   <Tag label={selected.country === "KR" ? "국내" : "해외"} color={selected.country === "KR" ? "green" : "blue"} />
@@ -466,39 +466,39 @@ export default function AnalysisPage() {
               <div className="grid grid-cols-2 gap-4">
                 {/* 현재가 */}
                 <div>
-                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">현재가</div>
-                  <div className="text-xl font-extrabold text-[#1A221A] dark:text-[#E8EEE8]">
+                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">현재가</div>
+                  <div className="text-xl font-extrabold text-[var(--color-text)] dark:text-[var(--color-text)]">
                     {formatPrice(quote.price, selected.country)}
                   </div>
                 </div>
                 {/* 등락률 */}
                 <div>
-                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">등락률</div>
-                  <div className={`text-xl font-extrabold ${quote.changePercent >= 0 ? "text-[#F04452]" : "text-[#4285F4]"}`}>
+                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">등락률</div>
+                  <div className={`text-xl font-extrabold ${quote.changePercent >= 0 ? "text-[var(--color-negative)]" : "text-[#4285F4]"}`}>
                     {quote.changePercent >= 0 ? "+" : ""}
                     {quote.changePercent.toFixed(2)}%
                   </div>
                 </div>
                 {/* 전일대비 */}
                 <div>
-                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">전일대비</div>
-                  <div className={`text-sm font-bold ${quote.change >= 0 ? "text-[#F04452]" : "text-[#4285F4]"}`}>
+                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">전일대비</div>
+                  <div className={`text-sm font-bold ${quote.change >= 0 ? "text-[var(--color-negative)]" : "text-[#4285F4]"}`}>
                     {quote.change >= 0 ? "+" : ""}
                     {formatPrice(Math.abs(quote.change), selected.country)}
                   </div>
                 </div>
                 {/* 52주 MDD */}
                 <div>
-                  <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A] mb-1">
+                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">
                     기간 내 MDD
                   </div>
-                  <div className="text-sm font-bold text-[#F04452]">
+                  <div className="text-sm font-bold text-[var(--color-negative)]">
                     {minMdd.toFixed(1)}%
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-center text-[#9AA99A] py-4">시세 정보를 불러올 수 없습니다.</p>
+              <p className="text-sm text-center text-[var(--color-g400)] py-4">시세 정보를 불러올 수 없습니다.</p>
             )}
           </Card>
         </div>
@@ -515,14 +515,14 @@ export default function AnalysisPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none"
               />
-              <span className="text-xs text-[#9AA99A]">~</span>
+              <span className="text-xs text-[var(--color-g400)]">~</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] outline-none"
+                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none"
               />
               <Button size="sm" onClick={handleDateChange}>
                 조회
@@ -536,29 +536,29 @@ export default function AnalysisPage() {
             ) : history.length > 0 ? (
               <>
                 {/* 주가 라인 차트 */}
-                <div className="text-[11px] text-[#9AA99A] mb-1">주가</div>
+                <div className="text-[11px] text-[var(--color-g400)] mb-1">주가</div>
                 <ResponsiveContainer width="100%" height={180}>
                   <LineChart data={history} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tick={{ fontSize: 10, fill: "var(--color-g400)" }}
                       tickFormatter={(v) => v.slice(5)}
                       interval="preserveStartEnd"
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tick={{ fontSize: 10, fill: "var(--color-g400)" }}
                       tickFormatter={(v) => selected.country === "KR" ? `${(v / 1000).toFixed(0)}K` : `$${v}`}
                       domain={["auto", "auto"]}
                     />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-g200)" }}
                       formatter={(v: unknown) => [formatPrice(v as number, selected.country), "주가"]}
                       labelFormatter={(l) => l}
                     />
                     <Line
                       type="monotone"
                       dataKey="close"
-                      stroke="#05C072"
+                      stroke="var(--color-positive)"
                       strokeWidth={1.5}
                       dot={false}
                     />
@@ -566,31 +566,31 @@ export default function AnalysisPage() {
                 </ResponsiveContainer>
 
                 {/* MDD 영역 차트 */}
-                <div className="text-[11px] text-[#9AA99A] mb-1 mt-3">MDD (최대 낙폭)</div>
+                <div className="text-[11px] text-[var(--color-g400)] mb-1 mt-3">MDD (최대 낙폭)</div>
                 <ResponsiveContainer width="100%" height={120}>
                   <AreaChart data={history} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tick={{ fontSize: 10, fill: "var(--color-g400)" }}
                       tickFormatter={(v) => v.slice(5)}
                       interval="preserveStartEnd"
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "#9AA99A" }}
+                      tick={{ fontSize: 10, fill: "var(--color-g400)" }}
                       tickFormatter={(v) => `${v}%`}
                       domain={["auto", 0]}
                     />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E8EEE8" }}
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-g200)" }}
                       formatter={(v: unknown) => [`${(v as number).toFixed(2)}%`, "MDD"]}
                       labelFormatter={(l) => l}
                     />
-                    <ReferenceLine y={0} stroke="#E8EEE8" />
+                    <ReferenceLine y={0} stroke="var(--color-g200)" />
                     <Area
                       type="monotone"
                       dataKey="mdd"
-                      stroke="#F04452"
-                      fill="#F04452"
+                      stroke="var(--color-negative)"
+                      fill="var(--color-negative)"
                       fillOpacity={0.15}
                       strokeWidth={1.5}
                     />
@@ -598,14 +598,14 @@ export default function AnalysisPage() {
                 </ResponsiveContainer>
 
                 {/* 자연어 해석 */}
-                <div className="mt-3 px-3 py-2.5 rounded-xl bg-[#FEE8EA] dark:bg-[#3D1519]">
-                  <p className="text-sm text-[#F04452] font-medium">
+                <div className="mt-3 px-3 py-2.5 rounded-xl bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                  <p className="text-sm text-[var(--color-negative)] font-medium">
                     이 기간 내 최대 <strong>{minMdd.toFixed(1)}%</strong> 하락한 적이 있어요
                   </p>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-center text-[#9AA99A] py-8">차트 데이터를 불러올 수 없습니다.</p>
+              <p className="text-sm text-center text-[var(--color-g400)] py-8">차트 데이터를 불러올 수 없습니다.</p>
             )}
           </Card>
         </div>
@@ -619,7 +619,7 @@ export default function AnalysisPage() {
           {!report && !reportLoading && (
             <Card>
               <div className="text-center py-4">
-                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] mb-4">
+                <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
                   AI가 {selected.name}({selected.ticker})을 분석합니다
                 </p>
                 <Button size="lg" onClick={generateReport}>
@@ -633,7 +633,7 @@ export default function AnalysisPage() {
             <Card>
               <div className="flex flex-col items-center py-8 gap-3">
                 <LoadingSpinner size={28} />
-                <p className="text-sm text-[#9AA99A]">AI가 분석 중입니다...</p>
+                <p className="text-sm text-[var(--color-g400)]">AI가 분석 중입니다...</p>
               </div>
             </Card>
           )}
@@ -643,7 +643,7 @@ export default function AnalysisPage() {
               {/* 추천 + 적정가 */}
               <Card>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">투자 의견</span>
+                  <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">투자 의견</span>
                   <span
                     className="px-3 py-1 rounded-full text-sm font-bold text-white"
                     style={{ backgroundColor: recColor }}
@@ -652,44 +652,44 @@ export default function AnalysisPage() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl p-3 bg-[#E6F9F1] dark:bg-[#0D2A1D]">
-                    <div className="text-[11px] text-[#05C072] mb-1">적정 매수가</div>
-                    <div className="text-base font-bold text-[#05C072]">{report.targetBuy.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
+                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]">
+                    <div className="text-[11px] text-[var(--color-positive)] mb-1">적정 매수가</div>
+                    <div className="text-base font-bold text-[var(--color-positive)]">{report.targetBuy.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
-                  <div className="rounded-xl p-3 bg-[#FEE8EA] dark:bg-[#3D1519]">
-                    <div className="text-[11px] text-[#F04452] mb-1">적정 매도가</div>
-                    <div className="text-base font-bold text-[#F04452]">{report.targetSell.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
+                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                    <div className="text-[11px] text-[var(--color-negative)] mb-1">적정 매도가</div>
+                    <div className="text-base font-bold text-[var(--color-negative)]">{report.targetSell.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
                 </div>
               </Card>
 
               {/* SWOT */}
               <Card>
-                <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3">SWOT 분석</div>
+                <div className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-3">SWOT 분석</div>
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div className="rounded-xl p-3 bg-[#E6F9F1] dark:bg-[#0D2A1D]">
-                    <div className="text-[11px] font-bold text-[#05C072] mb-1">S 강점</div>
-                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotStrength}</p>
+                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]">
+                    <div className="text-[11px] font-bold text-[var(--color-positive)] mb-1">S 강점</div>
+                    <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotStrength}</p>
                   </div>
-                  <div className="rounded-xl p-3 bg-[#FEE8EA] dark:bg-[#3D1519]">
-                    <div className="text-[11px] font-bold text-[#F04452] mb-1">W 약점</div>
-                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotWeakness}</p>
+                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                    <div className="text-[11px] font-bold text-[var(--color-negative)] mb-1">W 약점</div>
+                    <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotWeakness}</p>
                   </div>
                   <div className="rounded-xl p-3 bg-[#E8F0FE] dark:bg-[#0D1A2A]">
                     <div className="text-[11px] font-bold text-[#4285F4] mb-1">O 기회</div>
-                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotOpportunity}</p>
+                    <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotOpportunity}</p>
                   </div>
                   <div className="rounded-xl p-3 bg-[#FFF3E8] dark:bg-[#2A1D0D]">
-                    <div className="text-[11px] font-bold text-[#F07D05] mb-1">T 위협</div>
-                    <p className="text-xs text-[#1A221A] dark:text-[#E8EEE8] leading-relaxed">{report.swotThreat}</p>
+                    <div className="text-[11px] font-bold text-[var(--color-warning)] mb-1">T 위협</div>
+                    <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotThreat}</p>
                   </div>
                 </div>
               </Card>
 
               {/* 종합 의견 */}
               <Card>
-                <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-2">종합 투자 의견</div>
-                <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed">
+                <div className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-2">종합 투자 의견</div>
+                <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
                   {report.reasoning}
                 </p>
               </Card>
@@ -698,10 +698,10 @@ export default function AnalysisPage() {
               {report.recentIssues && (
                 <Card>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">최근 주요 이슈</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[#F07D05] font-semibold">AI 학습 기반</span>
+                    <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">최근 주요 이슈</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
                   </div>
-                  <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed whitespace-pre-line">
+                  <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed whitespace-pre-line">
                     {report.recentIssues}
                   </p>
                 </Card>

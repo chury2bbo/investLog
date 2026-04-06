@@ -9,7 +9,7 @@ export function LoadingSpinner({ size = 24 }: LoadingSpinnerProps) {
       height={size}
       viewBox="0 0 24 24"
       className="animate-spin"
-      style={{ color: "#05C072" }}
+      style={{ color: "var(--color-primary)" }}
     >
       <circle
         cx="12"

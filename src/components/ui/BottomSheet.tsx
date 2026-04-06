@@ -15,13 +15,13 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
       {/* 딤 배경 */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* 시트: 모바일 중앙 / PC 중앙 */}
+      {/* 시트 */}
       <div
-        className="relative w-[calc(100%-32px)] md:w-[420px] md:max-w-[90vw] rounded-2xl overflow-hidden mx-4 bg-white dark:bg-[#1D2720]"
+        className="relative w-[calc(100%-32px)] md:w-[420px] md:max-w-[90vw] rounded-[18px] overflow-hidden mx-4 bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)]"
         style={{ maxHeight: "80vh" }}
       >
         <div className="overflow-y-auto max-h-[80vh] p-6">
-          <h3 className="text-base font-bold mb-4 text-[#1A221A] dark:text-[#E8EEE8]">
+          <h3 className="text-base font-bold mb-4 text-[var(--color-text)]">
             {title}
           </h3>
           {children}

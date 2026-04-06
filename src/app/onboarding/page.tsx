@@ -119,19 +119,19 @@ function StockSearch({
   if (selected?.ticker) {
     return (
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: "#6B7B6B" }}>
+        <label className="block text-xs font-medium mb-1" style={{ color: "var(--color-g500)" }}>
           종목 검색
         </label>
-        <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: "#D4DDD4" }}>
+        <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: "var(--color-g200)" }}>
           <div>
-            <span className="text-sm font-semibold" style={{ color: "#1A221A" }}>{selected.name}</span>
-            <span className="text-xs ml-2" style={{ color: "#9AA99A" }}>{selected.ticker}</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>{selected.name}</span>
+            <span className="text-xs ml-2" style={{ color: "var(--color-g400)" }}>{selected.ticker}</span>
           </div>
           <button
             type="button"
             onClick={() => { onClear?.(); }}
-            className="text-lg leading-none hover:text-[#F04452] transition-colors"
-            style={{ color: "#9AA99A" }}
+            className="text-lg leading-none hover:text-(--color-negative) transition-colors"
+            style={{ color: "var(--color-g400)" }}
           >
             ×
           </button>
@@ -144,7 +144,7 @@ function StockSearch({
     <div ref={wrapperRef} className="relative">
       <label
         className="block text-xs font-medium mb-1"
-        style={{ color: "#6B7B6B" }}
+        style={{ color: "var(--color-g500)" }}
       >
         종목 검색
       </label>
@@ -157,7 +157,7 @@ function StockSearch({
           onFocus={() => results.length > 0 && setOpen(true)}
           placeholder="종목명 또는 티커 입력"
           className="flex-1 pb-2 text-sm bg-transparent outline-none border-b"
-          style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+          style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
         />
         {searching && <LoadingSpinner size={16} />}
       </div>
@@ -166,14 +166,14 @@ function StockSearch({
         <ul
           className="absolute z-20 w-full mt-1 rounded-xl overflow-hidden max-h-48 overflow-y-auto"
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "var(--color-surface)",
             boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
           }}
         >
           {results.map((r) => (
             <li
               key={r.ticker}
-              className="px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-between"
+              className="px-4 py-3 text-sm cursor-pointer hover:bg-(--color-g100) flex items-center justify-between"
               onClick={() => {
                 onSelect(r);
                 setQuery("");
@@ -181,9 +181,9 @@ function StockSearch({
                 setOpen(false);
               }}
             >
-              <span style={{ color: "#1A221A" }}>
+              <span style={{ color: "var(--color-text)" }}>
                 {r.name}{" "}
-                <span className="text-xs" style={{ color: "#9AA99A" }}>
+                <span className="text-xs" style={{ color: "var(--color-g400)" }}>
                   {r.ticker}
                 </span>
               </span>
@@ -200,9 +200,9 @@ function StockSearch({
         <div
           className="absolute z-20 w-full mt-1 rounded-xl px-4 py-3 text-sm"
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "var(--color-surface)",
             boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-            color: "#9AA99A",
+            color: "var(--color-g400)",
           }}
         >
           검색 결과가 없습니다
@@ -603,10 +603,10 @@ export default function OnboardingPage() {
     return (
       <>
         <div className="mb-2">
-          <h2 className="text-lg font-bold" style={{ color: "#1A221A" }}>
+          <h2 className="text-lg font-bold" style={{ color: "var(--color-text)" }}>
             계좌 & 종목 등록
           </h2>
-          <p className="text-xs mt-1" style={{ color: "#9AA99A" }}>
+          <p className="text-xs mt-1" style={{ color: "var(--color-g400)" }}>
             보유 중인 계좌와 종목을 등록하세요. 나중에 추가할 수도 있어요.
           </p>
         </div>
@@ -618,7 +618,7 @@ export default function OnboardingPage() {
               <div className="flex items-center justify-between mb-4">
                 <span
                   className="text-sm font-bold"
-                  style={{ color: "#1A221A" }}
+                  style={{ color: "var(--color-text)" }}
                 >
                   계좌 {accIdx + 1}
                 </span>
@@ -626,7 +626,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={() => { setImportAccIdx(accIdx); setImportModalOpen(true); }}
                     className="text-xs px-2.5 py-1 rounded-lg font-semibold cursor-pointer"
-                    style={{ backgroundColor: "#E8FAF2", color: "#05C072" }}
+                    style={{ backgroundColor: "var(--color-primary-soft)", color: "var(--color-primary)" }}
                   >
                     📷 캡처로 불러오기
                   </button>
@@ -634,7 +634,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={() => removeAccount(accIdx)}
                     className="text-xs"
-                    style={{ color: "#F04452" }}
+                    style={{ color: "var(--color-negative)" }}
                   >
                     삭제
                   </button>
@@ -646,7 +646,7 @@ export default function OnboardingPage() {
               <div className="mb-4">
                 <label
                   className="block text-xs font-medium mb-1"
-                  style={{ color: "#6B7B6B" }}
+                  style={{ color: "var(--color-g500)" }}
                 >
                   증권사
                 </label>
@@ -654,13 +654,13 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={() => setBrokerageDropOpen(brokerageDropOpen === accIdx ? null : accIdx)}
                   className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b cursor-pointer"
-                  style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                  style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
                 >
                   <span>{brokerages.find((b) => b.code === acc.accountCode)?.name ?? "증권사를 선택하세요"}</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: brokerageDropOpen === accIdx ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-(--color-g400)" style={{ transform: brokerageDropOpen === accIdx ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 {brokerageDropOpen === accIdx && (
-                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] bg-white shadow-lg">
+                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-(--color-g200) bg-(--color-surface) shadow-lg">
                     {brokerages.map((b) => (
                       <button
                         key={b.code}
@@ -668,14 +668,14 @@ export default function OnboardingPage() {
                         onClick={() => { updateAccount(accIdx, "accountCode", b.code); setBrokerageDropOpen(null); }}
                         className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
                         style={{
-                          backgroundColor: acc.accountCode === b.code ? "#E6F9F1" : "transparent",
-                          color: acc.accountCode === b.code ? "#05C072" : "#1A221A",
+                          backgroundColor: acc.accountCode === b.code ? "var(--color-primary-soft)" : "transparent",
+                          color: acc.accountCode === b.code ? "var(--color-primary)" : "var(--color-text)",
                           fontWeight: acc.accountCode === b.code ? 600 : 400,
-                          borderBottom: "1px solid #F0F4F0",
+                          borderBottom: "1px solid var(--color-g100)",
                         }}
                       >
                         <span>{b.name}</span>
-                        {acc.accountCode === b.code && <span className="text-[#05C072]">✓</span>}
+                        {acc.accountCode === b.code && <span className="text-(--color-primary)">✓</span>}
                       </button>
                     ))}
                   </div>
@@ -687,7 +687,7 @@ export default function OnboardingPage() {
                 <div>
                   <label
                     className="block text-xs font-medium mb-1"
-                    style={{ color: "#6B7B6B" }}
+                    style={{ color: "var(--color-g500)" }}
                   >
                     예수금 (KRW)
                   </label>
@@ -702,13 +702,13 @@ export default function OnboardingPage() {
                     placeholder="선택사항"
                     disabled={!acc.accountCode}
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b disabled:opacity-40"
-                    style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                    style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
                   />
                 </div>
                 <div>
                   <label
                     className="block text-xs font-medium mb-1"
-                    style={{ color: "#6B7B6B" }}
+                    style={{ color: "var(--color-g500)" }}
                   >
                     예수금 (USD)
                   </label>
@@ -722,18 +722,18 @@ export default function OnboardingPage() {
                     placeholder="선택사항"
                     disabled={!acc.accountCode}
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b disabled:opacity-40"
-                    style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                    style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
                   />
                 </div>
               </div>
-              <p className="text-xs mb-5" style={{ color: "#9AA99A" }}>
+              <p className="text-xs mb-5" style={{ color: "var(--color-g400)" }}>
                 나중에 계좌 상세에서 입력할 수 있어요
               </p>
 
               {/* 종목 검색 & 추가 */}
               <div
                 className={`rounded-xl p-4 mb-3 relative ${!acc.accountCode ? "opacity-40 pointer-events-none" : ""}`}
-                style={{ backgroundColor: "#F5F7F5" }}
+                style={{ backgroundColor: "var(--color-bg)" }}
               >
                 <StockSearch
                   onSelect={(result) => selectStock(accIdx, result)}
@@ -755,7 +755,7 @@ export default function OnboardingPage() {
                       />
                       <span
                         className="text-xs"
-                        style={{ color: "#9AA99A" }}
+                        style={{ color: "var(--color-g400)" }}
                       >
                         {getHoldingForm(accIdx).ticker}
                       </span>
@@ -765,7 +765,7 @@ export default function OnboardingPage() {
                       <div>
                         <label
                           className="block text-xs font-medium mb-1"
-                          style={{ color: "#6B7B6B" }}
+                          style={{ color: "var(--color-g500)" }}
                         >
                           평단가
                         </label>
@@ -781,15 +781,15 @@ export default function OnboardingPage() {
                           disabled={priceLoadings[accIdx]}
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
                           style={{
-                            borderColor: "#D4DDD4",
-                            color: "#1A221A",
+                            borderColor: "var(--color-g200)",
+                            color: "var(--color-text)",
                           }}
                         />
                       </div>
                       <div>
                         <label
                           className="block text-xs font-medium mb-1"
-                          style={{ color: "#6B7B6B" }}
+                          style={{ color: "var(--color-g500)" }}
                         >
                           수량
                         </label>
@@ -804,8 +804,8 @@ export default function OnboardingPage() {
                           placeholder="50"
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
                           style={{
-                            borderColor: "#D4DDD4",
-                            color: "#1A221A",
+                            borderColor: "var(--color-g200)",
+                            color: "var(--color-text)",
                           }}
                         />
                       </div>
@@ -815,7 +815,7 @@ export default function OnboardingPage() {
                       <div>
                         <label
                           className="block text-xs font-medium mb-1"
-                          style={{ color: "#6B7B6B" }}
+                          style={{ color: "var(--color-g500)" }}
                         >
                           내 섹터
                         </label>
@@ -832,15 +832,15 @@ export default function OnboardingPage() {
                           placeholder="선택사항"
                           className="w-full pb-2 text-sm bg-transparent outline-none border-b"
                           style={{
-                            borderColor: "#D4DDD4",
-                            color: "#1A221A",
+                            borderColor: "var(--color-g200)",
+                            color: "var(--color-text)",
                           }}
                         />
                       </div>
                     </div>
 
                     <div className="mb-3">
-                      <label className="block text-xs font-medium mb-2" style={{ color: "#6B7B6B" }}>
+                      <label className="block text-xs font-medium mb-2" style={{ color: "var(--color-g500)" }}>
                         태그
                       </label>
                       <div className="flex flex-wrap gap-1.5">
@@ -851,13 +851,13 @@ export default function OnboardingPage() {
                             onClick={() => toggleHoldingTag(accIdx, tag.label)}
                             className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                               getHoldingForm(accIdx).tags.includes(tag.label)
-                                ? "bg-[#05C072] text-white"
-                                : "bg-[#E8EEE8] text-[#6B7B6B] hover:bg-[#D4DDD4]"
+                                ? "bg-(--color-primary) text-white"
+                                : "bg-(--color-g200) text-(--color-g500) hover:bg-(--color-g200)"
                             }`}
                             title={tag.desc}
                           >
                             {tag.label}
-                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1A221A] text-white text-[10px] px-2 py-1 rounded-md z-10">
+                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-(--color-text) text-white text-[10px] px-2 py-1 rounded-md z-10">
                               {tag.desc}
                             </span>
                           </button>
@@ -886,18 +886,18 @@ export default function OnboardingPage() {
                     <div
                       key={hIdx}
                       className="flex items-center justify-between rounded-lg px-3 py-2"
-                      style={{ backgroundColor: "#F5F7F5" }}
+                      style={{ backgroundColor: "var(--color-bg)" }}
                     >
                       <div className="flex items-center gap-2">
                         <span
                           className="text-sm font-medium"
-                          style={{ color: "#1A221A" }}
+                          style={{ color: "var(--color-text)" }}
                         >
                           {h.name}
                         </span>
                         <span
                           className="text-xs"
-                          style={{ color: "#9AA99A" }}
+                          style={{ color: "var(--color-g400)" }}
                         >
                           {h.avgPrice.toLocaleString()}원 · {h.quantity}주
                         </span>
@@ -905,7 +905,7 @@ export default function OnboardingPage() {
                       <button
                         onClick={() => removeHolding(accIdx, hIdx)}
                         className="text-xs"
-                        style={{ color: "#F04452" }}
+                        style={{ color: "var(--color-negative)" }}
                       >
                         삭제
                       </button>
@@ -921,7 +921,7 @@ export default function OnboardingPage() {
         <button
           onClick={addAccount}
           className="w-full mt-3 py-3 rounded-xl text-sm font-medium border border-dashed flex items-center justify-center gap-1"
-          style={{ borderColor: "#D4DDD4", color: "#6B7B6B" }}
+          style={{ borderColor: "var(--color-g200)", color: "var(--color-g500)" }}
         >
           + 계좌 추가
         </button>
@@ -935,10 +935,10 @@ export default function OnboardingPage() {
     return (
       <>
         <div className="mb-2">
-          <h2 className="text-lg font-bold" style={{ color: "#1A221A" }}>
+          <h2 className="text-lg font-bold" style={{ color: "var(--color-text)" }}>
             첫 매매 기록
           </h2>
-          <p className="text-xs mt-1" style={{ color: "#9AA99A" }}>
+          <p className="text-xs mt-1" style={{ color: "var(--color-g400)" }}>
             최근 매매를 하나 기록해보세요. 건너뛰어도 괜찮아요.
           </p>
         </div>
@@ -951,26 +951,26 @@ export default function OnboardingPage() {
               .filter(({ acc }) => acc.accountCode !== "");
             return (
               <div className="mb-4">
-                <label className="block text-xs font-medium mb-1" style={{ color: "#6B7B6B" }}>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--color-g500)" }}>
                   계좌
                 </label>
                 <button
                   type="button"
                   onClick={() => validAccounts.length > 0 && setTradeAccountDropOpen(!tradeAccountDropOpen)}
                   className={`w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b ${validAccounts.length === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-                  style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                  style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
                 >
-                  <span style={{ color: trade.accountIndex === -1 ? "#9AA99A" : "#1A221A" }}>
+                  <span style={{ color: trade.accountIndex === -1 ? "var(--color-g400)" : "var(--color-text)" }}>
                     {validAccounts.length === 0
                       ? "등록된 계좌가 없습니다"
                       : trade.accountIndex === -1
                       ? "계좌를 선택하세요"
                       : `${accounts[trade.accountIndex]?.accountName} (계좌 ${trade.accountIndex + 1})`}
                   </span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#9AA99A]" style={{ transform: tradeAccountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-(--color-g400)" style={{ transform: tradeAccountDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 {tradeAccountDropOpen && validAccounts.length > 0 && (
-                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] bg-white shadow-lg">
+                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-(--color-g200) bg-(--color-surface) shadow-lg">
                     {validAccounts.map(({ acc, i }) => (
                       <button
                         key={i}
@@ -978,14 +978,14 @@ export default function OnboardingPage() {
                         onClick={() => { setTrade((prev) => ({ ...prev, accountIndex: i })); setTradeAccountDropOpen(false); }}
                         className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
                         style={{
-                          backgroundColor: trade.accountIndex === i ? "#E6F9F1" : "transparent",
-                          color: trade.accountIndex === i ? "#05C072" : "#1A221A",
+                          backgroundColor: trade.accountIndex === i ? "var(--color-primary-soft)" : "transparent",
+                          color: trade.accountIndex === i ? "var(--color-primary)" : "var(--color-text)",
                           fontWeight: trade.accountIndex === i ? 600 : 400,
-                          borderBottom: "1px solid #F0F4F0",
+                          borderBottom: "1px solid var(--color-g100)",
                         }}
                       >
                         <span>{acc.accountName} (계좌 {i + 1})</span>
-                        {trade.accountIndex === i && <span className="text-[#05C072]">✓</span>}
+                        {trade.accountIndex === i && <span className="text-(--color-primary)">✓</span>}
                       </button>
                     ))}
                   </div>
@@ -1008,10 +1008,10 @@ export default function OnboardingPage() {
                   backgroundColor:
                     trade.type === t
                       ? t === "BUY"
-                        ? "#F04452"
+                        ? "var(--color-negative)"
                         : "#4285F4"
-                      : "#F0F4F0",
-                  color: trade.type === t ? "#fff" : "#6B7B6B",
+                      : "var(--color-g100)",
+                  color: trade.type === t ? "#fff" : "var(--color-g500)",
                 }}
               >
                 {t === "BUY" ? "매수" : "매도"}
@@ -1033,7 +1033,7 @@ export default function OnboardingPage() {
             <div>
               <label
                 className="block text-xs font-medium mb-1"
-                style={{ color: "#6B7B6B" }}
+                style={{ color: "var(--color-g500)" }}
               >
                 가격
               </label>
@@ -1048,13 +1048,13 @@ export default function OnboardingPage() {
                 placeholder={tradePriceLoading ? "조회 중..." : "72,000"}
                 disabled={tradePriceLoading}
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-                style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
               />
             </div>
             <div>
               <label
                 className="block text-xs font-medium mb-1"
-                style={{ color: "#6B7B6B" }}
+                style={{ color: "var(--color-g500)" }}
               >
                 수량
               </label>
@@ -1067,7 +1067,7 @@ export default function OnboardingPage() {
                 }
                 placeholder="50"
                 className="w-full pb-2 text-sm bg-transparent outline-none border-b"
-                style={{ borderColor: "#D4DDD4", color: "#1A221A" }}
+                style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
               />
             </div>
           </div>
@@ -1076,11 +1076,11 @@ export default function OnboardingPage() {
           <div>
             <label
               className="block text-xs font-medium mb-2"
-              style={{ color: "#6B7B6B" }}
+              style={{ color: "var(--color-g500)" }}
             >
               매매 이유 태그
             </label>
-            <p className="text-xs mb-3" style={{ color: "#9AA99A" }}>
+            <p className="text-xs mb-3" style={{ color: "var(--color-g400)" }}>
               이 태그들이 쌓이면 나만의 투자성향을 분석해줘요
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1099,10 +1099,10 @@ export default function OnboardingPage() {
                     }
                     className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                     style={{
-                      backgroundColor: selected ? "#E6F9F1" : "#F0F4F0",
-                      color: selected ? "#05C072" : "#6B7B6B",
+                      backgroundColor: selected ? "var(--color-primary-soft)" : "var(--color-g100)",
+                      color: selected ? "var(--color-primary)" : "var(--color-g500)",
                       border: selected
-                        ? "1px solid #05C072"
+                        ? "1px solid var(--color-primary)"
                         : "1px solid transparent",
                     }}
                   >
@@ -1123,7 +1123,7 @@ export default function OnboardingPage() {
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#F5F7F5" }}>
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--color-bg)" }}>
         <LoadingSpinner size={32} />
       </div>
     );
@@ -1132,7 +1132,7 @@ export default function OnboardingPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center"
-      style={{ backgroundColor: "#F5F7F5" }}
+      style={{ backgroundColor: "var(--color-bg)" }}
     >
       {/* 캡처 불러오기 모달 */}
       <ImportModal
@@ -1142,7 +1142,7 @@ export default function OnboardingPage() {
       />
 
       {/* 토스트 */}
-      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-(--color-negative) min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
@@ -1158,28 +1158,28 @@ export default function OnboardingPage() {
       {/* 상단 헤더 */}
       <div
         className="w-full"
-        style={{ backgroundColor: "#FFFFFF" }}
+        style={{ backgroundColor: "var(--color-surface)" }}
       >
         <div className="w-full max-w-2xl mx-auto px-5 pt-8 pb-4">
           <h1
             className="text-xl font-bold mb-1"
-            style={{ color: "#1A221A" }}
+            style={{ color: "var(--color-text)" }}
           >
             InvestLog 시작하기
           </h1>
-          <p className="text-xs" style={{ color: "#9AA99A" }}>
+          <p className="text-xs" style={{ color: "var(--color-g400)" }}>
             Step {step} / 2
           </p>
 
           {/* 프로그레스 바 */}
           <div
             className="mt-3 h-1 rounded-full overflow-hidden"
-            style={{ backgroundColor: "#E8EEE8" }}
+            style={{ backgroundColor: "var(--color-g200)" }}
           >
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
-                backgroundColor: "#05C072",
+                backgroundColor: "var(--color-primary)",
                 width: step === 1 ? "50%" : "100%",
               }}
             />
@@ -1196,7 +1196,7 @@ export default function OnboardingPage() {
       <div
         className="w-full"
         style={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: "var(--color-surface)",
           boxShadow: "0 -1px 4px rgba(0,0,0,0.06)",
         }}
       >

@@ -87,20 +87,20 @@ export function StockSearchInput({ value, onChange, onEnter, className = "", pla
         className={className}
       />
       {showDropdown && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+        <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
           <div className="max-h-48 overflow-y-auto">
             {results.map((s) => (
               <button
                 key={s.ticker}
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); selectStock(s); }}
-                className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
               >
                 <div>
-                  <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">{s.name}</span>
-                  <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">{s.ticker}</span>
+                  <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">{s.name}</span>
+                  <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">{s.ticker}</span>
                 </div>
-                <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">{s.market}</span>
+                <span className="text-[10px] text-[var(--color-g400)] dark:text-[#4A5A4A]">{s.market}</span>
               </button>
             ))}
           </div>
