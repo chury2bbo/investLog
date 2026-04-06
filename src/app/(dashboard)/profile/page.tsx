@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Card, SectionTitle, Button, Input, Toast, BottomSheet } from "@/components/ui";
+import { Card, SectionTitle, Button, Input, Toast, ConfirmDialog } from "@/components/ui";
 
 const PW_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,15}$/;
 
 export default function ProfilePage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [hasPassword, setHasPassword] = useState(false);
@@ -212,34 +210,16 @@ export default function ProfilePage() {
       </div>
 
       {/* 탈퇴 확인 모달 */}
-      <BottomSheet
+      <ConfirmDialog
         open={deleteConfirm}
-        onClose={() => setDeleteConfirm(false)}
         title="정말 탈퇴하시겠어요?"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-(--color-g500) leading-relaxed">
-            계좌, 보유 종목, 매매 기록, 예수금 등 <strong>모든 데이터가 삭제</strong>됩니다.
-            이 작업은 되돌릴 수 없습니다.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDeleteConfirm(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-(--color-g100) dark:bg-(--color-border) text-(--color-text) cursor-pointer"
-            >
-              취소
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-negative)" }}
-            >
-              {deleting ? "탈퇴 중..." : "탈퇴하기"}
-            </button>
-          </div>
-        </div>
-      </BottomSheet>
+        message={"계좌, 보유 종목, 매매 기록, 예수금 등\n모든 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다."}
+        confirmLabel="탈퇴하기"
+        destructive
+        confirmLoading={deleting}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setDeleteConfirm(false)}
+      />
     </div>
   );
 }

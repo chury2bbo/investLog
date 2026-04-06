@@ -81,6 +81,7 @@ export default function AccountsPage() {
   const [formCashKRW, setFormCashKRW] = useState("");
   const [formCashUSD, setFormCashUSD] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // 수정 모달
   const [editModal, setEditModal] = useState(false);
@@ -155,6 +156,7 @@ export default function AccountsPage() {
 
   async function handleAddAccount() {
     setSubmitting(true);
+    setFormError("");
     try {
       const res = await fetch("/api/accounts", {
         method: "POST",
@@ -173,10 +175,14 @@ export default function AccountsPage() {
         setFormMemo("");
         setFormCashKRW("");
         setFormCashUSD("");
+        setFormError("");
         fetchAccounts();
+      } else {
+        const data = await res.json();
+        setFormError(data.error ?? "계좌 추가에 실패했습니다.");
       }
     } catch {
-      /* 생성 실패 */
+      setFormError("네트워크 오류가 발생했습니다.");
     } finally {
       setSubmitting(false);
     }
@@ -431,6 +437,10 @@ export default function AccountsPage() {
             />
           </div>
 
+          {formError && (
+            <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{formError}</p>
+          )}
+
           <Button
             size="lg"
             onClick={handleAddAccount}
@@ -475,7 +485,7 @@ export default function AccountsPage() {
       <ConfirmDialog
         open={deleteConfirm !== null}
         title="계좌를 삭제할까요?"
-        message={`${deleteConfirm?.name ?? ""} 계좌의 보유 종목, 매매 기록, 예수금이 모두 삭제되며 복구할 수 없습니다.`}
+        message={`${deleteConfirm?.name ?? ""} 계좌의 보유 종목, 매매 기록, 예수금이\n모두 삭제되며 복구할 수 없습니다.`}
         confirmLabel="삭제"
         destructive
         confirmLoading={deleting}

@@ -90,6 +90,8 @@ export default function AccountDetailPage() {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [usdRate, setUsdRate] = useState(1400);
 
+  // 통화 표시 토글 (외화 원본 / 원화 환산)
+  const [displayCurrency, setDisplayCurrency] = useState<"original" | "KRW">("original");
 
   // 입출금 모달
   const [cashModal, setCashModal] = useState<"deposit" | "withdraw" | null>(null);
@@ -628,7 +630,34 @@ export default function AccountDetailPage() {
       <div>
       {/* ── ① 보유 종목 리스트 ── */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
+          {/* 원화/외화 토글 */}
+          {account.holdings.some((h) => h.country !== "KR") && (
+            <div className="flex rounded-lg overflow-hidden border border-[#E4EAE4] dark:border-[#2D3D30]">
+              <button
+                onClick={() => setDisplayCurrency("original")}
+                className="px-2.5 py-1 text-[11px] font-semibold transition-all"
+                style={{
+                  backgroundColor: displayCurrency === "original" ? "#05C072" : "transparent",
+                  color: displayCurrency === "original" ? "#fff" : "#9AA99A",
+                }}
+              >
+                외화
+              </button>
+              <button
+                onClick={() => setDisplayCurrency("KRW")}
+                className="px-2.5 py-1 text-[11px] font-semibold transition-all"
+                style={{
+                  backgroundColor: displayCurrency === "KRW" ? "#05C072" : "transparent",
+                  color: displayCurrency === "KRW" ? "#fff" : "#9AA99A",
+                }}
+              >
+                원화
+              </button>
+            </div>
+          )}
+        </div>
         <Button size="sm" onClick={() => { resetHoldingForm(); setHoldingModal(true); }}>
           + 종목 등록
         </Button>
@@ -648,11 +677,14 @@ export default function AccountDetailPage() {
             const pnlRate = investedValue > 0 ? (pnl / investedValue) * 100 : 0;
             const hasQuote = !!quote;
 
-            const fmtPrice = (v: number) =>
-              isForeign
+            const fmtPrice = (v: number) => {
+              if (isForeign && displayCurrency === "KRW") {
+                return `₩${Math.round(v * usdRate).toLocaleString()}`;
+              }
+              return isForeign
                 ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : `₩${v.toLocaleString()}`;
-
+            };
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
@@ -814,7 +846,7 @@ export default function AccountDetailPage() {
       <ConfirmDialog
         open={deleteConfirm}
         title="계좌를 삭제할까요?"
-        message={`${account.brokerageCompany.name} 계좌의 보유 종목, 매매 기록, 예수금이 모두 삭제되며 복구할 수 없습니다.`}
+        message={`${account.brokerageCompany.name} 계좌의 보유 종목, 매매 기록, 예수금이\n모두 삭제되며 복구할 수 없습니다.`}
         confirmLabel="삭제"
         destructive
         confirmLoading={deleting}
