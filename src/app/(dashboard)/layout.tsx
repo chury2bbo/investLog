@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { ThemeToggle } from "@/components/ui";
+import { ThemeToggle, Logo } from "@/components/ui";
 
 // ─── 네비 아이콘 (lucide 스타일) ────────────────────────────
 
@@ -60,17 +60,7 @@ function IconSidebar() {
   return (
     <div className="hidden md:flex w-16 shrink-0 flex-col items-center py-[18px] sticky top-0 h-screen border-r bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)]">
       {/* 로고 */}
-      <div
-        className="w-9 h-9 rounded-[11px] flex items-center justify-center mb-7 shrink-0"
-        style={{
-          background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
-          boxShadow: "0 4px 14px color-mix(in srgb, var(--color-primary) 25%, transparent)",
-        }}
-      >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" />
-        </svg>
-      </div>
+      <div className="mb-7"><Logo size={36} /></div>
 
       {/* 네비 아이템 */}
       <div className="flex-1 flex flex-col gap-1 w-full">

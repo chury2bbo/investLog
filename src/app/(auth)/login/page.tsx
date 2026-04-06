@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner, Input } from "@/components/ui";
+import { LoadingSpinner, Input, Logo } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -64,26 +64,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-10">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3"
-            style={{
-              background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
-              boxShadow: "0 8px 24px color-mix(in srgb, var(--color-primary) 25%, transparent)",
-            }}
-          >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-              <polyline points="16 7 22 7 22 13" />
-            </svg>
+          <div className="mx-auto mb-3 flex justify-center">
+            <Logo size={56} />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-(--color-text)">
             버텨일지

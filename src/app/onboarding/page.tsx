@@ -1165,7 +1165,7 @@ export default function OnboardingPage() {
             className="text-xl font-bold mb-1"
             style={{ color: "var(--color-text)" }}
           >
-            InvestLog 시작하기
+            버텨일지 시작하기
           </h1>
           <p className="text-xs" style={{ color: "var(--color-g400)" }}>
             Step {step} / 2

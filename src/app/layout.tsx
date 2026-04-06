@@ -12,7 +12,7 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "InvestLog",
+  title: "버텨일지",
   description: "나만의 투자 기록장",
 };
 

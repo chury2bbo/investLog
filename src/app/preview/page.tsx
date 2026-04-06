@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Logo } from "@/components/ui";
 
 // ─── 새 디자인 시스템 컬러 토큰 ─────────────────────────────────
 const T = {
@@ -617,6 +618,47 @@ export default function PreviewPage() {
                 <AccountHeroB dark={dark} pnlRate={8.32} pnl={1234500} totalKRW={48234500} />
                 <AccountHeroB dark={dark} pnlRate={-3.21} pnl={-567800} totalKRW={32456700} />
               </div>
+            </div>
+
+            {/* 로고 비교 */}
+            <div>
+              <h2 className="text-[13px] font-bold mb-3" style={{ color: text }}>로고 비교</h2>
+              <Card dark={dark}>
+                <div className="mb-3">
+                  <div className="text-[11px] font-bold mb-2" style={{ color: muted }}>기존 (chart)</div>
+                  <div className="flex items-end gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={36} variant="chart" />
+                      <span className="text-[10px]" style={{ color: muted }}>36px</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={48} variant="chart" />
+                      <span className="text-[10px]" style={{ color: muted }}>48px</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={56} variant="chart" />
+                      <span className="text-[10px]" style={{ color: muted }}>56px</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold mb-2" style={{ color: muted }}>신규 (ant — 버텨일지)</div>
+                  <div className="flex items-end gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={44} variant="ant" />
+                      <span className="text-[10px]" style={{ color: muted }}>44px</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={64} variant="ant" />
+                      <span className="text-[10px]" style={{ color: muted }}>64px</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Logo size={100} variant="ant" />
+                      <span className="text-[10px]" style={{ color: muted }}>100px</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
 
             {/* 컴포넌트 샘플 */}

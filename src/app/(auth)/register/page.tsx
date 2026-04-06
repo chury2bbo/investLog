@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner, Input } from "@/components/ui";
+import { LoadingSpinner, Input, Logo } from "@/components/ui";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -78,29 +78,11 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-8">
-          <div
-            className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl mx-auto mb-2.5"
-            style={{
-              background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
-              boxShadow: "0 6px 20px color-mix(in srgb, var(--color-primary) 25%, transparent)",
-            }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-              <polyline points="16 7 22 7 22 13" />
-            </svg>
+          <div className="mx-auto mb-2.5 flex justify-center">
+            <Logo size={48} />
           </div>
           <h1 className="text-[22px] font-extrabold tracking-tight text-(--color-text)">
-            InvestLog
+            버텨일지
           </h1>
         </div>
 
@@ -204,7 +186,7 @@ export default function RegisterPage() {
               가입 완료!
             </h2>
             <p className="text-sm leading-7 text-(--color-g500) mb-7">
-              InvestLog에 오신 걸 환영해요.
+              버텨일지에 오신 걸 환영해요.
               <br />
               나만의 투자 기록을 시작해볼까요?
             </p>
