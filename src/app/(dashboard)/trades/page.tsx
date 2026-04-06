@@ -86,6 +86,14 @@ export default function TradesPage() {
   // 뷰 모드: 리스트 / 캘린더
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
+  // 매매 상세 바텀시트
+  const [detailTrade, setDetailTrade] = useState<TradeLog | null>(null);
+  const [detailEditing, setDetailEditing] = useState(false);
+  const [detailTags, setDetailTags] = useState<string[]>([]);
+  const [detailEmotion, setDetailEmotion] = useState<string>("");
+  const [detailMemo, setDetailMemo] = useState("");
+  const [detailSaving, setDetailSaving] = useState(false);
+
   // 모바일 필터 패널 토글
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
@@ -414,6 +422,38 @@ export default function TradesPage() {
   const reasonTagOptions = formType === "BUY" ? BUY_REASON_TAGS : SELL_REASON_TAGS;
   const selectedAccount = accounts.find((a) => a.id === formAccountId);
 
+  // ─── 매매 상세 열기/수정/저장 ─────────────────────────────
+
+  function openDetail(trade: TradeLog) {
+    setDetailTrade(trade);
+    setDetailTags(trade.reasonTags);
+    setDetailEmotion(trade.emotion ?? "");
+    setDetailMemo(trade.memo ?? "");
+    setDetailEditing(false);
+  }
+
+  async function saveDetail() {
+    if (!detailTrade) return;
+    setDetailSaving(true);
+    try {
+      const res = await fetch(`/api/trades/${detailTrade.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reasonTags: detailTags,
+          emotion: detailEmotion || null,
+          memo: detailMemo || null,
+        }),
+      });
+      if (res.ok) {
+        setDetailEditing(false);
+        setDetailTrade({ ...detailTrade, reasonTags: detailTags, emotion: detailEmotion || null, memo: detailMemo || null });
+        fetchTrades();
+      }
+    } catch { /* 저장 실패 */ }
+    finally { setDetailSaving(false); }
+  }
+
   // ─── 로딩 ──────────────────────────────────────────────
 
   if (loading && trades.length === 0) {
@@ -506,6 +546,7 @@ export default function TradesPage() {
                 total={total}
                 pageSize={pageSize}
                 onPageChange={setPage}
+                onSelect={openDetail}
               />
             )}
           </>
@@ -588,7 +629,7 @@ export default function TradesPage() {
               {trades.length === 0 ? (
                 <EmptyState message={total === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
               ) : (
-                <TradesList trades={trades} />
+                <TradesList trades={trades} onSelect={openDetail} />
               )}
             </div>
           </>
@@ -606,6 +647,176 @@ export default function TradesPage() {
           +
         </button>
       </div>
+
+      {/* ══════════════════════════════════════════════════ */}
+      {/* 매매 상세 바텀시트 */}
+      {/* ══════════════════════════════════════════════════ */}
+      <BottomSheet open={!!detailTrade} onClose={() => setDetailTrade(null)} title="매매 상세">
+        {detailTrade && (() => {
+          const country = getCountryFromTicker(detailTrade.ticker);
+          const accountName = `${detailTrade.account.brokerageCompany.name}${detailTrade.account.memo ? ` · ${detailTrade.account.memo}` : ""}`;
+          const emotionData = EMOTIONS.find((e) => e.label === detailTrade.emotion);
+          const isBuy = detailTrade.type === "BUY";
+          const total = detailTrade.price * detailTrade.quantity;
+          const isForeign = country !== "KR";
+          const priceStr = isForeign
+            ? `$${detailTrade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : `₩${detailTrade.price.toLocaleString()}`;
+          const totalStr = isForeign
+            ? `$${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : `₩${total.toLocaleString()}`;
+
+          return (
+            <div className="space-y-4">
+              {/* 종목 + 유형 */}
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-bold px-2 py-1 rounded-md ${isBuy ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"}`}>
+                  {isBuy ? "매수" : "매도"}
+                </span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-md ${country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                  {country === "KR" ? "국내" : "해외"}
+                </span>
+                <span className="text-base font-bold text-[var(--color-text)]">{detailTrade.name}</span>
+                <span className="text-xs text-[var(--color-g400)]">{detailTrade.ticker}</span>
+              </div>
+
+              {/* 매매 정보 */}
+              <div className="py-3 border-y border-[var(--color-g200)] dark:border-[var(--color-border)] space-y-2">
+                {/* 1행: 매매일 · 계좌 */}
+                <div className="flex items-center gap-1.5 text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+                  <span>{new Date(detailTrade.date).toLocaleDateString("ko-KR")}</span>
+                  <span>·</span>
+                  <span>{accountName}</span>
+                </div>
+                {/* 2행: 단가 × 수량 = 체결금액 (+ 수익률) */}
+                <div className="flex items-center gap-1.5 text-sm">
+                  <span className="text-[var(--color-text)]">{priceStr}</span>
+                  <span className="text-[var(--color-g400)]">×</span>
+                  <span className="text-[var(--color-text)]">{detailTrade.quantity.toLocaleString()}주</span>
+                  <span className="text-[var(--color-g400)]">=</span>
+                  <span className="font-bold text-[var(--color-text)]">{totalStr}</span>
+                  {detailTrade.type === "SELL" && detailTrade.realizedPnlRate != null && (
+                    <span className={`font-bold ml-1 ${detailTrade.realizedPnlRate >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}`}>
+                      ({detailTrade.realizedPnlRate >= 0 ? "+" : ""}{detailTrade.realizedPnlRate.toFixed(2)}%)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 이유 태그 */}
+              <div>
+                <div className="text-[11px] font-medium text-[var(--color-g400)] mb-2">이유 태그</div>
+                {detailEditing ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {(isBuy ? BUY_REASON_TAGS : SELL_REASON_TAGS).map((tag) => (
+                      <button
+                        key={tag.label}
+                        type="button"
+                        onClick={() => setDetailTags((prev) => prev.includes(tag.label) ? prev.filter((t) => t !== tag.label) : [...prev, tag.label])}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                          detailTags.includes(tag.label)
+                            ? "bg-[var(--color-primary)] text-white"
+                            : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
+                        }`}
+                      >
+                        {tag.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : detailTrade.reasonTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {detailTrade.reasonTags.map((tag) => (
+                      <span key={tag} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-[var(--color-g400)]">없음</span>
+                )}
+              </div>
+
+              {/* 심리 상태 */}
+              <div>
+                <div className="text-[11px] font-medium text-[var(--color-g400)] mb-2">심리 상태</div>
+                {detailEditing ? (
+                  <div className="flex gap-2">
+                    {EMOTIONS.map((em) => (
+                      <button
+                        key={em.label}
+                        type="button"
+                        onClick={() => setDetailEmotion(detailEmotion === em.label ? "" : em.label)}
+                        className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
+                          detailEmotion === em.label
+                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
+                            : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
+                        }`}
+                      >
+                        <span>{em.icon}</span>
+                        <span className="font-medium">{em.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : emotionData ? (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">
+                    <span className="[&>svg]:w-[14px] [&>svg]:h-[14px]">{emotionData.icon}</span>
+                    <span className="text-xs font-medium">{detailTrade.emotion}</span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-[var(--color-g400)]">없음</span>
+                )}
+              </div>
+
+              {/* 메모 */}
+              <div>
+                <div className="text-[11px] font-medium text-[var(--color-g400)] mb-2">메모</div>
+                {detailEditing ? (
+                  <textarea
+                    value={detailMemo}
+                    onChange={(e) => setDetailMemo(e.target.value)}
+                    placeholder="매매 이유나 메모를 남겨보세요"
+                    rows={3}
+                    className="w-full p-3 text-sm bg-[var(--color-g100)] dark:bg-[var(--color-border)] rounded-xl outline-none resize-none text-[var(--color-text)] placeholder:text-[var(--color-g400)] border border-[var(--color-g200)] dark:border-[var(--color-border)] focus:border-[var(--color-primary)] transition-colors"
+                  />
+                ) : detailTrade.memo ? (
+                  <div className="px-3 py-2.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-sm text-[var(--color-text)] leading-relaxed">
+                    {detailTrade.memo}
+                  </div>
+                ) : (
+                  <span className="text-xs text-[var(--color-g400)]">없음</span>
+                )}
+              </div>
+
+              {/* 수정/저장 버튼 */}
+              {!detailEditing ? (
+                <button
+                  onClick={() => setDetailEditing(true)}
+                  className="w-full py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] transition-colors cursor-pointer"
+                >
+                  수정
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setDetailEditing(false); setDetailTags(detailTrade.reasonTags); setDetailEmotion(detailTrade.emotion ?? ""); setDetailMemo(detailTrade.memo ?? ""); }}
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] cursor-pointer"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={saveDetail}
+                    disabled={detailSaving}
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl text-white cursor-pointer disabled:opacity-50"
+                    style={{ backgroundColor: "var(--color-primary)" }}
+                  >
+                    {detailSaving ? "저장 중..." : "저장"}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </BottomSheet>
 
       {/* ══════════════════════════════════════════════════ */}
       {/* 매매 등록 바텀시트 (공용) */}

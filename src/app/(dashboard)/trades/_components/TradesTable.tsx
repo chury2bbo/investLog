@@ -12,11 +12,12 @@ interface TradesTableProps {
   total: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  onSelect?: (trade: TradeLog) => void;
 }
 
 type SortCol = "date" | "price" | "total";
 
-export function TradesTable({ trades, page, total, pageSize, onPageChange }: TradesTableProps) {
+export function TradesTable({ trades, page, total, pageSize, onPageChange, onSelect }: TradesTableProps) {
   const [sortCol, setSortCol] = useState<SortCol>("date");
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
 
@@ -88,7 +89,8 @@ export function TradesTable({ trades, page, total, pageSize, onPageChange }: Tra
               return (
                 <tr
                   key={trade.id}
-                  className="border-b border-[var(--color-g100)]/60 dark:border-[var(--color-border)]/60 hover:bg-[#F8FAF8] dark:hover:bg-[var(--color-card)] cursor-pointer transition-colors"
+                  onClick={() => onSelect?.(trade)}
+                  className="border-b border-[var(--color-g100)]/60 dark:border-[var(--color-border)]/60 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] cursor-pointer transition-colors"
                 >
                   <td className="px-3 py-2.5 text-xs text-[var(--color-text)] dark:text-[var(--color-text)]">
                     {formatTradeDate(trade.date)}

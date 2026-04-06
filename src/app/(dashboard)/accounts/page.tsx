@@ -257,9 +257,11 @@ export default function AccountsPage() {
             계좌 관리
           </h1>
         </div>
-        <Button size="sm" onClick={() => setModalOpen(true)}>
-          + 계좌 추가
-        </Button>
+        <div className="hidden md:block">
+          <Button size="sm" onClick={() => setModalOpen(true)}>
+            + 계좌 추가
+          </Button>
+        </div>
       </div>
 
       {/* 계좌 목록 */}
@@ -375,7 +377,7 @@ export default function AccountsPage() {
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm(acc.id); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[#4D1D22] transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
                   >
                     삭제
                   </button>
@@ -474,8 +476,10 @@ export default function AccountsPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteConfirm(null)} />
           <div className="relative bg-[var(--color-surface)] dark:bg-[var(--color-card)] rounded-2xl p-6 w-[340px] max-w-[90vw]">
             <div className="text-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] flex items-center justify-center mx-auto mb-3">
-                <span className="text-xl">⚠️</span>
+              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] flex items-center justify-center mx-auto mb-3">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-negative)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
               </div>
               <h3 className="text-base font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-1">
                 계좌를 삭제하시겠습니까?
@@ -504,6 +508,14 @@ export default function AccountsPage() {
           </div>
         </div>
       )}
+
+      {/* 모바일 FAB */}
+      <button
+        onClick={() => setModalOpen(true)}
+        className="md:hidden fixed bottom-24 right-5 w-12 h-12 rounded-2xl bg-[var(--color-primary)] text-white text-2xl flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 z-40 active:scale-95 transition-transform cursor-pointer"
+      >
+        +
+      </button>
     </div>
   );
 }

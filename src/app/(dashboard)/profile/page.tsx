@@ -157,16 +157,14 @@ export default function ProfilePage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="이름을 입력하세요"
             />
-            <div className="flex justify-center">
-              <button
-                onClick={handleNameSave}
-                disabled={nameLoading}
-                className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
-                {nameLoading ? "저장 중..." : "저장"}
-              </button>
-            </div>
+            <button
+              onClick={handleNameSave}
+              disabled={nameLoading}
+              className="w-full py-3 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              {nameLoading ? "저장 중..." : "저장"}
+            </button>
           </div>
         </Card>
       </div>
@@ -191,16 +189,14 @@ export default function ProfilePage() {
                 placeholder={placeholder}
               />
             ))}
-            <div className="flex justify-center">
-              <button
-                onClick={handlePasswordSave}
-                disabled={pwLoading}
-                className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
-                {pwLoading ? "처리 중..." : pwTitle}
-              </button>
-            </div>
+            <button
+              onClick={handlePasswordSave}
+              disabled={pwLoading}
+              className="w-full py-3 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              {pwLoading ? "처리 중..." : pwTitle}
+            </button>
           </div>
         </Card>
       </div>

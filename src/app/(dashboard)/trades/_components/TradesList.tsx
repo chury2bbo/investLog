@@ -7,14 +7,7 @@ import { type TradeLog, getCountryFromTicker, formatTradeDate, formatPrice, form
 
 interface TradesListProps {
   trades: TradeLog[];
-}
-
-function TagPill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-      {children}
-    </span>
-  );
+  onSelect?: (trade: TradeLog) => void;
 }
 
 function PnlText({ value }: { value: number }) {
@@ -22,8 +15,8 @@ function PnlText({ value }: { value: number }) {
     <span
       className={`text-[11px] font-medium tabular-nums ${
         value >= 0
-          ? "text-[#3B6D11] dark:text-[#7BC043]"
-          : "text-[#A32D2D] dark:text-[#F08080]"
+          ? "text-[var(--color-positive)]"
+          : "text-[var(--color-negative)]"
       }`}
     >
       {value >= 0 ? "+" : ""}{value.toFixed(1)}%
@@ -31,19 +24,19 @@ function PnlText({ value }: { value: number }) {
   );
 }
 
-export function TradesList({ trades }: TradesListProps) {
+export function TradesList({ trades, onSelect }: TradesListProps) {
   return (
-    <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+    <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)" }}>
       {trades.map((trade, idx) => {
         const market = getCountryFromTicker(trade.ticker);
         const accountName = `${trade.account.brokerageCompany.name}${trade.account.memo ? ` · ${trade.account.memo}` : ""}`;
-        const isFirst = idx === 0;
         const isLast = idx === trades.length - 1;
 
         return (
           <div
             key={trade.id}
-            className={`px-3.5 py-3 active:bg-[#F8FAF8] dark:active:bg-[var(--color-card)] transition-colors cursor-pointer ${
+            onClick={() => onSelect?.(trade)}
+            className={`px-3.5 py-3 active:bg-[var(--color-g100)] dark:active:bg-[var(--color-border)] transition-colors cursor-pointer ${
               !isLast ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""
             }`}
           >
@@ -52,11 +45,11 @@ export function TradesList({ trades }: TradesListProps) {
               <div className="flex items-center gap-1.5 min-w-0">
                 <TypeBadge type={trade.type} />
                 <MarketBadge market={market} />
-                <span className="text-[14px] font-medium text-[var(--color-text)] dark:text-[var(--color-text)] truncate">
+                <span className="text-[14px] font-medium text-[var(--color-text)] truncate">
                   {trade.name}
                 </span>
               </div>
-              <span className="text-[14px] font-medium text-[var(--color-text)] dark:text-[var(--color-text)] shrink-0 ml-2 tabular-nums">
+              <span className="text-[14px] font-medium text-[var(--color-text)] shrink-0 ml-2 tabular-nums">
                 {formatTotal(trade)}
               </span>
             </div>
