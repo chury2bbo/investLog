@@ -13,8 +13,10 @@ import {
   EmptyState,
   BottomSheet,
   Divider,
+  ConfirmDialog,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
+import { ImportModal } from "@/components/ImportModal";
 
 import { formatKRW, fmtNum, stripNum } from "@/lib/format";
 
@@ -101,6 +103,7 @@ export default function AccountDetailPage() {
 
   // 종목 등록 모달
   const [holdingModal, setHoldingModal] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [hTicker, setHTicker] = useState("");
   const [hName, setHName] = useState("");
   const [hCountry, setHCountry] = useState("KR");
@@ -399,6 +402,29 @@ export default function AccountDetailPage() {
     } finally {
       setDeleting(false);
     }
+  }
+
+  // ─── 캡처 불러오기 확인 ────────────────────────────────
+
+  async function handleImportConfirm(
+    importedHoldings: { ticker: string; name: string; avgPrice: string; quantity: string; country: string }[]
+  ) {
+    for (const h of importedHoldings) {
+      await fetch("/api/holdings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: parseInt(accountId, 10),
+          ticker: h.ticker,
+          name: h.name,
+          country: h.country,
+          avgPrice: parseFloat(h.avgPrice),
+          quantity: parseInt(h.quantity, 10),
+          replace: true,
+        }),
+      });
+    }
+    fetchAccount();
   }
 
   // ─── 섹터 분포: SectorDonutChart 컴포넌트 내부에서 계산 ───
@@ -785,35 +811,16 @@ export default function AccountDetailPage() {
       </div>
 
       {/* 삭제 확인 모달 */}
-      <BottomSheet
+      <ConfirmDialog
         open={deleteConfirm}
-        onClose={() => setDeleteConfirm(false)}
         title="계좌를 삭제할까요?"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-[var(--color-g500)] leading-relaxed">
-            <strong>{account.brokerageCompany.name}</strong> 계좌와 관련된
-            보유 종목, 예수금, 매매 기록이 모두 삭제됩니다.
-            이 작업은 되돌릴 수 없습니다.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDeleteConfirm(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] cursor-pointer"
-            >
-              취소
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-negative)" }}
-            >
-              {deleting ? "삭제 중..." : "삭제하기"}
-            </button>
-          </div>
-        </div>
-      </BottomSheet>
+        message={`${account.brokerageCompany.name} 계좌의 보유 종목, 매매 기록, 예수금이 모두 삭제되며 복구할 수 없습니다.`}
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={deleting}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setDeleteConfirm(false)}
+      />
 
       {/* ── 입출금 바텀시트 ── */}
       <BottomSheet
@@ -870,6 +877,25 @@ export default function AccountDetailPage() {
         title="보유 종목 등록"
       >
         <div className="space-y-5">
+          {/* 캡처 불러오기 */}
+          <button
+            type="button"
+            onClick={() => { setHoldingModal(false); setImportModalOpen(true); }}
+            className="w-full py-3 rounded-xl border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[var(--color-primary-soft)] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+            </svg>
+            캡처로 불러오기
+          </button>
+
+          {/* 구분선 */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+            <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)]">또는 직접 입력</span>
+            <div className="flex-1 h-px bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+          </div>
+
           {/* 국내/해외 토글 */}
           <div className="flex rounded-xl overflow-hidden border border-[var(--color-g200)] dark:border-[var(--color-border)]">
             <button
@@ -1067,6 +1093,13 @@ export default function AccountDetailPage() {
           </Button>
         </div>
       </BottomSheet>
+
+      {/* ─── 캡처 불러오기 모달 ────────────────────────────── */}
+      <ImportModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onConfirm={(holdings) => handleImportConfirm(holdings)}
+      />
 
       {/* ─── 섹터 편집 바텀시트 ───────────────────────────── */}
       <BottomSheet

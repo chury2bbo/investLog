@@ -6,6 +6,8 @@ interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  destructive?: boolean;
+  confirmLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -16,6 +18,8 @@ export function ConfirmDialog({
   message,
   confirmLabel = "확인",
   cancelLabel = "취소",
+  destructive = false,
+  confirmLoading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -45,9 +49,14 @@ export function ConfirmDialog({
           <div className="w-px bg-[#F0F4F0] dark:bg-[#2D3D30]" />
           <button
             onClick={onConfirm}
-            className="flex-1 py-3.5 text-sm font-bold text-[#05C072] hover:bg-[#F0FAF5] dark:hover:bg-[#0D2A1D] rounded-br-2xl transition-colors cursor-pointer"
+            disabled={confirmLoading}
+            className={`flex-1 py-3.5 text-sm font-bold rounded-br-2xl transition-colors cursor-pointer disabled:opacity-50 ${
+              destructive
+                ? "text-[#F04452] hover:bg-[#FFF0F1] dark:hover:bg-[#3D1519]"
+                : "text-[#05C072] hover:bg-[#F0FAF5] dark:hover:bg-[#0D2A1D]"
+            }`}
           >
-            {confirmLabel}
+            {confirmLoading ? "처리 중..." : confirmLabel}
           </button>
         </div>
       </div>

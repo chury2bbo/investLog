@@ -12,6 +12,7 @@ import {
   LoadingSpinner,
   EmptyState,
   BottomSheet,
+  ConfirmDialog,
 } from "@/components/ui";
 
 // ─── 타입 ────────────────────────────────────────────────
@@ -89,7 +90,7 @@ export default function AccountsPage() {
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   // 삭제 확인
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const fetchAccounts = useCallback(async () => {
@@ -219,7 +220,7 @@ export default function AccountsPage() {
     if (!deleteConfirm) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/accounts/${deleteConfirm}`, {
+      const res = await fetch(`/api/accounts/${deleteConfirm.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -374,7 +375,7 @@ export default function AccountsPage() {
                     수정
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm(acc.id); }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ id: acc.id, name: acc.brokerageCompany.name }); }}
                     className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[#4D1D22] transition-colors"
                   >
                     삭제
@@ -469,41 +470,16 @@ export default function AccountsPage() {
       </BottomSheet>
 
       {/* 삭제 확인 모달 */}
-      {deleteConfirm !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-[var(--color-surface)] dark:bg-[var(--color-card)] rounded-2xl p-6 w-[340px] max-w-[90vw]">
-            <div className="text-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[var(--color-negative-soft)] flex items-center justify-center mx-auto mb-3">
-                <span className="text-xl">⚠️</span>
-              </div>
-              <h3 className="text-base font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-1">
-                계좌를 삭제하시겠습니까?
-              </h3>
-              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-                이 계좌의 <strong className="text-[var(--color-negative)]">보유 종목, 매매 기록, 예수금</strong>이
-                모두 삭제되며 복구할 수 없습니다.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)]"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deleting}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-negative)] text-white"
-                style={{ opacity: deleting ? 0.6 : 1 }}
-              >
-                {deleting ? "삭제 중..." : "삭제"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={deleteConfirm !== null}
+        title="계좌를 삭제할까요?"
+        message={`${deleteConfirm?.name ?? ""} 계좌의 보유 종목, 매매 기록, 예수금이 모두 삭제되며 복구할 수 없습니다.`}
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={deleting}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }
