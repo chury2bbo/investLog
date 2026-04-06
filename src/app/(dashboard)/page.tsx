@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -75,6 +75,10 @@ interface AccountSummary {
 }
 
 import { formatKRW, formatCompact } from "@/lib/format";
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
+} from "recharts";
 
 // ─── 자산 배분 바 차트 색상 ──────────────────────────────
 
@@ -84,6 +88,22 @@ const ALLOC_COLORS = {
   cashKRW: "#F07D05",
   cashUSD: "var(--color-g400)",
 };
+
+// ─── 총 자산 추이 더미 데이터 ─────────────────────────────
+const DUMMY_SNAPSHOTS = [
+  { month: "24.11", invested: 3200, evaluated: 3150 },
+  { month: "24.12", invested: 3400, evaluated: 3520 },
+  { month: "25.01", invested: 3600, evaluated: 3480 },
+  { month: "25.02", invested: 3800, evaluated: 3950 },
+  { month: "25.03", invested: 4000, evaluated: 4280 },
+  { month: "25.04", invested: 4200, evaluated: 4530 },
+];
+
+// ─── 종목별 비중 도넛 컬러 ───────────────────────────────
+const DONUT_COLORS = [
+  "#2DB87A", "#1F9E64", "#4285F4", "#F07D05", "#9DAD9D",
+  "#05C072", "#7C3AED", "#E8553D", "#C8D1C8", "#16754A",
+];
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 
@@ -99,6 +119,7 @@ export default function DashboardPage() {
   const [quotesRefreshing, setQuotesRefreshing] = useState(false);
   const [staleQuote, setStaleQuote] = useState(false);
   const [fxRefreshing, setFxRefreshing] = useState(false);
+  const [snapshots, setSnapshots] = useState<{ month: string; invested: number; evaluated: number }[]>([]);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -158,6 +179,77 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ─── 월별 스냅샷 기록 + 조회 ──────────────────────────────
+
+  const saveAndFetchSnapshots = useCallback(async (
+    accs: AccountData[],
+    qts: Record<string, QuoteResult>,
+    rate: number,
+  ) => {
+    // 스냅샷 데이터 계산
+    let cashTotal = 0;
+    let investedTotal = 0;
+    let evaluatedTotal = 0;
+
+    accs.forEach((acc) => {
+      acc.cashBalances.forEach((cb) => {
+        if (cb.currency === "KRW") cashTotal += cb.amount;
+        if (cb.currency === "USD") cashTotal += cb.amount * rate;
+      });
+
+      acc.holdings.forEach((h) => {
+        const quote = qts[h.ticker];
+        const currentPrice = quote?.price || h.avgPrice;
+        const isForeign = h.country !== "KR";
+        const fx = isForeign ? rate : 1;
+        investedTotal += h.avgPrice * h.quantity * fx;
+        evaluatedTotal += currentPrice * h.quantity * fx;
+      });
+    });
+
+    investedTotal += cashTotal;
+    evaluatedTotal += cashTotal;
+
+    // 종목이 있을 때만 기록
+    if (accs.length > 0) {
+      try {
+        await fetch("/api/asset-snapshot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cashTotal,
+            investedAmount: investedTotal,
+            evaluatedAmount: evaluatedTotal,
+            usdRate: rate,
+          }),
+        });
+      } catch { /* 기록 실패 무시 */ }
+    }
+
+    // 스냅샷 조회
+    try {
+      const res = await fetch("/api/asset-snapshot");
+      if (res.ok) {
+        const data = await res.json();
+        const formatted = (Array.isArray(data) ? data : []).map((s: { date: string; investedAmount: number; evaluatedAmount: number }) => ({
+          month: new Date(s.date).toLocaleDateString("ko-KR", { year: "2-digit", month: "numeric" }).replace(". ", ".").replace(".", "."),
+          invested: Math.round(s.investedAmount / 10000),
+          evaluated: Math.round(s.evaluatedAmount / 10000),
+        }));
+        setSnapshots(formatted);
+      }
+    } catch { /* 조회 실패 무시 */ }
+  }, []);
+
+  // fetchData 완료 후 스냅샷 처리
+  const snapshotSaved = useRef(false);
+  useEffect(() => {
+    if (!loading && accounts.length > 0 && !snapshotSaved.current) {
+      snapshotSaved.current = true;
+      saveAndFetchSnapshots(accounts, quotes, usdRate);
+    }
+  }, [loading, accounts, quotes, usdRate, saveAndFetchSnapshots]);
 
   // ─── 환율 새로고침 ──────────────────────────────────────
   // TODO: /api/market/quote API 완성 후 실제 환율 조회로 교체
@@ -336,13 +428,34 @@ export default function DashboardPage() {
   const accountSummaries = calcAccountSummaries();
   const allocation = calcAllocation(summary);
 
+  // 종목별 비중 계산
+  const holdingWeights = (() => {
+    const items: { name: string; label: string; country: string; value: number }[] = [];
+    accounts.forEach((acc) => {
+      acc.holdings.forEach((h) => {
+        const quote = quotes[h.ticker];
+        const price = quote?.price || h.avgPrice;
+        const evalKRW = h.country === "KR"
+          ? price * h.quantity
+          : price * h.quantity * usdRate;
+        const label = h.country === "KR" ? h.name : h.ticker;
+        const country = h.country;
+        const existing = items.find((i) => i.name === h.name);
+        if (existing) existing.value += evalKRW;
+        else items.push({ name: h.name, label, country, value: evalKRW });
+      });
+    });
+    return items.sort((a, b) => b.value - a.value);
+  })();
+  const holdingTotal = holdingWeights.reduce((s, h) => s + h.value, 0);
+
   const pnlPositive = summary.totalPnlRate >= 0;
   const dailyPositive = summary.dailyPnl >= 0;
 
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 지연 시세 안내 */}
       {staleQuote && (
         <div className="rounded-lg px-3 py-2 text-xs mb-4 bg-[#FFF8E8] dark:bg-[#2D2810] text-[#B8860B]">
@@ -543,21 +656,14 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* 자산 배분 카드 */}
-      <Card>
-        <div className="flex items-center justify-between mb-3.5">
-          <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-            자산 배분
-          </span>
-          <button
-            onClick={() => fetchData(true)}
-            disabled={quotesRefreshing}
-            className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
-          >
-            {quotesRefreshing ? "조회 중..." : "새로고침"}
-          </button>
-        </div>
+      {/* PC 2컬럼 / 모바일 1컬럼 */}
+      <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5 mt-4">
+      {/* 좌측: 자산 배분 + 총 자산 추이 */}
+      <div>
 
+      {/* 자산 배분 카드 */}
+      <SectionTitle title="자산 배분" />
+      <Card>
         {/* 가로 바 */}
         <div className="h-2.5 rounded-full overflow-hidden flex mb-3.5">
           {allocation.map((a) =>
@@ -592,12 +698,157 @@ export default function DashboardPage() {
         </div>
       </Card>
 
+      {/* ── 총 자산 추이 차트 ── */}
+      <div className="mt-4">
+        <SectionTitle title="총 자산 추이" />
+        <Card>
+          {/* 안내 문구 */}
+          <div className="flex items-center gap-1.5 mb-4">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span className="text-[11px] text-[var(--color-g400)]">
+              대시보드 접속 시 월별 자산이 자동으로 기록됩니다
+            </span>
+          </div>
+
+          {/* 범례 */}
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-[2px] rounded" style={{ backgroundColor: "var(--color-primary)" }} />
+              <span className="text-[11px] text-[var(--color-g500)]">평가금 기준</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-[2px] rounded" style={{ backgroundColor: "var(--color-g300)", borderTop: "1px dashed var(--color-g300)" }} />
+              <span className="text-[11px] text-[var(--color-g500)]">원금 기준</span>
+            </div>
+          </div>
+
+          {/* 차트 */}
+          {snapshots.length >= 2 ? (
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={snapshots} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
+                <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)" }} />
+                <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
+                <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="relative">
+              <div style={{ opacity: 0.35 }}>
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart data={DUMMY_SNAPSHOTS} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => `${v}만`} axisLine={false} tickLine={false} />
+                    <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" />
+                </svg>
+                <p className="text-sm font-medium text-[var(--color-g500)]">데이터 수집 중</p>
+                <p className="text-[11px] text-[var(--color-g400)]">{snapshots.length === 1 ? "다음 달부터 추이를 볼 수 있어요" : "접속할 때마다 자산이 기록돼요"}</p>
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      </div>{/* 좌측 컬럼 끝 */}
+
+      {/* 우측: 종목별 비중 + 계좌 현황 */}
+      <div className="mt-4 md:mt-0">
+
+      {/* ── 종목별 비중 도넛 ── */}
+      {holdingWeights.length > 0 && (
+        <div className="md:flex md:flex-col">
+          <SectionTitle title="종목별 비중" />
+          <Card className="md:flex-1">
+            <div className="flex items-center gap-4 md:h-full">
+              {/* 도넛 차트 */}
+              <div className="w-[140px] h-[140px] shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={holdingWeights}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={38}
+                      outerRadius={62}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {holdingWeights.map((_, i) => (
+                        <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(v: unknown) => [`₩${formatKRW(v as number)}`, "평가금"]}
+                      contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* 범례 */}
+              <div className="flex-1 space-y-1.5">
+                {holdingWeights.slice(0, 5).map((h, i) => {
+                  const pct = holdingTotal > 0 ? Math.round((h.value / holdingTotal) * 100) : 0;
+                  return (
+                    <div key={h.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: DONUT_COLORS[i % DONUT_COLORS.length] }} />
+                        <span className={`text-[10px] font-bold px-1 py-0.5 rounded ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{h.country === "KR" ? "국내" : "해외"}</span>
+                        <span className="text-xs text-[var(--color-text)] truncate max-w-[80px]">{h.label}</span>
+                      </div>
+                      <span className="text-xs font-bold text-[var(--color-text)]">{pct}%</span>
+                    </div>
+                  );
+                })}
+                {holdingWeights.length > 5 && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: "var(--color-g300)" }} />
+                      <span className="text-xs text-[var(--color-g400)]">외 {holdingWeights.length - 5}종목</span>
+                    </div>
+                    <span className="text-xs font-bold text-[var(--color-g400)]">
+                      {holdingTotal > 0 ? Math.round((holdingWeights.slice(5).reduce((s, h) => s + h.value, 0) / holdingTotal) * 100) : 0}%
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* ── 섹션 3: 계좌 현황 ── */}
       <div className="mt-4">
         <SectionTitle title="계좌 현황" />
 
         {accountSummaries.length === 0 ? (
-          <EmptyState message="아직 등록된 계좌가 없어요. 온보딩에서 추가해보세요." />
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" /><path d="M2 10h20" />
+              </svg>
+              <p className="text-sm text-[var(--color-g400)]">아직 등록된 계좌가 없어요</p>
+              <button
+                onClick={() => router.push("/accounts?add=true")}
+                className="px-4 py-2 text-sm font-bold rounded-xl cursor-pointer transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "var(--color-primary)", color: "#fff", boxShadow: "0 2px 12px color-mix(in srgb, var(--color-primary) 27%, transparent)" }}
+              >
+                계좌 관리에서 추가하기
+              </button>
+            </div>
+          </Card>
         ) : (
           <div className="space-y-2.5">
             {accountSummaries.map((acc) => (
@@ -605,7 +856,7 @@ export default function DashboardPage() {
                 <Card>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-[var(--color-primary-soft)]">
+                      <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)]">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                       </div>
                       <div>
@@ -628,6 +879,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      </div>{/* 우측 컬럼 끝 */}
+      </div>{/* 2컬럼 그리드 끝 */}
     </div>
   );
 }

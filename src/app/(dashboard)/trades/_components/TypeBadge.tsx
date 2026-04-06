@@ -1,15 +1,13 @@
 "use client";
 
 export function TypeBadge({ type }: { type: "BUY" | "SELL" }) {
+  const styles =
+    type === "BUY"
+      ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
+      : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]";
+
   return (
-    <span
-      className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap"
-      style={
-        type === "BUY"
-          ? { backgroundColor: "#E6F9F1", color: "var(--color-positive)" }
-          : { backgroundColor: "#FFF3E8", color: "#F07D05" }
-      }
-    >
+    <span className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${styles}`}>
       {type === "BUY" ? "매수" : "매도"}
     </span>
   );

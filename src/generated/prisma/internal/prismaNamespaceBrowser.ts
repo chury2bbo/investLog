@@ -64,6 +64,7 @@ export const ModelName = {
   TickerSummaryCache: 'TickerSummaryCache',
   TickerAnalysisCache: 'TickerAnalysisCache',
   UserAnalysisLog: 'UserAnalysisLog',
+  MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog'
 } as const
 
@@ -257,6 +258,19 @@ export const UserAnalysisLogScalarFieldEnum = {
 } as const
 
 export type UserAnalysisLogScalarFieldEnum = (typeof UserAnalysisLogScalarFieldEnum)[keyof typeof UserAnalysisLogScalarFieldEnum]
+
+
+export const MonthlyAssetSnapshotScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  cashTotal: 'cashTotal',
+  investedAmount: 'investedAmount',
+  evaluatedAmount: 'evaluatedAmount',
+  usdRate: 'usdRate'
+} as const
+
+export type MonthlyAssetSnapshotScalarFieldEnum = (typeof MonthlyAssetSnapshotScalarFieldEnum)[keyof typeof MonthlyAssetSnapshotScalarFieldEnum]
 
 
 export const ApiUsageLogScalarFieldEnum = {

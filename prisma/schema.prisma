@@ -30,6 +30,7 @@ model User {
   sessions       Session[]
   investAccounts InvestAccount[]
   analysisLogs   UserAnalysisLog[]
+  assetSnapshots MonthlyAssetSnapshot[]
   oauthAccounts  Account[]
 }
 
@@ -187,6 +188,20 @@ model UserAnalysisLog {
 
   @@index([userId, createdAt])
   @@map("user_analysis_logs")
+}
+
+model MonthlyAssetSnapshot {
+  id              Int      @id @default(autoincrement())
+  userId          String
+  date            DateTime @db.Date
+  cashTotal       Float
+  investedAmount  Float
+  evaluatedAmount Float
+  usdRate         Float
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("monthly_asset_snapshots")
 }
 
 model ApiUsageLog {

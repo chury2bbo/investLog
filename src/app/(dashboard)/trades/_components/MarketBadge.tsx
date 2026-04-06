@@ -1,15 +1,13 @@
 "use client";
 
 export function MarketBadge({ market }: { market: "KR" | "US" }) {
+  const styles =
+    market === "KR"
+      ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
+      : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]";
+
   return (
-    <span
-      className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap"
-      style={
-        market === "KR"
-          ? { backgroundColor: "#E6F9F1", color: "var(--color-positive)" }
-          : { backgroundColor: "#E8F0FE", color: "#4285F4" }
-      }
-    >
+    <span className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${styles}`}>
       {market === "KR" ? "국내" : "해외"}
     </span>
   );

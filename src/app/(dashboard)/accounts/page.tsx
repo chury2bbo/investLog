@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   Button,
@@ -59,12 +59,20 @@ import { formatKRW, fmtNum, stripNum, formatCash } from "@/lib/format";
 
 export default function AccountsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [brokerages, setBrokerages] = useState<Brokerage[]>([]);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
   const [usdRate, setUsdRate] = useState(1400);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // URL 파라미터로 모달 자동 열기 (?add=true)
+  useEffect(() => {
+    if (searchParams.get("add") === "true") {
+      setModalOpen(true);
+    }
+  }, [searchParams]);
 
   // 추가 모달 폼
   const [formCode, setFormCode] = useState("");
