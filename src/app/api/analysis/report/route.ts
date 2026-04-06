@@ -97,7 +97,8 @@ export async function GET(req: Request) {
   "swotWeakness": "약점 1~2줄",
   "swotOpportunity": "기회 1~2줄",
   "swotThreat": "위협 1~2줄",
-  "reasoning": "종합 투자 의견 3~4줄"
+  "reasoning": "종합 투자 의견 3~4줄",
+  "recentIssues": "최근 주요 호재·악재 이슈 3~4줄 (호재: ..., 악재: ... 형식으로)"
 }
 
 한국어로 작성하고, JSON만 응답해줘.`,
@@ -128,6 +129,7 @@ export async function GET(req: Request) {
         swotOpportunity: parsed.swotOpportunity ?? "",
         swotThreat: parsed.swotThreat ?? "",
         reasoning: parsed.reasoning ?? "",
+        recentIssues: parsed.recentIssues ?? "",
         cachedDate: today,
       },
       update: {
@@ -139,6 +141,7 @@ export async function GET(req: Request) {
         swotOpportunity: parsed.swotOpportunity ?? "",
         swotThreat: parsed.swotThreat ?? "",
         reasoning: parsed.reasoning ?? "",
+        recentIssues: parsed.recentIssues ?? "",
         cachedDate: today,
       },
     });

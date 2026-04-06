@@ -55,6 +55,7 @@ interface ReportData {
   swotOpportunity: string;
   swotThreat: string;
   reasoning: string;
+  recentIssues?: string;
 }
 
 interface HistoryPoint {
@@ -695,6 +696,19 @@ export default function AnalysisPage() {
                   {report.reasoning}
                 </p>
               </Card>
+
+              {/* 최근 이슈 */}
+              {report.recentIssues && (
+                <Card>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">최근 주요 이슈</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[#F07D05] font-semibold">AI 학습 기반</span>
+                  </div>
+                  <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed whitespace-pre-line">
+                    {report.recentIssues}
+                  </p>
+                </Card>
+              )}
             </div>
           )}
         </div>

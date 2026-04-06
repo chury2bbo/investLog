@@ -1,0 +1,323 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { Card, ConfirmDialog } from "@/components/ui";
+
+interface EditableHolding {
+  ticker: string;
+  name: string;
+  avgPrice: string;
+  quantity: string;
+  country: string;
+  checked: boolean;
+}
+
+interface CashBalance {
+  currency: string;
+  amount: number;
+}
+
+interface ImportModalProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (holdings: EditableHolding[], cashBalances: CashBalance[]) => void;
+}
+
+type Step = "upload" | "loading" | "confirm";
+
+export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
+  const [step, setStep] = useState<Step>("upload");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [holdings, setHoldings] = useState<EditableHolding[]>([]);
+  const [cashBalances, setCashBalances] = useState<CashBalance[]>([]);
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFileNameRef = useRef<string | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    lastFileNameRef.current = file.name;
+    handleFile(file);
+  }
+
+  function showToast(title: string, message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
+
+  function handleClose() {
+    setStep("upload");
+    setPreviewUrl(null);
+    setHoldings([]);
+    setCashBalances([]);
+    onClose();
+  }
+
+  async function handleFile(file: File) {
+    if (!file.type.startsWith("image/")) return;
+    setPreviewUrl(URL.createObjectURL(file));
+    setStep("loading");
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch("/api/import/analyze", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast("분석 실패", data.error ?? "이미지 분석에 실패했습니다.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (data.valid === false) {
+      showToast("인식 불가", "증권사 잔고 화면이 아닌 것 같아요. 보유 종목 화면을 캡처해주세요.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    const extracted = (data.holdings ?? []).map((h: { ticker?: string; name?: string; avgPrice?: number; quantity?: number; country?: string }) => ({
+      ticker: h.ticker ?? "",
+      name: h.name ?? "",
+      avgPrice: String(h.avgPrice ?? ""),
+      quantity: String(h.quantity ?? ""),
+      country: h.country ?? "KR",
+      checked: true,
+    }));
+
+    if (extracted.length === 0) {
+      showToast("종목 없음", "종목 정보를 찾을 수 없어요. 종목명·수량·평단가가 모두 보이는 화면을 캡처해주세요.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    setHoldings(extracted);
+    setCashBalances(data.cashBalances ?? []);
+    setStep("confirm");
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }
+
+  function updateHolding(i: number, field: keyof EditableHolding, value: string | boolean) {
+    setHoldings((prev) => prev.map((h, idx) => idx === i ? { ...h, [field]: value } : h));
+  }
+
+  if (!open) return null;
+
+  return (
+    <>
+      <ConfirmDialog
+        open={!!pendingFile}
+        title="동일한 이미지"
+        message="이미 분석한 이미지입니다. 다시 분석할까요?"
+        confirmLabel="다시 분석"
+        cancelLabel="취소"
+        onConfirm={() => {
+          if (pendingFile) {
+            lastFileNameRef.current = pendingFile.name;
+            handleFile(pendingFile);
+          }
+          setPendingFile(null);
+        }}
+        onCancel={() => setPendingFile(null)}
+      />
+      {/* 토스트 */}
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
+        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
+          <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
+        </div>
+        <button onClick={() => setToast((p) => ({ ...p, visible: false }))} className="text-white/60 hover:text-white transition-colors shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={handleClose}>
+      <div className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0 border-b border-[#F0F4F0] dark:border-[#2D3D30]">
+          <div>
+            <h2 className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8]">계좌 캡처 불러오기</h2>
+            <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">증권사 앱 잔고 화면을 캡처해서 업로드하세요</p>
+          </div>
+          <button onClick={handleClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-[#F0F4F0] dark:bg-[#2D3D30] cursor-pointer shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B]">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* 본문 */}
+        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+
+          {/* 업로드 */}
+          {step === "upload" && (
+            <>
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-[#D4DDD4] dark:border-[#2D3D30] rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-[#05C072] hover:bg-[#F0FAF5] dark:hover:bg-[#0D2A1D] transition-all"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#E8FAF2] dark:bg-[#0D2A1D] flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">이미지를 드래그하거나 클릭해서 업로드</p>
+                  <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">PNG, JPG, WEBP · 최대 10MB</p>
+                </div>
+                <div className="px-4 py-2 rounded-xl bg-[#05C072] text-white text-xs font-semibold">파일 선택</div>
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                onChange={handleFileChange} />
+              <Card>
+                <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-2">📌 이렇게 캡처해주세요</p>
+                <div className="space-y-1.5">
+                  {["증권사 앱의 보유 종목 / 잔고 화면을 캡처", "종목명, 수량, 평단가가 모두 보이도록", "여러 화면은 한 장씩 업로드"].map((tip, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                      <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A]">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* 로딩 */}
+          {step === "loading" && (
+            <>
+              {previewUrl && (
+                <div className="rounded-2xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={previewUrl} alt="업로드 이미지" className="w-full object-contain max-h-48" />
+                </div>
+              )}
+              <Card>
+                <div className="flex flex-col items-center py-6 gap-4">
+                  <div className="w-10 h-10 rounded-full border-4 border-[#05C072] border-t-transparent animate-spin" />
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">AI가 이미지를 분석 중이에요</p>
+                    <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">잠시만 기다려주세요 (보통 5~10초)</p>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* 확인 + 수정 */}
+          {step === "confirm" && (
+            <>
+              {previewUrl && (
+                <div className="rounded-2xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={previewUrl} alt="업로드 이미지" className="w-full object-contain max-h-32" />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#05C072] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">분석 완료 — 내용을 확인하고 수정해주세요</p>
+              </div>
+
+              {cashBalances.length > 0 && (
+                <Card>
+                  <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2">예수금</p>
+                  <div className="flex gap-2">
+                    {cashBalances.map((c) => (
+                      <div key={c.currency} className="flex-1 bg-[#F5F7F5] dark:bg-[#2D3D30] rounded-xl px-3 py-2">
+                        <p className="text-[10px] text-[#9AA99A]">{c.currency}</p>
+                        <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                          {c.currency === "KRW" ? `₩${c.amount.toLocaleString()}` : `$${c.amount}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              <Card>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A]">보유 종목</p>
+                  <span className="text-xs text-[#9AA99A]">{holdings.length}종목</span>
+                </div>
+                <div className="space-y-3">
+                  {holdings.map((h, i) => (
+                    <div key={i} className={`rounded-xl border p-3 transition-colors ${h.checked ? "border-[#05C072] bg-[#F0FAF5] dark:bg-[#0D2A1D]" : "border-[#E8EEE8] dark:border-[#2D3D30] opacity-50"}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input type="checkbox" checked={h.checked}
+                          onChange={(e) => updateHolding(i, "checked", e.target.checked)}
+                          className="accent-[#05C072] w-4 h-4 shrink-0 cursor-pointer" />
+                        <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8] flex-1 truncate">{h.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${h.country === "KR" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"}`}>
+                          {h.country}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-[#9AA99A] block mb-0.5">평단가</label>
+                          <input type="text" value={h.avgPrice ? Number(h.avgPrice).toLocaleString() : ""}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/,/g, "");
+                              if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "avgPrice", raw);
+                            }}
+                            disabled={!h.checked}
+                            className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                            placeholder="평단가" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-[#9AA99A] block mb-0.5">수량</label>
+                          <input type="text" value={h.quantity ? Number(h.quantity).toLocaleString() : ""}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/,/g, "");
+                              if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "quantity", raw);
+                            }}
+                            disabled={!h.checked}
+                            className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                            placeholder="수량" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <div className="flex gap-2">
+                <button onClick={() => { setStep("upload"); setPreviewUrl(null); setHoldings([]); }}
+                  className="flex-1 py-3 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] text-sm font-semibold text-[#6B7B6B] cursor-pointer hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors">
+                  다시 업로드
+                </button>
+                <button
+                  onClick={() => { onConfirm(holdings.filter((h) => h.checked), cashBalances); handleClose(); }}
+                  disabled={!holdings.some((h) => h.checked)}
+                  className="flex-1 py-3 rounded-xl bg-[#05C072] text-white text-sm font-bold cursor-pointer hover:bg-[#04a862] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                  {holdings.filter((h) => h.checked).length}종목 가져오기
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+    </>
+  );
+}

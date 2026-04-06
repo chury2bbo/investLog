@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Tag, LoadingSpinner } from "@/components/ui";
+import { ImportModal } from "@/components/ImportModal";
 
 function fmtNum(val: string) {
   if (!val) return "";
@@ -241,6 +242,40 @@ export default function OnboardingPage() {
       })
       .catch(() => setChecking(false));
   }, [router]);
+
+  // 캡처 불러오기 모달
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importAccIdx, setImportAccIdx] = useState(0);
+
+  function applyImportResult(
+    imported: { ticker: string; name: string; country: string; avgPrice: string; quantity: string }[],
+    importedCash: { currency: string; amount: number }[],
+    idx: number
+  ) {
+    setAccounts((prev) => {
+      const next = [...prev];
+      const newHoldings = imported
+        .filter((h) => !next[idx].holdings.some((e) => e.ticker === h.ticker))
+        .map((h) => ({
+          ticker: h.ticker,
+          name: h.name,
+          country: h.country ?? "KR",
+          avgPrice: parseFloat(h.avgPrice) || 0,
+          quantity: parseInt(h.quantity) || 0,
+          sectorManual: "",
+          tags: [],
+        }));
+      const krw = importedCash.find((c) => c.currency === "KRW");
+      const usd = importedCash.find((c) => c.currency === "USD");
+      next[idx] = {
+        ...next[idx],
+        holdings: [...next[idx].holdings, ...newHoldings],
+        ...(krw && krw.amount > 0 ? { cashKRW: String(krw.amount) } : {}),
+        ...(usd && usd.amount > 0 ? { cashUSD: String(usd.amount) } : {}),
+      };
+      return next;
+    });
+  }
 
   // 토스트
   const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
@@ -596,6 +631,14 @@ export default function OnboardingPage() {
                 >
                   계좌 {accIdx + 1}
                 </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setImportAccIdx(accIdx); setImportModalOpen(true); }}
+                    className="text-xs px-2.5 py-1 rounded-lg font-semibold cursor-pointer"
+                    style={{ backgroundColor: "#E8FAF2", color: "#05C072" }}
+                  >
+                    📷 캡처로 불러오기
+                  </button>
                 {accounts.length > 1 && (
                   <button
                     onClick={() => removeAccount(accIdx)}
@@ -605,6 +648,7 @@ export default function OnboardingPage() {
                     삭제
                   </button>
                 )}
+                </div>
               </div>
 
               {/* 증권사 선택 */}
@@ -1099,6 +1143,13 @@ export default function OnboardingPage() {
       className="min-h-screen flex flex-col items-center"
       style={{ backgroundColor: "#F5F7F5" }}
     >
+      {/* 캡처 불러오기 모달 */}
+      <ImportModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onConfirm={(holdings, cashBalances) => applyImportResult(holdings, cashBalances, importAccIdx)}
+      />
+
       {/* 토스트 */}
       <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">

@@ -169,6 +169,7 @@ model TickerAnalysisCache {
   swotOpportunity String
   swotThreat      String
   reasoning       String
+  recentIssues    String @default("")
   cachedDate      String
   updatedAt       DateTime @updatedAt
 

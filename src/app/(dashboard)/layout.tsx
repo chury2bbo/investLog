@@ -201,12 +201,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { status } = useSession();
   const [checked, setChecked] = useState(false);
 
   // 온보딩 미완료 시 온보딩으로 리다이렉트
   useEffect(() => {
     if (status !== "authenticated") return;
+
+    // 온보딩 중 import 페이지 접근은 허용
+    if (pathname === "/import") {
+      setChecked(true);
+      return;
+    }
 
     fetch("/api/user/me")
       .then((res) => res.ok ? res.json() : { onboardingDone: true })
@@ -218,7 +225,7 @@ export default function DashboardLayout({
         }
       })
       .catch(() => setChecked(true));
-  }, [status, router]);
+  }, [status, router, pathname]);
 
   // 체크 완료 전에는 빈 화면 (깜빡임 방지)
   if (status === "loading" || !checked) {

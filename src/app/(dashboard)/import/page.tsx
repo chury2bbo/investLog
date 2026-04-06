@@ -1,44 +1,107 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Card } from "@/components/ui";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Card, ConfirmDialog } from "@/components/ui";
 
-// ─── 샘플 더미 데이터 (실제 Claude 추출 결과 형태) ──────────
-const SAMPLE_RESULT = {
-  brokerage: "키움증권",
-  holdings: [
-    { ticker: "005930", name: "삼성전자", quantity: 50, avgPrice: 72000, country: "KR" },
-    { ticker: "000660", name: "SK하이닉스", quantity: 20, avgPrice: 185000, country: "KR" },
-    { ticker: "NVDA", name: "NVIDIA Corporation", quantity: 5, avgPrice: 820.5, country: "US" },
-    { ticker: "AAPL", name: "Apple Inc.", quantity: 10, avgPrice: 178.3, country: "US" },
-  ],
-  cashBalances: [
-    { currency: "KRW", amount: 1250000 },
-    { currency: "USD", amount: 320.5 },
-  ],
-};
+interface EditableHolding {
+  ticker: string;
+  name: string;
+  avgPrice: string;
+  quantity: string;
+  country: string;
+  checked: boolean;
+}
+
+interface CashBalance {
+  currency: string;
+  amount: number;
+}
 
 type Step = "upload" | "loading" | "confirm" | "done";
 
 export default function ImportPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromOnboarding = searchParams.get("from") === "onboarding";
+  const accIdx = searchParams.get("accIdx") ?? "0";
+
   const [step, setStep] = useState<Step>("upload");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [result, setResult] = useState<typeof SAMPLE_RESULT | null>(null);
-  const [checked, setChecked] = useState<boolean[]>([]);
+  const [holdings, setHoldings] = useState<EditableHolding[]>([]);
+  const [cashBalances, setCashBalances] = useState<CashBalance[]>([]);
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const lastFileNameRef = useRef<string | null>(null);
 
-  function handleFile(file: File) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (file.name === lastFileNameRef.current) {
+      setPendingFile(file);
+      return;
+    }
+    lastFileNameRef.current = file.name;
+    handleFile(file);
+  }
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(title: string, message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
+
+  async function handleFile(file: File) {
     if (!file.type.startsWith("image/")) return;
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
+    setErrorMsg(null);
     setStep("loading");
 
-    // 실제 구현 시 Claude API 호출 — 여기선 2초 후 샘플 데이터로 대체
-    setTimeout(() => {
-      setResult(SAMPLE_RESULT);
-      setChecked(SAMPLE_RESULT.holdings.map(() => true));
-      setStep("confirm");
-    }, 2000);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch("/api/import/analyze", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast("분석 실패", data.error ?? "이미지 분석에 실패했습니다.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (data.valid === false) {
+      showToast("인식 불가", "증권사 잔고 화면이 아닌 것 같아요. 보유 종목 화면을 캡처해주세요.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    const extracted: EditableHolding[] = (data.holdings ?? []).map((h: {
+      ticker?: string; name?: string; avgPrice?: number; quantity?: number; country?: string;
+    }) => ({
+      ticker: h.ticker ?? "",
+      name: h.name ?? "",
+      avgPrice: String(h.avgPrice ?? ""),
+      quantity: String(h.quantity ?? ""),
+      country: h.country ?? "KR",
+      checked: true,
+    }));
+
+    if (extracted.length === 0) {
+      showToast("종목 없음", "종목 정보를 찾을 수 없어요. 종목명·수량·평단가가 모두 보이는 화면을 캡처해주세요.");
+      setStep("upload");
+      setPreviewUrl(null);
+      return;
+    }
+
+    setHoldings(extracted);
+    setCashBalances(data.cashBalances ?? []);
+    setStep("confirm");
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -47,17 +110,43 @@ export default function ImportPage() {
     if (file) handleFile(file);
   }
 
+  function updateHolding(i: number, field: keyof EditableHolding, value: string | boolean) {
+    setHoldings((prev) => prev.map((h, idx) => idx === i ? { ...h, [field]: value } : h));
+  }
+
   function handleConfirm() {
-    setStep("done");
+    const selected = holdings.filter((h) => h.checked);
+    if (fromOnboarding) {
+      localStorage.setItem("import_result", JSON.stringify({ holdings: selected, cashBalances, accIdx: parseInt(accIdx) }));
+      router.back();
+    } else {
+      setStep("done");
+    }
   }
 
   return (
+    <>
+    <ConfirmDialog
+      open={!!pendingFile}
+      title="동일한 이미지"
+      message="이미 분석한 이미지입니다. 다시 분석할까요?"
+      confirmLabel="다시 분석"
+      cancelLabel="취소"
+      onConfirm={() => {
+        if (pendingFile) {
+          lastFileNameRef.current = pendingFile.name;
+          handleFile(pendingFile);
+        }
+        setPendingFile(null);
+      }}
+      onCancel={() => setPendingFile(null)}
+    />
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
       <div className="flex items-center gap-2 mb-6">
         <button
-          onClick={() => window.history.back()}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors"
+          onClick={() => router.back()}
+          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">
             <path d="M15 18l-6-6 6-6" />
@@ -65,10 +154,10 @@ export default function ImportPage() {
         </button>
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
-            계좌 캡쳐 불러오기
+            계좌 캡처 불러오기
           </h1>
           <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
-            증권사 앱 잔고 화면을 캡쳐해서 업로드하세요
+            증권사 앱 잔고 화면을 캡처해서 업로드하세요
           </p>
         </div>
       </div>
@@ -76,7 +165,6 @@ export default function ImportPage() {
       {/* ── STEP 1: 업로드 ── */}
       {step === "upload" && (
         <div className="space-y-4">
-          {/* 드래그 앤 드롭 영역 */}
           <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
@@ -107,24 +195,14 @@ export default function ImportPage() {
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+            onChange={handleFileChange}
           />
-
-          {/* 안내 카드 */}
           <Card>
-            <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3">
-              📌 이렇게 캡쳐해주세요
-            </p>
+            <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3">📌 이렇게 캡처해주세요</p>
             <div className="space-y-2">
-              {[
-                "증권사 앱의 보유 종목 / 잔고 화면을 캡쳐",
-                "종목명, 수량, 평단가가 모두 보이도록",
-                "여러 화면은 한 장씩 업로드",
-              ].map((tip, i) => (
+              {["증권사 앱의 보유 종목 / 잔고 화면을 캡처", "종목명, 수량, 평단가가 모두 보이도록", "여러 화면은 한 장씩 업로드"].map((tip, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                    {i + 1}
-                  </span>
+                  <span className="w-5 h-5 rounded-full bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                   <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A]">{tip}</p>
                 </div>
               ))}
@@ -154,10 +232,9 @@ export default function ImportPage() {
         </div>
       )}
 
-      {/* ── STEP 3: 확인 ── */}
-      {step === "confirm" && result && (
+      {/* ── STEP 3: 확인 + 수정 ── */}
+      {step === "confirm" && (
         <div className="space-y-4">
-          {/* 이미지 썸네일 */}
           {previewUrl && (
             <div className="rounded-2xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -165,98 +242,118 @@ export default function ImportPage() {
             </div>
           )}
 
-          {/* 추출 결과 헤더 */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-[#05C072] flex items-center justify-center">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
-            <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-              분석 완료 — 등록할 내용을 확인해주세요
-            </p>
+            <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">분석 완료 — 내용을 확인하고 수정해주세요</p>
           </div>
 
-          {/* 증권사 + 예수금 */}
+          {/* 예수금 */}
+          {cashBalances.length > 0 && (
+            <Card>
+              <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2">예수금</p>
+              <div className="flex gap-3">
+                {cashBalances.map((c) => (
+                  <div key={c.currency} className="flex-1 bg-[#F5F7F5] dark:bg-[#2D3D30] rounded-xl px-3 py-2">
+                    <p className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A]">{c.currency}</p>
+                    <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                      {c.currency === "KRW" ? `₩${c.amount.toLocaleString()}` : `$${c.amount}`}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* 보유 종목 — 수정 가능 */}
           <Card>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A]">증권사</span>
-              <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">{result.brokerage}</span>
+              <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A]">보유 종목</p>
+              <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">{holdings.length}종목</span>
             </div>
-            <div className="h-px bg-[#F0F4F0] dark:bg-[#2D3D30] mb-3" />
-            <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2">예수금</p>
-            <div className="flex gap-3">
-              {result.cashBalances.map((c) => (
-                <div key={c.currency} className="flex-1 bg-[#F5F7F5] dark:bg-[#2D3D30] rounded-xl px-3 py-2">
-                  <p className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A]">{c.currency}</p>
-                  <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
-                    {c.currency === "KRW" ? `₩${c.amount.toLocaleString()}` : `$${c.amount.toLocaleString()}`}
-                  </p>
+            <div className="space-y-3">
+              {holdings.map((h, i) => (
+                <div
+                  key={i}
+                  className={`rounded-xl border p-3 transition-colors ${
+                    h.checked
+                      ? "border-[#05C072] bg-[#F0FAF5] dark:bg-[#0D2A1D]"
+                      : "border-[#E8EEE8] dark:border-[#2D3D30] opacity-50"
+                  }`}
+                >
+                  {/* 상단: 체크박스 + 종목명 */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={h.checked}
+                      onChange={(e) => updateHolding(i, "checked", e.target.checked)}
+                      className="accent-[#05C072] w-4 h-4 shrink-0 cursor-pointer"
+                    />
+                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8] flex-1 truncate">{h.name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                      h.country === "KR"
+                        ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                        : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                    }`}>
+                      {h.country}
+                    </span>
+                  </div>
+                  {/* 하단: 평단가 + 수량 입력 */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A] block mb-0.5">평단가</label>
+                      <input
+                        type="text"
+                        value={h.avgPrice ? Number(h.avgPrice).toLocaleString() : ""}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/,/g, "");
+                          if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "avgPrice", raw);
+                        }}
+                        disabled={!h.checked}
+                        className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                        placeholder="평단가"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A] block mb-0.5">수량</label>
+                      <input
+                        type="text"
+                        value={h.quantity ? Number(h.quantity).toLocaleString() : ""}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/,/g, "");
+                          if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "quantity", raw);
+                        }}
+                        disabled={!h.checked}
+                        className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                        placeholder="수량"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* 보유 종목 */}
-          <Card>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A]">보유 종목</p>
-              <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">{result.holdings.length}종목</span>
-            </div>
-            <div className="space-y-2">
-              {result.holdings.map((h, i) => (
-                <label
-                  key={h.ticker}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${
-                    checked[i]
-                      ? "border-[#05C072] bg-[#F0FAF5] dark:bg-[#0D2A1D]"
-                      : "border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720]"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked[i]}
-                    onChange={() => setChecked((prev) => prev.map((v, j) => j === i ? !v : v))}
-                    className="accent-[#05C072] w-4 h-4"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8] truncate">{h.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${h.country === "KR" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"}`}>
-                        {h.country}
-                      </span>
-                    </div>
-                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">{h.ticker}</span>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
-                      {h.country === "KR" ? `₩${h.avgPrice.toLocaleString()}` : `$${h.avgPrice.toLocaleString()}`}
-                    </p>
-                    <p className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A]">{h.quantity}주</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </Card>
-
-          {/* 버튼 */}
           <div className="flex gap-2">
             <button
-              onClick={() => { setStep("upload"); setPreviewUrl(null); setResult(null); }}
-              className="flex-1 py-3 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors"
+              onClick={() => { setStep("upload"); setPreviewUrl(null); setHoldings([]); }}
+              className="flex-1 py-3 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors cursor-pointer"
             >
               다시 업로드
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!checked.some(Boolean)}
-              className="flex-2 flex-1 py-3 rounded-xl bg-[#05C072] text-white text-sm font-bold hover:bg-[#04a862] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={!holdings.some((h) => h.checked)}
+              className="flex-1 py-3 rounded-xl bg-[#05C072] text-white text-sm font-bold hover:bg-[#04a862] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              {checked.filter(Boolean).length}종목 등록하기
+              {holdings.filter((h) => h.checked).length}종목 {fromOnboarding ? "가져오기" : "등록하기"}
             </button>
           </div>
         </div>
       )}
 
-      {/* ── STEP 4: 완료 ── */}
+      {/* ── STEP 4: 완료 (standalone 모드) ── */}
       {step === "done" && (
         <Card>
           <div className="flex flex-col items-center py-8 gap-4">
@@ -266,20 +363,34 @@ export default function ImportPage() {
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8]">등록 완료!</p>
+              <p className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8]">완료!</p>
               <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">
-                {checked.filter(Boolean).length}개 종목이 계좌에 추가됐어요
+                {holdings.filter((h) => h.checked).length}개 종목을 불러왔어요
               </p>
             </div>
             <button
-              onClick={() => window.history.back()}
-              className="px-6 py-2.5 rounded-xl bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A] text-sm font-bold"
+              onClick={() => router.back()}
+              className="px-6 py-2.5 rounded-xl bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A] text-sm font-bold cursor-pointer"
             >
               확인
             </button>
           </div>
         </Card>
       )}
+      {/* 토스트 */}
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
+        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-white leading-tight">{toast.title}</p>
+          <p className="text-xs text-white/80 mt-0.5 leading-tight">{toast.message}</p>
+        </div>
+        <button onClick={() => setToast((p) => ({ ...p, visible: false }))} className="text-white/60 hover:text-white transition-colors shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
     </div>
+    </>
   );
 }
