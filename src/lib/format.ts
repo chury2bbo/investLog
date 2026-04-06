@@ -1,10 +1,12 @@
 /** 원화 금액을 억/만 단위로 축약 */
 export function formatKRW(value: number): string {
   if (Math.abs(value) >= 1_0000_0000) {
-    return `${Math.floor((value / 1_0000_0000) * 10) / 10}억`;
+    const v = Math.floor((value / 1_0000_0000) * 10) / 10;
+    return `${v.toLocaleString()}억`;
   }
   if (Math.abs(value) >= 1_0000) {
-    return `${Math.floor((value / 10000) * 10) / 10}만`;
+    const v = Math.floor((value / 10000) * 10) / 10;
+    return `${v.toLocaleString()}만`;
   }
   return Math.floor(value).toLocaleString();
 }

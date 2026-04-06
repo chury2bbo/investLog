@@ -425,10 +425,12 @@ export default function TradesPage() {
   // ─── 매매 상세 열기/수정/저장 ─────────────────────────────
 
   function openDetail(trade: TradeLog) {
-    setDetailTrade(trade);
-    setDetailTags(trade.reasonTags);
-    setDetailEmotion(trade.emotion ?? "");
-    setDetailMemo(trade.memo ?? "");
+    // trades 배열에서 최신 데이터 찾기
+    const latest = trades.find((t) => t.id === trade.id) ?? trade;
+    setDetailTrade(latest);
+    setDetailTags(latest.reasonTags);
+    setDetailEmotion(latest.emotion ?? "");
+    setDetailMemo(latest.memo ?? "");
     setDetailEditing(false);
   }
 
@@ -446,9 +448,12 @@ export default function TradesPage() {
         }),
       });
       if (res.ok) {
+        const updated = { ...detailTrade, reasonTags: detailTags, emotion: detailEmotion || null, memo: detailMemo || null };
+        setDetailTrade(updated);
         setDetailEditing(false);
-        setDetailTrade({ ...detailTrade, reasonTags: detailTags, emotion: detailEmotion || null, memo: detailMemo || null });
-        fetchTrades();
+        // trades 배열 즉시 교체 + 백그라운드 갱신
+        setTrades((prev) => prev.map((t) => t.id === updated.id ? { ...t, ...updated } : t));
+        await fetchTrades();
       }
     } catch { /* 저장 실패 */ }
     finally { setDetailSaving(false); }
@@ -585,7 +590,7 @@ export default function TradesPage() {
                 ))}
               </div>
             </div>
-            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} /></Card>
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
           </>
         )}
       </div>
@@ -635,7 +640,7 @@ export default function TradesPage() {
           </>
         ) : (
           <div className="px-4 py-2.5">
-            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} /></Card>
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
           </div>
         )}
 
@@ -779,9 +784,9 @@ export default function TradesPage() {
                     className="w-full p-3 text-sm bg-[var(--color-g100)] dark:bg-[var(--color-border)] rounded-xl outline-none resize-none text-[var(--color-text)] placeholder:text-[var(--color-g400)] border border-[var(--color-g200)] dark:border-[var(--color-border)] focus:border-[var(--color-primary)] transition-colors"
                   />
                 ) : detailTrade.memo ? (
-                  <div className="px-3 py-2.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-sm text-[var(--color-text)] leading-relaxed">
+                  <p className="text-sm text-[var(--color-text)] leading-relaxed">
                     {detailTrade.memo}
-                  </div>
+                  </p>
                 ) : (
                   <span className="text-xs text-[var(--color-g400)]">없음</span>
                 )}
