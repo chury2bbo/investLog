@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
-import { Card, SectionTitle, Button, Input, Toast, ConfirmDialog } from "@/components/ui";
+import { Card, SectionTitle, Button, Input, Toast, ConfirmDialog, ThemeToggle } from "@/components/ui";
 
 const PW_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,15}$/;
 
@@ -127,6 +127,11 @@ export default function ProfilePage() {
         onClose={() => setToast((p) => ({ ...p, visible: false }))}
       />
 
+      {/* 모바일 다크모드 토글 */}
+      <div className="flex justify-end md:hidden mb-2">
+        <ThemeToggle />
+      </div>
+
       {/* 프로필 헤더 */}
       <div className="flex flex-col items-center py-6 mb-6">
         <div
@@ -198,8 +203,18 @@ export default function ProfilePage() {
           </div>
         </Card>
       </div>
-      {/* 회원 탈퇴 */}
+      {/* 로그아웃 */}
       <div className="mt-6">
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="w-full py-3.5 rounded-2xl text-sm font-bold border border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] cursor-pointer transition-colors hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)]"
+        >
+          로그아웃
+        </button>
+      </div>
+
+      {/* 회원 탈퇴 */}
+      <div className="mt-3">
         <button
           onClick={() => setDeleteConfirm(true)}
           className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"

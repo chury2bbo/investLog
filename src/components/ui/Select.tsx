@@ -80,7 +80,7 @@ export function Select({
               className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between border-b border-[var(--color-g200)] dark:border-[var(--color-border)] last:border-0 ${
                 value === opt.value
                   ? "bg-[var(--color-primary-soft)] dark:bg-[var(--color-primary-dark)]/20 text-[var(--color-primary)] font-semibold"
-                  : "text-[var(--color-text)]"
+                  : "text-[var(--color-text)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)]"
               }`}
             >
               <span>{opt.label}</span>

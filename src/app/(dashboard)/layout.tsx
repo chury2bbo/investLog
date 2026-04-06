@@ -94,7 +94,7 @@ function IconSidebar() {
               {/* 툴팁 */}
               {hovered === item.id && (
                 <div
-                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1A221A]"
                   style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                 >
                   {item.label}
@@ -103,7 +103,7 @@ function IconSidebar() {
                     style={{
                       borderTop: "5px solid transparent",
                       borderBottom: "5px solid transparent",
-                      borderRight: "5px solid var(--color-text)",
+                      borderRight: "5px solid #1A221A",
                     }}
                   />
                 </div>
@@ -132,7 +132,7 @@ function IconSidebar() {
           </button>
           {hovered === "logout" && (
             <div
-              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1A221A]"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
             >
               로그아웃
@@ -166,7 +166,7 @@ function BottomNav() {
           <button
             key={item.id}
             onClick={() => router.push(item.id)}
-            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-1 cursor-pointer"
+            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-2 cursor-pointer min-h-[44px] justify-center"
             style={{ opacity: active ? 1 : 0.4 }}
           >
             <NavIcon name={item.icon} size={22} active={active} />

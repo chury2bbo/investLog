@@ -181,7 +181,11 @@ export default function RegisterPage() {
             className="rounded-2xl px-6 py-10 text-center bg-(--color-surface)"
             style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
           >
-            <div className="text-5xl mb-4">🎉</div>
+            <div className="mb-4 flex justify-center">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
             <h2 className="text-xl font-extrabold text-(--color-text) mb-2">
               가입 완료!
             </h2>

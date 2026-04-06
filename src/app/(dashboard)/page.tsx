@@ -64,6 +64,7 @@ interface AssetSummary {
 interface AccountSummary {
   id: number;
   name: string;
+  memo: string | null;
   type: string;
   stockCount: number;
   cashKRW: number;
@@ -366,6 +367,7 @@ export default function DashboardPage() {
       return {
         id: acc.id,
         name: acc.brokerageCompany.name,
+        memo: acc.memo,
         type,
         stockCount: acc.holdings.length,
         cashKRW,
@@ -510,7 +512,7 @@ export default function DashboardPage() {
               <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
             </svg>
           </button>
-          <ThemeToggle />
+          <div className="md:hidden"><ThemeToggle /></div>
         </div>
       </div>
 
@@ -727,7 +729,7 @@ export default function DashboardPage() {
               <span className="text-[11px] text-[var(--color-g500)]">평가금 기준</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-[2px] rounded" style={{ backgroundColor: "var(--color-g300)", borderTop: "1px dashed var(--color-g300)" }} />
+              <svg width="16" height="2" className="shrink-0"><line x1="0" y1="1" x2="16" y2="1" stroke="var(--color-g300)" strokeWidth="2" strokeDasharray="3 2" /></svg>
               <span className="text-[11px] text-[var(--color-g500)]">원금 기준</span>
             </div>
           </div>
@@ -739,7 +741,7 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
-                <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)" }} />
+                <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
                 <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
                 <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
               </LineChart>
@@ -798,8 +800,17 @@ export default function DashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(v: unknown) => [`₩${formatKRW(v as number)}`, "평가금"]}
-                      contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)" }}
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.[0]) return null;
+                        const data = payload[0].payload as { name: string; label: string; value: number };
+                        const pct = holdingTotal > 0 ? Math.round((data.value / holdingTotal) * 100) : 0;
+                        return (
+                          <div className="px-3 py-2 rounded-xl bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-xs shadow-lg border border-[var(--color-g200)] dark:border-[var(--color-border)]">
+                            <div className="font-bold text-[var(--color-text)] mb-0.5">{data.label}</div>
+                            <div className="text-[var(--color-g500)]">₩{formatKRW(data.value)} ({pct}%)</div>
+                          </div>
+                        );
+                      }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -879,8 +890,9 @@ export default function DashboardPage() {
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                       </div>
                       <div>
-                        <div className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        <div className="text-[15px] font-bold text-[var(--color-text)]">
                           {acc.name}
+                          {acc.memo && <span className="ml-1.5 text-xs font-normal text-[var(--color-g400)]">{acc.memo}</span>}
                         </div>
                         <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
                           {acc.type} · {acc.stockCount}종목

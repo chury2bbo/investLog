@@ -10,6 +10,7 @@ import {
   LoadingSpinner,
   EmptyState,
   Divider,
+  ThemeToggle,
 } from "@/components/ui";
 import {
   AreaChart,
@@ -277,18 +278,21 @@ export default function AnalysisPage() {
   return (
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
-      <div className="flex items-center gap-2 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
-        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
-          종목 분석
-        </h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.back()}
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
+            종목 분석
+          </h1>
+        </div>
+        <div className="md:hidden"><ThemeToggle /></div>
       </div>
 
       {/* ── 이전 분석 불러오기 ── */}

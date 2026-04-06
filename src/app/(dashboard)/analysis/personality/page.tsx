@@ -9,6 +9,7 @@ import {
   SectionTitle,
   LoadingSpinner,
   Divider,
+  ThemeToggle,
 } from "@/components/ui";
 import {
   BarChart,
@@ -240,30 +241,32 @@ export default function PersonalityPage() {
       <SectionTitle title="이유별 평균 수익률" />
       <Card className="mb-4">
         {tagPnl.length > 0 ? (
-          <ResponsiveContainer width="100%" height={tagPnl.length * 36 + 20}>
-            <BarChart data={tagPnl} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-              <XAxis
-                type="number"
-                tick={{ fontSize: 10, fill: "var(--color-g400)" }}
-                tickFormatter={(v) => `${v}%`}
-              />
-              <YAxis
-                type="category"
-                dataKey="tag"
-                tick={{ fontSize: 11, fill: "var(--color-text)" }}
-                width={80}
-              />
-              <Tooltip
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-g200)" }}
-                formatter={(v: unknown) => [`${(v as number).toFixed(2)}%`, "평균 수익률"]}
-              />
-              <Bar dataKey="avgPnl" radius={[0, 4, 4, 0]}>
-                {tagPnl.map((entry, i) => (
-                  <Cell key={i} fill={pnlColor(entry.avgPnl)} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-2.5">
+            {tagPnl.map((item) => {
+              const isPositive = item.avgPnl >= 0;
+              const maxAbs = Math.max(...tagPnl.map((t) => Math.abs(t.avgPnl)), 1);
+              const widthPct = Math.min((Math.abs(item.avgPnl) / maxAbs) * 100, 100);
+              return (
+                <div key={item.tag} className="flex items-center gap-3">
+                  <span className="text-xs font-medium text-[var(--color-text)] w-[72px] shrink-0 truncate">{item.tag}</span>
+                  <div className="flex-1 h-6 bg-[var(--color-g100)] dark:bg-[var(--color-border)] rounded-lg overflow-hidden relative">
+                    <div
+                      className="h-full rounded-lg"
+                      style={{
+                        width: `${widthPct}%`,
+                        backgroundColor: isPositive ? "var(--color-positive)" : "var(--color-negative)",
+                        opacity: 0.8,
+                        minWidth: 4,
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold w-[52px] text-right shrink-0" style={{ color: pnlColor(item.avgPnl) }}>
+                    {isPositive ? "+" : ""}{item.avgPnl.toFixed(1)}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <p className="text-sm text-center text-[var(--color-g400)] py-4">매수→매도 매칭 데이터가 부족합니다.</p>
         )}
@@ -476,18 +479,21 @@ export default function PersonalityPage() {
 function Header() {
   const router = useRouter();
   return (
-    <div className="flex items-center gap-2 mb-6">
-      <button
-        onClick={() => router.back()}
-        className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-      <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
-        투자 성향 분석
-      </h1>
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => router.back()}
+          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
+          투자 성향 분석
+        </h1>
+      </div>
+      <div className="md:hidden"><ThemeToggle /></div>
     </div>
   );
 }

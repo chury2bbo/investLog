@@ -93,6 +93,8 @@ export default function TradesPage() {
   const [detailEmotion, setDetailEmotion] = useState<string>("");
   const [detailMemo, setDetailMemo] = useState("");
   const [detailSaving, setDetailSaving] = useState(false);
+  const [detailDeleteConfirm, setDetailDeleteConfirm] = useState(false);
+  const [detailDeleting, setDetailDeleting] = useState(false);
 
   // 모바일 필터 패널 토글
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -459,6 +461,20 @@ export default function TradesPage() {
     finally { setDetailSaving(false); }
   }
 
+  async function deleteDetail() {
+    if (!detailTrade) return;
+    setDetailDeleting(true);
+    try {
+      const res = await fetch(`/api/trades/${detailTrade.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDetailDeleteConfirm(false);
+        setDetailTrade(null);
+        fetchTrades();
+      }
+    } catch { /* 삭제 실패 */ }
+    finally { setDetailDeleting(false); }
+  }
+
   // ─── 로딩 ──────────────────────────────────────────────
 
   if (loading && trades.length === 0) {
@@ -488,7 +504,7 @@ export default function TradesPage() {
         {/* 타이틀 — 계좌 관리와 동일 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors">
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -564,10 +580,10 @@ export default function TradesPage() {
                   <button
                     key={t}
                     onClick={() => handleFilterChange({ ...appliedFilters, tradeType: t })}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                       appliedFilters.tradeType === t
-                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
-                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
                     }`}
                   >
                     {t === "" ? "전체" : t === "BUY" ? "매수" : "매도"}
@@ -579,10 +595,10 @@ export default function TradesPage() {
                   <button
                     key={m}
                     onClick={() => handleFilterChange({ ...appliedFilters, market: m })}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                       appliedFilters.market === m
-                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
-                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
                     }`}
                   >
                     {m === "" ? "전체" : m === "KR" ? "국내" : "해외"}
@@ -792,19 +808,27 @@ export default function TradesPage() {
                 )}
               </div>
 
-              {/* 수정/저장 버튼 */}
+              {/* 수정/삭제/저장 버튼 */}
               {!detailEditing ? (
-                <button
-                  onClick={() => setDetailEditing(true)}
-                  className="w-full py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] transition-colors cursor-pointer"
-                >
-                  수정
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDetailEditing(true)}
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-colors cursor-pointer"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => setDetailDeleteConfirm(true)}
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors cursor-pointer"
+                  >
+                    삭제
+                  </button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setDetailEditing(false); setDetailTags(detailTrade.reasonTags); setDetailEmotion(detailTrade.emotion ?? ""); setDetailMemo(detailTrade.memo ?? ""); }}
-                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] cursor-pointer"
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-colors cursor-pointer"
                   >
                     취소
                   </button>
@@ -822,6 +846,41 @@ export default function TradesPage() {
           );
         })()}
       </BottomSheet>
+
+      {/* 매매 삭제 확인 모달 */}
+      {detailDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDetailDeleteConfirm(false)} />
+          <div className="relative bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)] rounded-2xl p-6 w-[340px] max-w-[90vw]">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] flex items-center justify-center mx-auto mb-3">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-negative)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-[var(--color-text)] mb-1">매매 기록을 삭제할까요?</h3>
+              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+                이 매매 기록은 삭제되며 복구할 수 없습니다.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDetailDeleteConfirm(false)}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] cursor-pointer"
+              >
+                취소
+              </button>
+              <button
+                onClick={deleteDetail}
+                disabled={detailDeleting}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-negative)] text-white cursor-pointer disabled:opacity-50"
+              >
+                {detailDeleting ? "삭제 중..." : "삭제"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════ */}
       {/* 매매 등록 바텀시트 (공용) */}
@@ -1017,7 +1076,7 @@ export default function TradesPage() {
                   title={tag.desc}
                 >
                   {tag.label}
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[var(--color-text)] text-white text-[10px] px-2 py-1 rounded-md">{tag.desc}</span>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1A221A] dark:bg-[var(--color-g400)] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
                 </button>
               ))}
             </div>

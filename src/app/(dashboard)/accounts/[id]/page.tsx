@@ -634,24 +634,24 @@ export default function AccountDetailPage() {
           <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
           {/* 원화/외화 토글 */}
           {account.holdings.some((h) => h.country !== "KR") && (
-            <div className="flex rounded-lg overflow-hidden border border-[#E4EAE4] dark:border-[#2D3D30]">
+            <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
               <button
                 onClick={() => setDisplayCurrency("original")}
-                className="px-2.5 py-1 text-[11px] font-semibold transition-all"
-                style={{
-                  backgroundColor: displayCurrency === "original" ? "#05C072" : "transparent",
-                  color: displayCurrency === "original" ? "#fff" : "#9AA99A",
-                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  displayCurrency === "original"
+                    ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                    : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                }`}
               >
                 외화
               </button>
               <button
                 onClick={() => setDisplayCurrency("KRW")}
-                className="px-2.5 py-1 text-[11px] font-semibold transition-all"
-                style={{
-                  backgroundColor: displayCurrency === "KRW" ? "#05C072" : "transparent",
-                  color: displayCurrency === "KRW" ? "#fff" : "#9AA99A",
-                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  displayCurrency === "KRW"
+                    ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                    : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                }`}
               >
                 원화
               </button>
@@ -678,12 +678,14 @@ export default function AccountDetailPage() {
             const hasQuote = !!quote;
 
             const fmtPrice = (v: number) => {
+              const sign = v < 0 ? "-" : "";
+              const abs = Math.abs(v);
               if (isForeign && displayCurrency === "KRW") {
-                return `₩${Math.round(v * usdRate).toLocaleString()}`;
+                return `${sign}₩${Math.round(abs * usdRate).toLocaleString()}`;
               }
               return isForeign
-                ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : `₩${v.toLocaleString()}`;
+                ? `${sign}$${abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : `${sign}₩${abs.toLocaleString()}`;
             };
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
