@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import Anthropic from "@anthropic-ai/sdk";
+import { prisma } from "@/lib/prisma";
+import { getYahooSearch } from "@/lib/yahoo";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -81,6 +83,27 @@ JSON만 응답해줘.`,
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
+
+    // ticker 빈값 종목에 대해 자동 보완
+    if (Array.isArray(parsed.holdings)) {
+      await Promise.all(
+        parsed.holdings.map(async (h: { ticker: string; name: string; country: string }) => {
+          if (h.ticker) return;
+
+          if (h.country === "KR") {
+            const found = await prisma.stockMaster.findFirst({
+              where: { name: { contains: h.name, mode: "insensitive" } },
+              select: { ticker: true },
+            });
+            if (found) h.ticker = found.ticker;
+          } else {
+            const results = await getYahooSearch(h.name);
+            if (results.length > 0) h.ticker = results[0].ticker;
+          }
+        })
+      );
+    }
+
     return Response.json(parsed);
   } catch (err) {
     console.error("Import analyze error:", err);

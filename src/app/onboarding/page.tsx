@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Tag, LoadingSpinner } from "@/components/ui";
+import { Button, Card, Tag, LoadingSpinner, ConfirmDialog } from "@/components/ui";
 import { ImportModal } from "@/components/ImportModal";
 
 import { fmtNum, stripNum } from "@/lib/format";
@@ -245,8 +245,21 @@ export default function OnboardingPage() {
   ) {
     setAccounts((prev) => {
       const next = [...prev];
-      const newHoldings = imported
-        .filter((h) => !next[idx].holdings.some((e) => e.ticker === h.ticker))
+      const isSame = (e: { ticker: string; name: string }, h: { ticker: string; name: string }) =>
+        h.ticker ? e.ticker === h.ticker : e.name === h.name;
+
+      // 기존 종목 업데이트 + 새 종목 추가
+      const updatedHoldings = next[idx].holdings.map((e) => {
+        const match = imported.find((h) => isSame(e, h));
+        if (!match) return e;
+        const newAvgPrice = parseFloat(match.avgPrice) || 0;
+        const newQuantity = parseInt(match.quantity) || 0;
+        if (e.avgPrice === newAvgPrice && e.quantity === newQuantity) return e;
+        return { ...e, avgPrice: newAvgPrice, quantity: newQuantity };
+      });
+
+      const addedHoldings = imported
+        .filter((h) => !next[idx].holdings.some((e) => isSame(e, h)))
         .map((h) => ({
           ticker: h.ticker,
           name: h.name,
@@ -256,11 +269,12 @@ export default function OnboardingPage() {
           sectorManual: "",
           tags: [],
         }));
+
       const krw = importedCash.find((c) => c.currency === "KRW");
       const usd = importedCash.find((c) => c.currency === "USD");
       next[idx] = {
         ...next[idx],
-        holdings: [...next[idx].holdings, ...newHoldings],
+        holdings: [...updatedHoldings, ...addedHoldings],
         ...(krw && krw.amount > 0 ? { cashKRW: String(krw.amount) } : {}),
         ...(usd && usd.amount > 0 ? { cashUSD: String(usd.amount) } : {}),
       };
@@ -289,6 +303,20 @@ export default function OnboardingPage() {
   // 드롭다운 열림 상태 (계좌별 증권사 / Step 2 계좌)
   const [brokerageDropOpen, setBrokerageDropOpen] = useState<number | null>(null);
   const [tradeAccountDropOpen, setTradeAccountDropOpen] = useState(false);
+
+  // 증권사 변경 시 기존 데이터 초기화 confirm
+  const [pendingBrokerageChange, setPendingBrokerageChange] = useState<{ index: number; code: string } | null>(null);
+
+  function selectBrokerage(index: number, code: string) {
+    setBrokerageDropOpen(null);
+    const acc = accounts[index];
+    const hasData = acc.cashKRW || acc.cashUSD || acc.holdings.length > 0;
+    if (hasData && acc.accountCode !== code) {
+      setPendingBrokerageChange({ index, code });
+      return;
+    }
+    updateAccount(index, "accountCode", code);
+  }
 
   // Step 1 — 계좌 & 종목
   const [accounts, setAccounts] = useState<AccountItem[]>([
@@ -626,7 +654,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={() => { setImportAccIdx(accIdx); setImportModalOpen(true); }}
                     className="text-xs px-2.5 py-1 rounded-lg font-semibold cursor-pointer"
-                    style={{ backgroundColor: "var(--color-primary-soft)", color: "var(--color-primary)" }}
+                    style={{ backgroundColor: "#E8FAF2", color: "#05C072" }}
                   >
                     📷 캡처로 불러오기
                   </button>
@@ -665,7 +693,7 @@ export default function OnboardingPage() {
                       <button
                         key={b.code}
                         type="button"
-                        onClick={() => { updateAccount(accIdx, "accountCode", b.code); setBrokerageDropOpen(null); }}
+                        onClick={() => selectBrokerage(accIdx, b.code)}
                         className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
                         style={{
                           backgroundColor: acc.accountCode === b.code ? "var(--color-primary-soft)" : "transparent",
@@ -1139,6 +1167,40 @@ export default function OnboardingPage() {
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onConfirm={(holdings, cashBalances) => applyImportResult(holdings, cashBalances, importAccIdx)}
+      />
+      <ConfirmDialog
+        open={!!pendingBrokerageChange}
+        title="증권사 정보가 변경되었습니다"
+        message={"입력한 예수금 및 보유 종목 정보를\n초기화하시겠습니까?"}
+        confirmLabel="초기화"
+        cancelLabel="취소"
+        onConfirm={() => {
+          if (pendingBrokerageChange) {
+            const { index, code } = pendingBrokerageChange;
+            const brokerage = brokerages.find((b) => b.code === code);
+            setAccounts((prev) => prev.map((acc, i) => i !== index ? acc : {
+              ...acc,
+              accountCode: code,
+              accountName: brokerage?.name ?? code,
+              cashKRW: "",
+              cashUSD: "",
+              holdings: [],
+            }));
+          }
+          setPendingBrokerageChange(null);
+        }}
+        onCancel={() => {
+          if (pendingBrokerageChange) {
+            const { index, code } = pendingBrokerageChange;
+            const brokerage = brokerages.find((b) => b.code === code);
+            setAccounts((prev) => prev.map((acc, i) => i !== index ? acc : {
+              ...acc,
+              accountCode: code,
+              accountName: brokerage?.name ?? code,
+            }));
+          }
+          setPendingBrokerageChange(null);
+        }}
       />
 
       {/* 토스트 */}

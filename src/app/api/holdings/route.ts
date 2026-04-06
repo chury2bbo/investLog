@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { accountId, ticker, name, country, avgPrice, quantity } = body;
+  const { accountId, ticker, name, country, avgPrice, quantity, replace } = body;
 
   if (!accountId || !ticker || !name || !avgPrice || !quantity) {
     return Response.json(
@@ -56,18 +56,31 @@ export async function POST(req: Request) {
 
   let holding;
   if (existing) {
-    const totalQty = existing.quantity + quantity;
-    const newAvgPrice =
-      (existing.avgPrice * existing.quantity + avgPrice * quantity) / totalQty;
+    if (replace) {
+      // 캡처 불러오기: 현재 잔고 그대로 덮어쓰기
+      holding = await prisma.holding.update({
+        where: { id: existing.id },
+        data: {
+          avgPrice,
+          quantity,
+          ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+        },
+      });
+    } else {
+      // 수동 등록: 평균 매수가 재계산
+      const totalQty = existing.quantity + quantity;
+      const newAvgPrice =
+        (existing.avgPrice * existing.quantity + avgPrice * quantity) / totalQty;
 
-    holding = await prisma.holding.update({
-      where: { id: existing.id },
-      data: {
-        avgPrice: newAvgPrice,
-        quantity: totalQty,
-        ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
-      },
-    });
+      holding = await prisma.holding.update({
+        where: { id: existing.id },
+        data: {
+          avgPrice: newAvgPrice,
+          quantity: totalQty,
+          ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+        },
+      });
+    }
   } else {
     holding = await prisma.holding.create({
       data: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, ConfirmDialog } from "@/components/ui";
 
 interface EditableHolding {
@@ -36,10 +36,26 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFileNameRef = useRef<string | null>(null);
 
+  // 모달 열릴 때 상태 초기화 (lastFileNameRef는 유지 — 재오픈 시에도 동일 파일 감지)
+  useEffect(() => {
+    if (open) {
+      setStep("upload");
+      setPreviewUrl(null);
+      setHoldings([]);
+      setCashBalances([]);
+      setPendingFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [open]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (file.name === lastFileNameRef.current) {
+      setPendingFile(file);
+      return;
+    }
     lastFileNameRef.current = file.name;
     handleFile(file);
   }
@@ -68,6 +84,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
 
     const res = await fetch("/api/import/analyze", { method: "POST", body: formData });
     const data = await res.json();
+    console.log("[ImportModal] analyze response:", data);
 
     if (!res.ok) {
       showToast("분석 실패", data.error ?? "이미지 분석에 실패했습니다.");
@@ -89,7 +106,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
       avgPrice: String(h.avgPrice ?? ""),
       quantity: String(h.quantity ?? ""),
       country: h.country ?? "KR",
-      checked: true,
+      checked: !!(h.ticker),
     }));
 
     if (extracted.length === 0) {
@@ -272,6 +289,9 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                           {h.country}
                         </span>
                       </div>
+                      {!h.ticker && (
+                        <p className="text-[10px] text-[#F04452] mb-2">종목코드를 인식하지 못해 제외됩니다</p>
+                      )}
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] text-[#9AA99A] block mb-0.5">평단가</label>
