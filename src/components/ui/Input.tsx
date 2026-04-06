@@ -41,7 +41,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <div>
       {label && (
-        <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+        <label className="block text-xs font-medium mb-1 text-[var(--color-g500)]">
           {label}
         </label>
       )}
@@ -59,7 +59,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         onFocus={onFocus}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        className={`w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] focus:border-[#05C072] disabled:opacity-50 transition-colors ${className}`}
+        className={`w-full pb-2 text-sm bg-transparent outline-none border-b-2 border-[var(--color-g200)] text-[var(--color-text)] placeholder:text-[var(--color-g400)] focus:border-[var(--color-primary)] disabled:opacity-50 transition-colors ${className}`}
       />
     </div>
   );

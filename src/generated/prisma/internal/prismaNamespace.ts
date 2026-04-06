@@ -396,6 +396,7 @@ export const ModelName = {
   StockMaster: 'StockMaster',
   TickerSummaryCache: 'TickerSummaryCache',
   TickerAnalysisCache: 'TickerAnalysisCache',
+  UserAnalysisLog: 'UserAnalysisLog',
   ApiUsageLog: 'ApiUsageLog'
 } as const
 
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "apiUsageLog"
+    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "apiUsageLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1304,6 +1305,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserAnalysisLog: {
+      payload: Prisma.$UserAnalysisLogPayload<ExtArgs>
+      fields: Prisma.UserAnalysisLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserAnalysisLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserAnalysisLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        findFirst: {
+          args: Prisma.UserAnalysisLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserAnalysisLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        findMany: {
+          args: Prisma.UserAnalysisLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>[]
+        }
+        create: {
+          args: Prisma.UserAnalysisLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        createMany: {
+          args: Prisma.UserAnalysisLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserAnalysisLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>[]
+        }
+        delete: {
+          args: Prisma.UserAnalysisLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        update: {
+          args: Prisma.UserAnalysisLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserAnalysisLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserAnalysisLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserAnalysisLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserAnalysisLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAnalysisLogPayload>
+        }
+        aggregate: {
+          args: Prisma.UserAnalysisLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserAnalysisLog>
+        }
+        groupBy: {
+          args: Prisma.UserAnalysisLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserAnalysisLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserAnalysisLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserAnalysisLogCountAggregateOutputType> | number
+        }
+      }
+    }
     ApiUsageLog: {
       payload: Prisma.$ApiUsageLogPayload<ExtArgs>
       fields: Prisma.ApiUsageLogFieldRefs
@@ -1573,11 +1648,24 @@ export const TickerAnalysisCacheScalarFieldEnum = {
   swotOpportunity: 'swotOpportunity',
   swotThreat: 'swotThreat',
   reasoning: 'reasoning',
+  recentIssues: 'recentIssues',
   cachedDate: 'cachedDate',
   updatedAt: 'updatedAt'
 } as const
 
 export type TickerAnalysisCacheScalarFieldEnum = (typeof TickerAnalysisCacheScalarFieldEnum)[keyof typeof TickerAnalysisCacheScalarFieldEnum]
+
+
+export const UserAnalysisLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  ticker: 'ticker',
+  name: 'name',
+  country: 'country',
+  createdAt: 'createdAt'
+} as const
+
+export type UserAnalysisLogScalarFieldEnum = (typeof UserAnalysisLogScalarFieldEnum)[keyof typeof UserAnalysisLogScalarFieldEnum]
 
 
 export const ApiUsageLogScalarFieldEnum = {
@@ -1790,6 +1878,7 @@ export type GlobalOmitConfig = {
   stockMaster?: Prisma.StockMasterOmit
   tickerSummaryCache?: Prisma.TickerSummaryCacheOmit
   tickerAnalysisCache?: Prisma.TickerAnalysisCacheOmit
+  userAnalysisLog?: Prisma.UserAnalysisLogOmit
   apiUsageLog?: Prisma.ApiUsageLogOmit
 }
 

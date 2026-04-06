@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner, Input } from "@/components/ui";
+import { LoadingSpinner, Input, Logo } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function LoginPage() {
   if (status === "loading") {
     return (
       <div
-        className="min-h-screen flex items-center justify-center bg-[#F5F7F5] dark:bg-[#0D1210]"
+        className="min-h-screen flex items-center justify-center bg-(--color-bg)"
       >
         <LoadingSpinner size={32} />
       </div>
@@ -60,45 +60,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#F5F7F5] dark:bg-[#0D1210]">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-(--color-bg)">
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-10">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3"
-            style={{
-              backgroundColor: "#05C072",
-              boxShadow: "0 8px 24px rgba(5,192,114,0.25)",
-            }}
-          >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-              <polyline points="16 7 22 7 22 13" />
-            </svg>
+          <div className="mx-auto mb-3 flex justify-center">
+            <Logo size={56} />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-(--color-text)">
             버텨일지
           </h1>
-          <p className="text-sm mt-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+          <p className="text-sm mt-1 text-(--color-g500)">
             한국 개미의 정신력 관리 및 기록
           </p>
         </div>
 
         {/* 로그인 카드 */}
         <div
-          className="rounded-2xl p-7 bg-white dark:bg-[#1D2720]"
+          className="rounded-2xl p-7 bg-(--color-surface)"
           style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
         >
-          <h2 className="text-lg font-bold mb-6 text-[#1A221A] dark:text-[#E8EEE8]">
+          <h2 className="text-lg font-bold mb-6 text-(--color-text)">
             로그인
           </h2>
 
@@ -125,7 +107,7 @@ export default function LoginPage() {
 
             {/* 에러 메시지 — 빨간 배경 배너 */}
             {error && (
-              <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">
+              <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-[#3D1519] text-(--color-negative)">
                 {error}
               </div>
             )}
@@ -136,7 +118,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
               style={{
-                backgroundColor: "#05C072",
+                backgroundColor: "var(--color-primary)",
                 opacity: loading ? 0.6 : 1,
               }}
             >
@@ -147,11 +129,11 @@ export default function LoginPage() {
 
           {/* 구분선 */}
           <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-[#E8EEE8] dark:bg-[#2D3D30]" />
-            <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A]">
+            <div className="flex-1 h-px bg-(--color-g200) dark:bg-(--color-border)" />
+            <span className="text-xs text-(--color-g400) dark:text-(--color-muted)">
               또는
             </span>
-            <div className="flex-1 h-px bg-[#E8EEE8] dark:bg-[#2D3D30]" />
+            <div className="flex-1 h-px bg-(--color-g200) dark:bg-(--color-border)" />
           </div>
 
           {/* 소셜 로그인 */}
@@ -159,7 +141,7 @@ export default function LoginPage() {
             <button
               onClick={() => signIn("google", { callbackUrl: "/" })}
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-colors hover:bg-gray-50 dark:hover:bg-[#253028] border-[#E8EEE8] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] bg-white dark:bg-[#1D2720]"
+              className="w-full py-3.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-colors hover:bg-(--color-g100) dark:hover:bg-(--color-card) border-(--color-g200) dark:border-(--color-border) text-(--color-text) bg-(--color-surface)"
             >
               <svg width="18" height="18" viewBox="0 0 18 18">
                 <path
@@ -207,11 +189,11 @@ export default function LoginPage() {
         </div>
 
         {/* 회원가입 링크 */}
-        <p className="text-center text-sm mt-5 text-[#9AA99A] dark:text-[#5A6A5A]">
+        <p className="text-center text-sm mt-5 text-(--color-g400) dark:text-(--color-muted)">
           아직 계정이 없으신가요?{" "}
           <Link
             href="/register"
-            className="font-bold text-[#05C072] hover:underline"
+            className="font-bold text-(--color-primary) hover:underline"
           >
             회원가입
           </Link>

@@ -40,14 +40,14 @@ export function Select({
   return (
     <div ref={ref}>
       {label && (
-        <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+        <label className="block text-xs font-medium mb-1 text-[var(--color-g500)]">
           {label}
         </label>
       )}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
+        className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b-2 border-[var(--color-g200)] text-[var(--color-text)] cursor-pointer"
       >
         <span>{selected?.label ?? placeholder}</span>
         <svg
@@ -55,11 +55,10 @@ export function Select({
           height="16"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="currentColor"
+          stroke="var(--color-g400)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-[#9AA99A]"
           style={{
             transform: open ? "rotate(180deg)" : "none",
             transition: "transform 0.2s",
@@ -69,7 +68,7 @@ export function Select({
         </svg>
       </button>
       {open && (
-        <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[#E4EAE4] dark:border-[#2A3828] bg-white dark:bg-[#1D2720] shadow-lg">
+        <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg">
           {options.map((opt) => (
             <button
               key={opt.value}
@@ -78,15 +77,15 @@ export function Select({
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0 ${
+              className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between border-b border-[var(--color-g200)] dark:border-[var(--color-border)] last:border-0 ${
                 value === opt.value
-                  ? "bg-[#E6F9F1] dark:bg-[#0D2A1D] text-[#05C072] font-semibold"
-                  : "text-[#1A221A] dark:text-[#E8EEE8]"
+                  ? "bg-[var(--color-primary-soft)] dark:bg-[var(--color-primary-dark)]/20 text-[var(--color-primary)] font-semibold"
+                  : "text-[var(--color-text)]"
               }`}
             >
               <span>{opt.label}</span>
               {value === opt.value && (
-                <span className="text-[#05C072]">✓</span>
+                <span className="text-[var(--color-primary)]">✓</span>
               )}
             </button>
           ))}

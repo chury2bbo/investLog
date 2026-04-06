@@ -32,12 +32,12 @@ function formatAmounts(krw: number, usd: number): string {
 export function SummaryChips({ totalCount, buyKrw, buyUsd, sellKrw, sellUsd, avgPnlRate }: SummaryChipsProps) {
   return (
     <div className="flex gap-2 overflow-x-auto scrollbar-none">
-      <span className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A]">
+      <span className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
         {totalCount}건
       </span>
       <span
         className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium"
-        style={{ backgroundColor: "#E6F9F1", color: "#05C072" }}
+        style={{ backgroundColor: "#E6F9F1", color: "var(--color-positive)" }}
       >
         매수 <b>{formatAmounts(buyKrw, buyUsd)}</b>
       </span>

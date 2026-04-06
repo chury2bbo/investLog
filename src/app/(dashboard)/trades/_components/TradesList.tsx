@@ -11,7 +11,7 @@ interface TradesListProps {
 
 function TagPill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A]">
+    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
       {children}
     </span>
   );
@@ -33,7 +33,7 @@ function PnlText({ value }: { value: number }) {
 
 export function TradesList({ trades }: TradesListProps) {
   return (
-    <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1D2720]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+    <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
       {trades.map((trade, idx) => {
         const market = getCountryFromTicker(trade.ticker);
         const accountName = `${trade.account.brokerageCompany.name}${trade.account.memo ? ` · ${trade.account.memo}` : ""}`;
@@ -43,8 +43,8 @@ export function TradesList({ trades }: TradesListProps) {
         return (
           <div
             key={trade.id}
-            className={`px-3.5 py-3 active:bg-[#F8FAF8] dark:active:bg-[#253028] transition-colors cursor-pointer ${
-              !isLast ? "border-b border-[#F0F4F0] dark:border-[#2D3D30]" : ""
+            className={`px-3.5 py-3 active:bg-[#F8FAF8] dark:active:bg-[var(--color-card)] transition-colors cursor-pointer ${
+              !isLast ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""
             }`}
           >
             {/* 1행 */}
@@ -52,17 +52,17 @@ export function TradesList({ trades }: TradesListProps) {
               <div className="flex items-center gap-1.5 min-w-0">
                 <TypeBadge type={trade.type} />
                 <MarketBadge market={market} />
-                <span className="text-[14px] font-medium text-[#1A221A] dark:text-[#E8EEE8] truncate">
+                <span className="text-[14px] font-medium text-[var(--color-text)] dark:text-[var(--color-text)] truncate">
                   {trade.name}
                 </span>
               </div>
-              <span className="text-[14px] font-medium text-[#1A221A] dark:text-[#E8EEE8] shrink-0 ml-2 tabular-nums">
+              <span className="text-[14px] font-medium text-[var(--color-text)] dark:text-[var(--color-text)] shrink-0 ml-2 tabular-nums">
                 {formatTotal(trade)}
               </span>
             </div>
             {/* 2행 */}
             <div className="flex justify-between items-center">
-              <span className="text-[12px] text-[#9AA99A] dark:text-[#5A6A5A] truncate">
+              <span className="text-[12px] text-[var(--color-g400)] dark:text-[var(--color-muted)] truncate">
                 {formatTradeDate(trade.date, true)} · {formatPrice(trade)} × {trade.quantity}주 · {accountName}
               </span>
               <div className="flex items-center gap-1.5 shrink-0 ml-2">

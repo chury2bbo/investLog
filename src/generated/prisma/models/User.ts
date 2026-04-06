@@ -224,6 +224,7 @@ export type UserWhereInput = {
   image?: Prisma.StringNullableFilter<"User"> | string | null
   sessions?: Prisma.SessionListRelationFilter
   investAccounts?: Prisma.InvestAccountListRelationFilter
+  analysisLogs?: Prisma.UserAnalysisLogListRelationFilter
   oauthAccounts?: Prisma.AccountListRelationFilter
 }
 
@@ -240,6 +241,7 @@ export type UserOrderByWithRelationInput = {
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   investAccounts?: Prisma.InvestAccountOrderByRelationAggregateInput
+  analysisLogs?: Prisma.UserAnalysisLogOrderByRelationAggregateInput
   oauthAccounts?: Prisma.AccountOrderByRelationAggregateInput
 }
 
@@ -259,6 +261,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.StringNullableFilter<"User"> | string | null
   sessions?: Prisma.SessionListRelationFilter
   investAccounts?: Prisma.InvestAccountListRelationFilter
+  analysisLogs?: Prisma.UserAnalysisLogListRelationFilter
   oauthAccounts?: Prisma.AccountListRelationFilter
 }, "id" | "email">
 
@@ -307,6 +310,7 @@ export type UserCreateInput = {
   image?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
 }
 
@@ -323,6 +327,7 @@ export type UserUncheckedCreateInput = {
   image?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -339,6 +344,7 @@ export type UserUpdateInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
 }
 
@@ -355,6 +361,7 @@ export type UserUncheckedUpdateInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -495,6 +502,20 @@ export type UserUpdateOneRequiredWithoutInvestAccountsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvestAccountsInput, Prisma.UserUpdateWithoutInvestAccountsInput>, Prisma.UserUncheckedUpdateWithoutInvestAccountsInput>
 }
 
+export type UserCreateNestedOneWithoutAnalysisLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnalysisLogsInput, Prisma.UserUncheckedCreateWithoutAnalysisLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnalysisLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAnalysisLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnalysisLogsInput, Prisma.UserUncheckedCreateWithoutAnalysisLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnalysisLogsInput
+  upsert?: Prisma.UserUpsertWithoutAnalysisLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnalysisLogsInput, Prisma.UserUpdateWithoutAnalysisLogsInput>, Prisma.UserUncheckedUpdateWithoutAnalysisLogsInput>
+}
+
 export type UserCreateWithoutOauthAccountsInput = {
   id?: string
   email: string
@@ -508,6 +529,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   image?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -523,6 +545,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   image?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -554,6 +577,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -569,6 +593,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -583,6 +608,7 @@ export type UserCreateWithoutSessionsInput = {
   emailVerified?: Date | string | null
   image?: string | null
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
 }
 
@@ -598,6 +624,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   emailVerified?: Date | string | null
   image?: string | null
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -629,6 +656,7 @@ export type UserUpdateWithoutSessionsInput = {
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
 }
 
@@ -644,6 +672,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -659,6 +688,7 @@ export type UserCreateWithoutInvestAccountsInput = {
   emailVerified?: Date | string | null
   image?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
 }
 
@@ -674,6 +704,7 @@ export type UserUncheckedCreateWithoutInvestAccountsInput = {
   emailVerified?: Date | string | null
   image?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -705,6 +736,7 @@ export type UserUpdateWithoutInvestAccountsInput = {
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
 }
 
@@ -720,6 +752,87 @@ export type UserUncheckedUpdateWithoutInvestAccountsInput = {
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAnalysisLogsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  password?: string | null
+  provider?: string | null
+  onboardingDone?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  emailVerified?: Date | string | null
+  image?: string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAnalysisLogsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  password?: string | null
+  provider?: string | null
+  onboardingDone?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  emailVerified?: Date | string | null
+  image?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAnalysisLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnalysisLogsInput, Prisma.UserUncheckedCreateWithoutAnalysisLogsInput>
+}
+
+export type UserUpsertWithoutAnalysisLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAnalysisLogsInput, Prisma.UserUncheckedUpdateWithoutAnalysisLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnalysisLogsInput, Prisma.UserUncheckedCreateWithoutAnalysisLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAnalysisLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAnalysisLogsInput, Prisma.UserUncheckedUpdateWithoutAnalysisLogsInput>
+}
+
+export type UserUpdateWithoutAnalysisLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAnalysisLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -731,12 +844,14 @@ export type UserUncheckedUpdateWithoutInvestAccountsInput = {
 export type UserCountOutputType = {
   sessions: number
   investAccounts: number
+  analysisLogs: number
   oauthAccounts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   investAccounts?: boolean | UserCountOutputTypeCountInvestAccountsArgs
+  analysisLogs?: boolean | UserCountOutputTypeCountAnalysisLogsArgs
   oauthAccounts?: boolean | UserCountOutputTypeCountOauthAccountsArgs
 }
 
@@ -767,6 +882,13 @@ export type UserCountOutputTypeCountInvestAccountsArgs<ExtArgs extends runtime.T
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountAnalysisLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserAnalysisLogWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountOauthAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AccountWhereInput
 }
@@ -785,6 +907,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   image?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   investAccounts?: boolean | Prisma.User$investAccountsArgs<ExtArgs>
+  analysisLogs?: boolean | Prisma.User$analysisLogsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -832,6 +955,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   investAccounts?: boolean | Prisma.User$investAccountsArgs<ExtArgs>
+  analysisLogs?: boolean | Prisma.User$analysisLogsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -843,6 +967,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     investAccounts: Prisma.$InvestAccountPayload<ExtArgs>[]
+    analysisLogs: Prisma.$UserAnalysisLogPayload<ExtArgs>[]
     oauthAccounts: Prisma.$AccountPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1252,6 +1377,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   investAccounts<T extends Prisma.User$investAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$investAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  analysisLogs<T extends Prisma.User$analysisLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$analysisLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAnalysisLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthAccounts<T extends Prisma.User$oauthAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1730,6 +1856,30 @@ export type User$investAccountsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.InvestAccountScalarFieldEnum | Prisma.InvestAccountScalarFieldEnum[]
+}
+
+/**
+ * User.analysisLogs
+ */
+export type User$analysisLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserAnalysisLog
+   */
+  select?: Prisma.UserAnalysisLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserAnalysisLog
+   */
+  omit?: Prisma.UserAnalysisLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserAnalysisLogInclude<ExtArgs> | null
+  where?: Prisma.UserAnalysisLogWhereInput
+  orderBy?: Prisma.UserAnalysisLogOrderByWithRelationInput | Prisma.UserAnalysisLogOrderByWithRelationInput[]
+  cursor?: Prisma.UserAnalysisLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserAnalysisLogScalarFieldEnum | Prisma.UserAnalysisLogScalarFieldEnum[]
 }
 
 /**

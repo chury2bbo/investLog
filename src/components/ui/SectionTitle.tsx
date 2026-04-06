@@ -6,7 +6,7 @@ interface SectionTitleProps {
 export function SectionTitle({ title, action }: SectionTitleProps) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <h2 className="text-sm font-bold" style={{ color: "#1A221A" }}>
+      <h2 className="text-[13px] font-bold text-[var(--color-text)]">
         {title}
       </h2>
       {action}

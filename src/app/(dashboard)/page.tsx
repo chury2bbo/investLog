@@ -79,10 +79,10 @@ import { formatKRW, formatCompact } from "@/lib/format";
 // ─── 자산 배분 바 차트 색상 ──────────────────────────────
 
 const ALLOC_COLORS = {
-  domestic: "#05C072",
+  domestic: "var(--color-primary)",
   foreign: "#4285F4",
   cashKRW: "#F07D05",
-  cashUSD: "#9AA99A",
+  cashUSD: "var(--color-g400)",
 };
 
 // ─── 메인 페이지 ─────────────────────────────────────────
@@ -353,24 +353,24 @@ export default function DashboardPage() {
       {/* ── 섹션 1: 인사말 + 환율 ── */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">
+          <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
             안녕하세요, {userName}님
           </p>
-          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8] mt-0.5">
+          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)] mt-0.5">
             내 투자 현황
           </h1>
         </div>
         <div className="flex items-center gap-2 mt-1">
           <div className="text-right">
-            <div className="text-[11px] text-[#9AA99A] dark:text-[#5A6A5A]">USD/KRW</div>
-            <div className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+            <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">USD/KRW</div>
+            <div className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
               {usdRate.toLocaleString()}
             </div>
           </div>
           <button
             onClick={refreshFx}
             disabled={fxRefreshing}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:cursor-default"
+            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:cursor-default"
             style={{ opacity: fxRefreshing ? 0.5 : 1 }}
           >
             <svg
@@ -382,7 +382,7 @@ export default function DashboardPage() {
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`text-[#6B7B6B] dark:text-[#7A8A7A] ${fxRefreshing ? "animate-spin" : ""}`}
+              className={`text-[var(--color-g500)] dark:text-[var(--color-muted)] ${fxRefreshing ? "animate-spin" : ""}`}
             >
               <path d="M21 2v6h-6" />
               <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
@@ -398,7 +398,7 @@ export default function DashboardPage() {
       <div
         className="rounded-[20px] p-6 mb-4 relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #027A47 0%, #05C072 100%)",
+          background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)",
         }}
       >
         {/* 데코 원 */}
@@ -507,12 +507,12 @@ export default function DashboardPage() {
           {
             label: "총 수익률",
             value: `${pnlPositive ? "+" : ""}${summary.totalPnlRate.toFixed(1)}%`,
-            color: pnlPositive ? "#05C072" : "#F04452",
+            color: pnlPositive ? "var(--color-positive)" : "var(--color-negative)",
           },
           {
             label: "총 수익금",
             value: `${pnlPositive ? "+" : ""}₩${formatKRW(summary.totalPnl)}`,
-            color: pnlPositive ? "#05C072" : "#F04452",
+            color: pnlPositive ? "var(--color-positive)" : "var(--color-negative)",
           },
           {
             label: "보유 종목",
@@ -526,16 +526,16 @@ export default function DashboardPage() {
           },
         ].map((s) => (
           <Card key={s.label} className="!p-3">
-            <div className="text-[11px] text-[#6B7B6B] dark:text-[#7A8A7A] mb-1">
+            <div className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-1">
               {s.label}
             </div>
             <div
-              className="text-[15px] font-extrabold tracking-tight"
+              className="text-[12px] md:text-[15px] font-extrabold tracking-tight leading-tight"
               style={{
                 color: s.color ?? undefined,
               }}
             >
-              <span className={s.color ? "" : "text-[#1A221A] dark:text-[#E8EEE8]"}>
+              <span className={s.color ? "" : "text-[var(--color-text)] dark:text-[var(--color-text)]"}>
                 {s.value}
               </span>
             </div>
@@ -546,13 +546,13 @@ export default function DashboardPage() {
       {/* 자산 배분 카드 */}
       <Card>
         <div className="flex items-center justify-between mb-3.5">
-          <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+          <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
             자산 배분
           </span>
           <button
             onClick={() => fetchData(true)}
             disabled={quotesRefreshing}
-            className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
           >
             {quotesRefreshing ? "조회 중..." : "새로고침"}
           </button>
@@ -569,22 +569,22 @@ export default function DashboardPage() {
             ) : null
           )}
           {summary.totalAsset === 0 && (
-            <div className="w-full bg-[#E8EEE8] dark:bg-[#2D3D30]" />
+            <div className="w-full bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
           )}
         </div>
 
         {/* 범례 */}
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 md:flex md:items-center md:justify-between">
           {allocation.map((a) => (
             <div key={a.label} className="flex items-center gap-1">
               <div
-                className="w-1.5 h-1.5 rounded-sm"
+                className="w-1.5 h-1.5 rounded-sm shrink-0"
                 style={{ backgroundColor: a.color }}
               />
-              <span className="text-[11px] text-[#6B7B6B] dark:text-[#7A8A7A]">
+              <span className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
                 {a.label}
               </span>
-              <span className="text-[11px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+              <span className="text-[11px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                 {a.pct}%
               </span>
             </div>
@@ -605,21 +605,21 @@ export default function DashboardPage() {
                 <Card>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[#E6F9F1] dark:bg-[#1D3D2A]">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
+                      <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-[var(--color-primary-soft)]">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
                       </div>
                       <div>
-                        <div className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        <div className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                           {acc.name}
                         </div>
-                        <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
+                        <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
                           {acc.type} · {acc.stockCount}종목
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <PnlTag value={acc.pnlRate} />
-                      <span className="text-[#9AA99A] dark:text-[#5A6A5A] text-base">›</span>
+                      <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)] text-base">›</span>
                     </div>
                   </div>
                 </Card>

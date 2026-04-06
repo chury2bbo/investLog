@@ -3,19 +3,16 @@ interface TagProps {
   color?: "green" | "gray" | "blue" | "orange";
 }
 
-const styles = {
-  green:  { backgroundColor: "#E6F9F1", color: "#05C072" },
-  gray:   { backgroundColor: "#F0F4F0", color: "#6B7B6B" },
-  blue:   { backgroundColor: "#E8F0FE", color: "#4285F4" },
-  orange: { backgroundColor: "#FFF3E8", color: "#F07D05" },
-};
-
 export function Tag({ label, color = "gray" }: TagProps) {
+  const styles: Record<string, string> = {
+    green: "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
+    gray: "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]",
+    blue: "bg-[#E8F0FE] text-[#4285F4]",
+    orange: "bg-[#FFFBF5] text-[var(--color-warning)]",
+  };
+
   return (
-    <span
-      className="text-xs font-medium px-2 py-1 rounded-md"
-      style={styles[color]}
-    >
+    <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide ${styles[color]}`}>
       {label}
     </span>
   );

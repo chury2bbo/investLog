@@ -3,24 +3,54 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #F5F7F5;
-  --foreground: #1A221A;
+  /* Brand (웜그린) */
+  --color-primary:       #2DB87A;
+  --color-primary-mid:   #1F9E64;
+  --color-primary-dark:  #16754A;
+  --color-primary-soft:  #E6F7EF;
+
+  /* Semantic */
+  --color-positive:      #05C072;
+  --color-positive-soft: #E8FBF3;
+  --color-negative:      #F04452;
+  --color-negative-soft: #FFF0F1;
+  --color-warning:       #FF7B00;
+
+  /* Neutral */
+  --color-bg:      #F2F4F2;
+  --color-surface: #FFFFFF;
+  --color-g100:    #F0F3F0;
+  --color-g200:    #E3E8E3;
+  --color-g300:    #C8D1C8;
+  --color-g400:    #9DAD9D;
+  --color-g500:    #6B7B6B;
+  --color-g600:    #4A5A4A;
+  --color-text:    #1A221A;
+
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
 }
 
 .dark {
-  --background: #0D1210;
-  --foreground: #E8EEE8;
+  --color-bg:      #0D1210;
+  --color-surface: #151C14;
+  --color-card:    #1C2420;
+  --color-border:  #283426;
+  --color-text:    #D8E8D8;
+  --color-muted:   #56725A;
+
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pretendard);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, system-ui, sans-serif;
 }

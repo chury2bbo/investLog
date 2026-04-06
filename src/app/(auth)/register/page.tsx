@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner, Input } from "@/components/ui";
+import { LoadingSpinner, Input, Logo } from "@/components/ui";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -74,33 +74,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#F5F7F5] dark:bg-[#0D1210]">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-(--color-bg)">
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-8">
-          <div
-            className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl mx-auto mb-2.5"
-            style={{
-              backgroundColor: "#05C072",
-              boxShadow: "0 6px 20px rgba(5,192,114,0.25)",
-            }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-              <polyline points="16 7 22 7 22 13" />
-            </svg>
+          <div className="mx-auto mb-2.5 flex justify-center">
+            <Logo size={48} />
           </div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
-            InvestLog
+          <h1 className="text-[22px] font-extrabold tracking-tight text-(--color-text)">
+            버텨일지
           </h1>
         </div>
 
@@ -108,13 +90,13 @@ export default function RegisterPage() {
           <>
             {/* Step 1 — 입력 카드 */}
             <div
-              className="rounded-2xl p-7 bg-white dark:bg-[#1D2720]"
+              className="rounded-2xl p-7 bg-(--color-surface)"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
             >
-              <h2 className="text-lg font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-1">
+              <h2 className="text-lg font-bold text-(--color-text) mb-1">
                 회원가입
               </h2>
-              <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] mb-6">
+              <p className="text-sm text-(--color-g500) mb-6">
                 투자 기록을 시작해보세요
               </p>
 
@@ -161,7 +143,7 @@ export default function RegisterPage() {
 
                 {/* 에러 메시지 — 빨간 배경 배너 */}
                 {error && (
-                  <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">
+                  <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-[#3D1519] text-(--color-negative)">
                     {error}
                   </div>
                 )}
@@ -172,7 +154,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
                   style={{
-                    backgroundColor: "#05C072",
+                    backgroundColor: "var(--color-primary)",
                     opacity: loading ? 0.6 : 1,
                   }}
                 >
@@ -183,11 +165,11 @@ export default function RegisterPage() {
             </div>
 
             {/* 로그인 링크 */}
-            <p className="text-center text-sm mt-5 text-[#9AA99A] dark:text-[#5A6A5A]">
+            <p className="text-center text-sm mt-5 text-(--color-g400) dark:text-(--color-muted)">
               이미 계정이 있으신가요?{" "}
               <Link
                 href="/login"
-                className="font-bold text-[#05C072] hover:underline"
+                className="font-bold text-(--color-primary) hover:underline"
               >
                 로그인
               </Link>
@@ -196,15 +178,15 @@ export default function RegisterPage() {
         ) : (
           /* Step 2 — 완료 카드 */
           <div
-            className="rounded-2xl px-6 py-10 text-center bg-white dark:bg-[#1D2720]"
+            className="rounded-2xl px-6 py-10 text-center bg-(--color-surface)"
             style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
           >
             <div className="text-5xl mb-4">🎉</div>
-            <h2 className="text-xl font-extrabold text-[#1A221A] dark:text-[#E8EEE8] mb-2">
+            <h2 className="text-xl font-extrabold text-(--color-text) mb-2">
               가입 완료!
             </h2>
-            <p className="text-sm leading-7 text-[#6B7B6B] dark:text-[#7A8A7A] mb-7">
-              InvestLog에 오신 걸 환영해요.
+            <p className="text-sm leading-7 text-(--color-g500) mb-7">
+              버텨일지에 오신 걸 환영해요.
               <br />
               나만의 투자 기록을 시작해볼까요?
             </p>
@@ -213,7 +195,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
               style={{
-                backgroundColor: "#05C072",
+                backgroundColor: "var(--color-primary)",
                 opacity: loading ? 0.6 : 1,
               }}
             >

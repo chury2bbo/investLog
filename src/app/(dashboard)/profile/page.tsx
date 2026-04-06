@@ -134,16 +134,16 @@ export default function ProfilePage() {
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-extrabold text-white mb-4"
           style={{
-            background: "linear-gradient(135deg, #027A47 0%, #05C072 100%)",
-            boxShadow: "0 4px 16px rgba(5,192,114,0.35)",
+            background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)",
+            boxShadow: "0 4px 16px color-mix(in srgb, var(--color-primary) 35%, transparent)",
           }}
         >
           {name ? name.charAt(0).toUpperCase() : "?"}
         </div>
-        <h1 className="text-xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+        <h1 className="text-xl font-extrabold tracking-tight text-(--color-text)">
           {name || "이름 없음"}
         </h1>
-        <p className="text-sm text-[#9AA99A] dark:text-[#5A6A5A] mt-1">{email}</p>
+        <p className="text-sm text-(--color-g400) mt-1">{email}</p>
       </div>
 
       {/* 이름 변경 */}
@@ -162,7 +162,7 @@ export default function ProfilePage() {
                 onClick={handleNameSave}
                 disabled={nameLoading}
                 className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: "#05C072" }}
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
                 {nameLoading ? "저장 중..." : "저장"}
               </button>
@@ -175,7 +175,7 @@ export default function ProfilePage() {
       <div>
         <SectionTitle title={pwTitle} />
         {!hasPassword && (
-          <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mb-2 px-1">
+          <p className="text-xs text-(--color-g400) mb-2 px-1">
             소셜 로그인 계정입니다. 비밀번호를 설정하면 이메일로도 로그인할 수 있습니다.
           </p>
         )}
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                 onClick={handlePasswordSave}
                 disabled={pwLoading}
                 className="w-36 py-2.5 text-sm font-semibold rounded-xl text-white cursor-pointer transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: "#05C072" }}
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
                 {pwLoading ? "처리 중..." : pwTitle}
               </button>
@@ -209,7 +209,7 @@ export default function ProfilePage() {
         <button
           onClick={() => setDeleteConfirm(true)}
           className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#F04452" }}
+          style={{ backgroundColor: "var(--color-negative)" }}
         >
           회원 탈퇴
         </button>
@@ -222,14 +222,14 @@ export default function ProfilePage() {
         title="정말 탈퇴하시겠어요?"
       >
         <div className="space-y-4">
-          <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] leading-relaxed">
+          <p className="text-sm text-(--color-g500) leading-relaxed">
             계좌, 보유 종목, 매매 기록, 예수금 등 <strong>모든 데이터가 삭제</strong>됩니다.
             이 작업은 되돌릴 수 없습니다.
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setDeleteConfirm(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-(--color-g100) dark:bg-(--color-border) text-(--color-text) cursor-pointer"
             >
               취소
             </button>
@@ -237,7 +237,7 @@ export default function ProfilePage() {
               onClick={handleDeleteAccount}
               disabled={deleting}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
-              style={{ backgroundColor: "#F04452" }}
+              style={{ backgroundColor: "var(--color-negative)" }}
             >
               {deleting ? "탈퇴 중..." : "탈퇴하기"}
             </button>

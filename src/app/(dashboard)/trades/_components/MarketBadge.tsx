@@ -6,7 +6,7 @@ export function MarketBadge({ market }: { market: "KR" | "US" }) {
       className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap"
       style={
         market === "KR"
-          ? { backgroundColor: "#E6F9F1", color: "#05C072" }
+          ? { backgroundColor: "#E6F9F1", color: "var(--color-positive)" }
           : { backgroundColor: "#E8F0FE", color: "#4285F4" }
       }
     >

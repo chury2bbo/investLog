@@ -452,15 +452,15 @@ export default function AccountDetailPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div>
-            <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A]">계좌 상세</p>
-            <h1 className="text-[26px] font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">계좌 상세</p>
+            <h1 className="text-[26px] font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
               {account.brokerageCompany.name}
               {account.memo && (
-                <span className="ml-2 text-sm font-normal text-[#9AA99A] dark:text-[#5A6A5A]">
+                <span className="ml-2 text-sm font-normal text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                   {account.memo}
                 </span>
               )}
@@ -479,7 +479,7 @@ export default function AccountDetailPage() {
       <div
         className="rounded-[20px] p-5 mb-4 relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #027A47 0%, #05C072 60%, #34D399 100%)",
+          background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)",
         }}
       >
         {/* 데코 — 오른쪽 상단 밝은 영역 */}
@@ -497,14 +497,22 @@ export default function AccountDetailPage() {
           </div>
           <div
             className="rounded-xl px-3 py-2 text-right"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.35)",
-            }}
+            style={{ backgroundColor: "rgba(255,255,255,0.92)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
           >
-            <div className="text-[15px] font-bold" style={{ color: totalPnlRate >= 0 ? "#FFFFFF" : "#F04452" }}>
-              {totalPnlRate >= 0 ? "+" : ""}{totalPnlRate.toFixed(2)}%
+            <div className="flex items-center gap-1 justify-end">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                stroke={totalPnlRate >= 0 ? "var(--color-positive)" : "var(--color-negative)"}
+              >
+                {totalPnlRate >= 0
+                  ? <><path d="M7 17L17 7" /><path d="M7 7h10v10" /></>
+                  : <><path d="M7 7l10 10" /><path d="M17 7v10H7" /></>
+                }
+              </svg>
+              <span className="text-[15px] font-bold" style={{ color: totalPnlRate >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}>
+                {totalPnlRate >= 0 ? "+" : ""}{totalPnlRate.toFixed(2)}%
+              </span>
             </div>
-            <div className="text-[11px] font-semibold" style={{ color: totalPnlRate >= 0 ? "rgba(255,255,255,0.8)" : "#F04452" }}>
+            <div className="text-[11px] font-semibold mt-0.5" style={{ color: totalPnlRate >= 0 ? "var(--color-positive)" : "var(--color-negative)", opacity: 0.7 }}>
               {totalPnl >= 0 ? "+" : "-"}₩{Math.floor(Math.abs(totalPnl)).toLocaleString()}
             </div>
           </div>
@@ -594,7 +602,7 @@ export default function AccountDetailPage() {
       <div>
       {/* ── ① 보유 종목 리스트 ── */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">보유 종목</span>
+        <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
         <Button size="sm" onClick={() => { resetHoldingForm(); setHoldingModal(true); }}>
           + 종목 등록
         </Button>
@@ -619,7 +627,7 @@ export default function AccountDetailPage() {
                 ? `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : `₩${v.toLocaleString()}`;
 
-            const pnlColor = pnl > 0 ? "#05C072" : pnl < 0 ? "#F04452" : "#9AA99A";
+            const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
               <Card key={h.id}>
@@ -627,11 +635,11 @@ export default function AccountDetailPage() {
                   <div>
                     <div className="flex items-center gap-1.5">
                       <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
-                      <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                      <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {h.name}
                       </span>
                     </div>
-                    <div className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
+                    <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
                       {h.ticker} · {h.quantity}주
                     </div>
                   </div>
@@ -639,9 +647,9 @@ export default function AccountDetailPage() {
                     {/* 현재가 */}
                     <div className="flex items-center gap-1.5 justify-end">
                       {quotesLoading ? (
-                        <div className="w-16 h-4 rounded bg-[#E8EEE8] dark:bg-[#2D3D30] animate-pulse" />
+                        <div className="w-16 h-4 rounded bg-[var(--color-g200)] dark:bg-[var(--color-border)] animate-pulse" />
                       ) : (
-                        <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                        <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                           {fmtPrice(currentPrice)}
                         </span>
                       )}
@@ -656,7 +664,7 @@ export default function AccountDetailPage() {
                 </div>
 
                 {/* 평단가 · 평가금액 */}
-                <div className="flex justify-between text-xs text-[#9AA99A] dark:text-[#5A6A5A] mb-2.5">
+                <div className="flex justify-between text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-2.5">
                   <span>평단가 {fmtPrice(h.avgPrice)}</span>
                   <span>평가금액 {fmtPrice(evalValue)}</span>
                 </div>
@@ -668,7 +676,7 @@ export default function AccountDetailPage() {
                     {h.sectorManual ? (
                       <Tag label={h.sectorManual} color="gray" />
                     ) : (
-                      <span className="text-xs text-[#B4C4B4] dark:text-[#4A5A4A] px-2 py-1 rounded-md border border-dashed border-[#D4DDD4] dark:border-[#3D4D40]">
+                      <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] px-2 py-1 rounded-md border border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)]">
                         내섹터 미지정
                       </span>
                     )}
@@ -678,7 +686,7 @@ export default function AccountDetailPage() {
                   </div>
                   <button
                     onClick={() => openSectorEdit(h)}
-                    className="text-[11px] font-medium text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#05C072] transition-colors shrink-0 ml-2"
+                    className="text-[11px] font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors shrink-0 ml-2"
                   >
                     편집
                   </button>
@@ -694,7 +702,7 @@ export default function AccountDetailPage() {
 
       {account.tradeLogs.length === 0 ? (
         <Card>
-          <p className="text-sm text-center py-4 text-[#9AA99A]">매매 기록이 없습니다.</p>
+          <p className="text-sm text-center py-4 text-[var(--color-g400)]">매매 기록이 없습니다.</p>
         </Card>
       ) : (
         <Card>
@@ -710,19 +718,19 @@ export default function AccountDetailPage() {
                 style={{
                   borderBottom:
                     i < account.tradeLogs.length - 1
-                      ? "1px solid #F0F4F0"
+                      ? "1px solid var(--color-g100)"
                       : "none",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-[#9AA99A] w-9">
+                  <span className="text-xs text-[var(--color-g400)] w-9">
                     {dateStr}
                   </span>
                   <div>
-                    <div className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                    <div className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">
                       {t.name}
                     </div>
-                    <div className="text-[11px] text-[#9AA99A]">
+                    <div className="text-[11px] text-[var(--color-g400)]">
                       {t.quantity}주 · {t.ticker.length <= 6 && /^\d+$/.test(t.ticker) ? `₩${t.price.toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </div>
                   </div>
@@ -738,7 +746,7 @@ export default function AccountDetailPage() {
           <button
             onClick={() => router.push(`/trades?accountId=${account.id}`)}
             className="w-full text-sm font-bold pt-3 pb-1 text-center cursor-pointer"
-            style={{ color: "#05C072" }}
+            style={{ color: "var(--color-primary)" }}
           >
             전체 매매일지 보기 →
           </button>
@@ -770,7 +778,7 @@ export default function AccountDetailPage() {
         <button
           onClick={() => setDeleteConfirm(true)}
           className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#F04452" }}
+          style={{ backgroundColor: "var(--color-negative)" }}
         >
           계좌 삭제
         </button>
@@ -783,7 +791,7 @@ export default function AccountDetailPage() {
         title="계좌를 삭제할까요?"
       >
         <div className="space-y-4">
-          <p className="text-sm text-[#6B7B6B] leading-relaxed">
+          <p className="text-sm text-[var(--color-g500)] leading-relaxed">
             <strong>{account.brokerageCompany.name}</strong> 계좌와 관련된
             보유 종목, 예수금, 매매 기록이 모두 삭제됩니다.
             이 작업은 되돌릴 수 없습니다.
@@ -791,7 +799,7 @@ export default function AccountDetailPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setDeleteConfirm(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] cursor-pointer"
             >
               취소
             </button>
@@ -799,7 +807,7 @@ export default function AccountDetailPage() {
               onClick={handleDeleteAccount}
               disabled={deleting}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
-              style={{ backgroundColor: "#F04452" }}
+              style={{ backgroundColor: "var(--color-negative)" }}
             >
               {deleting ? "삭제 중..." : "삭제하기"}
             </button>
@@ -823,8 +831,8 @@ export default function AccountDetailPage() {
                 className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
                 style={{
                   backgroundColor:
-                    cashCurrency === c ? "#05C072" : "#F0F4F0",
-                  color: cashCurrency === c ? "#fff" : "#6B7B6B",
+                    cashCurrency === c ? "var(--color-primary)" : "var(--color-g100)",
+                  color: cashCurrency === c ? "#fff" : "var(--color-g500)",
                 }}
               >
                 {c}
@@ -863,14 +871,14 @@ export default function AccountDetailPage() {
       >
         <div className="space-y-5">
           {/* 국내/해외 토글 */}
-          <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+          <div className="flex rounded-xl overflow-hidden border border-[var(--color-g200)] dark:border-[var(--color-border)]">
             <button
               type="button"
               onClick={() => { setHCountry("KR"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 hCountry === "KR"
-                  ? "bg-[#05C072] text-white"
-                  : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "bg-white dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
               국내
@@ -881,7 +889,7 @@ export default function AccountDetailPage() {
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 hCountry === "US"
                   ? "bg-[#4285F4] text-white"
-                  : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+                  : "bg-white dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
               해외
@@ -891,23 +899,23 @@ export default function AccountDetailPage() {
           {/* 종목 검색 (국내: autocomplete / 해외: 직접 입력) */}
           {hCountry === "KR" ? (
             <div ref={hStockSearchRef}>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+              <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">
                 종목 *
               </label>
               {hName && hTicker ? (
-                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">
                   <div>
-                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                    <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">
                       {hName}
                     </span>
-                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                    <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">
                       {hTicker}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setHName(""); setHTicker(""); setHAvgPrice(""); setHQuantity(""); }}
-                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                    className="text-lg leading-none text-[var(--color-g400)] dark:text-[var(--color-muted)] hover:text-[var(--color-negative)] transition-colors"
                   >
                     ×
                   </button>
@@ -920,10 +928,10 @@ export default function AccountDetailPage() {
                     onChange={(e) => handleHStockQueryChange(e.target.value)}
                     onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
                     placeholder="종목명 또는 티커 검색 (예: 삼성전자, 005930)"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
                   />
                   {hShowDropdown && (
-                    <div className="mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                    <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
                           {hStockResults.map((s) => (
@@ -931,24 +939,24 @@ export default function AccountDetailPage() {
                               key={s.ticker}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
                             >
                               <div>
-                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">
+                                <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">
                                   {s.name}
                                 </span>
-                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                                <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">
                                   {s.ticker}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">
+                              <span className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                                 {s.market}
                               </span>
                             </button>
                           ))}
                         </div>
                       ) : (
-                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">
+                        <div className="px-3 py-3 text-sm text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                           검색 결과가 없습니다
                         </div>
                       )}
@@ -959,23 +967,23 @@ export default function AccountDetailPage() {
             </div>
           ) : (
             <div ref={hStockSearchRef}>
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">
+              <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">
                 종목 *
               </label>
               {hName && hTicker ? (
-                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">
                   <div>
-                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+                    <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">
                       {hName}
                     </span>
-                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                    <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">
                       {hTicker}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setHName(""); setHTicker(""); setHAvgPrice(""); setHQuantity(""); }}
-                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                    className="text-lg leading-none text-[var(--color-g400)] dark:text-[var(--color-muted)] hover:text-[var(--color-negative)] transition-colors"
                   >
                     ×
                   </button>
@@ -988,10 +996,10 @@ export default function AccountDetailPage() {
                     onChange={(e) => handleHStockQueryChange(e.target.value)}
                     onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
                     placeholder="종목명 또는 티커 검색 (예: NVIDIA, NVDA)"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
                   />
                   {hShowDropdown && (
-                    <div className="mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                    <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
                           {hStockResults.map((s) => (
@@ -999,24 +1007,24 @@ export default function AccountDetailPage() {
                               key={s.ticker}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
                             >
                               <div>
-                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">
+                                <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">
                                   {s.name}
                                 </span>
-                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">
+                                <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">
                                   {s.ticker}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">
+                              <span className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                                 {s.market}
                               </span>
                             </button>
                           ))}
                         </div>
                       ) : (
-                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">
+                        <div className="px-3 py-3 text-sm text-[var(--color-g400)] dark:text-[var(--color-muted)]">
                           검색 결과가 없습니다
                         </div>
                       )}
@@ -1049,7 +1057,7 @@ export default function AccountDetailPage() {
 
           {/* 에러 */}
           {hError && (
-            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-[var(--color-negative-soft)] dark:bg-[#3D1519] text-[var(--color-negative)]">
               {hError}
             </div>
           )}
@@ -1069,8 +1077,8 @@ export default function AccountDetailPage() {
         <div className="space-y-5">
           {/* 기본 섹터 (읽기 전용) */}
           <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">기본 섹터</label>
-            <div className="pb-2 text-sm border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#9AA99A] dark:text-[#5A6A5A]">
+            <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">기본 섹터</label>
+            <div className="pb-2 text-sm border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
               {sectorEditHolding?.sectorAuto ?? "미분류"}
             </div>
           </div>

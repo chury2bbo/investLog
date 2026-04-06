@@ -63,6 +63,7 @@ export const ModelName = {
   StockMaster: 'StockMaster',
   TickerSummaryCache: 'TickerSummaryCache',
   TickerAnalysisCache: 'TickerAnalysisCache',
+  UserAnalysisLog: 'UserAnalysisLog',
   ApiUsageLog: 'ApiUsageLog'
 } as const
 
@@ -238,11 +239,24 @@ export const TickerAnalysisCacheScalarFieldEnum = {
   swotOpportunity: 'swotOpportunity',
   swotThreat: 'swotThreat',
   reasoning: 'reasoning',
+  recentIssues: 'recentIssues',
   cachedDate: 'cachedDate',
   updatedAt: 'updatedAt'
 } as const
 
 export type TickerAnalysisCacheScalarFieldEnum = (typeof TickerAnalysisCacheScalarFieldEnum)[keyof typeof TickerAnalysisCacheScalarFieldEnum]
+
+
+export const UserAnalysisLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  ticker: 'ticker',
+  name: 'name',
+  country: 'country',
+  createdAt: 'createdAt'
+} as const
+
+export type UserAnalysisLogScalarFieldEnum = (typeof UserAnalysisLogScalarFieldEnum)[keyof typeof UserAnalysisLogScalarFieldEnum]
 
 
 export const ApiUsageLogScalarFieldEnum = {

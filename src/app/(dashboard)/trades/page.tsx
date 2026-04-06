@@ -57,11 +57,11 @@ const SELL_REASON_TAGS = [
 ];
 
 const EMOTIONS = [
-  { label: "확신", emoji: "😎" },
-  { label: "불안", emoji: "😰" },
-  { label: "FOMO", emoji: "🤯" },
-  { label: "손절", emoji: "😣" },
-  { label: "기계적", emoji: "🤖" },
+  { label: "확신", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 20v-4"/><path d="M12 20V8"/><path d="M18 20V4"/><path d="M2 20h20"/></svg> },
+  { label: "불안", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M9.5 15.5l-1 2"/><path d="M14.5 15.5l1 2"/></svg> },
+  { label: "FOMO", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h2"/><path d="M14 9h2"/><path d="M9 15c.6-1 1.5-1.5 3-1.5s2.4.5 3 1.5"/><line x1="12" y1="4" x2="12" y2="2"/><line x1="8" y1="4.5" x2="7" y2="2.8"/><line x1="16" y1="4.5" x2="17" y2="2.8"/></svg> },
+  { label: "손절", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg> },
+  { label: "기계적", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> },
 ];
 
 import { fmtNum, stripNum } from "@/lib/format";
@@ -443,10 +443,10 @@ export default function TradesPage() {
         {/* 타이틀 — 계좌 관리와 동일 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]"><path d="M15 18l-6-6 6-6"/></svg>
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
               매매일지
             </h1>
           </div>
@@ -454,19 +454,18 @@ export default function TradesPage() {
             {/* 뷰 전환 아이콘 */}
             <button
               onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
               aria-label="뷰 전환"
             >
               {viewMode === "list" ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B] dark:text-[#7A8A7A]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-g500)] dark:text-[var(--color-muted)]">
                   <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
-                  <line x1="9" y1="4" x2="9" y2="22" />
-                  <line x1="15" y1="4" x2="15" y2="22" />
-                  <line x1="3" y1="16" x2="21" y2="16" />
                 </svg>
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B] dark:text-[#7A8A7A]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-g500)] dark:text-[var(--color-muted)]">
                   <line x1="8" y1="6" x2="21" y2="6" />
                   <line x1="8" y1="12" x2="21" y2="12" />
                   <line x1="8" y1="18" x2="21" y2="18" />
@@ -514,30 +513,30 @@ export default function TradesPage() {
           <>
             {/* 캘린더용 세그먼트 필터 */}
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
+              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
                 {(["", "BUY", "SELL"] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => handleFilterChange({ ...appliedFilters, tradeType: t })}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       appliedFilters.tradeType === t
-                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
-                        : "text-[#6B7B6B] dark:text-[#7A8A7A]"
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
                     }`}
                   >
                     {t === "" ? "전체" : t === "BUY" ? "매수" : "매도"}
                   </button>
                 ))}
               </div>
-              <div className="flex gap-0.5 rounded-xl bg-[#F0F4F0] dark:bg-[#2D3D30] p-0.5">
+              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
                 {(["", "KR", "US"] as const).map((m) => (
                   <button
                     key={m}
                     onClick={() => handleFilterChange({ ...appliedFilters, market: m })}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       appliedFilters.market === m
-                        ? "bg-white dark:bg-[#1D2720] text-[#1A221A] dark:text-[#E8EEE8] shadow-sm"
-                        : "text-[#6B7B6B] dark:text-[#7A8A7A]"
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
                     }`}
                   >
                     {m === "" ? "전체" : m === "KR" ? "국내" : "해외"}
@@ -602,7 +601,7 @@ export default function TradesPage() {
         {/* FAB 버튼 */}
         <button
           onClick={openModal}
-          className="fixed bottom-24 right-5 w-12 h-12 rounded-2xl bg-[#05C072] text-white text-2xl flex items-center justify-center shadow-lg shadow-[#05C072]/30 z-40 active:scale-95 transition-transform"
+          className="fixed bottom-24 right-5 w-12 h-12 rounded-2xl bg-[var(--color-primary)] text-white text-2xl flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 z-40 active:scale-95 transition-transform"
         >
           +
         </button>
@@ -634,7 +633,7 @@ export default function TradesPage() {
           />
 
           {/* 매수/매도 토글 */}
-          <div className="flex rounded-xl overflow-hidden border border-[#E8EEE8] dark:border-[#2D3D30]">
+          <div className="flex rounded-xl overflow-hidden border border-[var(--color-g200)] dark:border-[var(--color-border)]">
             <button
               type="button"
               onClick={() => {
@@ -644,7 +643,7 @@ export default function TradesPage() {
                 setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
-                formType === "BUY" ? "bg-[#05C072] text-white" : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+                formType === "BUY" ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
               매수
@@ -658,7 +657,7 @@ export default function TradesPage() {
                 setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
-                formType === "SELL" ? "bg-[#F04452] text-white" : "bg-white dark:bg-[#1D2720] text-[#9AA99A] dark:text-[#5A6A5A]"
+                formType === "SELL" ? "bg-[var(--color-negative)] text-white" : "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
               매도
@@ -668,12 +667,12 @@ export default function TradesPage() {
           {/* ── 필수 입력 ── */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#05C072] tracking-wider uppercase">필수</span>
+              <span className="text-[11px] font-bold text-[var(--color-primary)] tracking-wider uppercase">필수</span>
               {selectedAccount && selectedAccount.holdings.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowPrevTrades(!showPrevTrades)}
-                  className="text-[11px] font-medium text-[#6B7B6B] dark:text-[#7A8A7A] hover:text-[#05C072] transition-colors"
+                  className="text-[11px] font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors"
                 >
                   {formType === "SELL" ? "보유 종목 불러오기" : "이전 종목 불러오기"}
                 </button>
@@ -682,20 +681,20 @@ export default function TradesPage() {
 
             {/* 종목 목록 */}
             {showPrevTrades && selectedAccount && (
-              <div className="rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] p-2 max-h-32 overflow-y-auto space-y-1">
+              <div className="rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] p-2 max-h-32 overflow-y-auto space-y-1">
                 {selectedAccount.holdings.map((h) => (
                   <button
                     key={h.ticker}
                     type="button"
                     onClick={() => loadPrevTrade({ ticker: h.ticker, name: h.name })}
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors text-[#1A221A] dark:text-[#E8EEE8] flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors text-[var(--color-text)] dark:text-[var(--color-text)] flex items-center justify-between"
                   >
                     <div>
                       <span className="font-medium">{h.name}</span>
-                      <span className="text-[#9AA99A] dark:text-[#5A6A5A] ml-2 text-xs">{h.ticker}</span>
+                      <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2 text-xs">{h.ticker}</span>
                     </div>
                     {formType === "SELL" && (
-                      <span className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] shrink-0">{h.quantity.toLocaleString()}주</span>
+                      <span className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)] shrink-0">{h.quantity.toLocaleString()}주</span>
                     )}
                   </button>
                 ))}
@@ -704,17 +703,17 @@ export default function TradesPage() {
 
             {/* 종목 검색 */}
             <div ref={stockSearchRef} className="relative">
-              <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">종목 *</label>
+              <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">종목 *</label>
               {formName && formTicker ? (
-                <div className="flex items-center justify-between pb-2 border-b border-[#D4DDD4] dark:border-[#2D3D30]">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">
                   <div>
-                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">{formName}</span>
-                    <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">{formTicker}</span>
+                    <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{formName}</span>
+                    <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">{formTicker}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity(""); }}
-                    className="text-lg leading-none text-[#9AA99A] dark:text-[#5A6A5A] hover:text-[#F04452] transition-colors"
+                    className="text-lg leading-none text-[var(--color-g400)] dark:text-[var(--color-muted)] hover:text-[var(--color-negative)] transition-colors"
                   >
                     ×
                   </button>
@@ -727,10 +726,10 @@ export default function TradesPage() {
                     onChange={(e) => handleStockQueryChange(e.target.value)}
                     onFocus={() => { if (stockQuery) setShowStockDropdown(true); }}
                     placeholder="종목명 또는 티커 검색"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[#D4DDD4] dark:border-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A]"
+                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A]"
                   />
                   {showStockDropdown && (
-                    <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[#E8EEE8] dark:border-[#2D3D30] bg-white dark:bg-[#1D2720] shadow-lg overflow-hidden">
+                    <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {stockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
                           {stockResults.map((s) => (
@@ -738,18 +737,18 @@ export default function TradesPage() {
                               key={s.ticker}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors flex items-center justify-between"
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
                             >
                               <div>
-                                <span className="text-sm font-medium text-[#1A221A] dark:text-[#E8EEE8]">{s.name}</span>
-                                <span className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] ml-2">{s.ticker}</span>
+                                <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">{s.name}</span>
+                                <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] ml-2">{s.ticker}</span>
                               </div>
-                              <span className="text-[10px] text-[#B4C4B4] dark:text-[#4A5A4A]">{s.market}</span>
+                              <span className="text-[10px] text-[var(--color-g400)] dark:text-[#4A5A4A]">{s.market}</span>
                             </button>
                           ))}
                         </div>
                       ) : (
-                        <div className="px-3 py-3 text-sm text-[#9AA99A] dark:text-[#5A6A5A]">검색 결과가 없습니다</div>
+                        <div className="px-3 py-3 text-sm text-[var(--color-g400)] dark:text-[var(--color-muted)]">검색 결과가 없습니다</div>
                       )}
                     </div>
                   )}
@@ -780,14 +779,14 @@ export default function TradesPage() {
 
           {/* ── 구분선 ── */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#E8EEE8] dark:bg-[#2D3D30]" />
-            <span className="text-[11px] font-bold text-[#9AA99A] dark:text-[#5A6A5A] tracking-wider uppercase">선택</span>
-            <div className="flex-1 h-px bg-[#E8EEE8] dark:bg-[#2D3D30]" />
+            <div className="flex-1 h-px bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+            <span className="text-[11px] font-bold text-[var(--color-g400)] dark:text-[var(--color-muted)] tracking-wider uppercase">선택</span>
+            <div className="flex-1 h-px bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
           </div>
 
           {/* 이유 태그 */}
           <div>
-            <label className="block text-xs font-medium mb-2 text-[#6B7B6B] dark:text-[#7A8A7A]">이유 태그</label>
+            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">이유 태그</label>
             <div className="flex flex-wrap gap-1.5">
               {reasonTagOptions.map((tag) => (
                 <button
@@ -796,13 +795,13 @@ export default function TradesPage() {
                   onClick={() => toggleReasonTag(tag.label)}
                   className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     formReasonTags.includes(tag.label)
-                      ? "bg-[#05C072] text-white"
-                      : "bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#E8EEE8] dark:hover:bg-[#354035]"
+                      ? "bg-[var(--color-primary)] text-white"
+                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"
                   }`}
                   title={tag.desc}
                 >
                   {tag.label}
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1A221A] text-white text-[10px] px-2 py-1 rounded-md">{tag.desc}</span>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[var(--color-text)] text-white text-[10px] px-2 py-1 rounded-md">{tag.desc}</span>
                 </button>
               ))}
             </div>
@@ -810,7 +809,7 @@ export default function TradesPage() {
 
           {/* 심리 상태 */}
           <div>
-            <label className="block text-xs font-medium mb-2 text-[#6B7B6B] dark:text-[#7A8A7A]">심리 상태</label>
+            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">심리 상태</label>
             <div className="flex gap-2">
               {EMOTIONS.map((em) => (
                 <button
@@ -820,10 +819,10 @@ export default function TradesPage() {
                   className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors ${
                     formEmotion === em.label
                       ? "bg-[#F5F0FF] dark:bg-[#2A1D3D] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
-                      : "bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A]"
+                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)]"
                   }`}
                 >
-                  <span className="text-base">{em.emoji}</span>
+                  <span>{em.icon}</span>
                   <span className="font-medium">{em.label}</span>
                 </button>
               ))}
@@ -832,19 +831,19 @@ export default function TradesPage() {
 
           {/* 메모 */}
           <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7B6B] dark:text-[#7A8A7A]">메모</label>
+            <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">메모</label>
             <textarea
               value={formMemo}
               onChange={(e) => setFormMemo(e.target.value)}
               placeholder="매매 이유나 메모를 남겨보세요"
               rows={2}
-              className="w-full p-3 text-sm bg-[#F8FAF8] dark:bg-[#253028] rounded-xl outline-none resize-none text-[#1A221A] dark:text-[#E8EEE8] placeholder:text-[#B4C4B4] dark:placeholder:text-[#4A5A4A] border border-[#E8EEE8] dark:border-[#2D3D30]"
+              className="w-full p-3 text-sm bg-[#F8FAF8] dark:bg-[var(--color-card)] rounded-xl outline-none resize-none text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A] border border-[var(--color-g200)] dark:border-[var(--color-border)]"
             />
           </div>
 
           {/* 에러/경고 */}
           {submitError && (
-            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[#F04452]">{submitError}</div>
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[var(--color-negative)]">{submitError}</div>
           )}
           {cashWarning && (
             <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FFF8E8] dark:bg-[#2D2810] text-[#B8860B]">예수금이 부족하지만 매매가 등록되었습니다.</div>
@@ -860,26 +859,26 @@ export default function TradesPage() {
       {/* 예수금 부족 확인 모달 */}
       {cashConfirmOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-6 mx-5 max-w-sm w-full" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
+          <div className="bg-[var(--color-surface)] dark:bg-[var(--color-card)] rounded-2xl p-6 mx-5 max-w-sm w-full" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-full bg-[#FFF3E8] flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F07D05" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
-              <span className="text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8]">예수금 부족</span>
+              <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">예수금 부족</span>
             </div>
-            <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] whitespace-pre-line mb-5">
+            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] whitespace-pre-line mb-5">
               {cashConfirmMsg}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setCashConfirmOpen(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] transition-colors"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={() => { setCashConfirmOpen(false); doSubmit(); }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#05C072] text-white transition-colors"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-primary)] text-white transition-colors"
               >
                 등록
               </button>
