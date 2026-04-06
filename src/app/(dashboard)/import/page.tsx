@@ -89,7 +89,7 @@ export default function ImportPage() {
       avgPrice: String(h.avgPrice ?? ""),
       quantity: String(h.quantity ?? ""),
       country: h.country ?? "KR",
-      checked: true,
+      checked: !!(h.ticker),
     }));
 
     if (extracted.length === 0) {
@@ -299,6 +299,9 @@ export default function ImportPage() {
                       {h.country}
                     </span>
                   </div>
+                  {!h.ticker && (
+                    <p className="text-[10px] text-[#F04452] mb-2">종목코드를 인식하지 못해 제외됩니다</p>
+                  )}
                   {/* 하단: 평단가 + 수량 입력 */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>

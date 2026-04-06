@@ -33,7 +33,7 @@ export function ConfirmDialog({
       >
         <div className="px-5 pt-5 pb-4">
           <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">{title}</p>
-          <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mt-1.5 leading-relaxed">{message}</p>
+          <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mt-1.5 leading-relaxed whitespace-pre-line">{message}</p>
         </div>
         <div className="flex border-t border-[#F0F4F0] dark:border-[#2D3D30]">
           <button

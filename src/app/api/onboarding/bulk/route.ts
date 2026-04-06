@@ -38,8 +38,11 @@ export async function POST(req: Request) {
 
       // 보유종목
       if (acc.holdings?.length > 0) {
-        await tx.holding.createMany({
-          data: acc.holdings.map((h: {
+        const seenTickers = new Set<string>();
+        let emptyCount = 0;
+
+        const holdingsData = acc.holdings
+          .map((h: {
             ticker: string;
             name: string;
             country: string;
@@ -49,15 +52,21 @@ export async function POST(req: Request) {
             tags?: string[];
           }) => ({
             accountId: created.id,
-            ticker: h.ticker,
+            ticker: h.ticker || `__unknown_${emptyCount++}`,
             name: h.name,
             country: h.country,
             avgPrice: h.avgPrice,
             quantity: h.quantity,
             sectorManual: h.sectorManual ?? null,
             tags: h.tags ?? [],
-          })),
-        });
+          }))
+          .filter((h: { ticker: string }) => {
+            if (seenTickers.has(h.ticker)) return false;
+            seenTickers.add(h.ticker);
+            return true;
+          });
+
+        await tx.holding.createMany({ data: holdingsData });
       }
     }
 
