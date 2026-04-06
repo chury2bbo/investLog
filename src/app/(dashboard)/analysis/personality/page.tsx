@@ -381,7 +381,7 @@ export default function PersonalityPage() {
           {/* 투자자 유형 */}
           <Card>
             <div className="text-center">
-              <div className="text-3xl mb-2">🧠</div>
+              <div className="mb-2 flex justify-center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" /></svg></div>
               <div className="text-lg font-extrabold text-[var(--color-positive)] mb-1">
                 {report.investorType}
               </div>
@@ -426,7 +426,7 @@ export default function PersonalityPage() {
           {/* 개선 권고 */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💡</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" /></svg>
               <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">개선 권고</span>
             </div>
             <div className="space-y-2">
@@ -442,7 +442,7 @@ export default function PersonalityPage() {
           {/* 감정 분석 */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💭</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-g500)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">감정 분석</span>
             </div>
             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">

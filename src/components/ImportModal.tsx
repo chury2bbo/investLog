@@ -206,7 +206,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
                 onChange={handleFileChange} />
               <Card>
-                <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-2">📌 이렇게 캡처해주세요</p>
+                <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-2 flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 이렇게 캡처해주세요</p>
                 <div className="space-y-1.5">
                   {["증권사 앱의 보유 종목 / 잔고 화면을 캡처", "종목명, 수량, 평단가가 모두 보이도록", "여러 화면은 한 장씩 업로드"].map((tip, i) => (
                     <div key={i} className="flex items-start gap-2">
