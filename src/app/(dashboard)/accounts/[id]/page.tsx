@@ -14,6 +14,7 @@ import {
   BottomSheet,
   Divider,
   ConfirmDialog,
+  ThemeToggle,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -495,12 +496,15 @@ export default function AccountDetailPage() {
             </h1>
           </div>
         </div>
-        {(() => {
-          const hasKR = account.holdings.some((h) => h.country === "KR");
-          const hasForeign = account.holdings.some((h) => h.country !== "KR");
-          const label = hasKR && hasForeign ? "국내·해외" : hasKR ? "국내" : hasForeign ? "해외" : "";
-          return label ? <Tag label={label} color={hasForeign && hasKR ? "blue" : hasForeign ? "blue" : "green"} /> : null;
-        })()}
+        <div className="flex items-center gap-2">
+          {(() => {
+            const hasKR = account.holdings.some((h) => h.country === "KR");
+            const hasForeign = account.holdings.some((h) => h.country !== "KR");
+            const label = hasKR && hasForeign ? "국내·해외" : hasKR ? "국내" : hasForeign ? "해외" : "";
+            return label ? <Tag label={label} color={hasForeign && hasKR ? "blue" : hasForeign ? "blue" : "green"} /> : null;
+          })()}
+          <div className="md:hidden"><ThemeToggle /></div>
+        </div>
       </div>
 
       {/* ── ② 자산 요약 카드 ── */}
