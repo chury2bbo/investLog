@@ -12,6 +12,8 @@ import {
   EmptyState,
   BottomSheet,
   ConfirmDialog,
+  Skeleton,
+  ThemeToggle,
 } from "@/components/ui";
 import { TradeFilterCard } from "./_components/TradeFilterCard";
 import { TradesTable } from "./_components/TradesTable";
@@ -364,6 +366,11 @@ export default function TradesPage() {
 
     const price = parseFloat(formPrice);
     const quantity = parseInt(formQuantity, 10);
+
+    if (isNaN(price) || price <= 0 || isNaN(quantity) || quantity <= 0) {
+      setSubmitError("가격과 수량은 0보다 큰 값을 입력해주세요.");
+      return;
+    }
     const selectedAccount = accounts.find((a) => a.id === formAccountId);
 
     if (formType === "SELL" && selectedAccount) {
@@ -493,8 +500,64 @@ export default function TradesPage() {
 
   if (loading && trades.length === 0) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <LoadingSpinner size={32} />
+      <div className="w-full max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+        {/* Header (즉시 표시) */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">매매일지</h1>
+          </div>
+          <div className="md:hidden"><ThemeToggle /></div>
+        </div>
+
+        {/* Filter area */}
+        <Skeleton className="w-full h-12 rounded-xl mb-4" />
+
+        {/* 모바일: 리스트형 스켈레톤 */}
+        <div className="md:hidden rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className={`px-3.5 py-3 ${i < 5 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
+              <div className="flex justify-between items-center mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Skeleton className="w-8 h-[18px] rounded" />
+                  <Skeleton className="w-6 h-[18px] rounded" />
+                  <Skeleton className="w-20 h-4" />
+                </div>
+                <Skeleton className="w-16 h-4" />
+              </div>
+              <div className="flex justify-between items-center">
+                <Skeleton className="w-44 h-3" />
+                <Skeleton className="w-12 h-4 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* PC: 테이블형 스켈레톤 */}
+        <div className="hidden md:block rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+          <div className="px-4 py-3 border-b border-[var(--color-g100)] dark:border-[var(--color-border)]">
+            <div className="grid grid-cols-7 gap-2">
+              {["w-12", "w-8", "w-6", "w-16", "w-14", "w-10", "w-12"].map((w, i) => (
+                <Skeleton key={i} className={`${w} h-3`} />
+              ))}
+            </div>
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className={`px-4 py-3 ${i < 5 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
+              <div className="grid grid-cols-7 gap-2 items-center">
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-8 h-5 rounded" />
+                <Skeleton className="w-6 h-5 rounded" />
+                <Skeleton className="w-20 h-4" />
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-10 h-4" />
+                <Skeleton className="w-14 h-4" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -502,7 +565,7 @@ export default function TradesPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <>
+    <div className="animate-[fadeIn_0.4s_ease-out]">
       {/* 토스트 */}
       <Toast
         title={toast.title}
@@ -573,7 +636,7 @@ export default function TradesPage() {
 
             {/* 테이블 or 빈 상태 */}
             {trades.length === 0 ? (
-              <EmptyState message="조건에 맞는 매매 기록이 없어요." />
+              <EmptyState message={total === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
             ) : (
               <TradesTable
                 trades={trades}
@@ -1143,6 +1206,6 @@ export default function TradesPage() {
         onConfirm={() => { setCashConfirmOpen(false); doSubmit(); }}
         onCancel={() => setCashConfirmOpen(false)}
       />
-    </>
+    </div>
   );
 }

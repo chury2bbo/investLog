@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getKisSector } from "@/lib/kis";
+import { getYahooSector } from "@/lib/yahoo";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -36,41 +38,46 @@ export async function POST(req: Request) {
         });
       }
 
-      // 보유종목
+      // 보유종목 + sectorAuto 자동 조회
       if (acc.holdings?.length > 0) {
         const seenTickers = new Set<string>();
-        let emptyCount = 0;
 
-        const holdingsData = acc.holdings
-          .map((h: {
-            ticker: string;
-            name: string;
-            country: string;
-            avgPrice: number;
-            quantity: number;
-            sectorManual?: string;
-            tags?: string[];
-          }) => ({
-            accountId: created.id,
-            ticker: h.ticker || `__unknown_${emptyCount++}`,
-            name: h.name,
-            country: h.country,
-            avgPrice: h.avgPrice,
-            quantity: h.quantity,
-            sectorManual: h.sectorManual ?? null,
-            tags: h.tags ?? [],
-          }))
-          .filter((h: { ticker: string }) => {
-            if (seenTickers.has(h.ticker)) return false;
-            seenTickers.add(h.ticker);
-            return true;
+        for (const h of acc.holdings as {
+          ticker: string; name: string; country: string;
+          avgPrice: number; quantity: number;
+          sectorManual?: string; tags?: string[];
+        }[]) {
+          if (!h.ticker || seenTickers.has(h.ticker)) continue;
+          seenTickers.add(h.ticker);
+
+          // 섹터 자동 조회
+          let sectorAuto: string | null = null;
+          try {
+            const isDomestic = /^\d{6}$/.test(h.ticker);
+            const info = isDomestic
+              ? await getKisSector(h.ticker)
+              : await getYahooSector(h.ticker);
+            sectorAuto = info.sector ?? null;
+          } catch { /* 섹터 조회 실패 시 무시 */ }
+
+          await tx.holding.create({
+            data: {
+              accountId: created.id,
+              ticker: h.ticker,
+              name: h.name,
+              country: h.country,
+              avgPrice: h.avgPrice,
+              quantity: h.quantity,
+              sectorAuto,
+              sectorManual: h.sectorManual ?? null,
+              tags: h.tags ?? [],
+            },
           });
-
-        await tx.holding.createMany({ data: holdingsData });
+        }
       }
     }
 
-    // 첫 매매 기록
+    // 첫 매매 기록 + holding 연동
     if (trade?.ticker && trade?.price && trade?.quantity) {
       const accountEntry = createdAccounts.find((a) => a.index === trade.accountIndex);
       if (accountEntry) {
@@ -86,6 +93,46 @@ export async function POST(req: Request) {
             reasonTags: trade.reasonTags ?? [],
           },
         });
+
+        // 매수인 경우 holding 생성/업데이트
+        if (trade.type === "BUY") {
+          const country = trade.ticker.length <= 6 && /^\d+$/.test(trade.ticker) ? "KR" : "US";
+          const existing = await tx.holding.findFirst({
+            where: { accountId: accountEntry.id, ticker: trade.ticker },
+          });
+
+          if (existing) {
+            const totalQty = existing.quantity + trade.quantity;
+            const newAvgPrice =
+              (existing.avgPrice * existing.quantity + trade.price * trade.quantity) / totalQty;
+            await tx.holding.update({
+              where: { id: existing.id },
+              data: { avgPrice: newAvgPrice, quantity: totalQty },
+            });
+          } else {
+            // 섹터 자동 조회
+            let sectorAuto: string | null = null;
+            try {
+              const isDomestic = /^\d{6}$/.test(trade.ticker);
+              const info = isDomestic
+                ? await getKisSector(trade.ticker)
+                : await getYahooSector(trade.ticker);
+              sectorAuto = info.sector ?? null;
+            } catch { /* 섹터 조회 실패 시 무시 */ }
+
+            await tx.holding.create({
+              data: {
+                accountId: accountEntry.id,
+                ticker: trade.ticker,
+                name: trade.name,
+                country,
+                avgPrice: trade.price,
+                quantity: trade.quantity,
+                sectorAuto,
+              },
+            });
+          }
+        }
       }
     }
 

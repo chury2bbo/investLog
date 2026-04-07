@@ -141,7 +141,7 @@ export default function LoginPage() {
           {/* 소셜 로그인 */}
           <div className="space-y-2.5">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-colors hover:bg-(--color-g100) dark:hover:bg-(--color-card) border-(--color-g200) dark:border-(--color-border) text-(--color-text) bg-(--color-surface)"
             >
@@ -167,7 +167,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => signIn("kakao", { callbackUrl: "/" })}
+              onClick={() => signIn("kakao", { callbackUrl: "/onboarding" })}
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
               style={{ backgroundColor: "#FEE500", color: "#191919" }}

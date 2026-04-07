@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getKisQuote } from "@/lib/kis";
-import { getYahooQuote, getUsdKrwRate } from "@/lib/yahoo";
+import { getYahooQuote, getYahooFinancials, getUsdKrwRate } from "@/lib/yahoo";
 
 function isDomestic(ticker: string) {
   return /^\d{6}$/.test(ticker);
@@ -34,15 +34,38 @@ export async function GET(req: Request) {
     .map((t) => t.trim())
     .filter(Boolean);
 
+  const detailed = searchParams.get("detailed") === "true";
+
   const quotes = await Promise.all(
     tickers.map(async (ticker) => {
       try {
+        let quote;
         if (isDomestic(ticker)) {
-          return await getKisQuote(ticker);
+          quote = await getKisQuote(ticker);
+          // 국내: ROE는 yahoo quoteSummary로 보충
+          if (detailed) {
+            const [financials, yahooQ] = await Promise.all([
+              getYahooFinancials(ticker),
+              getYahooQuote(ticker).catch(() => null),
+            ]);
+            return {
+              ...quote,
+              roe: financials.roe,
+              forwardPer: yahooQ?.forwardPer ?? null,
+              forwardPbr: null,
+              fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? yahooQ?.fiftyTwoWeekHigh ?? null,
+              fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? yahooQ?.fiftyTwoWeekLow ?? null,
+            };
+          }
+          return quote;
         }
-        return await getYahooQuote(ticker);
+        quote = await getYahooQuote(ticker);
+        if (detailed) {
+          const financials = await getYahooFinancials(ticker);
+          return { ...quote, roe: financials.roe };
+        }
+        return quote;
       } catch {
-        // KIS 장애 시 yahoo 폴백
         try {
           return await getYahooQuote(ticker);
         } catch {

@@ -1279,6 +1279,14 @@ export default function OnboardingPage() {
                 건너뛰기
               </Button>
               <Button size="lg" onClick={() => {
+                  // 종목이 있는데 증권사 미선택인 경우 차단
+                  const noCode = accounts.findIndex((acc) =>
+                    (acc.holdings.length > 0 || getHoldingForm(accounts.indexOf(acc)).ticker) && !acc.accountCode
+                  );
+                  if (noCode !== -1) {
+                    showToast("증권사 필요", `계좌 ${noCode + 1}에 종목이 등록되어 있어요. 증권사를 선택해주세요.`);
+                    return;
+                  }
                   // 종목 선택 후 추가 버튼 없이 가격/수량 미입력인 경우 차단
                   const incomplete = accounts.findIndex((_, i) => {
                     const form = getHoldingForm(i);

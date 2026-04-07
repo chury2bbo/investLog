@@ -8,6 +8,13 @@ export interface YahooQuote {
   price: number;
   change: number;
   changePercent: number;
+  per?: number | null;
+  pbr?: number | null;
+  forwardPer?: number | null;
+  forwardPbr?: number | null;
+  fiftyTwoWeekHigh?: number | null;
+  fiftyTwoWeekLow?: number | null;
+  roe?: number | null;
 }
 
 export async function getYahooQuote(ticker: string): Promise<YahooQuote> {
@@ -24,7 +31,30 @@ export async function getYahooQuote(ticker: string): Promise<YahooQuote> {
     price: result.regularMarketPrice ?? 0,
     change: result.regularMarketChange ?? 0,
     changePercent: result.regularMarketChangePercent ?? 0,
+    per: result.trailingPE ?? null,
+    pbr: result.priceToBook ?? null,
+    forwardPer: result.forwardPE ?? null,
+    forwardPbr: null,
+    fiftyTwoWeekHigh: result.fiftyTwoWeekHigh ?? null,
+    fiftyTwoWeekLow: result.fiftyTwoWeekLow ?? null,
   };
+}
+
+/** ROE 조회 (quoteSummary 필요) */
+export async function getYahooFinancials(ticker: string): Promise<{ roe: number | null }> {
+  const symbol = /^\d{6}$/.test(ticker) ? `${ticker}.KS` : ticker;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (await yahooFinance.quoteSummary(
+      symbol,
+      { modules: ["financialData"] },
+      { validateResult: false }
+    )) as any;
+    const roe = result?.financialData?.returnOnEquity ?? null;
+    return { roe: roe !== null ? roe * 100 : null };
+  } catch {
+    return { roe: null };
+  }
 }
 
 export interface YahooSearchResult {

@@ -137,8 +137,22 @@ export default function PersonalityPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <LoadingSpinner size={32} />
+      <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+        <Header />
+        <div className="flex gap-2 mb-6">
+          <div className="h-7 w-24 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse" />
+          <div className="h-7 w-28 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse" />
+        </div>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="rounded-2xl bg-[var(--color-surface)] dark:bg-[var(--color-card)] p-5 mb-4">
+            <div className="h-4 w-28 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse mb-4" />
+            <div className="space-y-3">
+              <div className="h-3 w-full rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse" />
+              <div className="h-3 w-4/5 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse" />
+              <div className="h-3 w-3/5 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)] animate-pulse" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -149,7 +163,7 @@ export default function PersonalityPage() {
     const remaining = stats?.remaining ?? 10;
     const totalCount = stats?.totalCount ?? 0;
     return (
-      <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+      <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
         <Header />
         <Card>
           <div className="text-center py-10">
@@ -190,7 +204,7 @@ export default function PersonalityPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       <Header />
 
       {/* 요약 배지 */}

@@ -42,6 +42,10 @@ export interface KisQuote {
   price: number;
   change: number;
   changePercent: number;
+  per?: number | null;
+  pbr?: number | null;
+  fiftyTwoWeekHigh?: number | null;
+  fiftyTwoWeekLow?: number | null;
 }
 
 export async function getKisQuote(ticker: string): Promise<KisQuote> {
@@ -75,7 +79,21 @@ export async function getKisQuote(ticker: string): Promise<KisQuote> {
   const change = sign === "4" || sign === "5" ? -changeAbs : changeAbs;
   const changePercent = parseFloat(o.prdy_ctrt);
 
-  return { ticker, price, change, changePercent };
+  const per = parseFloat(o.per);
+  const pbr = parseFloat(o.pbr);
+  const w52h = parseFloat(o.stck_dryy_hgpr || o.w52_hgpr);
+  const w52l = parseFloat(o.stck_dryy_lwpr || o.w52_lwpr);
+
+  return {
+    ticker,
+    price,
+    change,
+    changePercent,
+    per: isNaN(per) || per === 0 ? null : per,
+    pbr: isNaN(pbr) || pbr === 0 ? null : pbr,
+    fiftyTwoWeekHigh: isNaN(w52h) || w52h === 0 ? null : w52h,
+    fiftyTwoWeekLow: isNaN(w52l) || w52l === 0 ? null : w52l,
+  };
 }
 
 export interface KisSectorInfo {

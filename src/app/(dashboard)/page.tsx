@@ -11,6 +11,7 @@ import {
   LoadingSpinner,
   EmptyState,
   ThemeToggle,
+  Skeleton,
 } from "@/components/ui";
 
 // ─── 타입 ────────────────────────────────────────────────
@@ -317,13 +318,12 @@ export default function DashboardPage() {
     const cashUSDinKRW = cashUSD * usdRate;
     const totalAsset =
       domesticStockValue + foreignStockKRW + cashKRW + cashUSDinKRW;
-    const totalPnl = totalAsset - totalInvested - cashKRW - cashUSDinKRW;
+    const totalPnl = (domesticStockValue + foreignStockKRW) - totalInvested;
     const totalPnlRate =
       totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
+    const prevAsset = totalAsset - dailyPnl;
     const dailyPnlRate =
-      totalAsset - dailyPnl > 0
-        ? (dailyPnl / (totalAsset - dailyPnl)) * 100
-        : 0;
+      prevAsset > 0 ? (dailyPnl / prevAsset) * 100 : 0;
 
     return {
       domesticStockValue,
@@ -429,8 +429,64 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <LoadingSpinner size={32} />
+      <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+        {/* 인사말 + 다크모드 토글 (즉시 표시) */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+              안녕하세요, {userName}님
+            </p>
+            <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] mt-0.5">
+              내 투자 현황
+            </h1>
+          </div>
+          <div className="md:hidden mt-1"><ThemeToggle /></div>
+        </div>
+
+        {/* 히어로 카드 스켈레톤 */}
+        <div className="rounded-[20px] p-5 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
+          <Skeleton className="h-4 w-24 mb-2 !bg-white/20" />
+          <Skeleton className="h-10 w-56 mb-3 !bg-white/20" />
+          <Skeleton className="h-5 w-40 mb-5 !bg-white/15" />
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex-1 rounded-xl px-2.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
+                <Skeleton className="h-3 w-12 mb-2 !bg-white/20" />
+                <Skeleton className="h-5 w-16 !bg-white/20" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 요약 지표 스켈레톤 */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="!p-3">
+              <Skeleton className="h-3 w-14 mb-2" />
+              <Skeleton className="h-5 w-16" />
+            </Card>
+          ))}
+        </div>
+
+        {/* 차트 영역 스켈레톤 */}
+        <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5 mt-4">
+          <div>
+            <Skeleton className="h-4 w-20 mb-3" />
+            <Card><Skeleton className="h-[160px] w-full" /></Card>
+            <div className="mt-4">
+              <Skeleton className="h-4 w-24 mb-3" />
+              <Card><Skeleton className="h-[100px] w-full" /></Card>
+            </div>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Skeleton className="h-4 w-24 mb-3" />
+            <Card><Skeleton className="h-[200px] w-full" /></Card>
+            <div className="mt-4">
+              <Skeleton className="h-4 w-20 mb-3" />
+              <Card><Skeleton className="h-[120px] w-full" /></Card>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -472,7 +528,7 @@ export default function DashboardPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       {/* 지연 시세 안내 */}
       {staleQuote && (
         <div className="rounded-lg px-3 py-2 text-xs mb-4 bg-[#FFF8E8] dark:bg-[#2D2810] text-[#B8860B]">

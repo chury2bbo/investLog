@@ -26,8 +26,12 @@ export default function RegisterPage() {
       setError("이름을 입력해주세요.");
       return;
     }
-    if (password.length < 8) {
-      setError("비밀번호는 8자 이상이어야 해요.");
+    if (password.length < 8 || password.length > 15) {
+      setError("비밀번호는 8~15자여야 해요.");
+      return;
+    }
+    if (!/[a-zA-Z]/.test(password) || !/\d/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setError("비밀번호는 영문, 숫자, 특수문자를 모두 포함해야 해요.");
       return;
     }
     if (password !== passwordConfirm) {
@@ -67,11 +71,16 @@ export default function RegisterPage() {
   async function handleStart() {
     setLoading(true);
     // 자동 로그인 후 온보딩으로 이동
-    await signIn("credentials", {
+    const res = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
+    if (res?.error) {
+      setError("자동 로그인에 실패했습니다. 로그인 페이지에서 다시 시도해주세요.");
+      setLoading(false);
+      return;
+    }
     router.push("/onboarding");
   }
 

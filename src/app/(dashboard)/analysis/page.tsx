@@ -38,6 +38,13 @@ interface QuoteData {
   price: number;
   change: number;
   changePercent: number;
+  per?: number | null;
+  pbr?: number | null;
+  roe?: number | null;
+  forwardPer?: number | null;
+  forwardPbr?: number | null;
+  fiftyTwoWeekHigh?: number | null;
+  fiftyTwoWeekLow?: number | null;
 }
 
 interface SummaryData {
@@ -106,6 +113,7 @@ export default function AnalysisPage() {
   const [searching, setSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectIdRef = useRef(0);
 
   // 선택된 종목
   const [selected, setSelected] = useState<SearchResult | null>(null);
@@ -180,6 +188,7 @@ export default function AnalysisPage() {
   }
 
   async function selectStock(stock: SearchResult) {
+    const id = ++selectIdRef.current;
     setSelected(stock);
     setQuery("");
     setShowDropdown(false);
@@ -194,16 +203,17 @@ export default function AnalysisPage() {
       if (!r.ok) console.error("[history POST]", await r.json());
     }).catch((e) => console.error("[history POST error]", e));
 
-    // 현재가 조회
+    // 현재가 + 투자지표 조회
     setQuoteLoading(true);
-    fetch(`/api/market/quote?tickers=${stock.ticker}`)
+    fetch(`/api/market/quote?tickers=${stock.ticker}&detailed=true`)
       .then((r) => r.json())
       .then((d) => {
+        if (selectIdRef.current !== id) return;
         const q = (d.quotes ?? [])[0];
         if (q) setQuote(q);
       })
       .catch(() => {})
-      .finally(() => setQuoteLoading(false));
+      .finally(() => { if (selectIdRef.current === id) setQuoteLoading(false); });
 
     // AI 기업 소개
     setSummaryLoading(true);
@@ -211,6 +221,7 @@ export default function AnalysisPage() {
     fetch(`/api/analysis/summary?ticker=${stock.ticker}`)
       .then((r) => r.json())
       .then((d) => {
+        if (selectIdRef.current !== id) return;
         if (d.summary) {
           try {
             const parsed = typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary;
@@ -221,7 +232,7 @@ export default function AnalysisPage() {
         }
       })
       .catch(() => {})
-      .finally(() => setSummaryLoading(false));
+      .finally(() => { if (selectIdRef.current === id) setSummaryLoading(false); });
 
     // MDD 차트 데이터
     fetchHistory(stock.ticker, startDate, endDate);
@@ -276,7 +287,7 @@ export default function AnalysisPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -467,37 +478,69 @@ export default function AnalysisPage() {
                 <LoadingSpinner size={24} />
               </div>
             ) : quote ? (
-              <div className="grid grid-cols-2 gap-4">
-                {/* 현재가 */}
-                <div>
-                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">현재가</div>
-                  <div className="text-xl font-extrabold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                    {formatPrice(quote.price, selected.country)}
+              <div className="space-y-4">
+                {/* 현재가 · 등락률 · 전일대비 */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">현재가</div>
+                    <div className="text-lg font-extrabold text-[var(--color-text)]">
+                      {formatPrice(quote.price, selected.country)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">등락률</div>
+                    <div className={`text-lg font-extrabold ${quote.changePercent >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}`}>
+                      {quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">전일대비</div>
+                    <div className={`text-sm font-bold ${quote.change >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}`}>
+                      {quote.change >= 0 ? "+" : ""}{formatPrice(Math.abs(quote.change), selected.country)}
+                    </div>
                   </div>
                 </div>
-                {/* 등락률 */}
-                <div>
-                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">등락률</div>
-                  <div className={`text-xl font-extrabold ${quote.changePercent >= 0 ? "text-[var(--color-negative)]" : "text-[#4285F4]"}`}>
-                    {quote.changePercent >= 0 ? "+" : ""}
-                    {quote.changePercent.toFixed(2)}%
+
+                {/* 구분선 */}
+                <div className="border-t border-[var(--color-g100)] dark:border-[var(--color-border)]" />
+
+                {/* 투자 지표 3열 2행 */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">PER</div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">
+                      {quote.per != null ? quote.per.toFixed(1) : "-"}
+                    </div>
                   </div>
-                </div>
-                {/* 전일대비 */}
-                <div>
-                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">전일대비</div>
-                  <div className={`text-sm font-bold ${quote.change >= 0 ? "text-[var(--color-negative)]" : "text-[#4285F4]"}`}>
-                    {quote.change >= 0 ? "+" : ""}
-                    {formatPrice(Math.abs(quote.change), selected.country)}
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">PBR</div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">
+                      {quote.pbr != null ? quote.pbr.toFixed(2) : "-"}
+                    </div>
                   </div>
-                </div>
-                {/* 52주 MDD */}
-                <div>
-                  <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">
-                    기간 내 MDD
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">ROE</div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">
+                      {quote.roe != null ? `${quote.roe.toFixed(1)}%` : "-"}
+                    </div>
                   </div>
-                  <div className="text-sm font-bold text-[var(--color-negative)]">
-                    {minMdd.toFixed(1)}%
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">52주 최고</div>
+                    <div className="text-sm font-bold text-[var(--color-positive)]">
+                      {quote.fiftyTwoWeekHigh != null ? formatPrice(quote.fiftyTwoWeekHigh, selected.country) : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">52주 최저</div>
+                    <div className="text-sm font-bold text-[var(--color-negative)]">
+                      {quote.fiftyTwoWeekLow != null ? formatPrice(quote.fiftyTwoWeekLow, selected.country) : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">Fwd PER</div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">
+                      {quote.forwardPer != null ? quote.forwardPer.toFixed(1) : "-"}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -117,7 +117,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="w-full max-w-lg mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-lg mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       {/* 토스트 */}
       <Toast
         title={toast.title}

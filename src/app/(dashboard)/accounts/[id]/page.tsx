@@ -15,6 +15,7 @@ import {
   Divider,
   ConfirmDialog,
   ThemeToggle,
+  Skeleton,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -524,8 +525,60 @@ export default function AccountDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <LoadingSpinner size={32} />
+      <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+        {/* 헤더 (즉시 표시) */}
+        <div className="flex items-center gap-2 mb-6">
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">계좌 상세</p>
+            <Skeleton className="h-7 w-36 mt-1" />
+          </div>
+        </div>
+
+        {/* 히어로 카드 스켈레톤 */}
+        <div className="rounded-[20px] p-5 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
+          <Skeleton className="h-4 w-20 mb-2 !bg-white/20" />
+          <Skeleton className="h-8 w-44 mb-4 !bg-white/20" />
+          <div className="grid grid-cols-4 gap-1.5">
+            <Skeleton className="h-3 w-12 !bg-white/15" />
+            <Skeleton className="h-3 w-12 !bg-white/15" />
+            <Skeleton className="h-3 w-12 !bg-white/15" />
+            <Skeleton className="h-3 w-12 !bg-white/15" />
+          </div>
+          <div className="grid grid-cols-4 gap-1.5 mt-2">
+            <Skeleton className="h-4 w-16 !bg-white/20" />
+            <Skeleton className="h-4 w-16 !bg-white/20" />
+            <Skeleton className="h-4 w-16 !bg-white/20" />
+            <Skeleton className="h-4 w-16 !bg-white/20" />
+          </div>
+        </div>
+
+        {/* 보유종목 스켈레톤 */}
+        <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5">
+          <div>
+            <Skeleton className="h-4 w-20 mb-3" />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-2xl p-4 mb-2 bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-10 h-10 !rounded-xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-24 mb-1.5" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-5 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Skeleton className="h-4 w-24 mb-3" />
+            <div className="rounded-2xl p-4 bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <Skeleton className="h-[200px] w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -575,7 +628,7 @@ export default function AccountDetailPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -648,26 +701,26 @@ export default function AccountDetailPage() {
           </div>
         </div>
 
-        {/* 매수금 · 예수금 · 평가금 · 합산 테이블 */}
+        {/* 평가금 · 매수금 · 예수금 · 합산 테이블 */}
         <div className="relative mt-3 space-y-1.5">
           {/* 헤더 */}
           <div className="grid grid-cols-4 gap-1.5">
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>매수금</div>
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>합산₩</div>
           </div>
           {/* 원화 행 */}
           {(investedKRW > 0 || cashKRW > 0 || evalKRW > 0) && (
             <div className="grid grid-cols-4 gap-1.5">
               <div className="text-xs font-bold text-white">
+                {evalKRW > 0 ? fmtKRW(evalKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
                 {investedKRW > 0 ? fmtKRW(investedKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
                 {cashKRW > 0 ? fmtKRW(cashKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
-              </div>
-              <div className="text-xs font-bold text-white">
-                {evalKRW > 0 ? fmtKRW(evalKRW) : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
                 {fmtKRW(totalKRW)}
@@ -678,13 +731,13 @@ export default function AccountDetailPage() {
           {(investedUSD > 0 || cashUSD > 0 || evalUSD > 0) && (
             <div className="grid grid-cols-4 gap-1.5">
               <div className="text-xs font-bold text-white">
+                {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
+              </div>
+              <div className="text-xs font-bold text-white">
                 {investedUSD > 0 ? `$${investedUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               <div className="text-xs font-bold text-white">
                 {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
-              </div>
-              <div className="text-xs font-bold text-white">
-                {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: "rgba(255,255,255,0.3)" }}>-</span>}
               </div>
               {investedKRW === 0 && cashKRW === 0 && evalKRW === 0 && (
                 <div className="text-xs font-bold text-white">
@@ -753,7 +806,7 @@ export default function AccountDetailPage() {
                     : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
                 }`}
               >
-                외화
+                $
               </button>
               <button
                 onClick={() => setDisplayCurrency("KRW")}
@@ -763,14 +816,16 @@ export default function AccountDetailPage() {
                     : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
                 }`}
               >
-                원화
+                ₩
               </button>
             </div>
           )}
         </div>
-        <Button size="sm" onClick={() => { resetHoldingForm(); setHoldingModal(true); }}>
-          + 종목 등록
-        </Button>
+        <div className="hidden md:block">
+          <Button size="sm" onClick={() => { resetHoldingForm(); setHoldingModal(true); }}>
+            + 종목 등록
+          </Button>
+        </div>
       </div>
 
       {account.holdings.length === 0 ? (
@@ -811,11 +866,11 @@ export default function AccountDetailPage() {
 
             return (
               <Card key={h.id}>
-                <div className="flex justify-between items-start mb-2.5">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} />
-                      <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                <div className="flex justify-between items-start gap-3 mb-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="shrink-0"><Tag label={isForeign ? "해외" : "국내"} color={isForeign ? "blue" : "green"} /></span>
+                      <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)] truncate">
                         {h.name}
                       </span>
                     </div>
@@ -823,7 +878,7 @@ export default function AccountDetailPage() {
                       {h.ticker} · {h.quantity}주
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     {/* 현재가 */}
                     <div className="flex items-center gap-1.5 justify-end">
                       {quotesLoading ? (
@@ -1367,6 +1422,14 @@ export default function AccountDetailPage() {
           </Button>
         </div>
       </BottomSheet>
+
+      {/* 모바일 FAB — 종목 등록 */}
+      <button
+        onClick={() => { resetHoldingForm(); setHoldingModal(true); }}
+        className="md:hidden fixed bottom-24 right-5 w-12 h-12 rounded-2xl bg-[var(--color-primary)] text-white text-2xl flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 z-40 active:scale-95 transition-transform cursor-pointer"
+      >
+        +
+      </button>
     </div>
   );
 }

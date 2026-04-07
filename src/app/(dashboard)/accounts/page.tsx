@@ -10,6 +10,7 @@ import {
   Input,
   Select,
   LoadingSpinner,
+  Skeleton,
   EmptyState,
   BottomSheet,
   ConfirmDialog,
@@ -58,7 +59,7 @@ interface QuoteResult {
   changePercent: number;
 }
 
-import { formatKRW, fmtNum, stripNum, formatCash } from "@/lib/format";
+import { formatKRW, fmtNum, stripNum } from "@/lib/format";
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 
@@ -246,19 +247,11 @@ export default function AccountsPage() {
 
   // ─── 로딩 ──────────────────────────────────────────────
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <LoadingSpinner size={32} />
-      </div>
-    );
-  }
-
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
     <div className="w-full max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
-      {/* 헤더 */}
+      {/* 헤더 (항상 즉시 표시) */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
@@ -278,11 +271,46 @@ export default function AccountsPage() {
         </div>
       </div>
 
+      {loading ? (
+        <div className="md:flex md:gap-6 md:items-start">
+          <div className="md:flex-1 md:min-w-0 space-y-2.5">
+            {[0, 1, 2].map((i) => (
+              <Card key={i}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-[42px] h-[42px] rounded-xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="w-32 h-4 rounded" />
+                      <Skeleton className="w-20 h-3 rounded" />
+                    </div>
+                  </div>
+                  <Skeleton className="w-16 h-6 rounded-lg" />
+                </div>
+                <div className="mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[0, 1, 2, 3].map((j) => (<Skeleton key={j} className="w-full h-3 rounded" />))}
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5 mt-2">
+                    {[0, 1, 2, 3].map((j) => (<Skeleton key={j} className="w-full h-4 rounded" />))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="hidden md:block md:w-[340px] md:shrink-0 space-y-3">
+            <Skeleton className="w-20 h-4 rounded mb-3" />
+            <Card><Skeleton className="h-[120px] w-full" /></Card>
+            <Skeleton className="w-24 h-4 rounded mt-5 mb-3" />
+            <Card><div className="flex justify-center py-6"><Skeleton className="w-40 h-40 rounded-full" /></div></Card>
+          </div>
+        </div>
+      ) : (
+      <>
       {/* PC: 2단 레이아웃 (좌: 계좌목록, 우: 차트) / 모바일: 세로 */}
-      <div className="md:flex md:gap-6">
+      <div className="md:flex md:gap-6 md:items-start">
         {/* 좌측: 계좌 목록 */}
         <div className="md:flex-1 md:min-w-0">
-      {/* 계좌 목록 */}
+      <h2 className="hidden md:block text-[13px] font-bold text-[var(--color-text)] mb-3">계좌 목록</h2>
       {accounts.length === 0 ? (
         <EmptyState message="아직 등록된 계좌가 없어요. 계좌를 추가해보세요." />
       ) : (
@@ -431,8 +459,8 @@ export default function AccountsPage() {
         {accounts.length > 0 && accounts.some((a) => a.holdings.length > 0) && (
           <div className="mt-6 md:mt-0 md:w-[340px] md:shrink-0 space-y-3 md:sticky md:top-6 md:self-start">
             {/* 계좌별 자산 비율 가로 막대 */}
+            <h2 className="text-[13px] font-bold text-[var(--color-text)] mb-3">계좌별 비율</h2>
             <Card>
-              <h2 className="text-[15px] font-bold mb-4 text-[var(--color-text)]">계좌별 비율</h2>
               {(() => {
                 const COLORS = ["#05C072", "#4285F4", "#F07D05", "#8B5CF6", "#EC4899", "#06B6D4"];
                 const accTotals = accounts.map((acc) => {
@@ -488,8 +516,8 @@ export default function AccountsPage() {
             </Card>
 
             {/* 섹터별 도넛 차트 */}
+            <h2 className="text-[13px] font-bold text-[var(--color-text)] mb-3 mt-5">전체 섹터 분포</h2>
             <Card>
-              <h2 className="text-[15px] font-bold mb-3 text-[var(--color-text)]">전체 섹터 분포</h2>
               <SectorDonutChart
                 holdings={accounts.flatMap((acc) =>
                   acc.holdings.map((h) => {
@@ -513,6 +541,8 @@ export default function AccountsPage() {
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* 계좌 추가 바텀시트 */}
       <BottomSheet
