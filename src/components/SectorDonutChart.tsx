@@ -222,7 +222,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
                     />
                   ))}
                 </Pie>
-                <Tooltip content={renderTooltip} />
+                <Tooltip content={renderTooltip} position={{ x: 0, y: -10 }} />
               </PieChart>
             </ResponsiveContainer>
 

@@ -116,6 +116,18 @@ export default function AccountDetailPage() {
   const [hError, setHError] = useState("");
   const [hPriceLoading, setHPriceLoading] = useState(false);
 
+  // 종목 수정 모달 (평단가/수량)
+  const [holdingEditModal, setHoldingEditModal] = useState(false);
+  const [holdingEditTarget, setHoldingEditTarget] = useState<Holding | null>(null);
+  const [holdingEditPrice, setHoldingEditPrice] = useState("");
+  const [holdingEditQty, setHoldingEditQty] = useState("");
+  const [holdingEditSubmitting, setHoldingEditSubmitting] = useState(false);
+  const [holdingEditError, setHoldingEditError] = useState("");
+
+  // 종목 삭제 확인
+  const [holdingDeleteConfirm, setHoldingDeleteConfirm] = useState<Holding | null>(null);
+  const [holdingDeleting, setHoldingDeleting] = useState(false);
+
   // 섹터 편집 모달
   const [sectorEditModal, setSectorEditModal] = useState(false);
   const [sectorEditHolding, setSectorEditHolding] = useState<Holding | null>(null);
@@ -344,6 +356,64 @@ export default function AccountDetailPage() {
       setHError("네트워크 오류가 발생했습니다.");
     } finally {
       setHSubmitting(false);
+    }
+  }
+
+  // ─── 종목 수정 (평단가/수량) ──────────────────────────────
+
+  function openHoldingEdit(h: Holding) {
+    setHoldingEditTarget(h);
+    setHoldingEditPrice(String(h.avgPrice));
+    setHoldingEditQty(String(h.quantity));
+    setHoldingEditError("");
+    setHoldingEditModal(true);
+  }
+
+  async function handleHoldingEditSubmit() {
+    if (!holdingEditTarget) return;
+    const avgPrice = parseFloat(holdingEditPrice.replace(/,/g, ""));
+    const quantity = parseInt(holdingEditQty.replace(/,/g, ""), 10);
+    if (!avgPrice || !quantity || avgPrice <= 0 || quantity <= 0) {
+      setHoldingEditError("평단가와 수량을 올바르게 입력해주세요.");
+      return;
+    }
+    setHoldingEditSubmitting(true);
+    setHoldingEditError("");
+    try {
+      const res = await fetch(`/api/holdings/${holdingEditTarget.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avgPrice, quantity }),
+      });
+      if (res.ok) {
+        setHoldingEditModal(false);
+        fetchAccount();
+      } else {
+        const data = await res.json();
+        setHoldingEditError(data.error ?? "수정 실패");
+      }
+    } catch {
+      setHoldingEditError("오류가 발생했습니다.");
+    } finally {
+      setHoldingEditSubmitting(false);
+    }
+  }
+
+  // ─── 종목 삭제 ──────────────────────────────────────────
+
+  async function handleHoldingDelete() {
+    if (!holdingDeleteConfirm) return;
+    setHoldingDeleting(true);
+    try {
+      const res = await fetch(`/api/holdings/${holdingDeleteConfirm.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setHoldingDeleteConfirm(null);
+        fetchAccount();
+      }
+    } catch {
+      /* 실패 */
+    } finally {
+      setHoldingDeleting(false);
     }
   }
 
@@ -689,7 +759,17 @@ export default function AccountDetailPage() {
         <EmptyState message="보유 종목이 없습니다." />
       ) : (
         <div className="space-y-2.5 mb-4">
-          {account.holdings.map((h) => {
+          {[...account.holdings]
+            .sort((a, b) => {
+              // 국내(KR) 먼저, 해외 뒤
+              if (a.country === "KR" && b.country !== "KR") return -1;
+              if (a.country !== "KR" && b.country === "KR") return 1;
+              // 같은 그룹 내에서 평가금액 큰 순
+              const aVal = (quotes[a.ticker]?.price || a.avgPrice) * a.quantity;
+              const bVal = (quotes[b.ticker]?.price || b.avgPrice) * b.quantity;
+              return bVal - aVal;
+            })
+            .map((h) => {
             const isForeign = h.country !== "KR";
             const quote = quotes[h.ticker];
             const currentPrice = quote?.price || h.avgPrice;
@@ -766,12 +846,26 @@ export default function AccountDetailPage() {
                       <Tag label={h.sectorAuto} color="gray" />
                     )}
                   </div>
-                  <button
-                    onClick={() => openSectorEdit(h)}
-                    className="text-[11px] font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors shrink-0 ml-2"
-                  >
-                    편집
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <button
+                      onClick={() => openSectorEdit(h)}
+                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                    >
+                      섹터
+                    </button>
+                    <button
+                      onClick={() => openHoldingEdit(h)}
+                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => setHoldingDeleteConfirm(h)}
+                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
               </Card>
             );
@@ -1155,6 +1249,52 @@ export default function AccountDetailPage() {
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onConfirm={(holdings) => handleImportConfirm(holdings)}
+      />
+
+      {/* ─── 종목 수정 바텀시트 ────────────────────────────── */}
+      <BottomSheet
+        open={holdingEditModal}
+        onClose={() => setHoldingEditModal(false)}
+        title={`종목 수정 — ${holdingEditTarget?.name ?? ""}`}
+      >
+        <div className="space-y-4">
+          <Input
+            label="평단가"
+            inputMode={holdingEditTarget?.country !== "KR" ? "decimal" : "numeric"}
+            value={fmtNum(holdingEditPrice)}
+            onChange={(e) => setHoldingEditPrice(stripNum(e.target.value, holdingEditTarget?.country !== "KR"))}
+            placeholder="평균 매수 단가"
+          />
+          <Input
+            label="보유 수량"
+            inputMode="numeric"
+            value={fmtNum(holdingEditQty)}
+            onChange={(e) => setHoldingEditQty(stripNum(e.target.value))}
+            placeholder="보유 주수"
+          />
+          {holdingEditError && (
+            <p className="text-xs text-[var(--color-negative)]">{holdingEditError}</p>
+          )}
+          <Button
+            size="lg"
+            onClick={handleHoldingEditSubmit}
+            disabled={holdingEditSubmitting}
+          >
+            {holdingEditSubmitting ? "저장 중..." : "저장"}
+          </Button>
+        </div>
+      </BottomSheet>
+
+      {/* ─── 종목 삭제 확인 ────────────────────────────────── */}
+      <ConfirmDialog
+        open={holdingDeleteConfirm !== null}
+        title="종목을 삭제할까요?"
+        message={`${holdingDeleteConfirm?.name ?? ""} (${holdingDeleteConfirm?.ticker ?? ""}) 종목이\n삭제되며 복구할 수 없습니다.`}
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={holdingDeleting}
+        onConfirm={handleHoldingDelete}
+        onCancel={() => setHoldingDeleteConfirm(null)}
       />
 
       {/* ─── 섹터 편집 바텀시트 ───────────────────────────── */}
