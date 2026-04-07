@@ -132,8 +132,11 @@ export default function TradesPage() {
   const [stockQuery, setStockQuery] = useState("");
   const [stockResults, setStockResults] = useState<{ ticker: string; name: string; market: string; country?: string }[]>([]);
   const [showStockDropdown, setShowStockDropdown] = useState(false);
+  const [stockActiveIndex, setStockActiveIndex] = useState(-1);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stockSearchRef = useRef<HTMLDivElement>(null);
+  const stockInputRef = useRef<HTMLInputElement>(null);
+  const stockItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // ─── 데이터 로딩 ───────────────────────────────────────
 
@@ -197,11 +200,21 @@ export default function TradesPage() {
     function handleClickOutside(e: MouseEvent) {
       if (stockSearchRef.current && !stockSearchRef.current.contains(e.target as Node)) {
         setShowStockDropdown(false);
+        setStockActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (stockActiveIndex === -1) stockInputRef.current?.focus();
+    else stockItemRefs.current[stockActiveIndex]?.focus();
+  }, [stockActiveIndex]);
+
+  useEffect(() => {
+    setStockActiveIndex(-1);
+  }, [stockResults]);
 
   // draft 필터 변경 (입력 중 — fetch 안 함)
   function handleFilterChange(f: Filters) {
@@ -996,10 +1009,15 @@ export default function TradesPage() {
               ) : (
                 <>
                   <input
+                    ref={stockInputRef}
                     type="text"
                     value={stockQuery}
                     onChange={(e) => handleStockQueryChange(e.target.value)}
                     onFocus={() => { if (stockQuery) setShowStockDropdown(true); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown" && showStockDropdown && stockResults.length > 0) { e.preventDefault(); setStockActiveIndex(0); }
+                      else if (e.key === "Escape") { setShowStockDropdown(false); setStockActiveIndex(-1); }
+                    }}
                     placeholder="종목명 또는 티커 검색"
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A]"
                   />
@@ -1007,12 +1025,19 @@ export default function TradesPage() {
                     <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {stockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
-                          {stockResults.map((s) => (
+                          {stockResults.map((s, i) => (
                             <button
                               key={s.ticker}
+                              ref={(el) => { stockItemRefs.current[i] = el; }}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
+                              onKeyDown={(e) => {
+                                if (e.key === "ArrowDown") { e.preventDefault(); setStockActiveIndex(Math.min(i + 1, stockResults.length - 1)); }
+                                else if (e.key === "ArrowUp") { e.preventDefault(); if (i === 0) setStockActiveIndex(-1); else setStockActiveIndex(i - 1); }
+                                else if (e.key === "Enter") { e.preventDefault(); selectStock(s); }
+                                else if (e.key === "Escape") { setShowStockDropdown(false); setStockActiveIndex(-1); }
+                              }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] focus:bg-[var(--color-g100)] dark:focus:bg-[var(--color-border)] outline-none transition-colors flex items-center justify-between"
                             >
                               <div>
                                 <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">{s.name}</span>

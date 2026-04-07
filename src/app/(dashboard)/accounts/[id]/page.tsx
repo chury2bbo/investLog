@@ -140,8 +140,11 @@ export default function AccountDetailPage() {
   const [hStockQuery, setHStockQuery] = useState("");
   const [hStockResults, setHStockResults] = useState<{ ticker: string; name: string; market: string }[]>([]);
   const [hShowDropdown, setHShowDropdown] = useState(false);
+  const [hActiveIndex, setHActiveIndex] = useState(-1);
   const hSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hStockSearchRef = useRef<HTMLDivElement>(null);
+  const hInputRef = useRef<HTMLInputElement>(null);
+  const hItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const hAvgPriceRef = useRef<HTMLInputElement>(null);
 
   // ─── 데이터 로딩 ───────────────────────────────────────
@@ -212,11 +215,26 @@ export default function AccountDetailPage() {
     function handleClickOutside(e: MouseEvent) {
       if (hStockSearchRef.current && !hStockSearchRef.current.contains(e.target as Node)) {
         setHShowDropdown(false);
+        setHActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // 키보드 드롭다운 포커스 이동
+  useEffect(() => {
+    if (hActiveIndex === -1) {
+      hInputRef.current?.focus();
+    } else {
+      hItemRefs.current[hActiveIndex]?.focus();
+    }
+  }, [hActiveIndex]);
+
+  // 검색 결과 바뀌면 선택 초기화
+  useEffect(() => {
+    setHActiveIndex(-1);
+  }, [hStockResults]);
 
   // ─── 입출금 처리 ───────────────────────────────────────
 
@@ -1099,10 +1117,15 @@ export default function AccountDetailPage() {
               ) : (
                 <>
                   <input
+                    ref={hInputRef}
                     type="text"
                     value={hStockQuery}
                     onChange={(e) => handleHStockQueryChange(e.target.value)}
                     onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
+                      else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                    }}
                     placeholder="종목명 또는 티커 검색 (예: 삼성전자, 005930)"
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
                   />
@@ -1110,12 +1133,19 @@ export default function AccountDetailPage() {
                     <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
-                          {hStockResults.map((s) => (
+                          {hStockResults.map((s, i) => (
                             <button
                               key={s.ticker}
+                              ref={(el) => { hItemRefs.current[i] = el; }}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
+                              onKeyDown={(e) => {
+                                if (e.key === "ArrowDown") { e.preventDefault(); setHActiveIndex(Math.min(i + 1, hStockResults.length - 1)); }
+                                else if (e.key === "ArrowUp") { e.preventDefault(); if (i === 0) setHActiveIndex(-1); else setHActiveIndex(i - 1); }
+                                else if (e.key === "Enter") { e.preventDefault(); selectHStock(s); }
+                                else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                              }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] focus:bg-[var(--color-g100)] dark:focus:bg-[var(--color-border)] outline-none transition-colors flex items-center justify-between"
                             >
                               <div>
                                 <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -1167,10 +1197,15 @@ export default function AccountDetailPage() {
               ) : (
                 <>
                   <input
+                    ref={hInputRef}
                     type="text"
                     value={hStockQuery}
                     onChange={(e) => handleHStockQueryChange(e.target.value)}
                     onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
+                      else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                    }}
                     placeholder="종목명 또는 티커 검색 (예: NVIDIA, NVDA)"
                     className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
                   />
@@ -1178,12 +1213,19 @@ export default function AccountDetailPage() {
                     <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
                         <div className="max-h-48 overflow-y-auto">
-                          {hStockResults.map((s) => (
+                          {hStockResults.map((s, i) => (
                             <button
                               key={s.ticker}
+                              ref={(el) => { hItemRefs.current[i] = el; }}
                               type="button"
                               onMouseDown={(e) => { e.preventDefault(); selectHStock(s); }}
-                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
+                              onKeyDown={(e) => {
+                                if (e.key === "ArrowDown") { e.preventDefault(); setHActiveIndex(Math.min(i + 1, hStockResults.length - 1)); }
+                                else if (e.key === "ArrowUp") { e.preventDefault(); if (i === 0) setHActiveIndex(-1); else setHActiveIndex(i - 1); }
+                                else if (e.key === "Enter") { e.preventDefault(); selectHStock(s); }
+                                else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                              }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] focus:bg-[var(--color-g100)] dark:focus:bg-[var(--color-border)] outline-none transition-colors flex items-center justify-between"
                             >
                               <div>
                                 <span className="text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text)]">
