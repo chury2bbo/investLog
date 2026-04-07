@@ -676,7 +676,7 @@ export default function AccountDetailPage() {
               합산 (원화)
             </div>
             <div className="text-[28px] font-extrabold text-white tracking-tight">
-              {fmtKRW(totalKRW)}
+              ₩{Math.floor(totalKRW).toLocaleString()}
             </div>
           </div>
           <div
@@ -702,12 +702,12 @@ export default function AccountDetailPage() {
           </div>
         </div>
 
-        {/* 평가금 · 매수금 · 예수금 · 합산 테이블 */}
+        {/* 평가금 · 투자원금 · 예수금 · 합산 테이블 */}
         <div className="relative mt-3 space-y-1.5">
           {/* 헤더 */}
           <div className="grid grid-cols-4 gap-1.5">
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>평가금</div>
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>매수금</div>
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>투자원금</div>
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>예수금</div>
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>합산₩</div>
           </div>

@@ -381,24 +381,24 @@ export default function AccountsPage() {
                   </div>
                 </div>
 
-                {/* 매수금 · 예수금 · 평가금 · 합산 */}
+                {/* 평가금 · 투자원금 · 예수금 · 합산 */}
                 <div className="mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)] space-y-2">
                   <div className="grid grid-cols-4 gap-1.5">
-                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">매수금</div>
-                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">예수금</div>
                     <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">평가금</div>
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">투자원금</div>
+                    <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">예수금</div>
                     <div className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">합산₩</div>
                   </div>
                   {(investedKRW > 0 || cashKRW > 0 || evalKRW > 0) && (
                     <div className="grid grid-cols-4 gap-1.5">
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalKRW > 0 ? fmtKRW(evalKRW) : <span className="text-[var(--color-g400)]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {investedKRW > 0 ? fmtKRW(investedKRW) : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {cashKRW > 0 ? fmtKRW(cashKRW) : <span className="text-[var(--color-g400)]">-</span>}
-                      </div>
-                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {evalKRW > 0 ? fmtKRW(evalKRW) : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-positive)]">
                         {fmtKRW(totalKRW)}
@@ -408,13 +408,13 @@ export default function AccountsPage() {
                   {(investedUSD > 0 || cashUSD > 0 || evalUSD > 0) && (
                     <div className="grid grid-cols-4 gap-1.5">
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {investedUSD > 0 ? `$${investedUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
                         {cashUSD > 0 ? `$${cashUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
-                      </div>
-                      <div className="text-xs font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">
-                        {evalUSD > 0 ? `$${evalUSD.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : <span className="text-[var(--color-g400)]">-</span>}
                       </div>
                       {investedKRW === 0 && cashKRW === 0 && evalKRW === 0 && (
                         <div className="text-xs font-bold text-[var(--color-positive)]">

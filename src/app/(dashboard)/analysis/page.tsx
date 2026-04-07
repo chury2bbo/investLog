@@ -24,6 +24,45 @@ import {
   ReferenceLine,
 } from "recharts";
 
+// ─── 용어 설명 툴팁 ─────────────────────────────────────
+
+const TERM_TOOLTIPS: Record<string, string> = {
+  "PER": "주가수익비율. 주가가 1주당 순이익의 몇 배인지 나타내요. 낮을수록 저평가 가능성이 있어요.",
+  "PBR": "주가순자산비율. 주가가 1주당 순자산의 몇 배인지 나타내요. 1 미만이면 장부가보다 싸게 거래 중이에요.",
+  "ROE": "자기자본이익률. 투입한 자본 대비 얼마나 벌었는지 나타내요. 높을수록 경영 효율이 좋아요.",
+  "52주 최고": "최근 1년간 가장 높았던 주가예요. 현재가와 비교해서 고점 대비 위치를 파악할 수 있어요.",
+  "52주 최저": "최근 1년간 가장 낮았던 주가예요. 현재가와 비교해서 바닥 대비 위치를 파악할 수 있어요.",
+  "Fwd PER": "올해 예상 실적 기준 PER이에요. 미래 수익성을 반영하므로 일반 PER보다 실질적이에요.",
+  "MDD": "최대낙폭(Maximum Drawdown). 고점 대비 최대 하락폭이에요. -30%면 최악의 시기에 30% 손실 가능했다는 뜻이에요.",
+};
+
+function TermLabel({ term }: { term: string }) {
+  const [show, setShow] = useState(false);
+  const tooltip = TERM_TOOLTIPS[term];
+  if (!tooltip) return <span>{term}</span>;
+
+  return (
+    <span className="relative inline-flex items-center gap-0.5">
+      {term}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setShow((p) => !p); }}
+        className="w-3.5 h-3.5 rounded-full bg-[var(--color-g200)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] text-[9px] font-bold flex items-center justify-center hover:bg-[var(--color-g300)] transition-colors cursor-pointer shrink-0"
+      >
+        ?
+      </button>
+      {show && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShow(false)} />
+          <div className="absolute left-0 top-full mt-1 z-50 w-52 p-2.5 rounded-xl bg-[var(--color-text)] dark:bg-[var(--color-surface)] text-white dark:text-[var(--color-text)] text-[11px] leading-relaxed shadow-lg">
+            {tooltip}
+          </div>
+        </>
+      )}
+    </span>
+  );
+}
+
 // ─── 타입 ────────────────────────────────────────────────
 
 interface SearchResult {
@@ -507,37 +546,37 @@ export default function AnalysisPage() {
                 {/* 투자 지표 3열 2행 */}
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">PER</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="PER" /></div>
                     <div className="text-sm font-bold text-[var(--color-text)]">
                       {quote.per != null ? quote.per.toFixed(1) : "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">PBR</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="PBR" /></div>
                     <div className="text-sm font-bold text-[var(--color-text)]">
                       {quote.pbr != null ? quote.pbr.toFixed(2) : "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">ROE</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="ROE" /></div>
                     <div className="text-sm font-bold text-[var(--color-text)]">
                       {quote.roe != null ? `${quote.roe.toFixed(1)}%` : "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">52주 최고</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="52주 최고" /></div>
                     <div className="text-sm font-bold text-[var(--color-positive)]">
                       {quote.fiftyTwoWeekHigh != null ? formatPrice(quote.fiftyTwoWeekHigh, selected.country) : "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">52주 최저</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="52주 최저" /></div>
                     <div className="text-sm font-bold text-[var(--color-negative)]">
                       {quote.fiftyTwoWeekLow != null ? formatPrice(quote.fiftyTwoWeekLow, selected.country) : "-"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1">Fwd PER</div>
+                    <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-1"><TermLabel term="Fwd PER" /></div>
                     <div className="text-sm font-bold text-[var(--color-text)]">
                       {quote.forwardPer != null ? quote.forwardPer.toFixed(1) : "-"}
                     </div>
@@ -554,7 +593,10 @@ export default function AnalysisPage() {
       {/* ── ④ MDD 차트 ── */}
       {selected && (
         <div className="mb-4">
-          <SectionTitle title="MDD 차트" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <h2 className="text-[15px] font-bold text-[var(--color-text)]">MDD 차트</h2>
+            <span className="text-[11px] text-[var(--color-g400)]"><TermLabel term="MDD" /></span>
+          </div>
           <Card>
             {/* 기간 입력 */}
             <div className="flex items-center gap-2 mb-4">

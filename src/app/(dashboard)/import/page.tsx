@@ -148,12 +148,12 @@ export default function ImportPage() {
           onClick={() => router.back()}
           className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#F0F4F0] dark:bg-[#2D3D30] hover:bg-[#E8EEE8] dark:hover:bg-[#354035] transition-colors cursor-pointer"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1A221A] dark:text-[#E8EEE8]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1A221A] dark:text-[#E8EEE8]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
             계좌 캡처 불러오기
           </h1>
           <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">
@@ -169,24 +169,24 @@ export default function ImportPage() {
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-[#D4DDD4] dark:border-[#2D3D30] rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#05C072] hover:bg-[#F0FAF5] dark:hover:bg-[#0D2A1D] transition-all"
+            className="border-2 border-dashed border-[#D4DDD4] dark:border-[#2D3D30] rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[var(--color-positive)] hover:bg-[var(--color-primary-soft)] dark:hover:bg-[#0D2A1D] transition-all"
           >
-            <div className="w-14 h-14 rounded-2xl bg-[#E8FAF2] dark:bg-[#0D2A1D] flex items-center justify-center">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D] flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-positive)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8]">
+              <p className="text-sm font-semibold text-[var(--color-text)]">
                 이미지를 드래그하거나 클릭해서 업로드
               </p>
               <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">
                 PNG, JPG, WEBP · 최대 10MB
               </p>
             </div>
-            <div className="px-4 py-2 rounded-xl bg-[#05C072] text-white text-xs font-semibold">
+            <div className="px-4 py-2 rounded-xl bg-[var(--color-positive)] text-white text-xs font-semibold">
               파일 선택
             </div>
           </div>
@@ -198,11 +198,11 @@ export default function ImportPage() {
             onChange={handleFileChange}
           />
           <Card>
-            <p className="text-xs font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3 flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 이렇게 캡처해주세요</p>
+            <p className="text-xs font-bold text-[var(--color-text)] mb-3 flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> 이렇게 캡처해주세요</p>
             <div className="space-y-2">
               {["증권사 앱의 보유 종목 / 잔고 화면을 캡처", "종목명, 수량, 평단가가 모두 보이도록", "여러 화면은 한 장씩 업로드"].map((tip, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-[#E8FAF2] dark:bg-[#0D2A1D] text-[#05C072] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D] text-[var(--color-positive)] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                   <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A]">{tip}</p>
                 </div>
               ))}
@@ -222,9 +222,9 @@ export default function ImportPage() {
           )}
           <Card>
             <div className="flex flex-col items-center py-6 gap-4">
-              <div className="w-12 h-12 rounded-full border-4 border-[#05C072] border-t-transparent animate-spin" />
+              <div className="w-12 h-12 rounded-full border-4 border-[var(--color-positive)] border-t-transparent animate-spin" />
               <div className="text-center">
-                <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">AI가 이미지를 분석 중이에요</p>
+                <p className="text-sm font-bold text-[var(--color-text)]">AI가 이미지를 분석 중이에요</p>
                 <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">잠시만 기다려주세요 (보통 5~10초)</p>
               </div>
             </div>
@@ -243,10 +243,10 @@ export default function ImportPage() {
           )}
 
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#05C072] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-[var(--color-positive)] flex items-center justify-center">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
-            <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">분석 완료 — 내용을 확인하고 수정해주세요</p>
+            <p className="text-sm font-bold text-[var(--color-text)]">분석 완료 — 내용을 확인하고 수정해주세요</p>
           </div>
 
           {/* 예수금 */}
@@ -255,9 +255,9 @@ export default function ImportPage() {
               <p className="text-xs font-bold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2">예수금</p>
               <div className="flex gap-3">
                 {cashBalances.map((c) => (
-                  <div key={c.currency} className="flex-1 bg-[#F5F7F5] dark:bg-[#2D3D30] rounded-xl px-3 py-2">
+                  <div key={c.currency} className="flex-1 bg-[var(--color-bg)] dark:bg-[#2D3D30] rounded-xl px-3 py-2">
                     <p className="text-[10px] text-[#9AA99A] dark:text-[#5A6A5A]">{c.currency}</p>
-                    <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">
+                    <p className="text-sm font-bold text-[var(--color-text)]">
                       {c.currency === "KRW" ? `₩${c.amount.toLocaleString()}` : `$${c.amount}`}
                     </p>
                   </div>
@@ -278,7 +278,7 @@ export default function ImportPage() {
                   key={i}
                   className={`rounded-xl border p-3 transition-colors ${
                     h.checked
-                      ? "border-[#05C072] bg-[#F0FAF5] dark:bg-[#0D2A1D]"
+                      ? "border-[var(--color-positive)] bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]"
                       : "border-[#E8EEE8] dark:border-[#2D3D30] opacity-50"
                   }`}
                 >
@@ -288,9 +288,9 @@ export default function ImportPage() {
                       type="checkbox"
                       checked={h.checked}
                       onChange={(e) => updateHolding(i, "checked", e.target.checked)}
-                      className="accent-[#05C072] w-4 h-4 shrink-0 cursor-pointer"
+                      className="accent-[var(--color-positive)] w-4 h-4 shrink-0 cursor-pointer"
                     />
-                    <span className="text-sm font-semibold text-[#1A221A] dark:text-[#E8EEE8] flex-1 truncate">{h.name}</span>
+                    <span className="text-sm font-semibold text-[var(--color-text)] flex-1 truncate">{h.name}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
                       h.country === "KR"
                         ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
@@ -300,7 +300,7 @@ export default function ImportPage() {
                     </span>
                   </div>
                   {!h.ticker && (
-                    <p className="text-[10px] text-[#F04452] mb-2">종목코드를 인식하지 못해 제외됩니다</p>
+                    <p className="text-[10px] text-[var(--color-negative)] mb-2">종목코드를 인식하지 못해 제외됩니다</p>
                   )}
                   {/* 하단: 평단가 + 수량 입력 */}
                   <div className="grid grid-cols-2 gap-2">
@@ -314,7 +314,7 @@ export default function ImportPage() {
                           if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "avgPrice", raw);
                         }}
                         disabled={!h.checked}
-                        className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                        className="w-full bg-white dark:bg-[var(--color-card)] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-positive)] disabled:opacity-40"
                         placeholder="평단가"
                       />
                     </div>
@@ -328,7 +328,7 @@ export default function ImportPage() {
                           if (raw === "" || /^\d*$/.test(raw)) updateHolding(i, "quantity", raw);
                         }}
                         disabled={!h.checked}
-                        className="w-full bg-white dark:bg-[#1D2720] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[#1A221A] dark:text-[#E8EEE8] focus:outline-none focus:border-[#05C072] disabled:opacity-40"
+                        className="w-full bg-white dark:bg-[var(--color-card)] border border-[#E0E8E0] dark:border-[#2D3D30] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-positive)] disabled:opacity-40"
                         placeholder="수량"
                       />
                     </div>
@@ -348,7 +348,7 @@ export default function ImportPage() {
             <button
               onClick={handleConfirm}
               disabled={!holdings.some((h) => h.checked)}
-              className="flex-1 py-3 rounded-xl bg-[#05C072] text-white text-sm font-bold hover:bg-[#04a862] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-[var(--color-positive)] text-white text-sm font-bold hover:bg-[#04a862] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               {holdings.filter((h) => h.checked).length}종목 {fromOnboarding ? "가져오기" : "등록하기"}
             </button>
@@ -360,20 +360,20 @@ export default function ImportPage() {
       {step === "done" && (
         <Card>
           <div className="flex flex-col items-center py-8 gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#E8FAF2] dark:bg-[#0D2A1D] flex items-center justify-center">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#05C072" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-16 h-16 rounded-full bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D] flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-positive)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6L9 17l-5-5"/>
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8]">완료!</p>
+              <p className="text-base font-bold text-[var(--color-text)]">완료!</p>
               <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-1">
                 {holdings.filter((h) => h.checked).length}개 종목을 불러왔어요
               </p>
             </div>
             <button
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-xl bg-[#1A221A] dark:bg-[#E8EEE8] text-white dark:text-[#1A221A] text-sm font-bold cursor-pointer"
+              className="px-6 py-2.5 rounded-xl bg-[var(--color-text)] dark:bg-[var(--color-g100)] text-white dark:text-[var(--color-text)] text-sm font-bold cursor-pointer"
             >
               확인
             </button>
@@ -381,7 +381,7 @@ export default function ImportPage() {
         </Card>
       )}
       {/* 토스트 */}
-      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[#F04452] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[300] flex items-start gap-3 px-4 py-3 rounded-2xl shadow-xl bg-[var(--color-negative)] min-w-[260px] max-w-[calc(100vw-40px)] transition-all duration-300 ${toast.visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}>
         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>

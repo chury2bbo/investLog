@@ -56,13 +56,13 @@ export function ConfirmDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 pt-5 pb-4">
-          <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">{title}</p>
+          <p className="text-sm font-bold text-[var(--color-text)]">{title}</p>
           <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mt-1.5 leading-relaxed whitespace-pre-line">{message}</p>
         </div>
         <div className="flex border-t border-[#F0F4F0] dark:border-[#2D3D30]">
           <button
             onClick={onCancel}
-            className="flex-1 py-3.5 text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F5F7F5] dark:hover:bg-[#2D3D30] rounded-bl-2xl transition-colors cursor-pointer"
+            className="flex-1 py-3.5 text-sm font-semibold text-[var(--color-g400)] dark:text-[var(--color-muted)] hover:bg-[var(--color-bg)] dark:hover:bg-[var(--color-border)] rounded-bl-2xl transition-colors cursor-pointer"
           >
             {cancelLabel}
           </button>
@@ -72,8 +72,8 @@ export function ConfirmDialog({
             disabled={confirmLoading}
             className={`flex-1 py-3.5 text-sm font-bold rounded-br-2xl transition-colors cursor-pointer disabled:opacity-50 ${
               destructive
-                ? "text-[#F04452] hover:bg-[#FFF0F1] dark:hover:bg-[#3D1519]"
-                : "text-[#05C072] hover:bg-[#F0FAF5] dark:hover:bg-[#0D2A1D]"
+                ? "text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[#3D1519]"
+                : "text-[var(--color-positive)] hover:bg-[var(--color-primary-soft)] dark:hover:bg-[#0D2A1D]"
             }`}
           >
             {confirmLoading ? "처리 중..." : confirmLabel}

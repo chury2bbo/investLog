@@ -1127,7 +1127,7 @@ export default function TradesPage() {
                   title={tag.desc}
                 >
                   {tag.label}
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1A221A] dark:bg-[var(--color-g400)] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[var(--color-text)] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
                 </button>
               ))}
             </div>

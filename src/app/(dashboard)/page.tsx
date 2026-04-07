@@ -93,7 +93,9 @@ const ALLOC_COLORS = {
   cashUSD: "var(--color-g400)",          // #9DAD9D
 };
 
-// ─── 총 자산 추이 더미 데이터 ─────────────────────────────
+// ─── 총 자산 추이 프리뷰용 더미 데이터 ─────────────────────
+// 스냅샷 2개월 미만일 때 배경에 흐리게(25%) 표시되는 장식용 차트 데이터
+// 실제 데이터가 2개월 이상 쌓이면 이 더미 대신 실제 스냅샷으로 차트 표시
 const DUMMY_SNAPSHOTS = [
   { month: "24.11", invested: 3200, evaluated: 3150 },
   { month: "24.12", invested: 3400, evaluated: 3520 },
@@ -118,7 +120,6 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [hoveredStock, setHoveredStock] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult>>({});
-  // TODO: /api/market/quote API 완성 후 실시간 환율 조회로 교체
   const [usdRate, setUsdRate] = useState(1400);
   const [loading, setLoading] = useState(true);
   const [quotesRefreshing, setQuotesRefreshing] = useState(false);
@@ -257,7 +258,6 @@ export default function DashboardPage() {
   }, [loading, accounts, quotes, usdRate, saveAndFetchSnapshots]);
 
   // ─── 환율 새로고침 ──────────────────────────────────────
-  // TODO: /api/market/quote API 완성 후 실제 환율 조회로 교체
 
   async function refreshFx() {
     setFxRefreshing(true);
@@ -653,15 +653,15 @@ export default function DashboardPage() {
         <div className="flex gap-2 mt-5">
           {[
             {
-              label: "국내주식",
+              label: "국내 평가금",
               value: formatCompact(summary.domesticStockValue, "KRW"),
             },
             {
-              label: "해외주식",
+              label: "해외 평가금",
               value: formatCompact(summary.foreignStockValue, "USD"),
             },
             {
-              label: "매수금",
+              label: "투자원금",
               krw: summary.investedKRW > 0 ? formatCompact(summary.investedKRW, "KRW") : null,
               usd: summary.investedUSD > 0 ? `$${summary.investedUSD >= 1000 ? `${(summary.investedUSD / 1000).toFixed(1)}K` : summary.investedUSD.toFixed(0)}` : null,
             },
@@ -1020,8 +1020,8 @@ export default function DashboardPage() {
             style={{
               left: `${parseFloat(left)}px`,
               top: `${parseFloat(top) - 32}px`,
-              backgroundColor: "#fff",
-              color: "#1A221A",
+              backgroundColor: "var(--color-surface)",
+              color: "var(--color-text)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
               border: "1px solid #E4EAE4",
             }}

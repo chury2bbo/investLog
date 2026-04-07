@@ -133,15 +133,15 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
     <div>
       {/* 월간 요약 */}
       <div className="mb-4 px-1">
-        <div className="text-[13px] text-[#6B7B6B] dark:text-[#7A8A7A]">
-          <span className="font-bold text-[#1A221A] dark:text-[#E8EEE8]">{monthLabel}</span>
+        <div className="text-[13px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+          <span className="font-bold text-[var(--color-text)]">{monthLabel}</span>
           {" — "}
-          <span className="text-[#05C072]">매수 {buyCount}회</span>
+          <span className="text-[var(--color-positive)]">매수 {buyCount}회</span>
           {" / "}
           <span className="text-[#F07D05]">매도 {sellCount}회</span>
           {" / "}
           순매수{" "}
-          <span className={netBuy >= 0 ? "text-[#05C072]" : "text-[#F04452]"}>
+          <span className={netBuy >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}>
             {netBuy >= 0 ? "+" : "-"}₩{formatKRW(Math.abs(netBuy))}
           </span>
         </div>
@@ -164,15 +164,15 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               root: "w-full",
               month_grid: "w-full",
               nav: "absolute top-0 left-0 right-0 flex items-center justify-between",
-              button_previous: "p-1.5 rounded-lg hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] cursor-pointer z-10",
-              button_next: "p-1.5 rounded-lg hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] text-[#6B7B6B] dark:text-[#7A8A7A] cursor-pointer z-10",
-              month_caption: "text-[15px] font-bold text-[#1A221A] dark:text-[#E8EEE8] text-center py-1",
+              button_previous: "p-1.5 rounded-lg hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] cursor-pointer z-10",
+              button_next: "p-1.5 rounded-lg hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] cursor-pointer z-10",
+              month_caption: "text-[15px] font-bold text-[var(--color-text)] text-center py-1",
               months: "w-full relative",
               weekdays: "grid grid-cols-7",
               weekday: "text-[11px] font-medium text-[#9AA99A] dark:text-[#5A6A5A] text-center py-2",
               week: "grid grid-cols-7",
               day: "relative text-center py-1",
-              day_button: "w-10 h-10 rounded-lg text-[13px] text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors cursor-pointer mx-auto flex items-center justify-center",
+              day_button: "w-10 h-10 rounded-lg text-[13px] text-[var(--color-text)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer mx-auto flex items-center justify-center",
               today: "font-bold",
               selected: "",
               outside: "text-[#D4DDD4] dark:text-[#3D4D40]",
@@ -189,14 +189,14 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     {...props}
                     className={`w-10 h-10 rounded-lg text-[13px] transition-colors cursor-pointer mx-auto flex items-center justify-center ${
                       isSelected
-                        ? "bg-[#F0F4F0] dark:bg-[#2D3D30] text-[#1A221A] dark:text-[#E8EEE8]"
-                        : "text-[#1A221A] dark:text-[#E8EEE8] hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30]"
+                        ? "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)]"
+                        : "text-[var(--color-text)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)]"
                     }`}
                   >
                     {day.date.getDate()}
                     {(hasBuy || hasSell) && (
                       <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
-                        {hasBuy && <span className="w-1.5 h-1.5 rounded-full bg-[#05C072]" />}
+                        {hasBuy && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-positive)]" />}
                         {hasSell && <span className="w-1.5 h-1.5 rounded-full bg-[#F07D05]" />}
                       </span>
                     )}
@@ -207,10 +207,10 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
           />
 
           {/* 선택된 날짜 매매 리스트 */}
-          <div className="mt-4 border-t border-[#F0F4F0] dark:border-[#2D3D30] pt-4">
+          <div className="mt-4 border-t border-[var(--color-g100)] dark:border-[var(--color-border)] pt-4">
             {selectedDate ? (
               <>
-                <div className="text-[13px] font-bold text-[#1A221A] dark:text-[#E8EEE8] mb-3 px-1">
+                <div className="text-[13px] font-bold text-[var(--color-text)] mb-3 px-1">
                   {selectedDate.slice(5).replace("-", "월 ")}일
                   <span className="ml-1.5 text-[11px] font-medium text-[#9AA99A] dark:text-[#5A6A5A]">
                     {selectedTrades.length}건
@@ -224,7 +224,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                       <div
                         key={t.id}
                         onClick={() => onSelect?.(t as unknown as Trade)}
-                        className="px-1 py-2.5 border-b border-[#F0F4F0] dark:border-[#2D3D30] last:border-0 cursor-pointer active:bg-[var(--color-g100)] dark:active:bg-[var(--color-border)] transition-colors rounded-lg"
+                        className="px-1 py-2.5 border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0 cursor-pointer active:bg-[var(--color-g100)] dark:active:bg-[var(--color-border)] transition-colors rounded-lg"
                       >
                         {/* 1행 */}
                         <div className="flex justify-between items-center mb-1">
@@ -247,11 +247,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                             >
                               {getCountry(t.ticker) === "KR" ? "국내" : "해외"}
                             </span>
-                            <span className="text-[14px] font-medium text-[#1A221A] dark:text-[#E8EEE8] truncate">
+                            <span className="text-[14px] font-medium text-[var(--color-text)] truncate">
                               {t.name}
                             </span>
                           </div>
-                          <span className="text-[14px] font-medium text-[#1A221A] dark:text-[#E8EEE8] shrink-0 ml-2 tabular-nums">
+                          <span className="text-[14px] font-medium text-[var(--color-text)] shrink-0 ml-2 tabular-nums">
                             {formatTotal(t.price, t.quantity, t.ticker)}
                           </span>
                         </div>
