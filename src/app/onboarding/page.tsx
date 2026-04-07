@@ -653,7 +653,7 @@ export default function OnboardingPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setImportAccIdx(accIdx); setImportModalOpen(true); }}
-                    className="text-xs px-2.5 py-1 rounded-lg font-semibold cursor-pointer bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)] hover:opacity-80 transition-opacity flex items-center gap-1"
+                    className="text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)] hover:opacity-80 transition-opacity flex items-center gap-1"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M12 5h.01"/></svg>
                     캡처로 불러오기
@@ -661,8 +661,7 @@ export default function OnboardingPage() {
                 {accounts.length > 1 && (
                   <button
                     onClick={() => removeAccount(accIdx)}
-                    className="text-xs"
-                    style={{ color: "var(--color-negative)" }}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors cursor-pointer"
                   >
                     삭제
                   </button>
@@ -932,8 +931,7 @@ export default function OnboardingPage() {
                       </div>
                       <button
                         onClick={() => removeHolding(accIdx, hIdx)}
-                        className="text-xs"
-                        style={{ color: "var(--color-negative)" }}
+                        className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors cursor-pointer"
                       >
                         삭제
                       </button>

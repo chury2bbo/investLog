@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Logo } from "@/components/ui";
+import Image from "next/image";
+import iconImg from "@/app/icon.png";
 
 // ─── 새 디자인 시스템 컬러 토큰 ─────────────────────────────────
 const T = {
@@ -622,40 +623,20 @@ export default function PreviewPage() {
 
             {/* 로고 비교 */}
             <div>
-              <h2 className="text-[13px] font-bold mb-3" style={{ color: text }}>로고 비교</h2>
+              <h2 className="text-[13px] font-bold mb-3" style={{ color: text }}>로고</h2>
               <Card dark={dark}>
-                <div className="mb-3">
-                  <div className="text-[11px] font-bold mb-2" style={{ color: muted }}>기존 (chart)</div>
-                  <div className="flex items-end gap-4">
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={36} variant="chart" />
-                      <span className="text-[10px]" style={{ color: muted }}>36px</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={48} variant="chart" />
-                      <span className="text-[10px]" style={{ color: muted }}>48px</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={56} variant="chart" />
-                      <span className="text-[10px]" style={{ color: muted }}>56px</span>
-                    </div>
+                <div className="flex items-end gap-4">
+                  <div className="flex flex-col items-center gap-1">
+                    <Image src={iconImg} alt="버텨일지" width={36} height={36} className="rounded-lg" />
+                    <span className="text-[10px]" style={{ color: muted }}>36px</span>
                   </div>
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold mb-2" style={{ color: muted }}>신규 (ant — 버텨일지)</div>
-                  <div className="flex items-end gap-4">
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={44} variant="ant" />
-                      <span className="text-[10px]" style={{ color: muted }}>44px</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={64} variant="ant" />
-                      <span className="text-[10px]" style={{ color: muted }}>64px</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <Logo size={100} variant="ant" />
-                      <span className="text-[10px]" style={{ color: muted }}>100px</span>
-                    </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <Image src={iconImg} alt="버텨일지" width={48} height={48} className="rounded-xl" />
+                    <span className="text-[10px]" style={{ color: muted }}>48px</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <Image src={iconImg} alt="버텨일지" width={56} height={56} className="rounded-xl" />
+                    <span className="text-[10px]" style={{ color: muted }}>56px</span>
                   </div>
                 </div>
               </Card>

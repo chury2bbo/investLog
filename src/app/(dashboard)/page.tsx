@@ -630,9 +630,18 @@ export default function DashboardPage() {
                 <div className="text-sm font-bold text-white">{item.value}</div>
               ) : (
                 <div>
-                  {item.krw && <div className="text-sm font-bold text-white leading-tight">{item.krw}</div>}
-                  {item.usd && <div className="text-xs font-semibold leading-tight" style={{ color: "rgba(255,255,255,0.75)" }}>{item.usd}</div>}
-                  {!item.krw && !item.usd && <div className="text-sm font-bold text-white">-</div>}
+                  {item.krw && item.usd ? (
+                    <>
+                      <div className="text-[13px] font-bold text-white leading-tight">{item.krw}</div>
+                      <div className="text-[13px] font-bold text-white leading-tight">{item.usd}</div>
+                    </>
+                  ) : item.krw ? (
+                    <div className="text-sm font-bold text-white">{item.krw}</div>
+                  ) : item.usd ? (
+                    <div className="text-sm font-bold text-white">{item.usd}</div>
+                  ) : (
+                    <div className="text-sm font-bold text-white">-</div>
+                  )}
                 </div>
               )}
             </div>
@@ -671,11 +680,19 @@ export default function DashboardPage() {
               {s.label}
             </div>
             <div
-              className="text-[12px] md:text-[15px] font-extrabold tracking-tight leading-tight"
+              className="flex items-center gap-1 text-[12px] md:text-[15px] font-extrabold tracking-tight leading-tight"
               style={{
                 color: s.color ?? undefined,
               }}
             >
+              {s.color && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" stroke={s.color} className="shrink-0">
+                  {s.color === "var(--color-positive)"
+                    ? <><path d="M7 17L17 7" /><path d="M7 7h10v10" /></>
+                    : <><path d="M7 7l10 10" /><path d="M17 7v10H7" /></>
+                  }
+                </svg>
+              )}
               <span className={s.color ? "" : "text-[var(--color-text)] dark:text-[var(--color-text)]"}>
                 {s.value}
               </span>
@@ -729,17 +746,26 @@ export default function DashboardPage() {
 
       {/* ── 총 자산 추이 차트 ── */}
       <div className="mt-4">
-        <SectionTitle title="총 자산 추이" />
-        <Card>
-          {/* 안내 문구 */}
-          <div className="flex items-center gap-1.5 mb-4">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
+        <div className="flex items-center gap-2 mb-3 min-h-[28px]">
+          <h2 className="text-[13px] font-bold text-[var(--color-text)]">총 자산 추이</h2>
+          {snapshots.length < 2 && (
             <span className="text-[11px] text-[var(--color-g400)]">
-              대시보드 접속 시 월별 자산이 자동으로 기록됩니다
+              · {snapshots.length === 1 ? "다음 달부터 추이가 표시돼요" : "매월 접속 시 자동 기록돼요"}
             </span>
-          </div>
+          )}
+        </div>
+        <Card>
+          {/* 안내 문구 — 데이터 충분할 때만 */}
+          {snapshots.length >= 2 && (
+            <div className="flex items-center gap-1.5 mb-4">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <span className="text-[11px] text-[var(--color-g400)]">
+                대시보드 접속 시 월별 자산이 자동으로 기록됩니다
+              </span>
+            </div>
+          )}
 
           {/* 범례 */}
           <div className="flex items-center gap-4 mb-3">
@@ -767,23 +793,19 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           ) : (
             <div className="relative">
-              <div style={{ opacity: 0.35 }}>
-                <ResponsiveContainer width="100%" height={180}>
+              <div style={{ opacity: 0.25 }}>
+                <ResponsiveContainer width="100%" height={100}>
                   <LineChart data={DUMMY_SNAPSHOTS} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => `${v}만`} axisLine={false} tickLine={false} />
-                    <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3 }} />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={false} axisLine={false} tickLine={false} />
+                    <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 2 }} />
+                    <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 2 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" />
-                </svg>
-                <p className="text-sm font-medium text-[var(--color-g500)]">데이터 수집 중</p>
-                <p className="text-[11px] text-[var(--color-g400)]">{snapshots.length === 1 ? "다음 달부터 추이를 볼 수 있어요" : "접속할 때마다 자산이 기록돼요"}</p>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-xs text-[var(--color-g400)]">{snapshots.length === 1 ? "다음 달부터 추이를 볼 수 있어요" : "접속할 때마다 자산이 기록돼요"}</p>
               </div>
             </div>
           )}

@@ -11,6 +11,7 @@ import {
   LoadingSpinner,
   EmptyState,
   BottomSheet,
+  ConfirmDialog,
 } from "@/components/ui";
 import { TradeFilterCard } from "./_components/TradeFilterCard";
 import { TradesTable } from "./_components/TradesTable";
@@ -861,39 +862,16 @@ export default function TradesPage() {
       </BottomSheet>
 
       {/* 매매 삭제 확인 모달 */}
-      {detailDeleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDetailDeleteConfirm(false)} />
-          <div className="relative bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)] rounded-2xl p-6 w-[340px] max-w-[90vw]">
-            <div className="text-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] flex items-center justify-center mx-auto mb-3">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-negative)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                </svg>
-              </div>
-              <h3 className="text-base font-bold text-[var(--color-text)] mb-1">매매 기록을 삭제할까요?</h3>
-              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-                이 매매 기록은 삭제되며 복구할 수 없습니다.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setDetailDeleteConfirm(false)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-text)] cursor-pointer"
-              >
-                취소
-              </button>
-              <button
-                onClick={deleteDetail}
-                disabled={detailDeleting}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[var(--color-negative)] text-white cursor-pointer disabled:opacity-50"
-              >
-                {detailDeleting ? "삭제 중..." : "삭제"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={detailDeleteConfirm}
+        title="매매 기록을 삭제할까요?"
+        message="이 매매 기록은 삭제되며 복구할 수 없습니다."
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={detailDeleting}
+        onConfirm={deleteDetail}
+        onCancel={() => setDetailDeleteConfirm(false)}
+      />
 
       {/* ══════════════════════════════════════════════════ */}
       {/* 매매 등록 바텀시트 (공용) */}
@@ -1157,35 +1135,14 @@ export default function TradesPage() {
       </BottomSheet>
 
       {/* 예수금 부족 확인 모달 */}
-      {cashConfirmOpen && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40">
-          <div className="bg-[var(--color-surface)] dark:bg-[var(--color-card)] rounded-2xl p-6 mx-5 max-w-sm w-full" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-[#FFF3E8] flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F07D05" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              </div>
-              <span className="text-[15px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">예수금 부족</span>
-            </div>
-            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] whitespace-pre-line mb-5">
-              {cashConfirmMsg}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCashConfirmOpen(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => { setCashConfirmOpen(false); doSubmit(); }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-primary)] text-white transition-colors"
-              >
-                등록
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={cashConfirmOpen}
+        title="예수금 부족"
+        message={cashConfirmMsg}
+        confirmLabel="등록"
+        onConfirm={() => { setCashConfirmOpen(false); doSubmit(); }}
+        onCancel={() => setCashConfirmOpen(false)}
+      />
     </>
   );
 }

@@ -12,4 +12,3 @@ export { BottomSheet } from "./BottomSheet";
 export { Toast } from "./Toast";
 export { ThemeToggle } from "./ThemeToggle";
 export { ConfirmDialog } from "./ConfirmDialog";
-export { Logo } from "./Logo";

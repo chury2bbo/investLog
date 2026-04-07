@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
@@ -23,16 +25,34 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  if (!open) return null;
+  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimating(true)));
+    } else {
+      setAnimating(false);
+      const timer = setTimeout(() => setVisible(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!visible) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[400] flex items-center justify-center px-6"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      className="fixed inset-0 z-[400] flex items-center justify-center px-6 transition-opacity duration-200"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)", opacity: animating ? 1 : 0 }}
       onClick={onCancel}
     >
       <div
-        className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-xs shadow-2xl"
+        className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-xs shadow-2xl transition-all duration-200"
+        style={{
+          transform: animating ? "scale(1)" : "scale(0.85)",
+          opacity: animating ? 1 : 0,
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 pt-5 pb-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Card, ConfirmDialog } from "@/components/ui";
+import { Card, ConfirmDialog, BottomSheet } from "@/components/ui";
 
 interface EditableHolding {
   ticker: string;
@@ -131,8 +131,6 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
     setHoldings((prev) => prev.map((h, idx) => idx === i ? { ...h, [field]: value } : h));
   }
 
-  if (!open) return null;
-
   return (
     <>
       <ConfirmDialog
@@ -163,23 +161,9 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
-    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={handleClose}>
-      <div className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0 border-b border-[#F0F4F0] dark:border-[#2D3D30]">
-          <div>
-            <h2 className="text-base font-bold text-[#1A221A] dark:text-[#E8EEE8]">계좌 캡처 불러오기</h2>
-            <p className="text-xs text-[#9AA99A] dark:text-[#5A6A5A] mt-0.5">증권사 앱 잔고 화면을 캡처해서 업로드하세요</p>
-          </div>
-          <button onClick={handleClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-[#F0F4F0] dark:bg-[#2D3D30] cursor-pointer shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#6B7B6B]">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* 본문 */}
-        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+      <BottomSheet open={open} onClose={handleClose} title="계좌 캡처 불러오기">
+        <p className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] -mt-2 mb-4">증권사 앱 잔고 화면을 캡처해서 업로드하세요</p>
+        <div className="space-y-4">
 
           {/* 업로드 */}
           {step === "upload" && (
@@ -336,8 +320,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
             </>
           )}
         </div>
-      </div>
-    </div>
+      </BottomSheet>
     </>
   );
 }
