@@ -15,6 +15,7 @@ import {
   ConfirmDialog,
   ThemeToggle,
 } from "@/components/ui";
+import SectorDonutChart from "@/components/SectorDonutChart";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ interface Holding {
   country: string;
   avgPrice: number;
   quantity: number;
+  sectorAuto: string | null;
+  sectorManual: string | null;
 }
 
 interface AccountData {
@@ -254,7 +257,7 @@ export default function AccountsPage() {
   // ─── 렌더 ──────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
+    <div className="w-full max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -275,6 +278,10 @@ export default function AccountsPage() {
         </div>
       </div>
 
+      {/* PC: 2단 레이아웃 (좌: 계좌목록, 우: 차트) / 모바일: 세로 */}
+      <div className="md:flex md:gap-6">
+        {/* 좌측: 계좌 목록 */}
+        <div className="md:flex-1 md:min-w-0">
       {/* 계좌 목록 */}
       {accounts.length === 0 ? (
         <EmptyState message="아직 등록된 계좌가 없어요. 계좌를 추가해보세요." />
@@ -418,6 +425,94 @@ export default function AccountsPage() {
           })}
         </div>
       )}
+        </div>
+
+        {/* 우측(PC) / 하단(모바일): 차트 */}
+        {accounts.length > 0 && accounts.some((a) => a.holdings.length > 0) && (
+          <div className="mt-6 md:mt-0 md:w-[340px] md:shrink-0 space-y-3 md:sticky md:top-6 md:self-start">
+            {/* 계좌별 자산 비율 가로 막대 */}
+            <Card>
+              <h2 className="text-[15px] font-bold mb-4 text-[var(--color-text)]">계좌별 비율</h2>
+              {(() => {
+                const COLORS = ["#05C072", "#4285F4", "#F07D05", "#8B5CF6", "#EC4899", "#06B6D4"];
+                const accTotals = accounts.map((acc) => {
+                  const cashKRW = acc.cashBalances.find((c) => c.currency === "KRW")?.amount ?? 0;
+                  const cashUSD = acc.cashBalances.find((c) => c.currency === "USD")?.amount ?? 0;
+                  let evalKRW = 0;
+                  let evalUSD = 0;
+                  acc.holdings.forEach((h) => {
+                    const quote = quotes[h.ticker];
+                    const curPrice = quote?.price || h.avgPrice;
+                    if (h.country !== "KR") evalUSD += curPrice * h.quantity;
+                    else evalKRW += curPrice * h.quantity;
+                  });
+                  return {
+                    label: acc.brokerageCompany.name + (acc.memo ? ` ${acc.memo}` : ""),
+                    total: evalKRW + evalUSD * usdRate + cashKRW + cashUSD * usdRate,
+                  };
+                });
+                const grandTotal = accTotals.reduce((s, a) => s + a.total, 0);
+                if (grandTotal === 0) return null;
+
+                const maxTotal = Math.max(...accTotals.map((a) => a.total));
+
+                return (
+                  <div className="space-y-4">
+                    {accTotals.map((a, i) => {
+                      const pct = ((a.total / grandTotal) * 100).toFixed(1);
+                      const barWidth = maxTotal > 0 ? (a.total / maxTotal) * 100 : 0;
+                      return (
+                        <div key={i} className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[13px] font-medium text-[var(--color-text)]">{a.label}</span>
+                            <span className="text-[13px] font-bold" style={{ color: COLORS[i % COLORS.length] }}>
+                              {pct}%
+                            </span>
+                          </div>
+                          <div className="w-full h-5 rounded-lg overflow-hidden bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                            <div
+                              className="h-full rounded-lg transition-all"
+                              style={{
+                                width: `${barWidth}%`,
+                                backgroundColor: COLORS[i % COLORS.length],
+                                opacity: 0.85,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </Card>
+
+            {/* 섹터별 도넛 차트 */}
+            <Card>
+              <h2 className="text-[15px] font-bold mb-3 text-[var(--color-text)]">전체 섹터 분포</h2>
+              <SectorDonutChart
+                holdings={accounts.flatMap((acc) =>
+                  acc.holdings.map((h) => {
+                    const quote = quotes[h.ticker];
+                    const isForeign = h.country !== "KR";
+                    return {
+                      ticker: h.ticker,
+                      name: h.name,
+                      country: h.country,
+                      avgPrice: h.avgPrice,
+                      quantity: h.quantity,
+                      sectorAuto: h.sectorAuto,
+                      sectorManual: h.sectorManual,
+                      currentPrice: quote?.price,
+                      exchangeRate: isForeign ? usdRate : 1,
+                    };
+                  })
+                )}
+              />
+            </Card>
+          </div>
+        )}
+      </div>
 
       {/* 계좌 추가 바텀시트 */}
       <BottomSheet

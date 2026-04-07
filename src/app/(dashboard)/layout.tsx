@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { ThemeToggle, Logo } from "@/components/ui";
+import { ThemeToggle } from "@/components/ui";
+import Image from "next/image";
+import iconImg from "@/app/icon.png";
 
 // ─── 네비 아이콘 (lucide 스타일) ────────────────────────────
 
@@ -60,7 +62,7 @@ function IconSidebar() {
   return (
     <div className="hidden md:flex w-16 shrink-0 flex-col items-center py-[18px] sticky top-0 h-screen border-r bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)] z-40">
       {/* 로고 */}
-      <div className="mb-7"><Logo size={36} /></div>
+      <div className="mb-7"><Image src={iconImg} alt="버텨일지" width={36} height={36} className="rounded-lg" /></div>
 
       {/* 네비 아이템 */}
       <div className="flex-1 flex flex-col gap-1 w-full">

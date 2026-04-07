@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoadingSpinner, Input, Logo } from "@/components/ui";
+import { LoadingSpinner, Input } from "@/components/ui";
+import Image from "next/image";
+import iconImg from "@/app/icon.png";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,7 +67,7 @@ export default function LoginPage() {
         {/* 로고 */}
         <div className="text-center mb-10">
           <div className="mx-auto mb-3 flex justify-center">
-            <Logo size={56} />
+            <Image src={iconImg} alt="버텨일지" width={56} height={56} className="rounded-xl" />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-(--color-text)">
             버텨일지

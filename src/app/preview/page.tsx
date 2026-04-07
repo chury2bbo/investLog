@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Logo } from "@/components/ui";
 
 // ─── 새 디자인 시스템 컬러 토큰 ─────────────────────────────────
@@ -770,6 +770,371 @@ export default function PreviewPage() {
       >
         <Icon d={Icons.plus} size={22} color="white" strokeWidth={2.5} />
       </button>
+    </div>
+  );
+}
+
+// ─── 팝업 프리뷰 페이지 ─────────────────────────────────────
+
+function BottomSheetPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimating(true)));
+    } else {
+      setAnimating(false);
+      const timer = setTimeout(() => setVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center">
+      <div
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{ backgroundColor: "rgba(0,0,0,0.4)", opacity: animating ? 1 : 0 }}
+        onClick={onClose}
+      />
+      {/* 모바일: 바텀시트 슬라이드업 / PC: 중앙 팝업 스케일 */}
+      <div
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-[#1D2720] dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
+        style={{
+          maxHeight: "85vh",
+          transform: animating
+            ? "translateY(0) scale(1)"
+            : "translateY(100%) scale(0.95)",
+          opacity: animating ? 1 : 0,
+        }}
+      >
+        {/* 드래그 핸들 (모바일) */}
+        <div className="flex justify-center pt-3 pb-1 md:hidden">
+          <div className="w-9 h-1 rounded-full bg-[#C8D1C8] dark:bg-[#3D5040]" />
+        </div>
+        <div className="overflow-y-auto max-h-[calc(85vh-20px)] p-6">
+          <h3 className="text-base font-bold mb-5 text-[#1A221A] dark:text-[#DCE8DC]">
+            매매 등록
+          </h3>
+          {/* 매매 등록 데모 폼 */}
+          <div className="space-y-5">
+            {/* 계좌 선택 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">계좌</label>
+              <div className="border-b-2 border-[#E3E8E3] dark:border-[#2A3828] pb-2 text-sm text-[#1A221A] dark:text-[#DCE8DC]">키움증권 (연금저축)</div>
+            </div>
+            {/* 매매일 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">매매일</label>
+              <div className="border-b-2 border-[#E3E8E3] dark:border-[#2A3828] pb-2 text-sm text-[#1A221A] dark:text-[#DCE8DC]">2026-04-07</div>
+            </div>
+            {/* 매수/매도 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">유형</label>
+              <div className="flex gap-2">
+                <div className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center text-white" style={{ backgroundColor: "#F04452" }}>매수</div>
+                <div className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center text-[#9DAD9D] border border-[#E3E8E3] dark:border-[#2A3828]">매도</div>
+              </div>
+            </div>
+            {/* 종목 검색 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">종목</label>
+              <div className="border-b-2 border-[#05C072] pb-2 text-sm text-[#1A221A] dark:text-[#DCE8DC]">삼성전자 (005930)</div>
+            </div>
+            {/* 가격 / 수량 */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">매수가</label>
+                <div className="border-b-2 border-[#E3E8E3] dark:border-[#2A3828] pb-2 text-sm text-[#1A221A] dark:text-[#DCE8DC]">72,000</div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">수량</label>
+                <div className="border-b-2 border-[#E3E8E3] dark:border-[#2A3828] pb-2 text-sm text-[#1A221A] dark:text-[#DCE8DC]">10</div>
+              </div>
+            </div>
+            {/* 매매 이유 태그 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2 block">매매 이유</label>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#E6F7EF] text-[#16754A] border border-[#05C072]">실적호조</span>
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3F0] text-[#6B7B6B] dark:bg-[#2A3828] dark:text-[#7A8A7A]">분할매수</span>
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3F0] text-[#6B7B6B] dark:bg-[#2A3828] dark:text-[#7A8A7A]">지인추천</span>
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3F0] text-[#6B7B6B] dark:bg-[#2A3828] dark:text-[#7A8A7A]">신규진입</span>
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3F0] text-[#6B7B6B] dark:bg-[#2A3828] dark:text-[#7A8A7A]">기술적반등</span>
+                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0F3F0] text-[#6B7B6B] dark:bg-[#2A3828] dark:text-[#7A8A7A]">저가매수</span>
+              </div>
+            </div>
+            {/* 심리 상태 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-2 block">심리 상태</label>
+              <div className="flex gap-3 justify-center">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl opacity-40">😰</span>
+                  <span className="text-[10px] text-[#9DAD9D]">불안</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl opacity-40">😐</span>
+                  <span className="text-[10px] text-[#9DAD9D]">보통</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl">😊</span>
+                  <span className="text-[10px] text-[#05C072] font-semibold">확신</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl opacity-40">🤩</span>
+                  <span className="text-[10px] text-[#9DAD9D]">흥분</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl opacity-40">😱</span>
+                  <span className="text-[10px] text-[#9DAD9D]">공포</span>
+                </div>
+              </div>
+            </div>
+            {/* 메모 */}
+            <div>
+              <label className="text-xs font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] mb-1.5 block">메모</label>
+              <div className="border-b-2 border-[#E3E8E3] dark:border-[#2A3828] pb-2 text-sm text-[#9DAD9D]">매매 메모를 입력하세요 (선택)</div>
+            </div>
+            {/* 등록 버튼 */}
+            <button
+              onClick={onClose}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+              style={{ backgroundColor: "#05C072" }}
+            >
+              매매 등록
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDialogPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimating(true)));
+    } else {
+      setAnimating(false);
+      const timer = setTimeout(() => setVisible(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[400] flex items-center justify-center px-6 transition-opacity duration-200"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)", opacity: animating ? 1 : 0 }}
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-xs shadow-2xl transition-all duration-200"
+        style={{
+          transform: animating ? "scale(1)" : "scale(0.9)",
+          opacity: animating ? 1 : 0,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 pt-5 pb-4">
+          <p className="text-sm font-bold text-[#1A221A] dark:text-[#E8EEE8]">계좌를 삭제할까요?</p>
+          <p className="text-xs text-[#6B7B6B] dark:text-[#7A8A7A] mt-1.5 leading-relaxed">
+            키움증권 계좌의 보유 종목, 매매 기록, 예수금이{"\n"}모두 삭제되며 복구할 수 없습니다.
+          </p>
+        </div>
+        <div className="flex border-t border-[#F0F4F0] dark:border-[#2D3D30]">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3.5 text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F5F7F5] dark:hover:bg-[#2D3D30] rounded-bl-2xl transition-colors cursor-pointer"
+          >
+            취소
+          </button>
+          <div className="w-px bg-[#F0F4F0] dark:bg-[#2D3D30]" />
+          <button
+            onClick={onClose}
+            className="flex-1 py-3.5 text-sm font-bold text-[#F04452] hover:bg-[#FFF0F1] dark:hover:bg-[#3D1519] rounded-br-2xl transition-colors cursor-pointer"
+          >
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImportModalPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnimating(true)));
+    } else {
+      setAnimating(false);
+      const timer = setTimeout(() => setVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center">
+      <div
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{ backgroundColor: "rgba(0,0,0,0.4)", opacity: animating ? 1 : 0 }}
+        onClick={onClose}
+      />
+      <div
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-[#1D2720] dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
+        style={{
+          maxHeight: "85vh",
+          transform: animating
+            ? "translateY(0) scale(1)"
+            : "translateY(100%) scale(0.95)",
+          opacity: animating ? 1 : 0,
+        }}
+      >
+        <div className="flex justify-center pt-3 pb-1 md:hidden">
+          <div className="w-9 h-1 rounded-full bg-[#C8D1C8] dark:bg-[#3D5040]" />
+        </div>
+        <div className="overflow-y-auto max-h-[85vh] p-6">
+          <h3 className="text-base font-bold mb-4 text-[#1A221A] dark:text-[#DCE8DC]">
+            계좌 캡처 불러오기
+          </h3>
+          {/* 데모 업로드 영역 */}
+          <div className="border-2 border-dashed border-[#E3E8E3] dark:border-[#2A3828] rounded-2xl p-8 text-center">
+            <div className="text-3xl mb-2">📸</div>
+            <p className="text-sm font-medium text-[#1A221A] dark:text-[#DCE8DC]">증권사 앱 캡처 이미지</p>
+            <p className="text-xs text-[#9DAD9D] dark:text-[#5C7A5C] mt-1">탭하여 사진을 선택하세요</p>
+          </div>
+          <p className="text-[11px] text-[#9DAD9D] dark:text-[#5C7A5C] mt-3 text-center">
+            AI가 종목·수량·평균단가를 자동으로 인식합니다
+          </p>
+          <button
+            onClick={onClose}
+            className="w-full mt-5 py-3.5 rounded-xl text-sm font-semibold text-white"
+            style={{ backgroundColor: "#05C072" }}
+          >
+            분석 시작
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PopupPreviewPage() {
+  const [bottomSheet, setBottomSheet] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(false);
+  const [importModal, setImportModal] = useState(false);
+
+  return (
+    <div className="min-h-screen px-5 py-10 bg-[#F2F4F2] dark:bg-[#0D1210]">
+      <div className="max-w-lg mx-auto">
+        <h1 className="text-2xl font-extrabold mb-2 text-[#1A221A] dark:text-[#DCE8DC]">
+          팝업 프리뷰
+        </h1>
+        <p className="text-sm text-[#6B7B6B] dark:text-[#7A8A7A] mb-8">
+          3가지 팝업 형태를 확인하세요. 모바일 크기로 줄여서 테스트해보세요.
+        </p>
+
+        <div className="space-y-3">
+          {/* 1. BottomSheet */}
+          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">BottomSheet</h3>
+                <p className="text-xs text-[#9DAD9D] dark:text-[#5C7A5C] mt-0.5">
+                  폼 입력용 · 모바일 슬라이드업 / PC 중앙 팝업 · 스크롤 지원
+                </p>
+              </div>
+              <button
+                onClick={() => setBottomSheet(true)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white cursor-pointer"
+                style={{ backgroundColor: "#05C072" }}
+              >
+                열기
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">계좌 추가</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">계좌 수정</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">종목 등록</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">입출금</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">매매 등록</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">매매 상세</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E6F7EF] text-[#16754A]">섹터 편집</span>
+            </div>
+          </div>
+
+          {/* 2. ConfirmDialog */}
+          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">ConfirmDialog</h3>
+                <p className="text-xs text-[#9DAD9D] dark:text-[#5C7A5C] mt-0.5">
+                  확인/경고용 · 중앙 페이드인
+                </p>
+              </div>
+              <button
+                onClick={() => setConfirmDialog(true)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white cursor-pointer"
+                style={{ backgroundColor: "#F04452" }}
+              >
+                열기
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF0F1] text-[#F04452]">계좌 삭제</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF0F1] text-[#F04452]">매매 삭제</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF0F1] text-[#F04452]">회원 탈퇴</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF5E6] text-[#FF7B00]">예수금 부족</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FFF5E6] text-[#FF7B00]">동일 이미지</span>
+            </div>
+          </div>
+
+          {/* 3. ImportModal */}
+          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">ImportModal</h3>
+                <p className="text-xs text-[#9DAD9D] dark:text-[#5C7A5C] mt-0.5">
+                  캡처 불러오기 · BottomSheet 기반 통일
+                </p>
+              </div>
+              <button
+                onClick={() => setImportModal(true)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white cursor-pointer"
+                style={{ backgroundColor: "#4285F4" }}
+              >
+                열기
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E8F0FE] text-[#4285F4]">계좌 캡처 불러오기</span>
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#E8F0FE] text-[#4285F4]">온보딩 캡처</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-[#9DAD9D] dark:text-[#5C7A5C] mt-6 text-center">
+          브라우저 크기를 모바일(~768px) / PC로 변경하며 확인해보세요
+        </p>
+      </div>
+
+      <BottomSheetPreview open={bottomSheet} onClose={() => setBottomSheet(false)} />
+      <ConfirmDialogPreview open={confirmDialog} onClose={() => setConfirmDialog(false)} />
+      <ImportModalPreview open={importModal} onClose={() => setImportModal(false)} />
     </div>
   );
 }
