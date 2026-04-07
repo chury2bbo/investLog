@@ -45,18 +45,7 @@ interface TradeItem {
 }
 
 
-const REASON_TAGS = [
-  { label: "실적호조", desc: "실적 개선 기대" },
-  { label: "저평가", desc: "내재가치 대비 할인" },
-  { label: "기술적분석", desc: "차트·지표 기반" },
-  { label: "배당목적", desc: "배당 수익 목적" },
-  { label: "성장주", desc: "장기 성장 기대" },
-  { label: "테마·트렌드", desc: "산업 트렌드 수혜" },
-  { label: "분할매수", desc: "나눠서 매수" },
-  { label: "포트리밸런싱", desc: "비중 조절" },
-  { label: "뉴스·공시", desc: "뉴스/공시 반응" },
-  { label: "지인추천", desc: "추천 받아 매수" },
-];
+import { BUY_REASON_TAGS, SELL_REASON_TAGS } from "@/lib/constants";
 
 // ─── 종목 검색 컴포넌트 ──────────────────────────────────
 
@@ -871,7 +860,7 @@ export default function OnboardingPage() {
                         태그
                       </label>
                       <div className="flex flex-wrap gap-1.5">
-                        {REASON_TAGS.map((tag) => (
+                        {BUY_REASON_TAGS.map((tag) => (
                           <button
                             key={tag.label}
                             type="button"
@@ -1028,7 +1017,7 @@ export default function OnboardingPage() {
             {(["BUY", "SELL"] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => setTrade((prev) => ({ ...prev, type: t }))}
+                onClick={() => setTrade((prev) => ({ ...prev, type: t, reasonTags: [] }))}
                 className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
                 style={{
                   backgroundColor:
@@ -1110,7 +1099,7 @@ export default function OnboardingPage() {
               이 태그들이 쌓이면 나만의 투자성향을 분석해줘요
             </p>
             <div className="flex flex-wrap gap-2">
-              {REASON_TAGS.map((tag) => {
+              {(trade.type === "BUY" ? BUY_REASON_TAGS : SELL_REASON_TAGS).map((tag) => {
                 const selected = trade.reasonTags.includes(tag.label);
                 return (
                   <button

@@ -160,8 +160,9 @@ export default function AccountDetailPage() {
       if (!acc) return;
 
       // 매매 이력 조회
-      const tradesRes = await fetch(`/api/trades?accountId=${accountId}`);
-      const trades = tradesRes.ok ? await tradesRes.json() : [];
+      const tradesRes = await fetch(`/api/trades?accountId=${accountId}&take=5`);
+      const tradesJson = tradesRes.ok ? await tradesRes.json() : [];
+      const trades = Array.isArray(tradesJson) ? tradesJson : tradesJson.data ?? [];
 
       // 입출금 이력 조회
       const cashLogsRes = await fetch(`/api/cash?accountId=${accountId}`);
@@ -169,7 +170,7 @@ export default function AccountDetailPage() {
 
       const accountData = {
         ...acc,
-        tradeLogs: Array.isArray(trades) ? trades.slice(0, 5) : [],
+        tradeLogs: trades.slice(0, 5),
         cashLogs: Array.isArray(cashLogs) ? cashLogs : [],
       };
       setAccount(accountData);

@@ -58,14 +58,39 @@ interface StatsData {
   holdingRanges?: HoldingRange[];
 }
 
+interface InvestorScore {
+  profitability: number;
+  discipline: number;
+  riskManagement: number;
+  consistency: number;
+}
+
 interface AiReport {
   investorType: string;
   typeDescription: string;
+  investorScore: InvestorScore;
   goodPatterns: string[];
   badPatterns: string[];
-  recommendations: string[];
+  dangerSignals: string[];
+  sectorAnalysis: string;
   emotionAnalysis: string;
+  tradingStyleAnalysis: string;
+  recommendations: string[];
+  monthlyTrend: string;
   summary: string;
+}
+
+interface ReportMeta {
+  periodMonths: number;
+  totalTrades: number;
+  buyCount: number;
+  sellCount: number;
+  matchedCount: number;
+  winRate: number;
+  avgPnl: number;
+  avgHoldingDays: number;
+  tradesPerWeek: number;
+  holdingCount: number;
 }
 
 // ─── 감정 이모지 매핑 ───────────────────────────────────
@@ -85,6 +110,7 @@ export default function PersonalityPage() {
   const [loading, setLoading] = useState(true);
 
   const [report, setReport] = useState<AiReport | null>(null);
+  const [reportMeta, setReportMeta] = useState<ReportMeta | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportRemaining, setReportRemaining] = useState<number | null>(null);
   const [reportError, setReportError] = useState("");
@@ -125,6 +151,7 @@ export default function PersonalityPage() {
       }
 
       setReport(data.report);
+      if (data.meta) setReportMeta(data.meta);
       if (data.remaining !== undefined) setReportRemaining(data.remaining);
     } catch {
       setReportError("네트워크 오류가 발생했습니다.");
@@ -405,15 +432,64 @@ export default function PersonalityPage() {
             </div>
           </Card>
 
+          {/* 분석 메타 정보 */}
+          {reportMeta && (
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "분석 기간", value: `${reportMeta.periodMonths}개월` },
+                { label: "승률", value: `${reportMeta.winRate}%`, color: reportMeta.winRate >= 50 ? "var(--color-positive)" : "var(--color-negative)" },
+                { label: "평균 수익", value: `${reportMeta.avgPnl >= 0 ? "+" : ""}${reportMeta.avgPnl}%`, color: reportMeta.avgPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" },
+                { label: "주간 거래", value: `${reportMeta.tradesPerWeek}회` },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl bg-[var(--color-surface)] dark:bg-[var(--color-card)] border border-[var(--color-g100)] dark:border-[var(--color-border)] p-2.5 text-center">
+                  <div className="text-[10px] text-[var(--color-g400)] mb-0.5">{item.label}</div>
+                  <div className="text-sm font-bold" style={{ color: item.color ?? "var(--color-text)" }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 투자 습관 점수 */}
+          {report.investorScore && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                <span className="text-sm font-bold text-[var(--color-text)]">투자 습관 점수</span>
+              </div>
+              <div className="space-y-3">
+                {([
+                  { label: "수익성", key: "profitability" as const, icon: "📈" },
+                  { label: "투자 규율", key: "discipline" as const, icon: "🎯" },
+                  { label: "리스크 관리", key: "riskManagement" as const, icon: "🛡️" },
+                  { label: "일관성", key: "consistency" as const, icon: "📊" },
+                ] as const).map((item) => {
+                  const score = report.investorScore[item.key] ?? 0;
+                  const color = score >= 70 ? "var(--color-positive)" : score >= 40 ? "var(--color-warning)" : "var(--color-negative)";
+                  return (
+                    <div key={item.key}>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-medium text-[var(--color-text)]">{item.icon} {item.label}</span>
+                        <span className="text-xs font-bold" style={{ color }}>{score}점</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${score}%`, backgroundColor: color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
           {/* 잘하는 패턴 */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">✅</span>
-              <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">잘하는 패턴</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-positive)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span className="text-sm font-bold text-[var(--color-text)]">잘하는 패턴</span>
             </div>
             <div className="space-y-2">
               {report.goodPatterns.map((p, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)] dark:text-[var(--color-text)]">
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
                   <span className="text-[var(--color-positive)] shrink-0 mt-0.5">●</span>
                   <span>{p}</span>
                 </div>
@@ -424,12 +500,12 @@ export default function PersonalityPage() {
           {/* 반복 실수 */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">⚠️</span>
-              <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">반복되는 실수</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span className="text-sm font-bold text-[var(--color-text)]">반복되는 실수</span>
             </div>
             <div className="space-y-2">
               {report.badPatterns.map((p, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)] dark:text-[var(--color-text)]">
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
                   <span className="text-[var(--color-negative)] shrink-0 mt-0.5">●</span>
                   <span>{p}</span>
                 </div>
@@ -437,31 +513,88 @@ export default function PersonalityPage() {
             </div>
           </Card>
 
-          {/* 개선 권고 */}
-          <Card>
-            <div className="flex items-center gap-2 mb-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" /></svg>
-              <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">개선 권고</span>
-            </div>
-            <div className="space-y-2">
-              {report.recommendations.map((r, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)] dark:text-[var(--color-text)]">
-                  <span className="text-[#4285F4] shrink-0 mt-0.5">●</span>
-                  <span>{r}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+          {/* 위험 신호 */}
+          {report.dangerSignals && report.dangerSignals.length > 0 && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-negative)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span className="text-sm font-bold text-[var(--color-negative)]">위험 신호</span>
+              </div>
+              <div className="space-y-2">
+                {report.dangerSignals.map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                    <span className="text-[var(--color-negative)] shrink-0 mt-0.5">!</span>
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* 섹터 분석 */}
+          {report.sectorAnalysis && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4285F4" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>
+                <span className="text-sm font-bold text-[var(--color-text)]">섹터 분석</span>
+              </div>
+              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
+                {report.sectorAnalysis}
+              </p>
+            </Card>
+          )}
 
           {/* 감정 분석 */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-g500)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-              <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">감정 분석</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-g500)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              <span className="text-sm font-bold text-[var(--color-text)]">감정 분석</span>
             </div>
             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
               {report.emotionAnalysis}
             </p>
+          </Card>
+
+          {/* 매매 스타일 분석 */}
+          {report.tradingStyleAnalysis && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span className="text-sm font-bold text-[var(--color-text)]">매매 스타일</span>
+              </div>
+              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
+                {report.tradingStyleAnalysis}
+              </p>
+            </Card>
+          )}
+
+          {/* 월별 추이 */}
+          {report.monthlyTrend && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-g500)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span className="text-sm font-bold text-[var(--color-text)]">월별 매매 추이</span>
+              </div>
+              <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
+                {report.monthlyTrend}
+              </p>
+            </Card>
+          )}
+
+          {/* 개선 권고 */}
+          <Card>
+            <div className="flex items-center gap-2 mb-3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" /></svg>
+              <span className="text-sm font-bold text-[var(--color-text)]">개선 권고</span>
+            </div>
+            <div className="space-y-2">
+              {report.recommendations.map((r, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                  <span className="text-[#4285F4] shrink-0 mt-0.5">{i + 1}.</span>
+                  <span>{r}</span>
+                </div>
+              ))}
+            </div>
           </Card>
 
           {/* 종합 한줄평 */}

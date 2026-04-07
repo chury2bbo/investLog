@@ -80,7 +80,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
       const res = await fetch(`/api/trades?${params}`);
       if (res.ok) {
         const data = await res.json();
-        setTrades(Array.isArray(data) ? data : []);
+        setTrades(Array.isArray(data) ? data : data.data ?? []);
       }
     } catch {
       /* fetch 실패 */

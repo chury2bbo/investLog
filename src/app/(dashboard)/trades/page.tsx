@@ -30,42 +30,26 @@ import {
   getCountryFromTicker,
 } from "./_components/types";
 
-// ─── 이유 태그 목록 ──────────────────────────────────────
+// ─── 이유 태그 & 심리 상태 (공통 상수) ──────────────────
 
-const BUY_REASON_TAGS = [
-  { label: "실적호조", desc: "실적 개선 기대" },
-  { label: "기술적분석", desc: "차트·지표 기반" },
-  { label: "저평가", desc: "내재가치 대비 할인" },
-  { label: "테마·트렌드", desc: "산업 트렌드 수혜" },
-  { label: "분할매수", desc: "나눠서 매수" },
-  { label: "신규진입", desc: "처음 매수" },
-  { label: "추가매수", desc: "보유 중 추가 매수" },
-  { label: "배당목적", desc: "배당 수익 목적" },
-  { label: "포트리밸런싱", desc: "비중 조절" },
-  { label: "지인추천", desc: "추천 받아 매수" },
-  { label: "뉴스·공시", desc: "뉴스/공시 반응" },
-];
+import {
+  BUY_REASON_TAGS,
+  SELL_REASON_TAGS,
+  EMOTIONS as EMOTION_LABELS,
+} from "@/lib/constants";
 
-const SELL_REASON_TAGS = [
-  { label: "목표가달성", desc: "목표 수익 도달" },
-  { label: "손절", desc: "추가 손실 방지" },
-  { label: "고평가판단", desc: "과대 평가 판단" },
-  { label: "실적악화", desc: "실적 부진" },
-  { label: "리스크헤지", desc: "리스크 축소" },
-  { label: "포트리밸런싱", desc: "비중 조절" },
-  { label: "현금필요", desc: "현금 확보" },
-  { label: "테마종료", desc: "테마 소멸" },
-  { label: "추세이탈", desc: "기술적 이탈" },
-  { label: "장기미보유", desc: "장기 보유 불필요" },
-];
+const EMOTION_ICONS: Record<string, React.ReactNode> = {
+  확신: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 20v-4"/><path d="M12 20V8"/><path d="M18 20V4"/><path d="M2 20h20"/></svg>,
+  불안: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M9.5 15.5l-1 2"/><path d="M14.5 15.5l1 2"/></svg>,
+  FOMO: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h2"/><path d="M14 9h2"/><path d="M9 15c.6-1 1.5-1.5 3-1.5s2.4.5 3 1.5"/><line x1="12" y1="4" x2="12" y2="2"/><line x1="8" y1="4.5" x2="7" y2="2.8"/><line x1="16" y1="4.5" x2="17" y2="2.8"/></svg>,
+  손절: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg>,
+  기계적: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
+};
 
-const EMOTIONS = [
-  { label: "확신", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 20v-4"/><path d="M12 20V8"/><path d="M18 20V4"/><path d="M2 20h20"/></svg> },
-  { label: "불안", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M9.5 15.5l-1 2"/><path d="M14.5 15.5l1 2"/></svg> },
-  { label: "FOMO", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h2"/><path d="M14 9h2"/><path d="M9 15c.6-1 1.5-1.5 3-1.5s2.4.5 3 1.5"/><line x1="12" y1="4" x2="12" y2="2"/><line x1="8" y1="4.5" x2="7" y2="2.8"/><line x1="16" y1="4.5" x2="17" y2="2.8"/></svg> },
-  { label: "손절", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg> },
-  { label: "기계적", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> },
-];
+const EMOTIONS = EMOTION_LABELS.map((e) => ({
+  label: e.label,
+  icon: EMOTION_ICONS[e.label] ?? null,
+}));
 
 import { fmtNum, stripNum } from "@/lib/format";
 
@@ -154,6 +138,7 @@ export default function TradesPage() {
       if (appliedFilters.dateTo) params.set("dateTo", appliedFilters.dateTo);
       if (appliedFilters.keyword) params.set("keyword", appliedFilters.keyword);
       params.set("skip", String(page * pageSize));
+      params.set("take", String(pageSize));
 
       const res = await fetch(`/api/trades?${params.toString()}`);
       if (res.ok) {

@@ -20,6 +20,8 @@ export async function GET(req: Request) {
   const month = searchParams.get("month"); // YYYY-MM (캘린더용)
   const keyword = searchParams.get("keyword");
   const market = searchParams.get("market"); // KR | US
+  const skip = parseInt(searchParams.get("skip") ?? "0", 10);
+  const take = parseInt(searchParams.get("take") ?? "20", 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: Record<string, any> = {
@@ -73,7 +75,10 @@ export async function GET(req: Request) {
     trades = trades.filter((t) => !/^\d{6}$/.test(t.ticker));
   }
 
-  return Response.json(trades);
+  const total = trades.length;
+  const paginated = trades.slice(skip, skip + take);
+
+  return Response.json({ data: paginated, total });
 }
 
 // ─── POST: 매매 등록 ────────────────────────────────────
