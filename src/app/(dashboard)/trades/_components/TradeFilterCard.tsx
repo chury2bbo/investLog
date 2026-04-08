@@ -86,7 +86,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
 
           {/* 버튼 */}
           <button
-            onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "" })}
+            onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "", tagStatus: "" })}
             className="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
           >
             초기화
@@ -149,6 +149,31 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={m}
                     onClick={() => set("market", m)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                      active
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="w-px h-5 bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">미입력</span>
+            <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
+              {(["", "noTag", "noEmotion"] as const).map((s) => {
+                const active = filters.tagStatus === s;
+                const label = s === "" ? "전체" : s === "noTag" ? "이유태그" : "심리상태";
+                return (
+                  <button
+                    key={s}
+                    onClick={() => set("tagStatus", s)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"

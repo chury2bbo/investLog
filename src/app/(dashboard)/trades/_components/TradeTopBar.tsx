@@ -20,7 +20,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
   const set = (key: keyof Filters, value: string) =>
     onChange({ ...filters, [key]: value });
 
-  const hasActiveFilter = !!(filters.dateFrom || filters.dateTo || filters.accountId || filters.keyword);
+  const hasActiveFilter = !!(filters.dateFrom || filters.dateTo || filters.accountId || filters.keyword || filters.tagStatus);
 
   return (
     <div className="sticky top-0 z-30 bg-[var(--color-bg)] dark:bg-[var(--color-bg)] border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">

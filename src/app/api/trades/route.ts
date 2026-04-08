@@ -75,6 +75,14 @@ export async function GET(req: Request) {
     trades = trades.filter((t) => !/^\d{6}$/.test(t.ticker));
   }
 
+  // 이유태그/심리상태 미입력 필터
+  const tagStatus = searchParams.get("tagStatus");
+  if (tagStatus === "noTag") {
+    trades = trades.filter((t) => !t.reasonTags || (t.reasonTags as string[]).length === 0);
+  } else if (tagStatus === "noEmotion") {
+    trades = trades.filter((t) => !t.emotion);
+  }
+
   const total = trades.length;
   const paginated = trades.slice(skip, skip + take);
 

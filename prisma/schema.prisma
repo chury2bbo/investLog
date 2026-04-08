@@ -214,3 +214,31 @@ model ApiUsageLog {
   @@unique([userId, type, date])
   @@map("api_usage_log")
 }
+
+model PersonalityCache {
+  id             Int      @id @default(autoincrement())
+  userId         String
+  weekKey        String
+  type           String
+  summary        String
+  winRate        Float?
+  avgHoldingDays Int?
+  lossRatio      Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, weekKey])
+  @@map("personality_cache")
+}
+
+model CoachingHistory {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  strengths String
+  mistakes  String
+  goals     String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("coaching_history")
+}

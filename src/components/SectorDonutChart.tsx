@@ -142,7 +142,8 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
   );
 
   const renderTooltip = useCallback(
-    (props: { active?: boolean; payload?: { payload: SectorItem }[] }) => (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (props: any) => (
       <CustomTooltip {...props} T={T} />
     ),
     [isDark]
@@ -158,34 +159,34 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
 
   return (
     <div>
-      {/* 탭: 내 섹터 먼저 */}
-      <div className="flex gap-2 mb-4">
-        {hasManualSector && (
+      {/* 탭: 내 섹터 / 기본 섹터 토글 */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
+          {hasManualSector && (
+            <button
+              onClick={() => setSectorTab("manual")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                sectorTab === "manual"
+                  ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                  : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
+              }`}
+            >
+              내섹터
+            </button>
+          )}
           <button
-            onClick={() => setSectorTab("manual")}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{
-              border: sectorTab === "manual" ? `1.5px solid ${T.tabActiveBorder}` : `1px solid ${T.tabInactiveBorder}`,
-              background: sectorTab === "manual" ? T.tabActiveBg : "transparent",
-              color: sectorTab === "manual" ? T.tabActiveColor : T.tabInactiveColor,
-            }}
+            onClick={() => setSectorTab("auto")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              sectorTab === "auto"
+                ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
+            }`}
           >
-            내 섹터
+            기본섹터
           </button>
-        )}
-        <button
-          onClick={() => setSectorTab("auto")}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-          style={{
-            border: sectorTab === "auto" ? `1.5px solid ${T.tabActiveBorder}` : `1px solid ${T.tabInactiveBorder}`,
-            background: sectorTab === "auto" ? T.tabActiveBg : "transparent",
-            color: sectorTab === "auto" ? T.tabActiveColor : T.tabInactiveColor,
-          }}
-        >
-          기본 섹터
-        </button>
+        </div>
         {!hasManualSector && (
-          <span className="text-[11px] self-center ml-1" style={{ color: T.textMuted }}>
+          <span className="text-[11px]" style={{ color: T.textMuted }}>
             내 섹터를 지정하면 탭이 추가돼요
           </span>
         )}

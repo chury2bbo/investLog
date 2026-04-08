@@ -31,6 +31,7 @@ export interface Filters {
   tradeType: "" | "BUY" | "SELL";
   market: "" | "KR" | "US";
   keyword: string;
+  tagStatus: "" | "noTag" | "noEmotion";
 }
 
 export const INITIAL_FILTERS: Filters = {
@@ -40,6 +41,7 @@ export const INITIAL_FILTERS: Filters = {
   tradeType: "",
   market: "",
   keyword: "",
+  tagStatus: "",
 };
 
 export function getCountryFromTicker(ticker: string): "KR" | "US" {

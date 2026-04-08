@@ -398,7 +398,9 @@ export const ModelName = {
   TickerAnalysisCache: 'TickerAnalysisCache',
   UserAnalysisLog: 'UserAnalysisLog',
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
-  ApiUsageLog: 'ApiUsageLog'
+  ApiUsageLog: 'ApiUsageLog',
+  PersonalityCache: 'PersonalityCache',
+  CoachingHistory: 'CoachingHistory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog"
+    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog" | "personalityCache" | "coachingHistory"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1530,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PersonalityCache: {
+      payload: Prisma.$PersonalityCachePayload<ExtArgs>
+      fields: Prisma.PersonalityCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PersonalityCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PersonalityCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        findFirst: {
+          args: Prisma.PersonalityCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PersonalityCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        findMany: {
+          args: Prisma.PersonalityCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+        }
+        create: {
+          args: Prisma.PersonalityCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        createMany: {
+          args: Prisma.PersonalityCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PersonalityCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+        }
+        delete: {
+          args: Prisma.PersonalityCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        update: {
+          args: Prisma.PersonalityCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.PersonalityCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PersonalityCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PersonalityCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.PersonalityCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+        }
+        aggregate: {
+          args: Prisma.PersonalityCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePersonalityCache>
+        }
+        groupBy: {
+          args: Prisma.PersonalityCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalityCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PersonalityCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalityCacheCountAggregateOutputType> | number
+        }
+      }
+    }
+    CoachingHistory: {
+      payload: Prisma.$CoachingHistoryPayload<ExtArgs>
+      fields: Prisma.CoachingHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CoachingHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CoachingHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.CoachingHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CoachingHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.CoachingHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.CoachingHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.CoachingHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CoachingHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.CoachingHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        update: {
+          args: Prisma.CoachingHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.CoachingHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CoachingHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CoachingHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.CoachingHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoachingHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.CoachingHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCoachingHistory>
+        }
+        groupBy: {
+          args: Prisma.CoachingHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CoachingHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CoachingHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CoachingHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1767,6 +1917,34 @@ export const ApiUsageLogScalarFieldEnum = {
 export type ApiUsageLogScalarFieldEnum = (typeof ApiUsageLogScalarFieldEnum)[keyof typeof ApiUsageLogScalarFieldEnum]
 
 
+export const PersonalityCacheScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  weekKey: 'weekKey',
+  type: 'type',
+  summary: 'summary',
+  winRate: 'winRate',
+  avgHoldingDays: 'avgHoldingDays',
+  lossRatio: 'lossRatio',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersonalityCacheScalarFieldEnum = (typeof PersonalityCacheScalarFieldEnum)[keyof typeof PersonalityCacheScalarFieldEnum]
+
+
+export const CoachingHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  strengths: 'strengths',
+  mistakes: 'mistakes',
+  goals: 'goals',
+  createdAt: 'createdAt'
+} as const
+
+export type CoachingHistoryScalarFieldEnum = (typeof CoachingHistoryScalarFieldEnum)[keyof typeof CoachingHistoryScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1969,6 +2147,8 @@ export type GlobalOmitConfig = {
   userAnalysisLog?: Prisma.UserAnalysisLogOmit
   monthlyAssetSnapshot?: Prisma.MonthlyAssetSnapshotOmit
   apiUsageLog?: Prisma.ApiUsageLogOmit
+  personalityCache?: Prisma.PersonalityCacheOmit
+  coachingHistory?: Prisma.CoachingHistoryOmit
 }
 
 /* Types for Logging */

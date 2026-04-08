@@ -11,6 +11,11 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  // 기존 경로 → 신규 경로 리다이렉트
+  if (req.nextUrl.pathname === "/analysis/personality") {
+    return NextResponse.redirect(new URL("/personality", req.url));
+  }
+
   return NextResponse.next();
 });
 

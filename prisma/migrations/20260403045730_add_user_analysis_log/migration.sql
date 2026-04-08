@@ -1,0 +1,3 @@
+-- Already applied directly to database (migration file was missing locally)
+-- Tables: monthly_asset_snapshots, user_analysis_logs
+-- Changes: ticker_analysis_cache.recentIssues column added

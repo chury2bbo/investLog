@@ -65,7 +65,9 @@ export const ModelName = {
   TickerAnalysisCache: 'TickerAnalysisCache',
   UserAnalysisLog: 'UserAnalysisLog',
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
-  ApiUsageLog: 'ApiUsageLog'
+  ApiUsageLog: 'ApiUsageLog',
+  PersonalityCache: 'PersonalityCache',
+  CoachingHistory: 'CoachingHistory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -282,6 +284,34 @@ export const ApiUsageLogScalarFieldEnum = {
 } as const
 
 export type ApiUsageLogScalarFieldEnum = (typeof ApiUsageLogScalarFieldEnum)[keyof typeof ApiUsageLogScalarFieldEnum]
+
+
+export const PersonalityCacheScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  weekKey: 'weekKey',
+  type: 'type',
+  summary: 'summary',
+  winRate: 'winRate',
+  avgHoldingDays: 'avgHoldingDays',
+  lossRatio: 'lossRatio',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersonalityCacheScalarFieldEnum = (typeof PersonalityCacheScalarFieldEnum)[keyof typeof PersonalityCacheScalarFieldEnum]
+
+
+export const CoachingHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  strengths: 'strengths',
+  mistakes: 'mistakes',
+  goals: 'goals',
+  createdAt: 'createdAt'
+} as const
+
+export type CoachingHistoryScalarFieldEnum = (typeof CoachingHistoryScalarFieldEnum)[keyof typeof CoachingHistoryScalarFieldEnum]
 
 
 export const SortOrder = {

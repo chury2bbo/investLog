@@ -58,7 +58,6 @@ export default function ImportPage() {
     if (!file.type.startsWith("image/")) return;
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setErrorMsg(null);
     setStep("loading");
 
     const formData = new FormData();

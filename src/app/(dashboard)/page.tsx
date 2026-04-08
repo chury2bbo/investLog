@@ -127,6 +127,15 @@ export default function DashboardPage() {
   const [fxRefreshing, setFxRefreshing] = useState(false);
   const [snapshots, setSnapshots] = useState<{ month: string; invested: number; evaluated: number }[]>([]);
 
+  // ─── 성향 위젯 데이터 ──────────────────────────────────
+  const [personalityType, setPersonalityType] = useState<string | null>(null);
+  const [personalitySummary, setPersonalitySummary] = useState<string | null>(null);
+  const [latestCoachingGoal, setLatestCoachingGoal] = useState<string | null>(null);
+  const [buyPatterns, setBuyPatterns] = useState<{ tag: string; count: number }[]>([]);
+  const [sellPatterns, setSellPatterns] = useState<{ tag: string; count: number }[]>([]);
+  const [noTagCount, setNoTagCount] = useState(0);
+  const [personalityLoading, setPersonalityLoading] = useState(true);
+
   const userName = session?.user?.name ?? "투자자";
 
   // ─── 데이터 로딩 ───────────────────────────────────────
@@ -256,6 +265,62 @@ export default function DashboardPage() {
       saveAndFetchSnapshots(accounts, quotes, usdRate);
     }
   }, [loading, accounts, quotes, usdRate, saveAndFetchSnapshots]);
+
+  // ─── 성향 위젯 데이터 로딩 ─────────────────────────────
+  useEffect(() => {
+    async function fetchPersonalityWidget() {
+      setPersonalityLoading(true);
+      try {
+        const [summaryRes, analysisRes, coachingRes] = await Promise.all([
+          fetch("/api/personality/summary"),
+          fetch("/api/trades/analysis?min=1"),
+          fetch("/api/personality/history"),
+        ]);
+
+        if (summaryRes.ok) {
+          const data = await summaryRes.json();
+          if (data.type) {
+            setPersonalityType(data.type);
+            setPersonalitySummary(data.summary ?? null);
+          }
+        }
+
+        if (coachingRes.ok) {
+          const data = await coachingRes.json();
+          const history = data.history ?? [];
+          if (history.length > 0 && history[0].goals?.length > 0) {
+            setLatestCoachingGoal(history[0].goals[0]);
+          }
+        }
+
+        if (analysisRes.ok) {
+          const data = await analysisRes.json();
+          if (!data.locked) {
+            setNoTagCount(data.noTagCount ?? 0);
+            // 매수/매도 이유태그 상위 3개
+            const dist = data.tagDistribution ?? [];
+            const buyTags = dist
+              .filter((t: { buy: number }) => t.buy > 0)
+              .sort((a: { buy: number }, b: { buy: number }) => b.buy - a.buy)
+              .slice(0, 3)
+              .map((t: { tag: string; buy: number }) => ({ tag: t.tag, count: t.buy }));
+            const sellTags = dist
+              .filter((t: { sell: number }) => t.sell > 0)
+              .sort((a: { sell: number }, b: { sell: number }) => b.sell - a.sell)
+              .slice(0, 3)
+              .map((t: { tag: string; sell: number }) => ({ tag: t.tag, count: t.sell }));
+            setBuyPatterns(buyTags);
+            setSellPatterns(sellTags);
+          }
+        }
+      } catch {
+        // 위젯 로딩 실패 무시
+      } finally {
+        setPersonalityLoading(false);
+      }
+    }
+    fetchPersonalityWidget();
+  }, []);
 
   // ─── 환율 새로고침 ──────────────────────────────────────
 
@@ -761,7 +826,6 @@ export default function DashboardPage() {
       <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5 mt-4">
       {/* 좌측: 자산 배분 + 총 자산 추이 */}
       <div>
-
       {/* 자산 배분 카드 */}
       <SectionTitle title="자산 배분" />
       <Card>
@@ -867,10 +931,61 @@ export default function DashboardPage() {
           )}
         </Card>
       </div>
+      {/* ── 계좌 현황 (PC만 표시) ── */}
+      <div className="mt-4 hidden md:block">
+        <SectionTitle title="계좌 현황" />
+
+        {accountSummaries.length === 0 ? (
+          <Card>
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" /><path d="M2 10h20" />
+              </svg>
+              <p className="text-sm text-[var(--color-g400)]">아직 등록된 계좌가 없어요</p>
+              <button
+                onClick={() => router.push("/accounts?add=true")}
+                className="px-4 py-2 text-sm font-bold rounded-xl cursor-pointer transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "var(--color-primary)", color: "#fff", boxShadow: "0 2px 12px color-mix(in srgb, var(--color-primary) 27%, transparent)" }}
+              >
+                계좌 관리에서 추가하기
+              </button>
+            </div>
+          </Card>
+        ) : (
+          <div className="space-y-2.5">
+            {accountSummaries.map((acc) => (
+              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer">
+                <Card>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)]">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>
+                      </div>
+                      <div>
+                        <div className="text-[15px] font-bold text-[var(--color-text)]">
+                          {acc.name}
+                          {acc.memo && <span className="ml-1.5 text-xs font-normal text-[var(--color-g400)]">{acc.memo}</span>}
+                        </div>
+                        <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
+                          {acc.type} · {acc.stockCount}종목
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <PnlTag value={acc.pnlRate} />
+                      <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)] text-base">›</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       </div>{/* 좌측 컬럼 끝 */}
 
-      {/* 우측: 종목별 비중 + 계좌 현황 */}
+      {/* 우측: 종목별 비중 + 성향 위젯 */}
       <div className="mt-4 md:mt-0">
 
       {/* ── 종목별 비중 도넛 ── */}
@@ -956,8 +1071,119 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── 섹션 3: 계좌 현황 ── */}
+      {/* ── 성향 위젯 ── */}
       <div className="mt-4">
+        <SectionTitle title="내 투자 성향" />
+        <Card>
+          {personalityLoading ? (
+            <div className="py-4 space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-48" />
+              <Skeleton className="h-3 w-40" />
+            </div>
+          ) : personalityType ? (
+            <div>
+              {/* 헤더 */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                  <span className="text-[15px] font-bold text-[var(--color-text)]">{personalityType}</span>
+                </div>
+                <button
+                  onClick={() => router.push("/personality")}
+                  className="text-xs font-medium text-[var(--color-primary)] hover:underline cursor-pointer"
+                >
+                  자세히 보기 →
+                </button>
+              </div>
+
+              {/* 코칭 목표 or 유형 설명 (폴백) */}
+              {latestCoachingGoal ? (
+                <div className="flex items-start gap-2 mb-3 px-3 py-2 rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <div>
+                    <p className="text-[10px] font-medium text-[var(--color-g400)] mb-0.5">최근 개선 목표</p>
+                    <p className="text-xs text-[var(--color-text)] leading-relaxed">{latestCoachingGoal}</p>
+                  </div>
+                </div>
+              ) : personalitySummary ? (
+                <p className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed mb-3">{personalitySummary}</p>
+              ) : null}
+
+              {/* 최근 매매 패턴 */}
+              {(buyPatterns.length > 0 || sellPatterns.length > 0) && (
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-2">최근 매매 패턴</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {buyPatterns.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-[var(--color-negative)] mb-1">매수</p>
+                        <div className="space-y-1">
+                          {buyPatterns.map((p) => (
+                            <div key={p.tag} className="flex items-center gap-1.5 text-xs">
+                              <Tag label={p.tag} />
+                              <span className="text-[var(--color-g400)]">{p.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {sellPatterns.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-[var(--color-primary)] mb-1">매도</p>
+                        <div className="space-y-1">
+                          {sellPatterns.map((p) => (
+                            <div key={p.tag} className="flex items-center gap-1.5 text-xs">
+                              <Tag label={p.tag} />
+                              <span className="text-[var(--color-g400)]">{p.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 태그 미입력 안내 */}
+              {noTagCount > 0 && (
+                <div
+                  className="flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                  style={{ backgroundColor: "var(--color-primary-soft)" }}
+                  onClick={() => router.push("/trades")}
+                >
+                  <span className="flex items-center gap-1.5 text-[var(--color-text)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z"/></svg>
+                    <span>이유 태그 없는 거래 <b>{noTagCount}건</b> — 채우면 분석이 정확해져요</span>
+                  </span>
+                  <span className="text-[var(--color-primary)] font-medium ml-2 shrink-0">채우기 →</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center py-4 gap-2 text-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><path d="M9 21h6"/><path d="M10 17v4"/><path d="M14 17v4"/></svg>
+              <p className="text-sm text-[var(--color-g400)]">
+                매매 5건 이상 기록하면<br />투자 성향을 분석해드려요
+              </p>
+              <button
+                onClick={() => router.push("/trades")}
+                className="mt-1 px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
+              >
+                매매 기록하러 가기
+              </button>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      </div>{/* 우측 컬럼 끝 */}
+
+      </div>{/* 2컬럼 그리드 끝 */}
+
+      {/* ── 계좌 현황 (모바일만 표시) ── */}
+      <div className="mt-4 md:hidden">
         <SectionTitle title="계좌 현황" />
 
         {accountSummaries.length === 0 ? (
@@ -1007,9 +1233,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-
-      </div>{/* 우측 컬럼 끝 */}
-      </div>{/* 2컬럼 그리드 끝 */}
 
       {/* 종목명 커스텀 툴팁 (fixed) */}
       {hoveredStock && (() => {

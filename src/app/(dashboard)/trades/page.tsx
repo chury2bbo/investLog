@@ -137,6 +137,7 @@ export default function TradesPage() {
       if (appliedFilters.dateFrom) params.set("dateFrom", appliedFilters.dateFrom);
       if (appliedFilters.dateTo) params.set("dateTo", appliedFilters.dateTo);
       if (appliedFilters.keyword) params.set("keyword", appliedFilters.keyword);
+      if (appliedFilters.tagStatus) params.set("tagStatus", appliedFilters.tagStatus);
       params.set("skip", String(page * pageSize));
       params.set("take", String(pageSize));
 
@@ -207,7 +208,7 @@ export default function TradesPage() {
   // draft 필터 변경 (입력 중 — fetch 안 함)
   function handleFilterChange(f: Filters) {
     // 매수/매도, 국내/해외 토글은 즉시 반영
-    if (f.tradeType !== draftFilters.tradeType || f.market !== draftFilters.market) {
+    if (f.tradeType !== draftFilters.tradeType || f.market !== draftFilters.market || f.tagStatus !== draftFilters.tagStatus) {
       setDraftFilters(f);
       setAppliedFilters(f);
       setPage(0);
@@ -417,6 +418,15 @@ export default function TradesPage() {
         return;
       }
       if (data.cashWarning) setCashWarning(true);
+
+      // 이유 태그 미입력 시 넛지 Toast
+      if (formReasonTags.length === 0) {
+        showToast(
+          `${formName} ${formType === "BUY" ? "매수" : "매도"} 등록 완료`,
+          "이유 태그를 추가하면 성향 분석이 더 정확해져요",
+        );
+      }
+
       setModalOpen(false);
       resetForm();
       fetchTrades();
@@ -1112,7 +1122,7 @@ export default function TradesPage() {
 
           {/* 이유 태그 */}
           <div>
-            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">이유 태그</label>
+            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">이유 태그 <span className="text-[var(--color-primary)] font-normal">★ 성향분석에 사용돼요</span></label>
             <div className="flex flex-wrap gap-1.5">
               {reasonTagOptions.map((tag) => (
                 <button
@@ -1135,7 +1145,7 @@ export default function TradesPage() {
 
           {/* 심리 상태 */}
           <div>
-            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">심리 상태</label>
+            <label className="block text-xs font-medium mb-2 text-[var(--color-g500)] dark:text-[var(--color-muted)]">심리 상태 <span className="text-[var(--color-primary)] font-normal">★ 성향분석에 사용돼요</span></label>
             <div className="flex gap-2">
               {EMOTIONS.map((em) => (
                 <button

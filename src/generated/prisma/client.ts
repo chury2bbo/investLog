@@ -116,3 +116,13 @@ export type MonthlyAssetSnapshot = Prisma.MonthlyAssetSnapshotModel
  * 
  */
 export type ApiUsageLog = Prisma.ApiUsageLogModel
+/**
+ * Model PersonalityCache
+ * 
+ */
+export type PersonalityCache = Prisma.PersonalityCacheModel
+/**
+ * Model CoachingHistory
+ * 
+ */
+export type CoachingHistory = Prisma.CoachingHistoryModel

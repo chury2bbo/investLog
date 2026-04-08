@@ -33,10 +33,10 @@ function NavIcon({ name, size = 19, active = false }: { name: string; size?: num
 
 const NAV_ITEMS = [
   { id: "/", icon: "home", label: "대시보드", mobileLabel: "홈" },
-  { id: "/accounts", icon: "wallet", label: "계좌 관리", mobileLabel: "계좌" },
   { id: "/trades", icon: "notebook", label: "매매일지", mobileLabel: "매매" },
+  { id: "/personality", icon: "brain", label: "투자 성향", mobileLabel: "성향" },
+  { id: "/accounts", icon: "wallet", label: "계좌 관리", mobileLabel: "계좌" },
   { id: "/analysis", icon: "chart", label: "종목 분석", mobileLabel: "분석" },
-  { id: "/analysis/personality", icon: "brain", label: "투자 성향", mobileLabel: "성향" },
   { id: "/profile", icon: "settings", label: "회원정보", mobileLabel: "설정" },
 ];
 
