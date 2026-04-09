@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Card,
   SectionTitle,
@@ -81,7 +82,7 @@ interface AccountSummary {
 import { formatKRW, formatCompact } from "@/lib/format";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
+  AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
 } from "recharts";
 
 // ─── 자산 배분 바 차트 색상 ──────────────────────────────
@@ -134,6 +135,7 @@ export default function DashboardPage() {
   const [buyPatterns, setBuyPatterns] = useState<{ tag: string; count: number }[]>([]);
   const [sellPatterns, setSellPatterns] = useState<{ tag: string; count: number }[]>([]);
   const [noTagCount, setNoTagCount] = useState(0);
+  const [personalityTradeCount, setPersonalityTradeCount] = useState(0);
   const [personalityLoading, setPersonalityLoading] = useState(true);
 
   const userName = session?.user?.name ?? "투자자";
@@ -272,14 +274,14 @@ export default function DashboardPage() {
       setPersonalityLoading(true);
       try {
         const [summaryRes, analysisRes, coachingRes] = await Promise.all([
-          fetch("/api/personality/summary"),
+          fetch("/api/personality/summary?cacheOnly=true"),
           fetch("/api/trades/analysis?min=1"),
           fetch("/api/personality/history"),
         ]);
 
         if (summaryRes.ok) {
           const data = await summaryRes.json();
-          if (data.type) {
+          if (data.type && !data.empty) {
             setPersonalityType(data.type);
             setPersonalitySummary(data.summary ?? null);
           }
@@ -295,6 +297,7 @@ export default function DashboardPage() {
 
         if (analysisRes.ok) {
           const data = await analysisRes.json();
+          setPersonalityTradeCount(data.totalCount ?? 0);
           if (!data.locked) {
             setNoTagCount(data.noTagCount ?? 0);
             // 매수/매도 이유태그 상위 3개
@@ -499,7 +502,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-              안녕하세요, {userName}님
+              안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline">{userName}님</Link>
             </p>
             <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] mt-0.5">
               내 투자 현황
@@ -509,7 +512,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 히어로 카드 스켈레톤 */}
-        <div className="rounded-[20px] p-5 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
+        <div className="rounded-[20px] p-6 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
           <Skeleton className="h-4 w-24 mb-2 !bg-white/20" />
           <Skeleton className="h-10 w-56 mb-3 !bg-white/20" />
           <Skeleton className="h-5 w-40 mb-5 !bg-white/15" />
@@ -577,13 +580,7 @@ export default function DashboardPage() {
         else items.push({ name: h.name, label, country, value: evalKRW });
       });
     });
-    return items.sort((a, b) => {
-      // 국내(KR) 먼저, 그 다음 해외
-      if (a.country === "KR" && b.country !== "KR") return -1;
-      if (a.country !== "KR" && b.country === "KR") return 1;
-      // 같은 그룹 내에서 비중 큰 순
-      return b.value - a.value;
-    });
+    return items.sort((a, b) => b.value - a.value);
   })();
   const holdingTotal = holdingWeights.reduce((s, h) => s + h.value, 0);
 
@@ -605,7 +602,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-            안녕하세요, {userName}님
+            안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline">{userName}님</Link>
           </p>
           <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)] mt-0.5">
             내 투자 현황
@@ -902,14 +899,20 @@ export default function DashboardPage() {
           {/* 차트 */}
           {snapshots.length >= 2 ? (
             <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={snapshots} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+              <AreaChart data={snapshots} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradEval" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
                 <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
-                <Line type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
-                <Line type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
-              </LineChart>
+                <Area type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} fill="url(#gradEval)" dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
+                <Area type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" fill="none" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
+              </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="relative">
@@ -1117,7 +1120,7 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {buyPatterns.length > 0 && (
                       <div>
-                        <p className="text-xs font-bold text-[var(--color-negative)] mb-1">매수</p>
+                        <p className="text-xs font-bold text-[var(--color-primary)] mb-1">매수</p>
                         <div className="space-y-1">
                           {buyPatterns.map((p) => (
                             <div key={p.tag} className="flex items-center gap-1.5 text-xs">
@@ -1130,7 +1133,7 @@ export default function DashboardPage() {
                     )}
                     {sellPatterns.length > 0 && (
                       <div>
-                        <p className="text-xs font-bold text-[var(--color-primary)] mb-1">매도</p>
+                        <p className="text-xs font-bold text-[var(--color-warning)] mb-1">매도</p>
                         <div className="space-y-1">
                           {sellPatterns.map((p) => (
                             <div key={p.tag} className="flex items-center gap-1.5 text-xs">
@@ -1160,11 +1163,25 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          ) : personalityTradeCount >= 5 ? (
+            <div className="flex flex-col items-center py-4 gap-2 text-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <p className="text-sm text-[var(--color-g400)]">
+                매매 데이터가 충분해요!<br />투자 성향을 진단해보세요
+              </p>
+              <button
+                onClick={() => router.push("/personality")}
+                className="mt-1 px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
+              >
+                성향 진단받기
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col items-center py-4 gap-2 text-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><path d="M9 21h6"/><path d="M10 17v4"/><path d="M14 17v4"/></svg>
               <p className="text-sm text-[var(--color-g400)]">
-                매매 5건 이상 기록하면<br />투자 성향을 분석해드려요
+                매매 {5 - personalityTradeCount}건 더 기록하면<br />투자 성향을 분석해드려요
               </p>
               <button
                 onClick={() => router.push("/trades")}

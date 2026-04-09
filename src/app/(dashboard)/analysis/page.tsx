@@ -11,6 +11,7 @@ import {
   EmptyState,
   Divider,
   ThemeToggle,
+  Toast,
 } from "@/components/ui";
 import {
   AreaChart,
@@ -173,6 +174,16 @@ export default function AnalysisPage() {
   const [reportLoading, setReportLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  // 토스트
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean; variant?: "success" | "error" }>({ title: "", message: "", visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(title: string, message: string, opts?: { variant?: "success" | "error" }) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true, variant: opts?.variant });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
+
   // MDD 기간
   const defaults = getDefaultDates();
   const [startDate, setStartDate] = useState(defaults.start);
@@ -296,12 +307,19 @@ export default function AnalysisPage() {
     setReportLoading(true);
     try {
       const res = await fetch(`/api/analysis/report?ticker=${selected.ticker}&name=${encodeURIComponent(selected.name)}&country=${selected.country ?? "KR"}`);
+      const d = await res.json();
       if (res.ok) {
-        const d = await res.json();
         setReport(d.report ?? null);
+      } else {
+        console.error("Report API error:", d.error);
+        showToast("분석 실패", d.error ?? "AI 분석 리포트를 생성할 수 없습니다.", { variant: "error" });
       }
-    } catch { /* ignore */ }
-    finally { setReportLoading(false); }
+    } catch (err) {
+      console.error("Report fetch error:", err);
+      showToast("네트워크 오류", "서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", { variant: "error" });
+    } finally {
+      setReportLoading(false);
+    }
   }
 
   // ─── MDD 차트 기간 변경 ───────────────────────────────
@@ -327,6 +345,15 @@ export default function AnalysisPage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
+      {/* 토스트 */}
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        variant={toast.variant}
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
+
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -711,7 +738,7 @@ export default function AnalysisPage() {
                 <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
                   AI가 {selected.name}({selected.ticker})을 분석합니다
                 </p>
-                <Button size="lg" onClick={generateReport}>
+                <Button size="lg" onClick={generateReport} disabled={reportLoading}>
                   분석 생성
                 </Button>
               </div>

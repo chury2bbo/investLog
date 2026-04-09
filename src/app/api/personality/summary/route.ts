@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { CLAUDE_MODEL, PERSONALITY_SUMMARY_SYSTEM, buildPersonalitySummaryUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
 
 /** ISO 주차 키 생성: "2026-W15" 형식 */
@@ -11,11 +12,14 @@ function getWeekKey(date: Date): string {
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const { searchParams } = new URL(req.url);
+  const cacheOnly = searchParams.get("cacheOnly") === "true";
 
   const weekKey = getWeekKey(new Date());
 
@@ -41,6 +45,11 @@ export async function GET() {
     });
   }
 
+  // 캐시만 조회 모드 — 캐시 없으면 빈 응답
+  if (cacheOnly) {
+    return Response.json({ empty: true, weekKey });
+  }
+
   // ─── 매매 데이터 조회 ─────────────────────────────────
   const trades = await prisma.tradeLog.findMany({
     where: { account: { userId: session.user.id } },
@@ -54,6 +63,19 @@ export async function GET() {
       remaining: 5 - trades.length,
     });
   }
+
+  // ─── 보유종목 조회 ────────────────────────────────────
+  const holdings = await prisma.holding.findMany({
+    where: { account: { userId: session.user.id } },
+    select: {
+      ticker: true,
+      name: true,
+      avgPrice: true,
+      quantity: true,
+      sectorAuto: true,
+      sectorManual: true,
+    },
+  });
 
   // ─── 통계 계산 ────────────────────────────────────────
   const buyTrades = trades.filter((t) => t.type === "BUY");
@@ -127,6 +149,35 @@ export async function GET() {
     }))
     .sort((a, b) => b.count - a.count);
 
+  // 섹터 집중도
+  const sectorMap: Record<string, number> = {};
+  holdings.forEach((h) => {
+    const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
+    sectorMap[sector] = (sectorMap[sector] ?? 0) + h.avgPrice * h.quantity;
+  });
+  const totalValue = Object.values(sectorMap).reduce((s, v) => s + v, 0);
+  const sectorSummary = Object.entries(sectorMap)
+    .sort(([, a], [, b]) => b - a)
+    .map(([sector, val]) => `${sector}: ${totalValue > 0 ? Math.round((val / totalValue) * 100) : 0}%`);
+
+  // 보유기간 분포
+  const holdingRanges = [
+    { label: "1주 이내", count: matchedTrades.filter((t) => t.holdingDays <= 7).length },
+    { label: "1~4주", count: matchedTrades.filter((t) => t.holdingDays > 7 && t.holdingDays <= 28).length },
+    { label: "1~3개월", count: matchedTrades.filter((t) => t.holdingDays > 28 && t.holdingDays <= 90).length },
+    { label: "3개월+", count: matchedTrades.filter((t) => t.holdingDays > 90).length },
+  ].filter((r) => r.count > 0);
+  const holdingSummary = holdingRanges.map((r) => {
+    const pct = Math.round((r.count / matchedTrades.length) * 100);
+    return `${r.label}: ${pct}%`;
+  });
+
+  // 현재 보유종목 요약
+  const holdingsList = holdings.map((h) => {
+    const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
+    return `${h.name}(${h.ticker}) — ${sector}, ${h.quantity}주`;
+  });
+
   // ─── Claude API 호출 ──────────────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -136,34 +187,26 @@ export async function GET() {
   try {
     const anthropic = new Anthropic({ apiKey });
 
-    const prompt = `당신은 개인 투자자의 매매 데이터를 분석하는 전문 투자 코치입니다.
-아래 데이터를 분석하여 JSON 형식으로만 응답하세요.
-
-═══ 투자자 데이터 ═══
-- 총 매매: ${trades.length}건 (매수 ${buyTrades.length}, 매도 ${sellTrades.length})
-- 매칭 완료: ${matchedTrades.length}건
-- 승률: ${winRate}%
-- 평균 보유: ${avgHoldingDays}일
-- 손절 비율: ${lossRatio}%
-
-═══ 이유 태그별 성과 ═══
-${topTags.map((t) => `- ${t.tag}: ${t.count}건, 평균 ${t.avgPnl >= 0 ? "+" : ""}${t.avgPnl}%`).join("\n")}
-
-═══ 감정별 성과 ═══
-${emotionSummary.length > 0
-  ? emotionSummary.map((e) => `- ${e.emotion}: ${e.count}건, 평균 ${e.avgPnl >= 0 ? "+" : ""}${e.avgPnl}%`).join("\n")
-  : "- 감정 기록 없음"}
-
-═══ 응답 형식 (JSON만 응답) ═══
-{
-  "type": "투자자 유형명 (10자 이내, 예: 신중한 가치투자자)",
-  "summary": "유형 설명 2문장 (강점 1문장 + 약점 1문장)"
-}`;
+    const userPrompt = buildPersonalitySummaryUserPrompt({
+      totalTrades: trades.length,
+      buyCount: buyTrades.length,
+      sellCount: sellTrades.length,
+      matchedCount: matchedTrades.length,
+      winRate,
+      avgHoldingDays,
+      lossRatio,
+      topTags,
+      emotionSummary,
+      sectorSummary,
+      holdingSummary,
+      holdingsList,
+    });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       max_tokens: 300,
-      messages: [{ role: "user", content: prompt }],
+      system: PERSONALITY_SUMMARY_SYSTEM,
+      messages: [{ role: "user", content: userPrompt }],
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";

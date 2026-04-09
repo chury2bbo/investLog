@@ -43,3 +43,6 @@ env
 
 #kiro
 /.kiro
+scripts/seed-demo.ts
+.gitignore
+scripts/seed-snapshot.ts

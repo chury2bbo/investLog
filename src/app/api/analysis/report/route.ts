@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { CLAUDE_MODEL, REPORT_SYSTEM, buildReportUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
 import { getKisQuote } from "@/lib/kis";
 import { getYahooQuote } from "@/lib/yahoo";
@@ -80,28 +81,13 @@ export async function GET(req: Request) {
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
+      model: CLAUDE_MODEL,
+      max_tokens: 4096,
+      system: REPORT_SYSTEM,
       messages: [
         {
           role: "user",
-          content: `주식 종목 "${stockName}"(${ticker}, ${priceText})에 대해 투자 분석을 해줘.
-반드시 ${priceText}를 기준으로 적정 매수가와 매도가를 산출해줘.
-다음 항목을 포함해서 JSON으로 응답해:
-
-{
-  "recommendation": "BUY" | "HOLD" | "SELL",
-  "targetBuy": "적정 매수가 (숫자만, 단위 없이)",
-  "targetSell": "적정 매도가 (숫자만, 단위 없이)",
-  "swotStrength": "강점 1~2줄",
-  "swotWeakness": "약점 1~2줄",
-  "swotOpportunity": "기회 1~2줄",
-  "swotThreat": "위협 1~2줄",
-  "reasoning": "종합 투자 의견 3~4줄",
-  "recentIssues": "최근 주요 호재·악재 이슈 3~4줄 (호재: ..., 악재: ... 형식으로)"
-}
-
-한국어로 작성하고, JSON만 응답해줘.`,
+          content: buildReportUserPrompt(stockName, ticker, priceText),
         },
       ],
     });
@@ -109,7 +95,10 @@ export async function GET(req: Request) {
     const text =
       message.content[0].type === "text" ? message.content[0].text : "";
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // 코드블록 내부 JSON 추출 시도 → 일반 JSON 추출 폴백
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }

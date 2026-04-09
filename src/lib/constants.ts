@@ -25,15 +25,16 @@ export const SELL_REASON_TAGS = [
   { label: "현금필요", desc: "현금 확보" },
   { label: "테마종료", desc: "테마 소멸" },
   { label: "추세이탈", desc: "기술적 이탈" },
-  { label: "장기미보유", desc: "장기 보유 불필요" },
+  { label: "매력소멸", desc: "보유 매력 감소" },
 ] as const;
 
 // ─── 심리 상태 ──────────────────────────────────────────
 
 export const EMOTIONS = [
   { label: "확신" },
+  { label: "기대감" },
   { label: "불안" },
   { label: "FOMO" },
-  { label: "손절" },
+  { label: "포기" },
   { label: "기계적" },
 ] as const;

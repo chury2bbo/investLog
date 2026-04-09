@@ -20,12 +20,12 @@ export function formatCompact(value: number, currency: string): string {
   return `₩${formatKRW(value)}`;
 }
 
-/** 통화 기호 포함 금액 표시 (₩1,000 / $1,000) */
+/** 통화 기호 포함 금액 표시 (₩1,000 / $1,000.00) */
 export function formatCash(amount: number, currency: string): string {
   if (currency === "USD") {
-    return `$${amount.toLocaleString()}`;
+    return `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-  return `₩${amount.toLocaleString()}`;
+  return `₩${Math.floor(amount).toLocaleString()}`;
 }
 
 /** 국가별 가격 표시 (₩72,000 / $120.50) */
@@ -33,7 +33,7 @@ export function formatPrice(value: number, country: string): string {
   if (country !== "KR") {
     return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-  return `₩${value.toLocaleString()}`;
+  return `₩${Math.floor(value).toLocaleString()}`;
 }
 
 /** 숫자 문자열에 천 단위 콤마 (소수점 보존) */

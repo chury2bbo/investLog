@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { ThemeToggle } from "@/components/ui";
 import Image from "next/image";
+import Link from "next/link";
 import iconImg from "@/app/icon.png";
 
 // ─── 네비 아이콘 (lucide 스타일) ────────────────────────────
@@ -51,7 +52,6 @@ function isActive(pathname: string, navId: string) {
 // ─── PC 아이콘 사이드바 ──────────────────────────────────
 
 function IconSidebar() {
-  const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
   const [hovered, setHovered] = useState<string | null>(null);
@@ -75,8 +75,8 @@ function IconSidebar() {
               onMouseEnter={() => setHovered(item.id)}
               onMouseLeave={() => setHovered(null)}
             >
-              <button
-                onClick={() => router.push(item.id)}
+              <Link
+                href={item.id}
                 className="w-full flex items-center justify-center py-3 relative cursor-pointer"
                 style={{
                   background: active
@@ -91,7 +91,7 @@ function IconSidebar() {
                   />
                 )}
                 <NavIcon name={item.icon} size={19} active={active} />
-              </button>
+              </Link>
 
               {/* 툴팁 */}
               {hovered === item.id && (
@@ -157,17 +157,16 @@ function IconSidebar() {
 // ─── 모바일 바텀 네비 ────────────────────────────────────
 
 function BottomNav() {
-  const router = useRouter();
   const pathname = usePathname();
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around pt-2 pb-5 z-50 border-t bg-[var(--color-surface)] dark:bg-[var(--color-surface)] border-[var(--color-g200)] dark:border-[var(--color-border)]">
-      {NAV_ITEMS.map((item) => {
+      {NAV_ITEMS.filter((item) => item.id !== "/profile").map((item) => {
         const active = isActive(pathname, item.id);
         return (
-          <button
+          <Link
             key={item.id}
-            onClick={() => router.push(item.id)}
+            href={item.id}
             className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-2 cursor-pointer min-h-[44px] justify-center"
             style={{ opacity: active ? 1 : 0.4 }}
           >
@@ -181,7 +180,7 @@ function BottomNav() {
             >
               {item.mobileLabel}
             </span>
-          </button>
+          </Link>
         );
       })}
     </div>
@@ -202,6 +201,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (status !== "authenticated") return;
+    if (checked) return;
 
     if (pathname === "/import") {
       setChecked(true);
@@ -218,7 +218,7 @@ export default function DashboardLayout({
         }
       })
       .catch(() => setChecked(true));
-  }, [status, router, pathname]);
+  }, [status, checked, router, pathname]);
 
   if (status === "loading" || !checked) {
     return (

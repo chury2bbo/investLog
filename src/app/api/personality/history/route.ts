@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { CLAUDE_MODEL, COACHING_SYSTEM, buildCoachingUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
 
 // ─── GET: 코칭 히스토리 목록 조회 ───────────────────────
@@ -129,6 +130,10 @@ export async function POST() {
   const avgHoldingDays = matchedTrades.length > 0
     ? Math.round(matchedTrades.reduce((s, t) => s + t.holdingDays, 0) / matchedTrades.length)
     : 0;
+  const lossCount = matchedTrades.filter((t) => t.pnlRate < 0).length;
+  const lossRatio = matchedTrades.length > 0
+    ? Math.round((lossCount / matchedTrades.length) * 100 * 10) / 10
+    : 0;
 
   // 태그별 성과
   const tagStats: Record<string, { count: number; totalPnl: number }> = {};
@@ -140,7 +145,12 @@ export async function POST() {
     });
   });
   const topTags = Object.entries(tagStats)
-    .map(([tag, s]) => `${tag}: ${s.count}건, 평균 ${(s.totalPnl / s.count).toFixed(1)}%`)
+    .map(([tag, s]) => ({
+      tag,
+      count: s.count,
+      avgPnl: Math.round((s.totalPnl / s.count) * 100) / 100,
+    }))
+    .sort((a, b) => b.count - a.count)
     .slice(0, 7);
 
   // 감정별 성과
@@ -152,7 +162,12 @@ export async function POST() {
     emotionStats[t.emotion].totalPnl += t.pnlRate;
   });
   const emotionSummary = Object.entries(emotionStats)
-    .map(([emotion, s]) => `${emotion}: ${s.count}건, 평균 ${(s.totalPnl / s.count).toFixed(1)}%`);
+    .map(([emotion, s]) => ({
+      emotion,
+      count: s.count,
+      avgPnl: Math.round((s.totalPnl / s.count) * 100) / 100,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   // 섹터 집중도
   const sectorMap: Record<string, number> = {};
@@ -178,6 +193,12 @@ export async function POST() {
     return `${r.label}: ${pct}%`;
   });
 
+  // 현재 보유종목 요약
+  const holdingsList = holdings.map((h) => {
+    const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
+    return `${h.name}(${h.ticker}) — ${sector}, ${h.quantity}주`;
+  });
+
   // ─── Claude API 호출 ──────────────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -187,43 +208,26 @@ export async function POST() {
   try {
     const anthropic = new Anthropic({ apiKey });
 
-    const prompt = `당신은 개인 투자자의 매매 패턴을 분석하고 개선 방향을 제시하는 코치입니다.
-반드시 아래 JSON 형식으로만 응답하세요. 진단 → 근거 → 액션 3단 구조를 지키세요.
-
-═══ 투자자 데이터 ═══
-- 총 매매: ${trades.length}건 (매수 ${buyTrades.length}, 매도 ${sellTrades.length})
-- 매칭 완료: ${matchedTrades.length}건
-- 승률: ${winRate}%
-- 평균 보유: ${avgHoldingDays}일
-
-═══ 이유 태그별 성과 ═══
-${topTags.join("\n")}
-
-═══ 감정별 성과 ═══
-${emotionSummary.length > 0 ? emotionSummary.join("\n") : "감정 기록 없음"}
-
-═══ 섹터 집중도 ═══
-${sectorSummary.join("\n")}
-
-═══ 보유기간 분포 ═══
-${holdingSummary.join("\n")}
-
-═══ 응답 형식 (JSON만 응답) ═══
-{
-  "strengths": ["잘하고 있는 것 1", "잘하고 있는 것 2"],
-  "mistakes": ["반복 실수 1 (수치 포함)", "반복 실수 2 (수치 포함)"],
-  "goals": ["구체적 개선 목표 1 (수치 포함)", "목표 2", "목표 3"]
-}
-
-규칙:
-- 각 항목은 1~2문장, 반드시 수치 근거 포함
-- 막연한 조언 금지 ("더 열심히" 같은 표현 사용 금지)
-- 한국어로 응답`;
+    const userPrompt = buildCoachingUserPrompt({
+      totalTrades: trades.length,
+      buyCount: buyTrades.length,
+      sellCount: sellTrades.length,
+      matchedCount: matchedTrades.length,
+      winRate,
+      avgHoldingDays,
+      lossRatio,
+      topTags,
+      emotionSummary,
+      sectorSummary,
+      holdingSummary,
+      holdingsList,
+    });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       max_tokens: 800,
-      messages: [{ role: "user", content: prompt }],
+      system: COACHING_SYSTEM,
+      messages: [{ role: "user", content: userPrompt }],
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
+import { CLAUDE_MODEL, IMPORT_ANALYZE_PROMPT } from "@/lib/prompts";
 import { getYahooSearch } from "@/lib/yahoo";
 
 export async function POST(req: Request) {
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       messages: [
         {
@@ -45,31 +46,7 @@ export async function POST(req: Request) {
             },
             {
               type: "text",
-              text: `이 이미지를 분석해줘.
-
-1단계: 증권사 앱의 보유종목 또는 잔고 화면인지 판단해.
-- 증권사 잔고/보유종목 화면이 아닌 경우: { "valid": false } 만 반환
-- 종목명·수량·평단가를 전혀 읽을 수 없는 경우: { "valid": false } 만 반환
-
-2단계: 유효한 화면이면 아래 JSON 형식으로 응답해줘.
-
-규칙:
-- avgPrice(평단가), quantity(수량)는 콤마/원/$ 없이 순수 숫자, 확인 안 되면 0
-- ticker(종목코드)가 안 보이면 빈 문자열
-- 국내 종목은 country "KR", 해외 종목은 "US"
-- cashBalances는 예수금/잔고가 보이면 추출, 없으면 빈 배열
-
-{
-  "valid": true,
-  "holdings": [
-    { "name": "종목명", "ticker": "종목코드", "avgPrice": 0, "quantity": 0, "country": "KR" }
-  ],
-  "cashBalances": [
-    { "currency": "KRW", "amount": 0 }
-  ]
-}
-
-JSON만 응답해줘.`,
+              text: IMPORT_ANALYZE_PROMPT,
             },
           ],
         },
@@ -91,11 +68,20 @@ JSON만 응답해줘.`,
           if (h.ticker) return;
 
           if (h.country === "KR") {
-            const found = await prisma.stockMaster.findFirst({
-              where: { name: { contains: h.name, mode: "insensitive" } },
+            // 정확 일치 우선 → 없으면 contains 폴백
+            const exact = await prisma.stockMaster.findFirst({
+              where: { name: h.name },
               select: { ticker: true },
             });
-            if (found) h.ticker = found.ticker;
+            if (exact) {
+              h.ticker = exact.ticker;
+            } else {
+              const partial = await prisma.stockMaster.findFirst({
+                where: { name: { contains: h.name, mode: "insensitive" } },
+                select: { ticker: true },
+              });
+              if (partial) h.ticker = partial.ticker;
+            }
           } else {
             const results = await getYahooSearch(h.name);
             if (results.length > 0) h.ticker = results[0].ticker;

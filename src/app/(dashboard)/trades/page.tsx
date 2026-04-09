@@ -40,9 +40,10 @@ import {
 
 const EMOTION_ICONS: Record<string, React.ReactNode> = {
   확신: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 20v-4"/><path d="M12 20V8"/><path d="M18 20V4"/><path d="M2 20h20"/></svg>,
+  기대감: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
   불안: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M9.5 15.5l-1 2"/><path d="M14.5 15.5l1 2"/></svg>,
   FOMO: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h2"/><path d="M14 9h2"/><path d="M9 15c.6-1 1.5-1.5 3-1.5s2.4.5 3 1.5"/><line x1="12" y1="4" x2="12" y2="2"/><line x1="8" y1="4.5" x2="7" y2="2.8"/><line x1="16" y1="4.5" x2="17" y2="2.8"/></svg>,
-  손절: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg>,
+  포기: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg>,
   기계적: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
 };
 
@@ -59,6 +60,7 @@ import { fmtNum, stripNum } from "@/lib/format";
 export default function TradesPage() {
   const router = useRouter();
   const [trades, setTrades] = useState<TradeLog[]>([]);
+  const tradesRef = useRef<TradeLog[]>([]);
   const [total, setTotal] = useState(0);
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +107,7 @@ export default function TradesPage() {
   const [cashConfirmMsg, setCashConfirmMsg] = useState("");
 
   // 토스트
-  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean }>({ title: "", message: "", visible: false });
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean; variant?: "success" | "error"; action?: { label: string; onClick: () => void } }>({ title: "", message: "", visible: false });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 이전 거래 불러오기
@@ -146,11 +148,13 @@ export default function TradesPage() {
         const data = await res.json();
         if (data.data && typeof data.total === "number") {
           setTrades(data.data);
+          tradesRef.current = data.data;
           setTotal(data.total);
         } else {
           // API가 아직 paginated 응답이 아닌 경우 호환
           const arr = Array.isArray(data) ? data : [];
           setTrades(arr);
+          tradesRef.current = arr;
           setTotal(arr.length);
         }
       }
@@ -225,6 +229,8 @@ export default function TradesPage() {
 
   // ─── 요약 계산 ───────────────────────────────────────���─
 
+  const buyCount = trades.filter((t) => t.type === "BUY").length;
+  const sellCount = trades.filter((t) => t.type === "SELL").length;
   const buyKrw = trades
     .filter((t) => t.type === "BUY" && getCountryFromTicker(t.ticker) === "KR")
     .reduce((sum, t) => sum + t.price * t.quantity, 0);
@@ -244,10 +250,11 @@ export default function TradesPage() {
 
   // ─── 매매 등록 ─────────────────────────────────────────
 
-  function showToast(title: string, message: string) {
+  function showToast(title: string, message: string, opts?: { variant?: "success" | "error"; action?: { label: string; onClick: () => void } }) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToast({ title, message, visible: true });
-    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+    setToast({ title, message, visible: true, variant: opts?.variant, action: opts?.action });
+    const duration = opts?.action ? 6000 : 3500;
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), duration);
   }
 
   function resetForm() {
@@ -419,17 +426,49 @@ export default function TradesPage() {
       }
       if (data.cashWarning) setCashWarning(true);
 
-      // 이유 태그 미입력 시 넛지 Toast
-      if (formReasonTags.length === 0) {
-        showToast(
-          `${formName} ${formType === "BUY" ? "매수" : "매도"} 등록 완료`,
-          "이유 태그를 추가하면 성향 분석이 더 정확해져요",
-        );
-      }
+      const missingTags = formReasonTags.length === 0;
+      const missingEmotion = !formEmotion;
+      const tradeName = formName;
+      const tradeType = formType;
+      const tradeId = data.id;
 
       setModalOpen(false);
       resetForm();
-      fetchTrades();
+      await fetchTrades();
+
+      // 등록 완료 Toast (넛지 포함)
+      const typeLabel = tradeType === "BUY" ? "매수" : "매도";
+      if (missingTags || missingEmotion) {
+        const missing = missingTags && missingEmotion
+          ? "이유 태그와 심리 상태"
+          : missingTags ? "이유 태그" : "심리 상태";
+        showToast(
+          `${tradeName} ${typeLabel} 등록 완료`,
+          `${missing}를 추가하면 성향 분석이 더 정확해져요`,
+          {
+            variant: "success",
+            action: {
+              label: "지금 추가",
+              onClick: () => {
+                const trade = tradesRef.current.find((t) => t.id === tradeId);
+                if (trade) {
+                  setDetailTrade(trade);
+                  setDetailTags(trade.reasonTags);
+                  setDetailEmotion(trade.emotion ?? "");
+                  setDetailMemo(trade.memo ?? "");
+                  setDetailEditing(true);
+                }
+              },
+            },
+          },
+        );
+      } else {
+        showToast(
+          `${tradeName} ${typeLabel} 등록 완료`,
+          `${formQuantity}주 · ${Number(formPrice).toLocaleString()}원`,
+          { variant: "success" },
+        );
+      }
     } catch {
       setSubmitError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -566,6 +605,8 @@ export default function TradesPage() {
         title={toast.title}
         message={toast.message}
         visible={toast.visible}
+        variant={toast.variant}
+        action={toast.action}
         onClose={() => setToast((p) => ({ ...p, visible: false }))}
       />
 
@@ -626,7 +667,7 @@ export default function TradesPage() {
 
             {/* 요약 칩 */}
             <div className="mb-3">
-              <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
+              <SummaryChips totalCount={total} buyCount={buyCount} sellCount={sellCount} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} />
             </div>
 
             {/* 테이블 or 빈 상태 */}
@@ -714,7 +755,7 @@ export default function TradesPage() {
 
             {/* 요약 칩 */}
             <div className="px-4 py-2.5">
-              <SummaryChips totalCount={total} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} avgPnlRate={avgPnlRate} />
+              <SummaryChips totalCount={total} buyCount={buyCount} sellCount={sellCount} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} />
             </div>
 
             {/* 리스트 or 빈 상태 */}
@@ -754,10 +795,10 @@ export default function TradesPage() {
           const isForeign = country !== "KR";
           const priceStr = isForeign
             ? `$${detailTrade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-            : `₩${detailTrade.price.toLocaleString()}`;
+            : `₩${Math.floor(detailTrade.price).toLocaleString()}`;
           const totalStr = isForeign
             ? `$${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-            : `₩${total.toLocaleString()}`;
+            : `₩${Math.floor(total).toLocaleString()}`;
 
           return (
             <div className="space-y-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
@@ -15,6 +15,7 @@ import {
   BottomSheet,
   ConfirmDialog,
   ThemeToggle,
+  Toast,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 
@@ -99,6 +100,16 @@ export default function AccountsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // 토스트
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean; variant?: "success" | "error" }>({ title: "", message: "", visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(title: string, message: string, opts?: { variant?: "success" | "error" }) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true, variant: opts?.variant });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
+
   const fetchAccounts = useCallback(async () => {
     try {
       const res = await fetch("/api/accounts");
@@ -182,6 +193,7 @@ export default function AccountsPage() {
         setFormCashUSD("");
         setFormError("");
         fetchAccounts();
+        showToast("계좌 추가 완료", "새 계좌가 등록되었습니다.", { variant: "success" });
       } else {
         const data = await res.json();
         setFormError(data.error ?? "계좌 추가에 실패했습니다.");
@@ -235,8 +247,10 @@ export default function AccountsPage() {
         method: "DELETE",
       });
       if (res.ok) {
+        const deletedName = deleteConfirm.name;
         setDeleteConfirm(null);
         fetchAccounts();
+        showToast("계좌 삭제 완료", `${deletedName} 계좌가 삭제되었습니다.`, { variant: "success" });
       }
     } catch {
       /* 실패 */
@@ -251,6 +265,15 @@ export default function AccountsPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
+      {/* 토스트 */}
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        variant={toast.variant}
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
+
       {/* 헤더 (항상 즉시 표시) */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">

@@ -77,9 +77,10 @@ interface CoachingItem {
 
 const EMOTION_ICONS: Record<string, React.ReactNode> = {
   확신: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 20v-4"/><path d="M12 20V8"/><path d="M18 20V4"/><path d="M2 20h20"/></svg>,
+  기대감: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
   불안: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
   FOMO: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 9h2"/><path d="M14 9h2"/><path d="M9 15c.6-1 1.5-1.5 3-1.5s2.4.5 3 1.5"/></svg>,
-  손절: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg>,
+  포기: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 20h20"/><line x1="2" y1="4" x2="22" y2="20" strokeWidth="2"/></svg>,
   기계적: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
 };
 
@@ -108,7 +109,7 @@ export default function PersonalityPage() {
   const [personalityLoading, setPersonalityLoading] = useState(false);
   const [coachingLoading, setCoachingLoading] = useState(false);
   const [coachingError, setCoachingError] = useState("");
-  const [expandedCoaching, setExpandedCoaching] = useState<number | null>(null);
+  const [expandedCoachings, setExpandedCoachings] = useState<Set<number>>(new Set());
   const [refreshMsg, setRefreshMsg] = useState("");
 
   // ─── 데이터 패칭 ──────────────────────────────────────
@@ -117,7 +118,7 @@ export default function PersonalityPage() {
     try {
       const [statsRes, personalityRes, historyRes] = await Promise.allSettled([
         fetch("/api/trades/analysis?min=3"),
-        fetch("/api/personality/summary"),
+        fetch("/api/personality/summary?cacheOnly=true"),
         fetch("/api/personality/history"),
       ]);
 
@@ -129,7 +130,7 @@ export default function PersonalityPage() {
 
       if (personalityRes.status === "fulfilled" && personalityRes.value.ok) {
         const data = await personalityRes.value.json();
-        if (!data.locked) setPersonality(data);
+        if (!data.locked && !data.empty) setPersonality(data);
       }
 
       if (historyRes.status === "fulfilled" && historyRes.value.ok) {
@@ -157,14 +158,16 @@ export default function PersonalityPage() {
       const res = await fetch("/api/personality/summary");
       if (res.ok) {
         const data = await res.json();
-        if (!data.locked) {
-          // 캐시된 결과와 동일하면 이미 이번 주 진단 완료
+        if (!data.locked && !data.empty) {
           if (personality && data.weekKey === personality.weekKey) {
             setRefreshMsg("이번 주 진단 내용이 있어요. 다음 주에 다시 진단할 수 있습니다.");
             setTimeout(() => setRefreshMsg(""), 4000);
           } else {
             setPersonality(data);
           }
+        } else if (data.locked) {
+          setRefreshMsg(`매매 ${data.remaining}건 더 기록하면 진단할 수 있어요.`);
+          setTimeout(() => setRefreshMsg(""), 4000);
         }
       }
     } catch {
@@ -189,7 +192,7 @@ export default function PersonalityPage() {
       }
       setCoachings((prev) => [data, ...prev]);
       setCoachingRemaining(data.remaining ?? 0);
-      setExpandedCoaching(data.id);
+      setExpandedCoachings((prev) => new Set(prev).add(data.id));
     } catch {
       setCoachingError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -205,7 +208,7 @@ export default function PersonalityPage() {
     return (
       <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
         <Header />
-        <div className="rounded-2xl p-6 mb-6" style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))" }}>
+        <div className="rounded-[20px] p-6 mb-6" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
           <Skeleton className="h-4 w-32 mb-3 !bg-white/20" />
           <Skeleton className="h-7 w-48 mb-2 !bg-white/20" />
           <Skeleton className="h-4 w-full !bg-white/20" />
@@ -291,12 +294,12 @@ export default function PersonalityPage() {
 
       {/* ══════════ 섹션 1 — 나의 투자자 유형 ══════════ */}
       {canShowHero && (
-        <div className="rounded-2xl p-6 mb-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))" }}>
+        <div className="rounded-[20px] p-6 mb-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
           {/* 장식 원 */}
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10" style={{ background: "white" }} />
           <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-10" style={{ background: "white" }} />
 
-          <p className="text-xs font-semibold text-white/70 mb-1">나의 투자자 유형</p>
+          <p className="text-xs font-semibold text-white/55 mb-1">나의 투자자 유형</p>
 
           {personality ? (
             <>
@@ -309,7 +312,7 @@ export default function PersonalityPage() {
                   { label: "평균보유", value: personality.avgHoldingDays != null ? `${personality.avgHoldingDays}일` : "-" },
                   { label: "손절비율", value: personality.lossRatio != null ? `${personality.lossRatio}%` : "-" },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-xl py-2 px-3 text-center" style={{ background: "rgba(255,255,255,0.15)" }}>
+                  <div key={item.label} className="rounded-xl py-2 px-3 text-center" style={{ background: "rgba(255,255,255,0.12)" }}>
                     <div className="text-[10px] text-white/60">{item.label}</div>
                     <div className="text-sm font-bold text-white">{item.value}</div>
                   </div>
@@ -325,7 +328,7 @@ export default function PersonalityPage() {
                   disabled={personalityLoading}
                   className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors disabled:opacity-50 cursor-pointer backdrop-blur-sm"
                 >
-                  {personalityLoading ? "분석 중..." : "AI 재진단"}
+                  {personalityLoading ? "분석 중..." : "AI 진단"}
                 </button>
               </div>
               {refreshMsg && (
@@ -341,7 +344,7 @@ export default function PersonalityPage() {
             </div>
           ) : (
             <div className="py-4">
-              <p className="text-sm text-white/70 mb-3">아직 유형 진단이 생성되지 않았어요</p>
+              <p className="text-sm text-white/55 mb-3">아직 유형 진단이 생성되지 않았어요</p>
               <button
                 onClick={refreshPersonality}
                 className="text-sm font-semibold text-white underline underline-offset-2 hover:text-white/80 transition-colors"
@@ -722,7 +725,7 @@ export default function PersonalityPage() {
       {coachings.length > 0 && (
         <div className="space-y-3 mb-4">
           {coachings.map((coaching, idx) => {
-            const isExpanded = expandedCoaching === coaching.id;
+            const isExpanded = expandedCoachings.has(coaching.id);
             const dateStr = new Date(coaching.createdAt).toLocaleDateString("ko-KR", {
               month: "long",
               day: "numeric",
@@ -730,7 +733,12 @@ export default function PersonalityPage() {
             return (
               <Card key={coaching.id}>
                 <button
-                  onClick={() => setExpandedCoaching(isExpanded ? null : coaching.id)}
+                  onClick={() => setExpandedCoachings(prev => {
+                    const next = new Set(prev);
+                    if (isExpanded) next.delete(coaching.id);
+                    else next.add(coaching.id);
+                    return next;
+                  })}
                   className="w-full flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">

@@ -60,7 +60,7 @@ export function formatPrice(trade: { price: number; ticker: string }): string {
   const country = getCountryFromTicker(trade.ticker);
   return country === "US"
     ? `$${trade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    : `₩${trade.price.toLocaleString()}`;
+    : `₩${Math.floor(trade.price).toLocaleString()}`;
 }
 
 export function formatTotal(trade: { price: number; quantity: number; ticker: string }): string {
@@ -68,7 +68,7 @@ export function formatTotal(trade: { price: number; quantity: number; ticker: st
   const country = getCountryFromTicker(trade.ticker);
   return country === "US"
     ? `$${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    : `₩${total.toLocaleString()}`;
+    : `₩${Math.floor(total).toLocaleString()}`;
 }
 
 export const QUICK_DATE_OPTIONS = [

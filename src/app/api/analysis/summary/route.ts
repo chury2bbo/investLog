@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { CLAUDE_MODEL, buildSummaryUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
 
 export async function GET(req: Request) {
@@ -33,21 +34,12 @@ export async function GET(req: Request) {
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       max_tokens: 512,
       messages: [
         {
           role: "user",
-          content: `주식 종목 "${ticker}"에 대해 한국어로 간결하게 소개해줘.
-다음 형식으로 작성해:
-- 종목명(한국어)
-- 거래소
-- 섹터
-- 산업
-- 소개 (2~3줄로 핵심 사업과 투자 포인트 요약)
-
-JSON 형식으로 응답해줘:
-{"name":"종목명","exchange":"거래소","sector":"섹터","industry":"산업","summary":"소개 2~3줄"}`,
+          content: buildSummaryUserPrompt(ticker),
         },
       ],
     });

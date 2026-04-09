@@ -71,7 +71,17 @@ export async function DELETE() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await prisma.user.delete({ where: { id: session.user.id } });
+  const userId = session.user.id;
+
+  // relation 없는 테이블 수동 삭제 (cascade 미적용 대상)
+  await Promise.all([
+    prisma.apiUsageLog.deleteMany({ where: { userId } }),
+    prisma.personalityCache.deleteMany({ where: { userId } }),
+    prisma.coachingHistory.deleteMany({ where: { userId } }),
+  ]);
+
+  // User 삭제 (나머지는 onDelete: Cascade로 자동 삭제)
+  await prisma.user.delete({ where: { id: userId } });
 
   return Response.json({ success: true });
 }

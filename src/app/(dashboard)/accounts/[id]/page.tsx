@@ -16,6 +16,7 @@ import {
   ConfirmDialog,
   ThemeToggle,
   Skeleton,
+  Toast,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -136,6 +137,16 @@ export default function AccountDetailPage() {
   const [sectorEditTags, setSectorEditTags] = useState<string[]>([]);
   const [sectorEditTagInput, setSectorEditTagInput] = useState("");
   const [sectorEditSubmitting, setSectorEditSubmitting] = useState(false);
+
+  // 토스트
+  const [toast, setToast] = useState<{ title: string; message: string; visible: boolean; variant?: "success" | "error" }>({ title: "", message: "", visible: false });
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(title: string, message: string, opts?: { variant?: "success" | "error" }) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ title, message, visible: true, variant: opts?.variant });
+    toastTimerRef.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  }
 
   // 국내 종목 검색 autocomplete
   const [hStockQuery, setHStockQuery] = useState("");
@@ -372,6 +383,7 @@ export default function AccountDetailPage() {
       setHoldingModal(false);
       resetHoldingForm();
       fetchAccount();
+      showToast("종목 추가 완료", `${hName}(${hTicker})이(가) 등록되었습니다.`, { variant: "success" });
     } catch {
       setHError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -383,7 +395,7 @@ export default function AccountDetailPage() {
 
   function openHoldingEdit(h: Holding) {
     setHoldingEditTarget(h);
-    setHoldingEditPrice(String(h.avgPrice));
+    setHoldingEditPrice(String(h.country === "KR" ? Math.floor(h.avgPrice) : h.avgPrice));
     setHoldingEditQty(String(h.quantity));
     setHoldingEditError("");
     setHoldingEditModal(true);
@@ -408,6 +420,7 @@ export default function AccountDetailPage() {
       if (res.ok) {
         setHoldingEditModal(false);
         fetchAccount();
+        showToast("종목 수정 완료", `${holdingEditTarget.name} 정보가 수정되었습니다.`, { variant: "success" });
       } else {
         const data = await res.json();
         setHoldingEditError(data.error ?? "수정 실패");
@@ -425,10 +438,12 @@ export default function AccountDetailPage() {
     if (!holdingDeleteConfirm) return;
     setHoldingDeleting(true);
     try {
+      const deletedName = holdingDeleteConfirm.name;
       const res = await fetch(`/api/holdings/${holdingDeleteConfirm.id}`, { method: "DELETE" });
       if (res.ok) {
         setHoldingDeleteConfirm(null);
         fetchAccount();
+        showToast("종목 삭제 완료", `${deletedName}이(가) 삭제되었습니다.`, { variant: "success" });
       }
     } catch {
       /* 실패 */
@@ -539,7 +554,7 @@ export default function AccountDetailPage() {
         </div>
 
         {/* 히어로 카드 스켈레톤 */}
-        <div className="rounded-[20px] p-5 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
+        <div className="rounded-[20px] p-6 mb-4" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
           <Skeleton className="h-4 w-20 mb-2 !bg-white/20" />
           <Skeleton className="h-8 w-44 mb-4 !bg-white/20" />
           <div className="grid grid-cols-4 gap-1.5">
@@ -630,6 +645,15 @@ export default function AccountDetailPage() {
 
   return (
     <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
+      {/* 토스트 */}
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        variant={toast.variant}
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
+
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -661,7 +685,7 @@ export default function AccountDetailPage() {
 
       {/* ── ② 자산 요약 카드 ── */}
       <div
-        className="rounded-[20px] p-5 mb-4 relative overflow-hidden"
+        className="rounded-[20px] p-6 mb-4 relative overflow-hidden"
         style={{
           background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)",
         }}
@@ -672,7 +696,7 @@ export default function AccountDetailPage() {
 
         <div className="relative flex justify-between items-start">
           <div>
-            <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <div className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>
               합산 (원화)
             </div>
             <div className="text-[28px] font-extrabold text-white tracking-tight">
@@ -861,7 +885,7 @@ export default function AccountDetailPage() {
               }
               return isForeign
                 ? `${sign}$${abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : `${sign}₩${abs.toLocaleString()}`;
+                : `${sign}₩${Math.floor(abs).toLocaleString()}`;
             };
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
@@ -981,7 +1005,7 @@ export default function AccountDetailPage() {
                       {t.name}
                     </div>
                     <div className="text-[11px] text-[var(--color-g400)]">
-                      {t.quantity}주 · {t.ticker.length <= 6 && /^\d+$/.test(t.ticker) ? `₩${t.price.toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      {t.quantity}주 · {t.ticker.length <= 6 && /^\d+$/.test(t.ticker) ? `₩${Math.floor(t.price).toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </div>
                   </div>
                 </div>
