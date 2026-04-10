@@ -225,13 +225,17 @@ export async function POST() {
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 800,
+      max_tokens: 2048,
       system: COACHING_SYSTEM,
       messages: [{ role: "user", content: userPrompt }],
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const { input_tokens, output_tokens } = message.usage;
+
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }
@@ -248,7 +252,7 @@ export async function POST() {
       },
     });
 
-    // ─── 사용 횟수 증가 ─────────────────────────────────
+    // ─── 사용 횟수 + 토큰 증가 ──────────────────────────
     await prisma.apiUsageLog.upsert({
       where: {
         userId_type_date: {
@@ -262,9 +266,13 @@ export async function POST() {
         type: "coaching",
         date: today,
         count: 1,
+        inputTokens: input_tokens,
+        outputTokens: output_tokens,
       },
       update: {
         count: { increment: 1 },
+        inputTokens: { increment: input_tokens },
+        outputTokens: { increment: output_tokens },
       },
     });
 

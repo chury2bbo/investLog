@@ -18,7 +18,7 @@
 
 | 구분 | 기술 | 버전/비고 |
 |------|------|-----------|
-| 프레임워크 | Next.js App Router | 14 |
+| 프레임워크 | Next.js App Router | 16 |
 | 언어 | TypeScript | strict 모드 |
 | 스타일 | Tailwind CSS | - |
 | 차트 | Recharts | - |

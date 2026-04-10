@@ -1911,7 +1911,9 @@ export const ApiUsageLogScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
   date: 'date',
-  count: 'count'
+  count: 'count',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens'
 } as const
 
 export type ApiUsageLogScalarFieldEnum = (typeof ApiUsageLogScalarFieldEnum)[keyof typeof ApiUsageLogScalarFieldEnum]

@@ -4,7 +4,7 @@ interface ButtonProps {
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
-  onClick?: () => void;
+  onClick?: () => void | Promise<void>;
 }
 
 export function Button({

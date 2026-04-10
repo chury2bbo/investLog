@@ -65,9 +65,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-(--color-bg)">
       <div className="w-full max-w-sm">
         {/* 로고 */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 mt-14">
           <div className="mx-auto mb-3 flex justify-center">
-            <Image src={iconImg} alt="버텨일지" width={56} height={56} className="rounded-xl" />
+            <Image src={iconImg} alt="버텨일지" width={68} height={68} className="rounded-xl" />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-(--color-text)">
             버텨일지

@@ -1216,9 +1216,33 @@ export default function OnboardingPage() {
           >
             버텨일지 시작하기
           </h1>
-          <p className="text-xs" style={{ color: "var(--color-g400)" }}>
-            Step {step} / 2
-          </p>
+          {/* 스텝 인디케이터 */}
+          <div className="mt-4 flex items-center gap-2">
+            {[
+              { num: 1, label: "계좌·종목 등록" },
+              { num: 2, label: "첫 매매 기록" },
+            ].map(({ num, label }) => (
+              <div key={num} className="flex items-center gap-2 flex-1">
+                <div
+                  className="flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold shrink-0 transition-colors duration-300"
+                  style={{
+                    backgroundColor: step >= num ? "var(--color-primary)" : "var(--color-g200)",
+                    color: step >= num ? "#fff" : "var(--color-g400)",
+                  }}
+                >
+                  {step > num ? "✓" : num}
+                </div>
+                <span
+                  className="text-xs font-medium transition-colors duration-300"
+                  style={{
+                    color: step >= num ? "var(--color-text)" : "var(--color-g400)",
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
 
           {/* 프로그레스 바 */}
           <div
@@ -1256,16 +1280,23 @@ export default function OnboardingPage() {
                 variant="secondary"
                 size="lg"
                 onClick={async () => {
-                  await fetch("/api/onboarding/bulk", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ accounts: [], trade: undefined }),
-                  });
-                  router.push("/");
+                  setSubmitting(true);
+                  try {
+                    const res = await fetch("/api/onboarding/bulk", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ accounts: [], trade: undefined }),
+                    });
+                    if (!res.ok) throw new Error("온보딩 완료 처리 실패");
+                    router.push("/");
+                  } catch {
+                    showToast("오류", "건너뛰기 처리 중 문제가 발생했어요. 다시 시도해주세요.");
+                    setSubmitting(false);
+                  }
                 }}
                 disabled={submitting}
               >
-                건너뛰기
+                {submitting ? "처리 중..." : "건너뛰기"}
               </Button>
               <Button size="lg" onClick={() => {
                   // 종목이 있는데 증권사 미선택인 경우 차단

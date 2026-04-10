@@ -29,11 +29,15 @@ export type AggregateApiUsageLog = {
 export type ApiUsageLogAvgAggregateOutputType = {
   id: number | null
   count: number | null
+  inputTokens: number | null
+  outputTokens: number | null
 }
 
 export type ApiUsageLogSumAggregateOutputType = {
   id: number | null
   count: number | null
+  inputTokens: number | null
+  outputTokens: number | null
 }
 
 export type ApiUsageLogMinAggregateOutputType = {
@@ -42,6 +46,8 @@ export type ApiUsageLogMinAggregateOutputType = {
   type: string | null
   date: string | null
   count: number | null
+  inputTokens: number | null
+  outputTokens: number | null
 }
 
 export type ApiUsageLogMaxAggregateOutputType = {
@@ -50,6 +56,8 @@ export type ApiUsageLogMaxAggregateOutputType = {
   type: string | null
   date: string | null
   count: number | null
+  inputTokens: number | null
+  outputTokens: number | null
 }
 
 export type ApiUsageLogCountAggregateOutputType = {
@@ -58,6 +66,8 @@ export type ApiUsageLogCountAggregateOutputType = {
   type: number
   date: number
   count: number
+  inputTokens: number
+  outputTokens: number
   _all: number
 }
 
@@ -65,11 +75,15 @@ export type ApiUsageLogCountAggregateOutputType = {
 export type ApiUsageLogAvgAggregateInputType = {
   id?: true
   count?: true
+  inputTokens?: true
+  outputTokens?: true
 }
 
 export type ApiUsageLogSumAggregateInputType = {
   id?: true
   count?: true
+  inputTokens?: true
+  outputTokens?: true
 }
 
 export type ApiUsageLogMinAggregateInputType = {
@@ -78,6 +92,8 @@ export type ApiUsageLogMinAggregateInputType = {
   type?: true
   date?: true
   count?: true
+  inputTokens?: true
+  outputTokens?: true
 }
 
 export type ApiUsageLogMaxAggregateInputType = {
@@ -86,6 +102,8 @@ export type ApiUsageLogMaxAggregateInputType = {
   type?: true
   date?: true
   count?: true
+  inputTokens?: true
+  outputTokens?: true
 }
 
 export type ApiUsageLogCountAggregateInputType = {
@@ -94,6 +112,8 @@ export type ApiUsageLogCountAggregateInputType = {
   type?: true
   date?: true
   count?: true
+  inputTokens?: true
+  outputTokens?: true
   _all?: true
 }
 
@@ -189,6 +209,8 @@ export type ApiUsageLogGroupByOutputType = {
   type: string
   date: string
   count: number
+  inputTokens: number
+  outputTokens: number
   _count: ApiUsageLogCountAggregateOutputType | null
   _avg: ApiUsageLogAvgAggregateOutputType | null
   _sum: ApiUsageLogSumAggregateOutputType | null
@@ -220,6 +242,8 @@ export type ApiUsageLogWhereInput = {
   type?: Prisma.StringFilter<"ApiUsageLog"> | string
   date?: Prisma.StringFilter<"ApiUsageLog"> | string
   count?: Prisma.IntFilter<"ApiUsageLog"> | number
+  inputTokens?: Prisma.IntFilter<"ApiUsageLog"> | number
+  outputTokens?: Prisma.IntFilter<"ApiUsageLog"> | number
 }
 
 export type ApiUsageLogOrderByWithRelationInput = {
@@ -228,6 +252,8 @@ export type ApiUsageLogOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   date?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 export type ApiUsageLogWhereUniqueInput = Prisma.AtLeast<{
@@ -240,6 +266,8 @@ export type ApiUsageLogWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.StringFilter<"ApiUsageLog"> | string
   date?: Prisma.StringFilter<"ApiUsageLog"> | string
   count?: Prisma.IntFilter<"ApiUsageLog"> | number
+  inputTokens?: Prisma.IntFilter<"ApiUsageLog"> | number
+  outputTokens?: Prisma.IntFilter<"ApiUsageLog"> | number
 }, "id" | "userId_type_date">
 
 export type ApiUsageLogOrderByWithAggregationInput = {
@@ -248,6 +276,8 @@ export type ApiUsageLogOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   date?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
   _count?: Prisma.ApiUsageLogCountOrderByAggregateInput
   _avg?: Prisma.ApiUsageLogAvgOrderByAggregateInput
   _max?: Prisma.ApiUsageLogMaxOrderByAggregateInput
@@ -264,6 +294,8 @@ export type ApiUsageLogScalarWhereWithAggregatesInput = {
   type?: Prisma.StringWithAggregatesFilter<"ApiUsageLog"> | string
   date?: Prisma.StringWithAggregatesFilter<"ApiUsageLog"> | string
   count?: Prisma.IntWithAggregatesFilter<"ApiUsageLog"> | number
+  inputTokens?: Prisma.IntWithAggregatesFilter<"ApiUsageLog"> | number
+  outputTokens?: Prisma.IntWithAggregatesFilter<"ApiUsageLog"> | number
 }
 
 export type ApiUsageLogCreateInput = {
@@ -271,6 +303,8 @@ export type ApiUsageLogCreateInput = {
   type: string
   date: string
   count?: number
+  inputTokens?: number
+  outputTokens?: number
 }
 
 export type ApiUsageLogUncheckedCreateInput = {
@@ -279,6 +313,8 @@ export type ApiUsageLogUncheckedCreateInput = {
   type: string
   date: string
   count?: number
+  inputTokens?: number
+  outputTokens?: number
 }
 
 export type ApiUsageLogUpdateInput = {
@@ -286,6 +322,8 @@ export type ApiUsageLogUpdateInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  inputTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  outputTokens?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ApiUsageLogUncheckedUpdateInput = {
@@ -294,6 +332,8 @@ export type ApiUsageLogUncheckedUpdateInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  inputTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  outputTokens?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ApiUsageLogCreateManyInput = {
@@ -302,6 +342,8 @@ export type ApiUsageLogCreateManyInput = {
   type: string
   date: string
   count?: number
+  inputTokens?: number
+  outputTokens?: number
 }
 
 export type ApiUsageLogUpdateManyMutationInput = {
@@ -309,6 +351,8 @@ export type ApiUsageLogUpdateManyMutationInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  inputTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  outputTokens?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ApiUsageLogUncheckedUpdateManyInput = {
@@ -317,6 +361,8 @@ export type ApiUsageLogUncheckedUpdateManyInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  inputTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  outputTokens?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ApiUsageLogUserIdTypeDateCompoundUniqueInput = {
@@ -331,11 +377,15 @@ export type ApiUsageLogCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   date?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 export type ApiUsageLogAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 export type ApiUsageLogMaxOrderByAggregateInput = {
@@ -344,6 +394,8 @@ export type ApiUsageLogMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   date?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 export type ApiUsageLogMinOrderByAggregateInput = {
@@ -352,11 +404,15 @@ export type ApiUsageLogMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   date?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 export type ApiUsageLogSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  inputTokens?: Prisma.SortOrder
+  outputTokens?: Prisma.SortOrder
 }
 
 
@@ -367,6 +423,8 @@ export type ApiUsageLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   type?: boolean
   date?: boolean
   count?: boolean
+  inputTokens?: boolean
+  outputTokens?: boolean
 }, ExtArgs["result"]["apiUsageLog"]>
 
 export type ApiUsageLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -375,6 +433,8 @@ export type ApiUsageLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   type?: boolean
   date?: boolean
   count?: boolean
+  inputTokens?: boolean
+  outputTokens?: boolean
 }, ExtArgs["result"]["apiUsageLog"]>
 
 export type ApiUsageLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -383,6 +443,8 @@ export type ApiUsageLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   type?: boolean
   date?: boolean
   count?: boolean
+  inputTokens?: boolean
+  outputTokens?: boolean
 }, ExtArgs["result"]["apiUsageLog"]>
 
 export type ApiUsageLogSelectScalar = {
@@ -391,9 +453,11 @@ export type ApiUsageLogSelectScalar = {
   type?: boolean
   date?: boolean
   count?: boolean
+  inputTokens?: boolean
+  outputTokens?: boolean
 }
 
-export type ApiUsageLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "date" | "count", ExtArgs["result"]["apiUsageLog"]>
+export type ApiUsageLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "date" | "count" | "inputTokens" | "outputTokens", ExtArgs["result"]["apiUsageLog"]>
 
 export type $ApiUsageLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ApiUsageLog"
@@ -404,6 +468,8 @@ export type $ApiUsageLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
     type: string
     date: string
     count: number
+    inputTokens: number
+    outputTokens: number
   }, ExtArgs["result"]["apiUsageLog"]>
   composites: {}
 }
@@ -832,6 +898,8 @@ export interface ApiUsageLogFieldRefs {
   readonly type: Prisma.FieldRef<"ApiUsageLog", 'String'>
   readonly date: Prisma.FieldRef<"ApiUsageLog", 'String'>
   readonly count: Prisma.FieldRef<"ApiUsageLog", 'Int'>
+  readonly inputTokens: Prisma.FieldRef<"ApiUsageLog", 'Int'>
+  readonly outputTokens: Prisma.FieldRef<"ApiUsageLog", 'Int'>
 }
     
 

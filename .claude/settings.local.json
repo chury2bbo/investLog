@@ -18,7 +18,9 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://192.168.2.19:3000/login)",
       "Bash(find d:/project/investLog/src/app -name \"page.tsx\" -exec grep -l \"async\\\\|await\" {} \\\\;)",
       "Bash(npm ls:*)",
-      "Bash(node -e ':*)"
+      "Bash(node -e ':*)",
+      "Bash(npx tsx -e ':*)",
+      "Bash(npx tsx:*)"
     ],
     "additionalDirectories": [
       "d:\\project\\investLog\\src\\app\\api\\accounts",

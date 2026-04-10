@@ -88,13 +88,16 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-(--color-bg)">
       <div className="w-full max-w-sm">
         {/* 로고 */}
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-2.5 flex justify-center">
-            <Image src={iconImg} alt="버텨일지" width={48} height={48} className="rounded-xl" />
+        <div className="text-center mb-10 mt-14">
+          <div className="mx-auto mb-3 flex justify-center">
+            <Image src={iconImg} alt="버텨일지" width={68} height={68} className="rounded-xl" />
           </div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-(--color-text)">
+          <h1 className="text-2xl font-extrabold tracking-tight text-(--color-text)">
             버텨일지
           </h1>
+          <p className="text-sm mt-1 text-(--color-g500)">
+            한국 개미의 정신력 관리 및 기록
+          </p>
         </div>
 
         {step === 1 ? (

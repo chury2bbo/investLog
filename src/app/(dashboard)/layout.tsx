@@ -64,9 +64,9 @@ function IconSidebar() {
       {/* 로고 */}
       <div className="mb-7"><Image src={iconImg} alt="버텨일지" width={36} height={36} className="rounded-lg" /></div>
 
-      {/* 네비 아이템 */}
+      {/* 네비 아이템 (profile은 하단 이니셜 버튼으로 대체) */}
       <div className="flex-1 flex flex-col gap-1 w-full">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => item.id !== "/profile").map((item) => {
           const active = isActive(pathname, item.id);
           return (
             <div
@@ -115,9 +115,42 @@ function IconSidebar() {
         })}
       </div>
 
-      {/* 하단: 다크모드 + 프로필 */}
+      {/* 하단: 다크모드 + 프로필 + 로그아웃 */}
       <div className="flex flex-col gap-2 items-center">
         <ThemeToggle />
+        <div
+          className="relative"
+          onMouseEnter={() => setHovered("profile")}
+          onMouseLeave={() => setHovered(null)}
+        >
+          <Link
+            href="/profile"
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-extrabold text-white cursor-pointer"
+            style={{
+              background: isActive(pathname, "/profile")
+                ? "linear-gradient(135deg, var(--color-primary), var(--color-primary-mid))"
+                : "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+            }}
+          >
+            {initial}
+          </Link>
+          {hovered === "profile" && (
+            <div
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+              style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+            >
+              회원정보
+              <div
+                className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-0 h-0"
+                style={{
+                  borderTop: "5px solid transparent",
+                  borderBottom: "5px solid transparent",
+                  borderRight: "5px solid var(--color-text)",
+                }}
+              />
+            </div>
+          )}
+        </div>
         <div
           className="relative"
           onMouseEnter={() => setHovered("logout")}
@@ -125,12 +158,14 @@ function IconSidebar() {
         >
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-extrabold text-white cursor-pointer"
-            style={{
-              background: "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
-            }}
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center cursor-pointer transition-colors"
+            style={{ color: "var(--color-g400)" }}
           >
-            {initial}
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
           {hovered === "logout" && (
             <div

@@ -39,13 +39,16 @@ export async function GET(req: Request) {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  // 당일 캐시 확인 (캐시 히트 시 한도 차감 없음)
-  const cached = await prisma.tickerAnalysisCache.findUnique({
-    where: { ticker },
-  });
+  // 캐시 + 한도 + 현재가를 병렬로 조회
+  const [cached, usage, priceResult] = await Promise.all([
+    prisma.tickerAnalysisCache.findUnique({ where: { ticker } }),
+    prisma.apiUsageLog.findUnique({
+      where: { userId_type_date: { userId, type: "analysis", date: today } },
+    }),
+    fetchCurrentPrice(ticker, country),
+  ]);
 
   if (cached && cached.cachedDate === today) {
-    // 캐시 히트 시에도 사용자 분석 이력 기록
     try {
       await prisma.$executeRaw`
         INSERT INTO user_analysis_logs ("userId", ticker, name, country, "createdAt")
@@ -55,10 +58,6 @@ export async function GET(req: Request) {
     return Response.json({ ticker, report: cached, cached: true });
   }
 
-  // 사용자 일일 한도 확인
-  const usage = await prisma.apiUsageLog.findUnique({
-    where: { userId_type_date: { userId, type: "analysis", date: today } },
-  });
   if (usage && usage.count >= DAILY_LIMIT) {
     return Response.json(
       { error: `일일 분석 한도(${DAILY_LIMIT}회)를 초과했습니다. 내일 다시 시도해주세요.` },
@@ -71,8 +70,7 @@ export async function GET(req: Request) {
     return Response.json({ error: "AI API 키가 설정되지 않았습니다." }, { status: 500 });
   }
 
-  // 현재가 조회
-  const { price, currency } = await fetchCurrentPrice(ticker, country);
+  const { price, currency } = priceResult;
   const priceText = price > 0
     ? `현재가: ${price.toLocaleString()}${currency}`
     : "현재가: 조회 불가";
@@ -82,7 +80,7 @@ export async function GET(req: Request) {
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 4096,
+      max_tokens: 2048,
       system: REPORT_SYSTEM,
       messages: [
         {
@@ -94,16 +92,24 @@ export async function GET(req: Request) {
 
     const text =
       message.content[0].type === "text" ? message.content[0].text : "";
+    const { input_tokens, output_tokens } = message.usage;
 
     // 코드블록 내부 JSON 추출 시도 → 일반 JSON 추출 폴백
     const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
+      console.error("[Report] JSON 파싱 실패 — AI 원본 응답:", text.slice(0, 500));
+      return Response.json({ error: "AI 서버 응답이 불완전합니다. 다시 시도해주세요." }, { status: 502 });
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      console.error("[Report] JSON.parse 실패 — 추출된 문자열:", jsonMatch[0].slice(0, 500));
+      return Response.json({ error: "AI 서버 응답이 불완전합니다. 다시 시도해주세요." }, { status: 502 });
+    }
 
     // 당일 캐시 저장
     const report = await prisma.tickerAnalysisCache.upsert({
@@ -135,11 +141,11 @@ export async function GET(req: Request) {
       },
     });
 
-    // 사용량 카운트 증가
+    // 사용량 카운트 + 토큰 증가
     await prisma.apiUsageLog.upsert({
       where: { userId_type_date: { userId, type: "analysis", date: today } },
-      update: { count: { increment: 1 } },
-      create: { userId, type: "analysis", date: today, count: 1 },
+      update: { count: { increment: 1 }, inputTokens: { increment: input_tokens }, outputTokens: { increment: output_tokens } },
+      create: { userId, type: "analysis", date: today, count: 1, inputTokens: input_tokens, outputTokens: output_tokens },
     });
 
     // 사용자 분석 이력 기록
@@ -151,8 +157,12 @@ export async function GET(req: Request) {
     } catch { /* 이력 저장 실패 무시 */ }
 
     return Response.json({ ticker, report, cached: false });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Report API error:", err);
-    return Response.json({ error: "AI 분석 생성에 실패했습니다." }, { status: 500 });
+    const isOverloaded = err instanceof Error && (err.message?.includes("Overloaded") || err.message?.includes("529"));
+    const message = isOverloaded
+      ? "AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요."
+      : "AI 분석 생성에 실패했습니다.";
+    return Response.json({ error: message }, { status: isOverloaded ? 503 : 500 });
   }
 }

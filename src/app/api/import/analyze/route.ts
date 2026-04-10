@@ -54,6 +54,16 @@ export async function POST(req: Request) {
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";
+    const { input_tokens, output_tokens } = message.usage;
+
+    // 토큰 사용량 기록
+    const today = new Date().toISOString().slice(0, 10);
+    await prisma.apiUsageLog.upsert({
+      where: { userId_type_date: { userId: session.user.id, type: "import", date: today } },
+      create: { userId: session.user.id, type: "import", date: today, count: 1, inputTokens: input_tokens, outputTokens: output_tokens },
+      update: { count: { increment: 1 }, inputTokens: { increment: input_tokens }, outputTokens: { increment: output_tokens } },
+    });
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return Response.json({ error: "이미지에서 종목 정보를 찾을 수 없습니다." }, { status: 400 });
