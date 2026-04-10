@@ -534,63 +534,95 @@ export default function TradesPage() {
 
   if (loading && trades.length === 0) {
     return (
-      <div className="w-full max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
-        {/* Header (즉시 표시) */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">매매일지</h1>
-          </div>
-          <div className="md:hidden"><ThemeToggle /></div>
-        </div>
-
-        {/* Filter area */}
-        <Skeleton className="w-full h-12 rounded-xl mb-4" />
-
-        {/* 모바일: 리스트형 스켈레톤 */}
-        <div className="md:hidden rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={`px-3.5 py-3 ${i < 5 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
-              <div className="flex justify-between items-center mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <Skeleton className="w-8 h-[18px] rounded" />
-                  <Skeleton className="w-6 h-[18px] rounded" />
-                  <Skeleton className="w-20 h-4" />
-                </div>
-                <Skeleton className="w-16 h-4" />
-              </div>
-              <div className="flex justify-between items-center">
-                <Skeleton className="w-44 h-3" />
-                <Skeleton className="w-12 h-4 rounded" />
-              </div>
+      <div className="animate-[fadeIn_0.2s_ease-out]">
+        {/* ══════════ PC 스켈레톤 (md 이상) ══════════ */}
+        <div className="hidden md:block w-full max-w-5xl mx-auto px-5 py-6">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">매매일지</h1>
             </div>
-          ))}
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-9 h-9 rounded-xl" />
+              <Skeleton className="w-[88px] h-9 rounded-xl" />
+            </div>
+          </div>
+
+          {/* 필터 카드 */}
+          <Skeleton className="w-full h-[58px] rounded-2xl mb-4" />
+
+          {/* 요약 칩 */}
+          <Skeleton className="w-full h-[68px] rounded-2xl mb-3" />
+
+          {/* 테이블 */}
+          <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+            <div className="px-3 py-2.5 border-b border-[var(--color-g200)] dark:border-[var(--color-border)] flex items-center gap-2">
+              <Skeleton className="w-[70px] h-3 shrink-0" />
+              <Skeleton className="w-[48px] h-3 shrink-0" />
+              <Skeleton className="w-[48px] h-3 shrink-0" />
+              <Skeleton className="flex-1 h-3" />
+              <Skeleton className="w-[72px] h-3 shrink-0" />
+              <Skeleton className="w-[34px] h-3 shrink-0" />
+              <Skeleton className="w-[88px] h-3 shrink-0" />
+            </div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className={`px-3 py-3 flex items-center gap-2 ${i < 6 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
+                <Skeleton className="w-[70px] h-4 shrink-0" />
+                <Skeleton className="w-[48px] h-5 rounded shrink-0" />
+                <Skeleton className="w-[48px] h-5 rounded shrink-0" />
+                <Skeleton className="flex-1 h-4" />
+                <Skeleton className="w-[72px] h-4 shrink-0" />
+                <Skeleton className="w-[34px] h-4 shrink-0" />
+                <Skeleton className="w-[88px] h-4 shrink-0" />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* PC: 테이블형 스켈레톤 */}
-        <div className="hidden md:block rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          <div className="px-4 py-3 border-b border-[var(--color-g100)] dark:border-[var(--color-border)]">
-            <div className="grid grid-cols-7 gap-2">
-              {["w-12", "w-8", "w-6", "w-16", "w-14", "w-10", "w-12"].map((w, i) => (
-                <Skeleton key={i} className={`${w} h-3`} />
+        {/* ══════════ 모바일 스켈레톤 (md 미만) ══════════ */}
+        <div className="block md:hidden pb-28">
+          {/* 상단 고정 바 */}
+          <div className="sticky top-0 z-20 px-4 pt-4 pb-2 bg-[var(--color-bg)]">
+            <div className="flex items-center justify-between mb-2">
+              <Skeleton className="w-24 h-7" />
+              <Skeleton className="w-9 h-9 rounded-xl" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="flex-1 h-9 rounded-xl" />
+              <Skeleton className="w-9 h-9 rounded-xl" />
+              <Skeleton className="w-9 h-9 rounded-xl" />
+            </div>
+          </div>
+
+          {/* 요약 칩 */}
+          <div className="px-4 py-2.5">
+            <Skeleton className="w-full h-[120px] rounded-2xl" />
+          </div>
+
+          {/* 리스트 */}
+          <div className="px-4">
+            <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className={`px-3.5 py-3 ${i < 6 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="w-8 h-[18px] rounded" />
+                      <Skeleton className="w-6 h-[18px] rounded" />
+                      <Skeleton className="w-20 h-4" />
+                    </div>
+                    <Skeleton className="w-16 h-4" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="w-44 h-3" />
+                    <Skeleton className="w-12 h-4 rounded" />
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={`px-4 py-3 ${i < 5 ? "border-b border-[var(--color-g100)] dark:border-[var(--color-border)]" : ""}`}>
-              <div className="grid grid-cols-7 gap-2 items-center">
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-8 h-5 rounded" />
-                <Skeleton className="w-6 h-5 rounded" />
-                <Skeleton className="w-20 h-4" />
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-10 h-4" />
-                <Skeleton className="w-14 h-4" />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     );

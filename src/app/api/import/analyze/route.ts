@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: [
         {
           role: "user",
@@ -64,6 +64,15 @@ export async function POST(req: Request) {
       update: { count: { increment: 1 }, inputTokens: { increment: input_tokens }, outputTokens: { increment: output_tokens } },
     });
 
+    // 응답이 max_tokens로 잘렸는지 확인
+    if (message.stop_reason === "max_tokens") {
+      console.warn("Import analyze: response truncated by max_tokens");
+      return Response.json(
+        { error: "종목이 너무 많아 분석이 잘렸어요. 이미지를 나눠서 다시 시도해주세요." },
+        { status: 400 }
+      );
+    }
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return Response.json({ error: "이미지에서 종목 정보를 찾을 수 없습니다." }, { status: 400 });
@@ -76,25 +85,31 @@ export async function POST(req: Request) {
       await Promise.all(
         parsed.holdings.map(async (h: { ticker: string; name: string; country: string }) => {
           if (h.ticker) return;
+          if (!h.name || !h.name.trim()) return;
 
-          if (h.country === "KR") {
-            // 정확 일치 우선 → 없으면 contains 폴백
-            const exact = await prisma.stockMaster.findFirst({
-              where: { name: h.name },
-              select: { ticker: true },
-            });
-            if (exact) {
-              h.ticker = exact.ticker;
-            } else {
-              const partial = await prisma.stockMaster.findFirst({
-                where: { name: { contains: h.name, mode: "insensitive" } },
+          try {
+            if (h.country === "KR") {
+              // 정확 일치 우선 → 없으면 contains 폴백
+              const exact = await prisma.stockMaster.findFirst({
+                where: { name: h.name },
                 select: { ticker: true },
               });
-              if (partial) h.ticker = partial.ticker;
+              if (exact) {
+                h.ticker = exact.ticker;
+              } else {
+                const partial = await prisma.stockMaster.findFirst({
+                  where: { name: { contains: h.name, mode: "insensitive" } },
+                  select: { ticker: true },
+                });
+                if (partial) h.ticker = partial.ticker;
+              }
+            } else {
+              const results = await getYahooSearch(h.name);
+              if (results.length > 0) h.ticker = results[0].ticker;
             }
-          } else {
-            const results = await getYahooSearch(h.name);
-            if (results.length > 0) h.ticker = results[0].ticker;
+          } catch (lookupErr) {
+            console.warn(`Ticker lookup failed for "${h.name}":`, lookupErr instanceof Error ? lookupErr.message : lookupErr);
+            // 한 종목 실패가 전체 분석을 막지 않도록 무시
           }
         })
       );

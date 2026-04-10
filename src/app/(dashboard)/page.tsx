@@ -274,7 +274,7 @@ export default function DashboardPage() {
       setPersonalityLoading(true);
       try {
         const [summaryRes, analysisRes, coachingRes] = await Promise.all([
-          fetch("/api/personality/summary?cacheOnly=true"),
+          fetch("/api/personality/summary?last=true"),
           fetch("/api/trades/analysis?min=1"),
           fetch("/api/personality/history"),
         ]);
@@ -516,9 +516,9 @@ export default function DashboardPage() {
           <Skeleton className="h-4 w-24 mb-2 !bg-white/20" />
           <Skeleton className="h-10 w-56 mb-3 !bg-white/20" />
           <Skeleton className="h-5 w-40 mb-5 !bg-white/15" />
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-1 rounded-xl px-2.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <div key={i} className="rounded-xl px-3 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
                 <Skeleton className="h-3 w-12 mb-2 !bg-white/20" />
                 <Skeleton className="h-5 w-16 !bg-white/20" />
               </div>
@@ -527,7 +527,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 요약 지표 스켈레톤 */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="!p-3">
               <Skeleton className="h-3 w-14 mb-2" />
@@ -711,8 +711,8 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        {/* 미니 카드 4개 */}
-        <div className="flex gap-2 mt-5">
+        {/* 미니 카드 4개 — 모바일 2x2 / 데스크톱 4컬럼 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
           {[
             {
               label: "국내 평가금",
@@ -735,7 +735,7 @@ export default function DashboardPage() {
           ].map((item) => (
             <div
               key={item.label}
-              className="flex-1 rounded-xl px-2.5 py-3"
+              className="rounded-xl px-3 py-3"
               style={{ background: "rgba(255,255,255,0.12)" }}
             >
               <div
@@ -769,8 +769,8 @@ export default function DashboardPage() {
 
       {/* ── 섹션 2: 요약 지표 + 자산 배분 ── */}
 
-      {/* 요약 지표 4칸 */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      {/* 요약 지표 4칸 — 모바일 2x2 / 데스크톱 4컬럼 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
         {[
           {
             label: "총 수익률",
@@ -779,7 +779,7 @@ export default function DashboardPage() {
           },
           {
             label: "총 수익금",
-            value: `${pnlPositive ? "+" : ""}₩${formatKRW(summary.totalPnl)}`,
+            value: `${pnlPositive ? "+" : ""}${formatCompact(summary.totalPnl, "KRW")}`,
             color: pnlPositive ? "var(--color-positive)" : "var(--color-negative)",
           },
           {
@@ -798,7 +798,7 @@ export default function DashboardPage() {
               {s.label}
             </div>
             <div
-              className="flex items-center gap-1 text-[12px] md:text-[15px] font-extrabold tracking-tight leading-tight"
+              className="flex items-center gap-1 text-[14px] md:text-[15px] font-extrabold tracking-tight leading-tight"
               style={{
                 color: s.color ?? undefined,
               }}

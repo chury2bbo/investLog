@@ -217,10 +217,10 @@ model ApiUsageLog {
   @@map("api_usage_log")
 }
 
-model PersonalityCache {
+model PersonalityResult {
   id             Int      @id @default(autoincrement())
   userId         String
-  weekKey        String
+  dateKey        String
   type           String
   summary        String
   winRate        Float?
@@ -229,8 +229,8 @@ model PersonalityCache {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@unique([userId, weekKey])
-  @@map("personality_cache")
+  @@unique([userId, dateKey])
+  @@map("personality_result")
 }
 
 model CoachingHistory {

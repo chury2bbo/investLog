@@ -399,7 +399,7 @@ export const ModelName = {
   UserAnalysisLog: 'UserAnalysisLog',
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog',
-  PersonalityCache: 'PersonalityCache',
+  PersonalityResult: 'PersonalityResult',
   CoachingHistory: 'CoachingHistory'
 } as const
 
@@ -416,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog" | "personalityCache" | "coachingHistory"
+    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog" | "personalityResult" | "coachingHistory"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1530,77 +1530,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    PersonalityCache: {
-      payload: Prisma.$PersonalityCachePayload<ExtArgs>
-      fields: Prisma.PersonalityCacheFieldRefs
+    PersonalityResult: {
+      payload: Prisma.$PersonalityResultPayload<ExtArgs>
+      fields: Prisma.PersonalityResultFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.PersonalityCacheFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload> | null
+          args: Prisma.PersonalityResultFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.PersonalityCacheFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         findFirst: {
-          args: Prisma.PersonalityCacheFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload> | null
+          args: Prisma.PersonalityResultFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.PersonalityCacheFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         findMany: {
-          args: Prisma.PersonalityCacheFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+          args: Prisma.PersonalityResultFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>[]
         }
         create: {
-          args: Prisma.PersonalityCacheCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         createMany: {
-          args: Prisma.PersonalityCacheCreateManyArgs<ExtArgs>
+          args: Prisma.PersonalityResultCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.PersonalityCacheCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+          args: Prisma.PersonalityResultCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>[]
         }
         delete: {
-          args: Prisma.PersonalityCacheDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         update: {
-          args: Prisma.PersonalityCacheUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         deleteMany: {
-          args: Prisma.PersonalityCacheDeleteManyArgs<ExtArgs>
+          args: Prisma.PersonalityResultDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.PersonalityCacheUpdateManyArgs<ExtArgs>
+          args: Prisma.PersonalityResultUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.PersonalityCacheUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>[]
+          args: Prisma.PersonalityResultUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>[]
         }
         upsert: {
-          args: Prisma.PersonalityCacheUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityCachePayload>
+          args: Prisma.PersonalityResultUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalityResultPayload>
         }
         aggregate: {
-          args: Prisma.PersonalityCacheAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePersonalityCache>
+          args: Prisma.PersonalityResultAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePersonalityResult>
         }
         groupBy: {
-          args: Prisma.PersonalityCacheGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PersonalityCacheGroupByOutputType>[]
+          args: Prisma.PersonalityResultGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalityResultGroupByOutputType>[]
         }
         count: {
-          args: Prisma.PersonalityCacheCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PersonalityCacheCountAggregateOutputType> | number
+          args: Prisma.PersonalityResultCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalityResultCountAggregateOutputType> | number
         }
       }
     }
@@ -1919,10 +1919,10 @@ export const ApiUsageLogScalarFieldEnum = {
 export type ApiUsageLogScalarFieldEnum = (typeof ApiUsageLogScalarFieldEnum)[keyof typeof ApiUsageLogScalarFieldEnum]
 
 
-export const PersonalityCacheScalarFieldEnum = {
+export const PersonalityResultScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  weekKey: 'weekKey',
+  dateKey: 'dateKey',
   type: 'type',
   summary: 'summary',
   winRate: 'winRate',
@@ -1932,7 +1932,7 @@ export const PersonalityCacheScalarFieldEnum = {
   updatedAt: 'updatedAt'
 } as const
 
-export type PersonalityCacheScalarFieldEnum = (typeof PersonalityCacheScalarFieldEnum)[keyof typeof PersonalityCacheScalarFieldEnum]
+export type PersonalityResultScalarFieldEnum = (typeof PersonalityResultScalarFieldEnum)[keyof typeof PersonalityResultScalarFieldEnum]
 
 
 export const CoachingHistoryScalarFieldEnum = {
@@ -2149,7 +2149,7 @@ export type GlobalOmitConfig = {
   userAnalysisLog?: Prisma.UserAnalysisLogOmit
   monthlyAssetSnapshot?: Prisma.MonthlyAssetSnapshotOmit
   apiUsageLog?: Prisma.ApiUsageLogOmit
-  personalityCache?: Prisma.PersonalityCacheOmit
+  personalityResult?: Prisma.PersonalityResultOmit
   coachingHistory?: Prisma.CoachingHistoryOmit
 }
 

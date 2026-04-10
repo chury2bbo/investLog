@@ -811,17 +811,52 @@ export default function AnalysisPage() {
               </Card>
 
               {/* 최근 이슈 */}
-              {report.recentIssues && (
-                <Card>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">최근 주요 이슈</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
-                  </div>
-                  <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed whitespace-pre-line">
-                    {report.recentIssues}
-                  </p>
-                </Card>
-              )}
+              {report.recentIssues && (() => {
+                const text = report.recentIssues;
+                const positiveMatch = text.match(/호재\s*[::]\s*([\s\S]*?)(?=\s*악재\s*[::]|$)/);
+                const negativeMatch = text.match(/악재\s*[::]\s*([\s\S]*?)$/);
+                const positive = positiveMatch?.[1]?.trim();
+                const negative = negativeMatch?.[1]?.trim();
+                const hasParsed = positive || negative;
+
+                return (
+                  <Card>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">최근 주요 이슈</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
+                    </div>
+
+                    {hasParsed ? (
+                      <div className="space-y-2.5">
+                        {positive && (
+                          <div className="flex items-start gap-2">
+                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#E8F7EE] dark:bg-[#0F2A1A] text-[var(--color-positive)]">
+                              호재
+                            </span>
+                            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed flex-1">
+                              {positive}
+                            </p>
+                          </div>
+                        )}
+                        {negative && (
+                          <div className="flex items-start gap-2">
+                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#FCE8EA] dark:bg-[#2A0F12] text-[var(--color-negative)]">
+                              악재
+                            </span>
+                            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed flex-1">
+                              {negative}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed whitespace-pre-line">
+                        {text}
+                      </p>
+                    )}
+                  </Card>
+                );
+              })()}
             </div>
           )}
         </div>

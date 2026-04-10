@@ -19,10 +19,14 @@ export async function GET(req: Request) {
   const totalCount = trades.length;
 
   if (totalCount < minTrades) {
+    const holdingCount = await prisma.holding.count({
+      where: { account: { userId: session.user.id } },
+    });
     return Response.json({
       locked: true,
       totalCount,
       remaining: minTrades - totalCount,
+      holdingCount,
     });
   }
 

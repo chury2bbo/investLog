@@ -165,7 +165,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
           {hasManualSector && (
             <button
               onClick={() => setSectorTab("manual")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                 sectorTab === "manual"
                   ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
                   : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"
@@ -176,7 +176,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
           )}
           <button
             onClick={() => setSectorTab("auto")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
               sectorTab === "auto"
                 ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
                 : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"

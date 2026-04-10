@@ -169,7 +169,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
             <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
               {(["", "noTag", "noEmotion"] as const).map((s) => {
                 const active = filters.tagStatus === s;
-                const label = s === "" ? "전체" : s === "noTag" ? "이유태그" : "심리상태";
+                const label = s === "" ? "전체" : s === "noTag" ? "태그" : "심리";
                 return (
                   <button
                     key={s}

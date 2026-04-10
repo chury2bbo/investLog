@@ -161,6 +161,51 @@ ${PERSONALITY_SUMMARY_RESPONSE_SCHEMA}`;
 }
 
 // ═══════════════════════════════════════════════════════════
+// 2-1. 투자자 유형 진단 — Level 1 (보유 종목 기반 간이 진단)
+//
+//    조건: 매매 5건 미만, 보유 종목 1개 이상
+//    결과: 짧은 유형명 + 1문장 요약
+// ═══════════════════════════════════════════════════════════
+
+export const PERSONALITY_LEVEL1_SYSTEM = `당신은 투자자의 보유 종목 구성만으로 간단한 투자 성향 유형을 진단합니다.
+매매 이력이 부족하므로 추측하지 말고, 보유 종목 분포(국가/섹터/종목 수/예수금 비중)에서 드러나는 특징만 1문장으로 묘사하세요.
+
+규칙:
+- 한국어로 응답
+- JSON 형식으로만 응답
+- 유형명은 10자 이내 (예: "글로벌 분산 투자자", "테크 집중 투자자", "신중한 대기형")
+- summary는 보유 종목 구성에서 드러나는 특징 1문장 (격려 톤)`;
+
+export const PERSONALITY_LEVEL1_RESPONSE_SCHEMA = `═══ 응답 형식 (JSON만 응답) ═══
+{
+  "type": "유형명 (10자 이내)",
+  "summary": "보유 종목 기반 한 문장 설명"
+}`;
+
+interface Level1Data {
+  totalHoldings: number;
+  domesticCount: number;
+  foreignCount: number;
+  cashRatio: number; // 0~100
+  topSectors: { sector: string; pct: number }[];
+  holdingsList: string[]; // "삼성전자(005930) — 반도체, 50주"
+}
+
+export function buildPersonalityLevel1Prompt(data: Level1Data) {
+  return `아래 투자자의 보유 종목만으로 간단한 유형을 진단해주세요.
+
+═══ 보유 구성 ═══
+- 총 보유 종목: ${data.totalHoldings}개 (국내 ${data.domesticCount} / 해외 ${data.foreignCount})
+- 예수금 비중: ${data.cashRatio.toFixed(0)}%
+- 상위 섹터: ${data.topSectors.length > 0 ? data.topSectors.map((s) => `${s.sector} ${s.pct.toFixed(0)}%`).join(", ") : "정보 없음"}
+
+═══ 보유종목 ═══
+${data.holdingsList.length > 0 ? data.holdingsList.map((h) => `- ${h}`).join("\n") : "- 없음"}
+
+${PERSONALITY_LEVEL1_RESPONSE_SCHEMA}`;
+}
+
+// ═══════════════════════════════════════════════════════════
 // 3. 종목 분석 리포트 (/api/analysis/report)
 //
 //    화면: 종목 분석 페이지 (/analysis) → 종목 선택 후 분석 결과
@@ -188,7 +233,7 @@ export function buildReportUserPrompt(stockName: string, ticker: string, priceTe
   "swotOpportunity": "기회 1~2줄",
   "swotThreat": "위협 1~2줄",
   "reasoning": "종합 투자 의견 3~4줄",
-  "recentIssues": "최근 주요 호재·악재 이슈 3~4줄 (호재: ..., 악재: ... 형식으로)"
+  "recentIssues": "최근 주요 호재·악재. 반드시 아래 형식으로 작성 (각 1~2문장):\\n호재: ...\\n악재: ..."
 }
 
 한국어로 작성하고, JSON만 응답해줘.`;
@@ -235,7 +280,10 @@ export const IMPORT_ANALYZE_PROMPT = `이 이미지를 분석해줘.
 
 규칙:
 - avgPrice(평단가), quantity(수량)는 콤마/원/$ 없이 순수 숫자, 확인 안 되면 0
-- ticker(종목코드)가 안 보이면 빈 문자열
+- ticker(종목코드): 화면에 보이면 그대로 사용. 안 보이면 종목명을 보고 직접 채워줘.
+  · 국내 (country="KR"): 한국거래소 6자리 코드 (예: 삼성전자→005930)
+  · 해외 (country="US"): 미국 증시 영문 ticker (예: 엔비디아→NVDA, 테슬라→TSLA, 알파벳A→GOOGL)
+  · 확실하지 않으면 빈 문자열 (잘못된 코드 넣지 말 것)
 - 국내 종목은 country "KR", 해외 종목은 "US"
 - cashBalances는 예수금/잔고가 보이면 추출, 없으면 빈 배열
 

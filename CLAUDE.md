@@ -63,8 +63,10 @@ where: { account: { userId: session.user.id } }  // ← 격리 핵심
 
 ### Claude API 비용
 - 기업 소개 요약: 티커당 영구 캐시 (`ticker_summary_cache`)
-- 종목 분석: 당일 캐시 (`ticker_analysis_cache`)
-- 성향 리포트: 캐시 없음 — 사용자당 3회/일 제한 (`api_usage_log`)
+- 종목 분석: 당일 캐시 (`ticker_analysis_cache`), 사용자당 10회/일 제한
+- 투자성향 진단: 캐시 없음 — 사용자당 1회/일 제한 (`api_usage_log`)
+- AI 코칭 리포트: 캐시 없음 — 사용자당 3회/일 제한 (`api_usage_log`)
+- 스크린샷 분석: 캐시 없음, 제한 없음
 
 ---
 

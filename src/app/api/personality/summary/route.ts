@@ -1,15 +1,21 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { CLAUDE_MODEL, PERSONALITY_SUMMARY_SYSTEM, buildPersonalitySummaryUserPrompt } from "@/lib/prompts";
+import {
+  CLAUDE_MODEL,
+  PERSONALITY_SUMMARY_SYSTEM,
+  buildPersonalitySummaryUserPrompt,
+  PERSONALITY_LEVEL1_SYSTEM,
+  buildPersonalityLevel1Prompt,
+} from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
 
-/** ISO 주차 키 생성: "2026-W15" 형식 */
-function getWeekKey(date: Date): string {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+const DAILY_LIMIT = 1;
+
+/** 한국 시간(KST) 기준 YYYY-MM-DD 키 */
+function getKstDateKey(): string {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0, 10);
 }
 
 export async function GET(req: Request) {
@@ -19,35 +25,46 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const cacheOnly = searchParams.get("cacheOnly") === "true";
+  const lastOnly = searchParams.get("last") === "true";
 
-  const weekKey = getWeekKey(new Date());
+  const today = getKstDateKey();
 
-  // ─── 캐시 확인 ────────────────────────────────────────
-  const cached = await prisma.personalityCache.findUnique({
+  // ─── 마지막 진단 결과 조회 (초기 로딩용) ─────────────────
+  if (lastOnly) {
+    const last = await prisma.personalityResult.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    });
+    if (last) {
+      return Response.json({
+        type: last.type,
+        summary: last.summary,
+        winRate: last.winRate,
+        avgHoldingDays: last.avgHoldingDays,
+        lossRatio: last.lossRatio,
+        level: last.winRate == null ? 1 : 2,
+        analyzedAt: last.dateKey,
+      });
+    }
+    return Response.json({ empty: true });
+  }
+
+  // ─── 일일 호출 제한 확인 ──────────────────────────────
+  const usage = await prisma.apiUsageLog.findUnique({
     where: {
-      userId_weekKey: {
+      userId_type_date: {
         userId: session.user.id,
-        weekKey,
+        type: "personality_summary",
+        date: today,
       },
     },
   });
 
-  if (cached) {
-    return Response.json({
-      type: cached.type,
-      summary: cached.summary,
-      winRate: cached.winRate,
-      avgHoldingDays: cached.avgHoldingDays,
-      lossRatio: cached.lossRatio,
-      cachedAt: cached.updatedAt.toISOString().slice(0, 10),
-      weekKey,
-    });
-  }
-
-  // 캐시만 조회 모드 — 캐시 없으면 빈 응답
-  if (cacheOnly) {
-    return Response.json({ empty: true, weekKey });
+  if (usage && usage.count >= DAILY_LIMIT) {
+    return Response.json(
+      { error: "투자성향 진단은 하루 1회까지 가능합니다.", limitReached: true },
+      { status: 429 }
+    );
   }
 
   // ─── 매매 데이터 조회 ─────────────────────────────────
@@ -56,26 +73,35 @@ export async function GET(req: Request) {
     orderBy: { date: "asc" },
   });
 
-  if (trades.length < 5) {
-    return Response.json({
-      locked: true,
-      totalCount: trades.length,
-      remaining: 5 - trades.length,
-    });
-  }
-
   // ─── 보유종목 조회 ────────────────────────────────────
   const holdings = await prisma.holding.findMany({
     where: { account: { userId: session.user.id } },
     select: {
       ticker: true,
       name: true,
+      country: true,
       avgPrice: true,
       quantity: true,
       sectorAuto: true,
       sectorManual: true,
     },
   });
+
+  // ─── Level 1: 매매 5건 미만 + 보유 종목 1개 이상 ─────
+  if (trades.length < 5) {
+    if (holdings.length === 0) {
+      return Response.json({
+        locked: true,
+        totalCount: trades.length,
+        remaining: 5 - trades.length,
+      });
+    }
+    return await runLevel1Diagnosis({
+      userId: session.user.id,
+      today,
+      holdings,
+    });
+  }
 
   // ─── 통계 계산 ────────────────────────────────────────
   const buyTrades = trades.filter((t) => t.type === "BUY");
@@ -222,7 +248,6 @@ export async function GET(req: Request) {
     const result = JSON.parse(jsonMatch[0]);
 
     // ─── API 사용 로그 + 토큰 ────────────────────────────
-    const today = new Date().toISOString().slice(0, 10);
     await prisma.apiUsageLog.upsert({
       where: {
         userId_type_date: {
@@ -246,11 +271,19 @@ export async function GET(req: Request) {
       },
     });
 
-    // ─── 캐시 저장 ──────────────────────────────────────
-    await prisma.personalityCache.create({
-      data: {
+    // ─── 마지막 결과 저장 ─────────────────────────────────
+    await prisma.personalityResult.upsert({
+      where: { userId_dateKey: { userId: session.user.id, dateKey: today } },
+      create: {
         userId: session.user.id,
-        weekKey,
+        dateKey: today,
+        type: result.type,
+        summary: result.summary,
+        winRate,
+        avgHoldingDays,
+        lossRatio,
+      },
+      update: {
         type: result.type,
         summary: result.summary,
         winRate,
@@ -265,11 +298,164 @@ export async function GET(req: Request) {
       winRate,
       avgHoldingDays,
       lossRatio,
-      cachedAt: new Date().toISOString().slice(0, 10),
-      weekKey,
+      level: 2,
+      analyzedAt: today,
     });
   } catch (err) {
     console.error("Personality summary error:", err);
+    return Response.json({ error: "유형 진단에 실패했습니다." }, { status: 500 });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Level 1 — 보유 종목 기반 간이 진단
+// ═══════════════════════════════════════════════════════════
+
+interface Level1Holding {
+  ticker: string;
+  name: string;
+  country: string;
+  avgPrice: number;
+  quantity: number;
+  sectorAuto: string | null;
+  sectorManual: string | null;
+}
+
+async function runLevel1Diagnosis({
+  userId,
+  today,
+  holdings,
+}: {
+  userId: string;
+  today: string;
+  holdings: Level1Holding[];
+}) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return Response.json({ error: "AI API 키가 설정되지 않았습니다." }, { status: 500 });
+  }
+
+  // ─── 예수금 잔고 조회 (KRW 환산은 단순 합산) ─────────
+  const cashBalances = await prisma.cashBalance.findMany({
+    where: { account: { userId } },
+  });
+  const cashKRW = cashBalances
+    .filter((c) => c.currency === "KRW")
+    .reduce((s, c) => s + c.amount, 0);
+  const cashUSDinKRW = cashBalances
+    .filter((c) => c.currency === "USD")
+    .reduce((s, c) => s + c.amount * 1380, 0); // 환율 추정치
+  const totalCash = cashKRW + cashUSDinKRW;
+
+  // ─── 보유 종목 평가금 (매수가 기준 단순 계산) ────────
+  const holdingValueKRW = holdings.reduce((s, h) => {
+    const v = h.avgPrice * h.quantity;
+    return s + (h.country === "KR" ? v : v * 1380);
+  }, 0);
+  const totalAsset = holdingValueKRW + totalCash;
+  const cashRatio = totalAsset > 0 ? (totalCash / totalAsset) * 100 : 0;
+
+  // ─── 섹터 분포 ────────────────────────────────────────
+  const sectorMap: Record<string, number> = {};
+  holdings.forEach((h) => {
+    const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
+    const v = h.avgPrice * h.quantity * (h.country === "KR" ? 1 : 1380);
+    sectorMap[sector] = (sectorMap[sector] ?? 0) + v;
+  });
+  const topSectors = Object.entries(sectorMap)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+    .map(([sector, val]) => ({
+      sector,
+      pct: holdingValueKRW > 0 ? (val / holdingValueKRW) * 100 : 0,
+    }));
+
+  const domesticCount = holdings.filter((h) => h.country === "KR").length;
+  const foreignCount = holdings.filter((h) => h.country !== "KR").length;
+  const holdingsList = holdings.slice(0, 15).map((h) => {
+    const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
+    return `${h.name}(${h.ticker}) — ${sector}, ${h.quantity}주`;
+  });
+
+  try {
+    const anthropic = new Anthropic({ apiKey });
+    const userPrompt = buildPersonalityLevel1Prompt({
+      totalHoldings: holdings.length,
+      domesticCount,
+      foreignCount,
+      cashRatio,
+      topSectors,
+      holdingsList,
+    });
+
+    const message = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 384,
+      system: PERSONALITY_LEVEL1_SYSTEM,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    const { input_tokens, output_tokens } = message.usage;
+
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
+    }
+    const result = JSON.parse(jsonMatch[0]);
+
+    // ─── 사용 로그 (Level 2와 같은 type 키 공유 — 1회/일 통합) ─
+    await prisma.apiUsageLog.upsert({
+      where: { userId_type_date: { userId, type: "personality_summary", date: today } },
+      create: {
+        userId,
+        type: "personality_summary",
+        date: today,
+        count: 1,
+        inputTokens: input_tokens,
+        outputTokens: output_tokens,
+      },
+      update: {
+        count: { increment: 1 },
+        inputTokens: { increment: input_tokens },
+        outputTokens: { increment: output_tokens },
+      },
+    });
+
+    // ─── 결과 저장 ────────────────────────────────────────
+    await prisma.personalityResult.upsert({
+      where: { userId_dateKey: { userId, dateKey: today } },
+      create: {
+        userId,
+        dateKey: today,
+        type: result.type,
+        summary: result.summary,
+        winRate: null,
+        avgHoldingDays: null,
+        lossRatio: null,
+      },
+      update: {
+        type: result.type,
+        summary: result.summary,
+        winRate: null,
+        avgHoldingDays: null,
+        lossRatio: null,
+      },
+    });
+
+    return Response.json({
+      type: result.type,
+      summary: result.summary,
+      winRate: null,
+      avgHoldingDays: null,
+      lossRatio: null,
+      level: 1,
+      analyzedAt: today,
+    });
+  } catch (err) {
+    console.error("Level 1 personality error:", err);
     return Response.json({ error: "유형 진단에 실패했습니다." }, { status: 500 });
   }
 }

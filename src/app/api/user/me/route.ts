@@ -76,7 +76,7 @@ export async function DELETE() {
   // relation 없는 테이블 수동 삭제 (cascade 미적용 대상)
   await Promise.all([
     prisma.apiUsageLog.deleteMany({ where: { userId } }),
-    prisma.personalityCache.deleteMany({ where: { userId } }),
+    prisma.personalityResult.deleteMany({ where: { userId } }),
     prisma.coachingHistory.deleteMany({ where: { userId } }),
   ]);
 

@@ -66,7 +66,7 @@ export const ModelName = {
   UserAnalysisLog: 'UserAnalysisLog',
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog',
-  PersonalityCache: 'PersonalityCache',
+  PersonalityResult: 'PersonalityResult',
   CoachingHistory: 'CoachingHistory'
 } as const
 
@@ -288,10 +288,10 @@ export const ApiUsageLogScalarFieldEnum = {
 export type ApiUsageLogScalarFieldEnum = (typeof ApiUsageLogScalarFieldEnum)[keyof typeof ApiUsageLogScalarFieldEnum]
 
 
-export const PersonalityCacheScalarFieldEnum = {
+export const PersonalityResultScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  weekKey: 'weekKey',
+  dateKey: 'dateKey',
   type: 'type',
   summary: 'summary',
   winRate: 'winRate',
@@ -301,7 +301,7 @@ export const PersonalityCacheScalarFieldEnum = {
   updatedAt: 'updatedAt'
 } as const
 
-export type PersonalityCacheScalarFieldEnum = (typeof PersonalityCacheScalarFieldEnum)[keyof typeof PersonalityCacheScalarFieldEnum]
+export type PersonalityResultScalarFieldEnum = (typeof PersonalityResultScalarFieldEnum)[keyof typeof PersonalityResultScalarFieldEnum]
 
 
 export const CoachingHistoryScalarFieldEnum = {

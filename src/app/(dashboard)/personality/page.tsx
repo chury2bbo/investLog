@@ -10,6 +10,7 @@ import {
   Divider,
   Skeleton,
   ThemeToggle,
+  BottomSheet,
 } from "@/components/ui";
 
 // ─── 타입 ────────────────────────────────────────────────
@@ -44,6 +45,7 @@ interface StatsData {
   locked: boolean;
   totalCount: number;
   remaining?: number;
+  holdingCount?: number;
   tagDistribution?: TagDist[];
   tagPnl?: TagPnl[];
   emotionPnl?: EmotionPnl[];
@@ -61,8 +63,9 @@ interface PersonalitySummary {
   winRate: number | null;
   avgHoldingDays: number | null;
   lossRatio: number | null;
-  cachedAt: string;
-  weekKey: string;
+  limitReached?: boolean;
+  analyzedAt?: string;
+  level?: 1 | 2;
 }
 
 interface CoachingItem {
@@ -111,6 +114,10 @@ export default function PersonalityPage() {
   const [coachingError, setCoachingError] = useState("");
   const [expandedCoachings, setExpandedCoachings] = useState<Set<number>>(new Set());
   const [refreshMsg, setRefreshMsg] = useState("");
+  const [showAllCoachings, setShowAllCoachings] = useState(false);
+  const [showTagDistribution, setShowTagDistribution] = useState(false);
+
+  const COACHING_PREVIEW_COUNT = 5;
 
   // ─── 데이터 패칭 ──────────────────────────────────────
 
@@ -118,7 +125,7 @@ export default function PersonalityPage() {
     try {
       const [statsRes, personalityRes, historyRes] = await Promise.allSettled([
         fetch("/api/trades/analysis?min=3"),
-        fetch("/api/personality/summary?cacheOnly=true"),
+        fetch("/api/personality/summary?last=true"),
         fetch("/api/personality/history"),
       ]);
 
@@ -128,15 +135,20 @@ export default function PersonalityPage() {
         setStats(await statsRes.value.json());
       }
 
-      if (personalityRes.status === "fulfilled" && personalityRes.value.ok) {
+      if (personalityRes.status === "fulfilled") {
         const data = await personalityRes.value.json();
-        if (!data.locked && !data.empty) setPersonality(data);
+        if (personalityRes.value.ok && !data.locked && !data.empty) setPersonality(data);
       }
 
       if (historyRes.status === "fulfilled" && historyRes.value.ok) {
         const data = await historyRes.value.json();
-        setCoachings(data.history ?? []);
+        const history: CoachingItem[] = data.history ?? [];
+        setCoachings(history);
         setCoachingRemaining(data.remaining ?? 3);
+        // 가장 최근 코칭 1개는 기본 펼침
+        if (history.length > 0) {
+          setExpandedCoachings(new Set([history[0].id]));
+        }
       }
     } catch {
       /* ignore */
@@ -156,19 +168,17 @@ export default function PersonalityPage() {
     setPersonalityLoading(true);
     try {
       const res = await fetch("/api/personality/summary");
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
-        if (!data.locked && !data.empty) {
-          if (personality && data.weekKey === personality.weekKey) {
-            setRefreshMsg("이번 주 진단 내용이 있어요. 다음 주에 다시 진단할 수 있습니다.");
-            setTimeout(() => setRefreshMsg(""), 4000);
-          } else {
-            setPersonality(data);
-          }
-        } else if (data.locked) {
+        if (!data.locked) {
+          setPersonality(data);
+        } else {
           setRefreshMsg(`매매 ${data.remaining}건 더 기록하면 진단할 수 있어요.`);
           setTimeout(() => setRefreshMsg(""), 4000);
         }
+      } else if (res.status === 429) {
+        setRefreshMsg("투자성향 진단은 하루 1회까지 가능합니다.");
+        setTimeout(() => setRefreshMsg(""), 4000);
       }
     } catch {
       /* ignore */
@@ -209,9 +219,21 @@ export default function PersonalityPage() {
       <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6">
         <Header />
         <div className="rounded-[20px] p-6 mb-6" style={{ background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)" }}>
-          <Skeleton className="h-4 w-32 mb-3 !bg-white/20" />
-          <Skeleton className="h-7 w-48 mb-2 !bg-white/20" />
-          <Skeleton className="h-4 w-full !bg-white/20" />
+          <Skeleton className="h-3 w-24 mb-2 !bg-white/20" />
+          <Skeleton className="h-6 w-40 mb-2 !bg-white/20" />
+          <Skeleton className="h-4 w-full mb-4 !bg-white/15" />
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl py-2 px-3" style={{ background: "rgba(255,255,255,0.12)" }}>
+                <Skeleton className="h-2.5 w-10 mb-1.5 mx-auto !bg-white/20" />
+                <Skeleton className="h-4 w-12 mx-auto !bg-white/20" />
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-2.5 w-20 !bg-white/15" />
+            <Skeleton className="h-7 w-16 rounded-lg !bg-white/20" />
+          </div>
         </div>
         {[1, 2].map((i) => (
           <Card key={i} className="mb-4">
@@ -227,9 +249,10 @@ export default function PersonalityPage() {
     );
   }
 
-  // ─── 매매 없음 (3건 미만) ─────────────────────────────
+  // ─── 완전 잠금 (매매 3건 미만 + 보유 종목 0개) ─────────
+  // 보유 종목이 있으면 Level 1 히어로만 보여주는 별도 분기로 진행
 
-  if (!stats || stats.locked) {
+  if ((!stats || stats.locked) && (stats?.holdingCount ?? 0) === 0) {
     const remaining = stats?.remaining ?? 3;
     return (
       <div className="w-full max-w-2xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
@@ -246,7 +269,8 @@ export default function PersonalityPage() {
               투자 성향 분석이 잠겨있어요
             </h2>
             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
-              매매 기록이 <strong className="text-[var(--color-positive)]">3건</strong> 이상이어야 분석할 수 있어요
+              매매 기록이 <strong className="text-[var(--color-positive)]">3건</strong> 이상이거나
+              보유 종목이 <strong className="text-[var(--color-positive)]">1개</strong> 이상 있어야 분석할 수 있어요
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
               <span className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">현재 {totalCount}건</span>
@@ -261,6 +285,10 @@ export default function PersonalityPage() {
     );
   }
 
+  // ─── Level 1 전용 페이지 (매매 3건 미만이지만 보유 종목 있음) ─
+  // stats.locked = true 인데 holdingCount > 0인 경우
+  // 히어로 + Level 1 진단만 보여주고, 데이터 패턴/감정 등 통계 섹션은 매매 부족 안내
+
   // ─── 데이터 추출 ──────────────────────────────────────
 
   const {
@@ -274,8 +302,10 @@ export default function PersonalityPage() {
     noTagCount = 0,
   } = stats;
 
-  const canShowHero = totalCount >= 5;
+  const holdingCount = stats.holdingCount ?? 0;
+  const canShowHero = totalCount >= 5 || holdingCount >= 1;
   const canShowCoaching = totalCount >= 10;
+  const isLevel1 = personality?.level === 1;
 
   // ─── 인사이트 자동 생성 ───────────────────────────────
 
@@ -303,25 +333,43 @@ export default function PersonalityPage() {
 
           {personality ? (
             <>
-              <h2 className="text-xl font-extrabold text-white mb-2">{personality.type}</h2>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h2 className="text-xl font-extrabold text-white">{personality.type}</h2>
+                {isLevel1 && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/20 text-white">
+                    보유 종목 기반
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-white/80 leading-relaxed mb-4">{personality.summary}</p>
 
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[
-                  { label: "승률", value: personality.winRate != null ? `${personality.winRate}%` : "-" },
-                  { label: "평균보유", value: personality.avgHoldingDays != null ? `${personality.avgHoldingDays}일` : "-" },
-                  { label: "손절비율", value: personality.lossRatio != null ? `${personality.lossRatio}%` : "-" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-xl py-2 px-3 text-center" style={{ background: "rgba(255,255,255,0.12)" }}>
-                    <div className="text-[10px] text-white/60">{item.label}</div>
-                    <div className="text-sm font-bold text-white">{item.value}</div>
-                  </div>
-                ))}
-              </div>
+              {isLevel1 ? (
+                <div className="rounded-xl px-4 py-3 mb-4 text-[11px] text-white/75 leading-relaxed" style={{ background: "rgba(255,255,255,0.10)" }}>
+                  매매 5건 이상 기록하면 승률 · 평균보유 · 손절비율까지 분석한 정밀 진단으로 업그레이드돼요
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {[
+                    { label: "승률", value: personality.winRate != null ? `${personality.winRate}%` : "-" },
+                    { label: "평균보유", value: personality.avgHoldingDays != null ? `${personality.avgHoldingDays}일` : "-" },
+                    { label: "손절비율", value: personality.lossRatio != null ? `${personality.lossRatio}%` : "-" },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-xl py-2 px-3 text-center" style={{ background: "rgba(255,255,255,0.12)" }}>
+                      <div className="text-[10px] text-white/60">{item.label}</div>
+                      <div className="text-sm font-bold text-white">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-white/50">
-                  마지막 분석: {personality.cachedAt} · 주 1회 갱신
+                  {personality.analyzedAt
+                    ? (() => {
+                        const [, m, d] = personality.analyzedAt.split("-");
+                        return `${parseInt(m, 10)}월 ${parseInt(d, 10)}일 진단`;
+                      })()
+                    : "하루 1회 진단 가능"}
                 </span>
                 <button
                   onClick={refreshPersonality}
@@ -356,19 +404,41 @@ export default function PersonalityPage() {
         </div>
       )}
 
-      {/* 5건 미만 유형 잠금 안내 */}
-      {!canShowHero && (
-        <div className="rounded-2xl p-5 mb-6 border border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)] text-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
-            <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          <p className="text-sm font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-            매매 <strong className="text-[var(--color-positive)]">{5 - totalCount}건</strong> 더 기록하면 투자자 유형을 진단해드려요
-          </p>
-        </div>
+      {/* ══════════ 매매 3건 미만이면 통계 섹션 잠금 ══════════ */}
+      {stats.locked && (
+        <>
+          <SectionTitle title="데이터로 보는 내 패턴" />
+          <Card className="mb-6">
+            <div className="text-center py-6">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
+                <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <p className="text-sm font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
+                매매 <strong className="text-[var(--color-positive)]">{3 - totalCount}건</strong> 더 기록하면 매매 패턴 통계를 볼 수 있어요
+              </p>
+              <Button onClick={() => router.push("/trades")}>매매 기록하러 가기</Button>
+            </div>
+          </Card>
+        </>
       )}
 
-      {/* ══════════ 섹션 2 — 데이터로 보는 내 패턴 ══════════ */}
+      {/* 5건 미만이지만 매매 3건 이상은 있는 경우 (Level 1 X) */}
+      {!stats.locked && !canShowHero && (
+        <Card className="mb-6">
+          <div className="text-center py-6">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
+              <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <p className="text-sm font-medium text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
+              매매 <strong className="text-[var(--color-positive)]">{5 - totalCount}건</strong> 더 기록하면 투자자 유형을 진단해드려요
+            </p>
+            <Button onClick={() => router.push("/trades")}>매매 기록하러 가기</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ══════════ 섹션 2 — 데이터로 보는 내 패턴 (매매 3건 이상에서만) ══════════ */}
+      {!stats.locked && <>
       <SectionTitle title="데이터로 보는 내 패턴" />
 
       {/* 탭 바 */}
@@ -440,34 +510,51 @@ export default function PersonalityPage() {
             </p>
           )}
 
-          {/* 태그 분포 (매수/매도 건수) */}
+          {/* 태그 분포 (매수/매도 건수) — 접기/펼치기 */}
           {tagDistribution.length > 0 && (
             <>
               <Divider />
-              <p className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-2.5">태그별 거래 건수</p>
-              <div className="space-y-2">
-                {tagDistribution.slice(0, 6).map((item) => {
-                  const maxVal = tagDistribution[0].total;
-                  const pct = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
-                  return (
-                    <div key={item.tag}>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium text-[var(--color-text)]">{item.tag}</span>
-                        <span className="text-[var(--color-g400)]">매수 {item.buy} · 매도 {item.sell}</span>
+              <button
+                onClick={() => setShowTagDistribution((v) => !v)}
+                className="w-full flex items-center justify-between cursor-pointer"
+              >
+                <span className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+                  태그별 거래 건수
+                </span>
+                <svg
+                  width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  className={`transition-transform ${showTagDistribution ? "rotate-180" : ""}`}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {showTagDistribution && (
+                <div className="space-y-2 mt-3 animate-[fadeIn_0.2s_ease-out]">
+                  {tagDistribution.slice(0, 6).map((item) => {
+                    const maxVal = tagDistribution[0].total;
+                    const pct = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
+                    return (
+                      <div key={item.tag}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="font-medium text-[var(--color-text)]">{item.tag}</span>
+                          <span className="text-[var(--color-g400)]">매수 {item.buy} · 매도 {item.sell}</span>
+                        </div>
+                        <div className="h-2 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                          <div
+                            className="h-full rounded"
+                            style={{
+                              width: `${pct}%`,
+                              background: `linear-gradient(90deg, var(--color-positive) ${(item.buy / item.total) * 100}%, var(--color-warning) ${(item.buy / item.total) * 100}%)`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
-                        <div
-                          className="h-full rounded"
-                          style={{
-                            width: `${pct}%`,
-                            background: `linear-gradient(90deg, var(--color-positive) ${(item.buy / item.total) * 100}%, var(--color-warning) ${(item.buy / item.total) * 100}%)`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </>
           )}
         </Card>
@@ -654,6 +741,7 @@ export default function PersonalityPage() {
           </button>
         </div>
       )}
+      </>}
 
       {/* ══════════ 섹션 3 — AI 코칭 & 개선 플랜 ══════════ */}
       <SectionTitle
@@ -682,9 +770,10 @@ export default function PersonalityPage() {
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-g300)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
               <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+            <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-4">
               매매 <strong className="text-[var(--color-positive)]">{10 - totalCount}건</strong> 더 기록하면 AI 코칭이 열려요
             </p>
+            <Button onClick={() => router.push("/trades")}>매매 기록하러 가기</Button>
           </div>
         </Card>
       )}
@@ -721,100 +810,153 @@ export default function PersonalityPage() {
         </Card>
       )}
 
-      {/* 코칭 히스토리 */}
+      {/* 코칭 히스토리 — 최근 N개만 표시 */}
       {coachings.length > 0 && (
-        <div className="space-y-3 mb-4">
-          {coachings.map((coaching, idx) => {
-            const isExpanded = expandedCoachings.has(coaching.id);
-            const dateStr = new Date(coaching.createdAt).toLocaleDateString("ko-KR", {
-              month: "long",
-              day: "numeric",
-            });
-            return (
-              <Card key={coaching.id}>
-                <button
-                  onClick={() => setExpandedCoachings(prev => {
-                    const next = new Set(prev);
-                    if (isExpanded) next.delete(coaching.id);
-                    else next.add(coaching.id);
-                    return next;
-                  })}
-                  className="w-full flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[var(--color-primary)]">
-                      {idx === 0 ? "최신" : dateStr}
-                    </span>
-                    {idx === 0 && (
-                      <span className="text-xs text-[var(--color-g400)]">{dateStr} 생성</span>
-                    )}
-                  </div>
-                  <svg
-                    width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                    className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
+        <>
+          <div className="space-y-3 mb-4">
+            {coachings.slice(0, COACHING_PREVIEW_COUNT).map((coaching, idx) => (
+              <CoachingCard
+                key={coaching.id}
+                coaching={coaching}
+                isLatest={idx === 0}
+                isExpanded={expandedCoachings.has(coaching.id)}
+                onToggle={() => setExpandedCoachings((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(coaching.id)) next.delete(coaching.id);
+                  else next.add(coaching.id);
+                  return next;
+                })}
+              />
+            ))}
+          </div>
 
-                {isExpanded && (
-                  <div className="mt-4 space-y-4 animate-[fadeIn_0.3s_ease-out]">
-                    {/* 잘하고 있는 것 */}
-                    <div>
-                      <p className="text-xs font-bold text-[var(--color-positive)] mb-2 flex items-center gap-1">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        잘하고 있는 것
-                      </p>
-                      <div className="space-y-1.5">
-                        {coaching.strengths.map((s, i) => (
-                          <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
-                            <span className="text-[var(--color-positive)] shrink-0 mt-0.5">●</span>
-                            <span>{s}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+          {coachings.length > COACHING_PREVIEW_COUNT && (
+            <button
+              onClick={() => setShowAllCoachings(true)}
+              className="w-full mb-4 py-3 text-sm font-semibold text-[var(--color-primary)] border border-[var(--color-g200)] dark:border-[var(--color-border)] rounded-2xl hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-card)] transition-colors cursor-pointer"
+            >
+              전체 히스토리 보기 ({coachings.length}개)
+            </button>
+          )}
+        </>
+      )}
 
-                    {/* 반복되는 실수 */}
-                    <div>
-                      <p className="text-xs font-bold text-[var(--color-warning)] mb-2 flex items-center gap-1">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        반복되는 실수
-                      </p>
-                      <div className="space-y-1.5">
-                        {coaching.mistakes.map((m, i) => (
-                          <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
-                            <span className="text-[var(--color-negative)] shrink-0 mt-0.5">●</span>
-                            <span>{m}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+      {/* 전체 히스토리 모달 */}
+      <BottomSheet
+        open={showAllCoachings}
+        onClose={() => setShowAllCoachings(false)}
+        title={`AI 코칭 전체 히스토리 (${coachings.length}개)`}
+      >
+        <div className="space-y-3">
+          {coachings.map((coaching, idx) => (
+            <CoachingCard
+              key={coaching.id}
+              coaching={coaching}
+              isLatest={idx === 0}
+              isExpanded={expandedCoachings.has(coaching.id)}
+              onToggle={() => setExpandedCoachings((prev) => {
+                const next = new Set(prev);
+                if (next.has(coaching.id)) next.delete(coaching.id);
+                else next.add(coaching.id);
+                return next;
+              })}
+            />
+          ))}
+        </div>
+      </BottomSheet>
+    </div>
+  );
+}
 
-                    {/* 이번 달 개선 목표 */}
-                    <div>
-                      <p className="text-xs font-bold mb-2 flex items-center gap-1" style={{ color: "var(--color-primary)" }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                        이번 달 개선 목표
-                      </p>
-                      <div className="space-y-1.5">
-                        {coaching.goals.map((g, i) => (
-                          <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
-                            <span className="shrink-0 mt-0.5 text-xs font-bold" style={{ color: "var(--color-primary)" }}>{i + 1}</span>
-                            <span>{g}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            );
-          })}
+// ─── 코칭 카드 컴포넌트 ─────────────────────────────────
+
+function CoachingCard({
+  coaching,
+  isLatest,
+  isExpanded,
+  onToggle,
+}: {
+  coaching: CoachingItem;
+  isLatest: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const dateStr = new Date(coaching.createdAt).toLocaleDateString("ko-KR", {
+    month: "long",
+    day: "numeric",
+  });
+  return (
+    <Card>
+      <button onClick={onToggle} className="w-full flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[var(--color-primary)]">
+            {isLatest ? "최신" : dateStr}
+          </span>
+          {isLatest && (
+            <span className="text-xs text-[var(--color-g400)]">{dateStr} 생성</span>
+          )}
+        </div>
+        <svg
+          width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="var(--color-g400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {isExpanded && (
+        <div className="mt-4 space-y-4 animate-[fadeIn_0.3s_ease-out]">
+          {/* 잘하고 있는 것 */}
+          <div>
+            <p className="text-xs font-bold text-[var(--color-positive)] mb-2 flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              잘하고 있는 것
+            </p>
+            <div className="space-y-1.5">
+              {coaching.strengths.map((s, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                  <span className="text-[var(--color-positive)] shrink-0 mt-0.5">●</span>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 반복되는 실수 */}
+          <div>
+            <p className="text-xs font-bold text-[var(--color-warning)] mb-2 flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              반복되는 실수
+            </p>
+            <div className="space-y-1.5">
+              {coaching.mistakes.map((m, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                  <span className="text-[var(--color-negative)] shrink-0 mt-0.5">●</span>
+                  <span>{m}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 이번 달 개선 목표 */}
+          <div>
+            <p className="text-xs font-bold mb-2 flex items-center gap-1" style={{ color: "var(--color-primary)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              이번 달 개선 목표
+            </p>
+            <div className="space-y-1.5">
+              {coaching.goals.map((g, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                  <span className="shrink-0 mt-0.5 text-xs font-bold" style={{ color: "var(--color-primary)" }}>{i + 1}</span>
+                  <span>{g}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
