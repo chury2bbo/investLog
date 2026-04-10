@@ -111,6 +111,7 @@ model TradeLog {
   memo       String?
   createdAt  DateTime      @default(now())
   account    InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  cashLog    CashLog?
 
   @@index([accountId])
   @@index([date])
@@ -127,17 +128,20 @@ model CashBalance {
 }
 
 model CashLog {
-  id        Int           @id @default(autoincrement())
-  date      DateTime
-  accountId Int
-  type      String
-  currency  String
-  amount    Float
-  memo      String?
-  createdAt DateTime      @default(now())
-  account   InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  id         Int           @id @default(autoincrement())
+  date       DateTime
+  accountId  Int
+  type       String
+  currency   String
+  amount     Float
+  memo       String?
+  tradeLogId Int?          @unique
+  createdAt  DateTime      @default(now())
+  account    InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tradeLog   TradeLog?     @relation(fields: [tradeLogId], references: [id], onDelete: Cascade)
 
   @@index([accountId])
+  @@index([tradeLogId])
 }
 
 model StockMaster {

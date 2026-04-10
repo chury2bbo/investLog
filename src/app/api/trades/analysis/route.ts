@@ -10,9 +10,14 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const minTrades = Number(searchParams.get("min") ?? "3");
 
-  // 사용자의 모든 매매 기록 조회
+  // 사용자의 매매 기록 조회 (최근 6개월 — 성향 분석 일관성)
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const trades = await prisma.tradeLog.findMany({
-    where: { account: { userId: session.user.id } },
+    where: {
+      account: { userId: session.user.id },
+      date: { gte: sixMonthsAgo },
+    },
     orderBy: { date: "asc" },
   });
 

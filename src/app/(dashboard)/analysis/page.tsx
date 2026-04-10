@@ -249,9 +249,9 @@ export default function AnalysisPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ticker: stock.ticker, name: stock.name, country: stock.country ?? "KR" }),
-    }).then(async (r) => {
-      if (!r.ok) console.error("[history POST]", await r.json());
-    }).catch((e) => console.error("[history POST error]", e));
+    }).catch(() => {
+      /* 분석 이력 기록 실패는 무시 */
+    });
 
     // 현재가 + 투자지표 조회
     setQuoteLoading(true);
@@ -311,11 +311,9 @@ export default function AnalysisPage() {
       if (res.ok) {
         setReport(d.report ?? null);
       } else {
-        console.error("Report API error:", d.error);
         showToast("분석 실패", d.error ?? "AI 분석 리포트를 생성할 수 없습니다.", { variant: "error" });
       }
-    } catch (err) {
-      console.error("Report fetch error:", err);
+    } catch {
       showToast("네트워크 오류", "서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", { variant: "error" });
     } finally {
       setReportLoading(false);

@@ -854,7 +854,9 @@ export default function AccountDetailPage() {
       </div>
 
       {account.holdings.length === 0 ? (
-        <EmptyState message="보유 종목이 없습니다." />
+        <Card className="mb-4">
+          <EmptyState message="보유 종목이 없습니다." />
+        </Card>
       ) : (
         <div className="space-y-2.5 mb-4">
           {[...account.holdings]

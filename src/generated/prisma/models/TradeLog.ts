@@ -289,6 +289,7 @@ export type TradeLogWhereInput = {
   memo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TradeLog"> | Date | string
   account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
+  cashLog?: Prisma.XOR<Prisma.CashLogNullableScalarRelationFilter, Prisma.CashLogWhereInput> | null
 }
 
 export type TradeLogOrderByWithRelationInput = {
@@ -306,6 +307,7 @@ export type TradeLogOrderByWithRelationInput = {
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   account?: Prisma.InvestAccountOrderByWithRelationInput
+  cashLog?: Prisma.CashLogOrderByWithRelationInput
 }
 
 export type TradeLogWhereUniqueInput = Prisma.AtLeast<{
@@ -326,6 +328,7 @@ export type TradeLogWhereUniqueInput = Prisma.AtLeast<{
   memo?: Prisma.StringNullableFilter<"TradeLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"TradeLog"> | Date | string
   account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
+  cashLog?: Prisma.XOR<Prisma.CashLogNullableScalarRelationFilter, Prisma.CashLogWhereInput> | null
 }, "id">
 
 export type TradeLogOrderByWithAggregationInput = {
@@ -381,6 +384,7 @@ export type TradeLogCreateInput = {
   memo?: string | null
   createdAt?: Date | string
   account: Prisma.InvestAccountCreateNestedOneWithoutTradeLogsInput
+  cashLog?: Prisma.CashLogCreateNestedOneWithoutTradeLogInput
 }
 
 export type TradeLogUncheckedCreateInput = {
@@ -397,6 +401,7 @@ export type TradeLogUncheckedCreateInput = {
   reasonMemo?: string | null
   memo?: string | null
   createdAt?: Date | string
+  cashLog?: Prisma.CashLogUncheckedCreateNestedOneWithoutTradeLogInput
 }
 
 export type TradeLogUpdateInput = {
@@ -412,6 +417,7 @@ export type TradeLogUpdateInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.InvestAccountUpdateOneRequiredWithoutTradeLogsNestedInput
+  cashLog?: Prisma.CashLogUpdateOneWithoutTradeLogNestedInput
 }
 
 export type TradeLogUncheckedUpdateInput = {
@@ -428,6 +434,7 @@ export type TradeLogUncheckedUpdateInput = {
   reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cashLog?: Prisma.CashLogUncheckedUpdateOneWithoutTradeLogNestedInput
 }
 
 export type TradeLogCreateManyInput = {
@@ -546,6 +553,11 @@ export type TradeLogSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
 }
 
+export type TradeLogNullableScalarRelationFilter = {
+  is?: Prisma.TradeLogWhereInput | null
+  isNot?: Prisma.TradeLogWhereInput | null
+}
+
 export type TradeLogCreateNestedManyWithoutAccountInput = {
   create?: Prisma.XOR<Prisma.TradeLogCreateWithoutAccountInput, Prisma.TradeLogUncheckedCreateWithoutAccountInput> | Prisma.TradeLogCreateWithoutAccountInput[] | Prisma.TradeLogUncheckedCreateWithoutAccountInput[]
   connectOrCreate?: Prisma.TradeLogCreateOrConnectWithoutAccountInput | Prisma.TradeLogCreateOrConnectWithoutAccountInput[]
@@ -597,6 +609,22 @@ export type TradeLogUpdatereasonTagsInput = {
   push?: string | string[]
 }
 
+export type TradeLogCreateNestedOneWithoutCashLogInput = {
+  create?: Prisma.XOR<Prisma.TradeLogCreateWithoutCashLogInput, Prisma.TradeLogUncheckedCreateWithoutCashLogInput>
+  connectOrCreate?: Prisma.TradeLogCreateOrConnectWithoutCashLogInput
+  connect?: Prisma.TradeLogWhereUniqueInput
+}
+
+export type TradeLogUpdateOneWithoutCashLogNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeLogCreateWithoutCashLogInput, Prisma.TradeLogUncheckedCreateWithoutCashLogInput>
+  connectOrCreate?: Prisma.TradeLogCreateOrConnectWithoutCashLogInput
+  upsert?: Prisma.TradeLogUpsertWithoutCashLogInput
+  disconnect?: Prisma.TradeLogWhereInput | boolean
+  delete?: Prisma.TradeLogWhereInput | boolean
+  connect?: Prisma.TradeLogWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TradeLogUpdateToOneWithWhereWithoutCashLogInput, Prisma.TradeLogUpdateWithoutCashLogInput>, Prisma.TradeLogUncheckedUpdateWithoutCashLogInput>
+}
+
 export type TradeLogCreateWithoutAccountInput = {
   date: Date | string
   ticker: string
@@ -609,6 +637,7 @@ export type TradeLogCreateWithoutAccountInput = {
   reasonMemo?: string | null
   memo?: string | null
   createdAt?: Date | string
+  cashLog?: Prisma.CashLogCreateNestedOneWithoutTradeLogInput
 }
 
 export type TradeLogUncheckedCreateWithoutAccountInput = {
@@ -624,6 +653,7 @@ export type TradeLogUncheckedCreateWithoutAccountInput = {
   reasonMemo?: string | null
   memo?: string | null
   createdAt?: Date | string
+  cashLog?: Prisma.CashLogUncheckedCreateNestedOneWithoutTradeLogInput
 }
 
 export type TradeLogCreateOrConnectWithoutAccountInput = {
@@ -671,6 +701,84 @@ export type TradeLogScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"TradeLog"> | Date | string
 }
 
+export type TradeLogCreateWithoutCashLogInput = {
+  date: Date | string
+  ticker: string
+  name: string
+  type: string
+  price: number
+  quantity: number
+  reasonTags?: Prisma.TradeLogCreatereasonTagsInput | string[]
+  emotion?: string | null
+  reasonMemo?: string | null
+  memo?: string | null
+  createdAt?: Date | string
+  account: Prisma.InvestAccountCreateNestedOneWithoutTradeLogsInput
+}
+
+export type TradeLogUncheckedCreateWithoutCashLogInput = {
+  id?: number
+  date: Date | string
+  accountId: number
+  ticker: string
+  name: string
+  type: string
+  price: number
+  quantity: number
+  reasonTags?: Prisma.TradeLogCreatereasonTagsInput | string[]
+  emotion?: string | null
+  reasonMemo?: string | null
+  memo?: string | null
+  createdAt?: Date | string
+}
+
+export type TradeLogCreateOrConnectWithoutCashLogInput = {
+  where: Prisma.TradeLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.TradeLogCreateWithoutCashLogInput, Prisma.TradeLogUncheckedCreateWithoutCashLogInput>
+}
+
+export type TradeLogUpsertWithoutCashLogInput = {
+  update: Prisma.XOR<Prisma.TradeLogUpdateWithoutCashLogInput, Prisma.TradeLogUncheckedUpdateWithoutCashLogInput>
+  create: Prisma.XOR<Prisma.TradeLogCreateWithoutCashLogInput, Prisma.TradeLogUncheckedCreateWithoutCashLogInput>
+  where?: Prisma.TradeLogWhereInput
+}
+
+export type TradeLogUpdateToOneWithWhereWithoutCashLogInput = {
+  where?: Prisma.TradeLogWhereInput
+  data: Prisma.XOR<Prisma.TradeLogUpdateWithoutCashLogInput, Prisma.TradeLogUncheckedUpdateWithoutCashLogInput>
+}
+
+export type TradeLogUpdateWithoutCashLogInput = {
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ticker?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  reasonTags?: Prisma.TradeLogUpdatereasonTagsInput | string[]
+  emotion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.InvestAccountUpdateOneRequiredWithoutTradeLogsNestedInput
+}
+
+export type TradeLogUncheckedUpdateWithoutCashLogInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accountId?: Prisma.IntFieldUpdateOperationsInput | number
+  ticker?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  reasonTags?: Prisma.TradeLogUpdatereasonTagsInput | string[]
+  emotion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type TradeLogCreateManyAccountInput = {
   id?: number
   date: Date | string
@@ -698,6 +806,7 @@ export type TradeLogUpdateWithoutAccountInput = {
   reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cashLog?: Prisma.CashLogUpdateOneWithoutTradeLogNestedInput
 }
 
 export type TradeLogUncheckedUpdateWithoutAccountInput = {
@@ -713,6 +822,7 @@ export type TradeLogUncheckedUpdateWithoutAccountInput = {
   reasonMemo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cashLog?: Prisma.CashLogUncheckedUpdateOneWithoutTradeLogNestedInput
 }
 
 export type TradeLogUncheckedUpdateManyWithoutAccountInput = {
@@ -747,6 +857,7 @@ export type TradeLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   memo?: boolean
   createdAt?: boolean
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
+  cashLog?: boolean | Prisma.TradeLog$cashLogArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLog"]>
 
 export type TradeLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -802,6 +913,7 @@ export type TradeLogSelectScalar = {
 export type TradeLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "accountId" | "ticker" | "name" | "type" | "price" | "quantity" | "reasonTags" | "emotion" | "reasonMemo" | "memo" | "createdAt", ExtArgs["result"]["tradeLog"]>
 export type TradeLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
+  cashLog?: boolean | Prisma.TradeLog$cashLogArgs<ExtArgs>
 }
 export type TradeLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
@@ -814,6 +926,7 @@ export type $TradeLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "TradeLog"
   objects: {
     account: Prisma.$InvestAccountPayload<ExtArgs>
+    cashLog: Prisma.$CashLogPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1224,6 +1337,7 @@ readonly fields: TradeLogFieldRefs;
 export interface Prisma__TradeLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   account<T extends Prisma.InvestAccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InvestAccountDefaultArgs<ExtArgs>>): Prisma.Prisma__InvestAccountClient<runtime.Types.Result.GetResult<Prisma.$InvestAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  cashLog<T extends Prisma.TradeLog$cashLogArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeLog$cashLogArgs<ExtArgs>>): Prisma.Prisma__CashLogClient<runtime.Types.Result.GetResult<Prisma.$CashLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1664,6 +1778,25 @@ export type TradeLogDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many TradeLogs to delete.
    */
   limit?: number
+}
+
+/**
+ * TradeLog.cashLog
+ */
+export type TradeLog$cashLogArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CashLog
+   */
+  select?: Prisma.CashLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CashLog
+   */
+  omit?: Prisma.CashLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CashLogInclude<ExtArgs> | null
+  where?: Prisma.CashLogWhereInput
 }
 
 /**

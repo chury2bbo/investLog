@@ -262,9 +262,10 @@ export async function POST(req: Request) {
   }
 
   // 매매 기록 저장
+  const tradeDate = bodyDate ? new Date(bodyDate) : new Date();
   const tradeLog = await prisma.tradeLog.create({
     data: {
-      date: bodyDate ? new Date(bodyDate) : new Date(),
+      date: tradeDate,
       accountId,
       ticker,
       name,
@@ -278,15 +279,16 @@ export async function POST(req: Request) {
     },
   });
 
-  // 예수금 변동 로그
+  // 예수금 변동 로그 (tradeLog와 1:1 외래 키로 연결)
   await prisma.cashLog.create({
     data: {
-      date: bodyDate ? new Date(bodyDate) : new Date(),
+      date: tradeDate,
       accountId,
       type: type === "BUY" ? "TRADE_BUY" : "TRADE_SELL",
       currency,
       amount: type === "BUY" ? -tradeAmount : tradeAmount,
       memo: `${name} ${type === "BUY" ? "매수" : "매도"} ${quantity}주`,
+      tradeLogId: tradeLog.id,
     },
   });
 

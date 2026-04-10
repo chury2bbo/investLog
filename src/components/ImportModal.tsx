@@ -84,7 +84,6 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
 
     const res = await fetch("/api/import/analyze", { method: "POST", body: formData });
     const data = await res.json();
-    console.log("[ImportModal] analyze response:", data);
 
     if (!res.ok) {
       showToast("분석 실패", data.error ?? "이미지 분석에 실패했습니다.");

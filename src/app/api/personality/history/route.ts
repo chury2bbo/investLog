@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CLAUDE_MODEL, COACHING_SYSTEM, buildCoachingUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
+import { parseAiJson } from "@/lib/parseAiJson";
 
 // ─── GET: 코칭 히스토리 목록 조회 ───────────────────────
 export async function GET() {
@@ -66,15 +67,20 @@ export async function POST() {
     }, { status: 429 });
   }
 
-  // ─── 매매 데이터 조회 ─────────────────────────────────
+  // ─── 매매 데이터 조회 (최근 6개월) ─────────────────────
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const trades = await prisma.tradeLog.findMany({
-    where: { account: { userId: session.user.id } },
+    where: {
+      account: { userId: session.user.id },
+      date: { gte: sixMonthsAgo },
+    },
     orderBy: { date: "asc" },
   });
 
   if (trades.length < 10) {
     return Response.json({
-      error: "매매 기록이 10건 이상 필요합니다.",
+      error: "최근 6개월 매매 기록이 10건 이상 필요합니다.",
       totalCount: trades.length,
     }, { status: 400 });
   }
@@ -233,14 +239,10 @@ export async function POST() {
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     const { input_tokens, output_tokens } = message.usage;
 
-    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const result = parseAiJson<{ strengths: string[]; mistakes: string[]; goals: string[] }>(text);
+    if (!result) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }
-
-    const result = JSON.parse(jsonMatch[0]);
 
     // ─── DB 저장 ────────────────────────────────────────
     const coaching = await prisma.coachingHistory.create({

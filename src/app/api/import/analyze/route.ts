@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { CLAUDE_MODEL, IMPORT_ANALYZE_PROMPT } from "@/lib/prompts";
 import { getYahooSearch } from "@/lib/yahoo";
+import { parseAiJson } from "@/lib/parseAiJson";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -73,12 +74,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const parsed = parseAiJson<{
+      valid?: boolean;
+      holdings?: { ticker: string; name: string; country: string; avgPrice: number; quantity: number }[];
+      cashBalances?: { currency: string; amount: number }[];
+    }>(text);
+    if (!parsed) {
       return Response.json({ error: "이미지에서 종목 정보를 찾을 수 없습니다." }, { status: 400 });
     }
-
-    const parsed = JSON.parse(jsonMatch[0]);
 
     // ticker 빈값 종목에 대해 자동 보완
     if (Array.isArray(parsed.holdings)) {

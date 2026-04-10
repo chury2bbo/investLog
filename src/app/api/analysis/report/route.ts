@@ -4,6 +4,7 @@ import { CLAUDE_MODEL, REPORT_SYSTEM, buildReportUserPrompt } from "@/lib/prompt
 import Anthropic from "@anthropic-ai/sdk";
 import { getKisQuote } from "@/lib/kis";
 import { getYahooQuote } from "@/lib/yahoo";
+import { parseAiJson } from "@/lib/parseAiJson";
 
 const DAILY_LIMIT = 10;
 
@@ -94,20 +95,18 @@ export async function GET(req: Request) {
       message.content[0].type === "text" ? message.content[0].text : "";
     const { input_tokens, output_tokens } = message.usage;
 
-    // 코드블록 내부 JSON 추출 시도 → 일반 JSON 추출 폴백
-    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("[Report] JSON 파싱 실패 — AI 원본 응답:", text.slice(0, 500));
-      return Response.json({ error: "AI 서버 응답이 불완전합니다. 다시 시도해주세요." }, { status: 502 });
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(jsonMatch[0]);
-    } catch {
-      console.error("[Report] JSON.parse 실패 — 추출된 문자열:", jsonMatch[0].slice(0, 500));
+    const parsed = parseAiJson<{
+      recommendation?: string;
+      targetBuy?: string;
+      targetSell?: string;
+      swotStrength?: string;
+      swotWeakness?: string;
+      swotOpportunity?: string;
+      swotThreat?: string;
+      reasoning?: string;
+      recentIssues?: string;
+    }>(text);
+    if (!parsed) {
       return Response.json({ error: "AI 서버 응답이 불완전합니다. 다시 시도해주세요." }, { status: 502 });
     }
 

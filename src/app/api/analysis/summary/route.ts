@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CLAUDE_MODEL, buildSummaryUserPrompt } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
+import { parseAiJson } from "@/lib/parseAiJson";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -48,12 +49,10 @@ export async function GET(req: Request) {
       message.content[0].type === "text" ? message.content[0].text : "";
     const { input_tokens, output_tokens } = message.usage;
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const parsed = parseAiJson(text);
+    if (!parsed) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }
-
-    const parsed = JSON.parse(jsonMatch[0]);
 
     const summaryKo = JSON.stringify(parsed);
     await prisma.tickerSummaryCache.upsert({
@@ -72,7 +71,6 @@ export async function GET(req: Request) {
 
     return Response.json({ ticker, summary: summaryKo, cached: false });
   } catch (err: unknown) {
-    console.error("Summary API error:", err);
     const isOverloaded = err instanceof Error && (err.message?.includes("Overloaded") || err.message?.includes("529"));
     const message = isOverloaded
       ? "AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요."

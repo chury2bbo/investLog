@@ -78,11 +78,7 @@ function IconSidebar() {
               <Link
                 href={item.id}
                 className="w-full flex items-center justify-center py-3 relative cursor-pointer"
-                style={{
-                  background: active
-                    ? "var(--color-primary-soft)"
-                    : "transparent",
-                }}
+                style={{ opacity: active ? 1 : 0.4 }}
               >
                 {active && (
                   <div

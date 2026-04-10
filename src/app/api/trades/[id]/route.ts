@@ -145,17 +145,8 @@ export async function DELETE(
     }
   }
 
-  // 매매 기록 삭제
+  // 매매 기록 삭제 — cashLog는 외래 키(tradeLogId) cascade로 자동 삭제
   await prisma.tradeLog.delete({ where: { id: tradeId } });
-
-  // 관련 예수금 변동 로그도 삭제
-  await prisma.cashLog.deleteMany({
-    where: {
-      accountId: trade.accountId,
-      memo: { contains: `${trade.name} ${trade.type === "BUY" ? "매수" : "매도"} ${trade.quantity}주` },
-      date: trade.date,
-    },
-  });
 
   return Response.json({ success: true });
 }

@@ -8,6 +8,8 @@ import {
   buildPersonalityLevel1Prompt,
 } from "@/lib/prompts";
 import Anthropic from "@anthropic-ai/sdk";
+import { parseAiJson } from "@/lib/parseAiJson";
+import { getUsdKrwRate } from "@/lib/yahoo";
 
 const DAILY_LIMIT = 1;
 
@@ -67,9 +69,14 @@ export async function GET(req: Request) {
     );
   }
 
-  // ─── 매매 데이터 조회 ─────────────────────────────────
+  // ─── 매매 데이터 조회 (최근 6개월) ─────────────────────
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const trades = await prisma.tradeLog.findMany({
-    where: { account: { userId: session.user.id } },
+    where: {
+      account: { userId: session.user.id },
+      date: { gte: sixMonthsAgo },
+    },
     orderBy: { date: "asc" },
   });
 
@@ -238,14 +245,10 @@ export async function GET(req: Request) {
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     const { input_tokens, output_tokens } = message.usage;
 
-    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const result = parseAiJson<{ type: string; summary: string }>(text);
+    if (!result) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }
-
-    const result = JSON.parse(jsonMatch[0]);
 
     // ─── API 사용 로그 + 토큰 ────────────────────────────
     await prisma.apiUsageLog.upsert({
@@ -335,6 +338,14 @@ async function runLevel1Diagnosis({
     return Response.json({ error: "AI API 키가 설정되지 않았습니다." }, { status: 500 });
   }
 
+  // ─── 환율 조회 (실패 시 1400으로 폴백) ───────────────
+  let usdRate = 1400;
+  try {
+    usdRate = await getUsdKrwRate();
+  } catch {
+    /* 폴백 유지 */
+  }
+
   // ─── 예수금 잔고 조회 (KRW 환산은 단순 합산) ─────────
   const cashBalances = await prisma.cashBalance.findMany({
     where: { account: { userId } },
@@ -344,13 +355,13 @@ async function runLevel1Diagnosis({
     .reduce((s, c) => s + c.amount, 0);
   const cashUSDinKRW = cashBalances
     .filter((c) => c.currency === "USD")
-    .reduce((s, c) => s + c.amount * 1380, 0); // 환율 추정치
+    .reduce((s, c) => s + c.amount * usdRate, 0);
   const totalCash = cashKRW + cashUSDinKRW;
 
   // ─── 보유 종목 평가금 (매수가 기준 단순 계산) ────────
   const holdingValueKRW = holdings.reduce((s, h) => {
     const v = h.avgPrice * h.quantity;
-    return s + (h.country === "KR" ? v : v * 1380);
+    return s + (h.country === "KR" ? v : v * usdRate);
   }, 0);
   const totalAsset = holdingValueKRW + totalCash;
   const cashRatio = totalAsset > 0 ? (totalCash / totalAsset) * 100 : 0;
@@ -359,7 +370,7 @@ async function runLevel1Diagnosis({
   const sectorMap: Record<string, number> = {};
   holdings.forEach((h) => {
     const sector = h.sectorManual ?? h.sectorAuto ?? "기타";
-    const v = h.avgPrice * h.quantity * (h.country === "KR" ? 1 : 1380);
+    const v = h.avgPrice * h.quantity * (h.country === "KR" ? 1 : usdRate);
     sectorMap[sector] = (sectorMap[sector] ?? 0) + v;
   });
   const topSectors = Object.entries(sectorMap)
@@ -398,13 +409,10 @@ async function runLevel1Diagnosis({
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     const { input_tokens, output_tokens } = message.usage;
 
-    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : text;
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const result = parseAiJson<{ type: string; summary: string }>(text);
+    if (!result) {
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 });
     }
-    const result = JSON.parse(jsonMatch[0]);
 
     // ─── 사용 로그 (Level 2와 같은 type 키 공유 — 1회/일 통합) ─
     await prisma.apiUsageLog.upsert({

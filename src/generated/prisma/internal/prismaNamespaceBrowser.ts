@@ -205,6 +205,7 @@ export const CashLogScalarFieldEnum = {
   currency: 'currency',
   amount: 'amount',
   memo: 'memo',
+  tradeLogId: 'tradeLogId',
   createdAt: 'createdAt'
 } as const
 
