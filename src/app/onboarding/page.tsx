@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Tag, LoadingSpinner, ConfirmDialog } from "@/components/ui";
+import { Button, Card, Tag, LoadingSpinner, ConfirmDialog, Select } from "@/components/ui";
 import { ImportModal } from "@/components/ImportModal";
 
 import { fmtNum, stripNum } from "@/lib/format";
@@ -64,8 +64,11 @@ function StockSearch({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const localInputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,6 +78,20 @@ function StockSearch({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 
+  // activeIndex 변경 시 포커스 이동
+  useEffect(() => {
+    if (activeIndex === -1) {
+      localInputRef.current?.focus();
+    } else {
+      itemRefs.current[activeIndex]?.focus();
+    }
+  }, [activeIndex]);
+
+  // 결과 바뀌면 선택 초기화
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [results]);
+
   useEffect(() => {
     return () => { recognitionRef.current?.stop(); };
   }, []);
@@ -83,11 +100,20 @@ function StockSearch({
     function handleClickOutside(e: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function selectResult(r: SearchResult) {
+    onSelect(r);
+    setQuery("");
+    setResults([]);
+    setOpen(false);
+    setActiveIndex(-1);
+  }
 
   function handleChange(value: string) {
     setQuery(value);
@@ -184,11 +210,20 @@ function StockSearch({
       </label>
       <div className="flex items-center gap-2">
         <input
-          ref={inputRef}
+          ref={(el) => { (localInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el; inputRef?.(el); }}
           type="text"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown" && open && results.length > 0) {
+              e.preventDefault();
+              setActiveIndex(0);
+            } else if (e.key === "Escape") {
+              setOpen(false);
+              setActiveIndex(-1);
+            }
+          }}
           placeholder={isListening ? "듣는 중..." : "종목명 또는 티커 입력"}
           className="flex-1 pb-2 text-sm bg-transparent outline-none border-b"
           style={{ borderColor: isListening ? "var(--color-negative)" : "var(--color-g200)", color: "var(--color-text)", transition: "border-color 0.2s" }}
@@ -231,25 +266,36 @@ function StockSearch({
       )}
 
       {open && results.length > 0 && (
-        <ul
+        <div
           className="absolute z-20 w-full mt-1 rounded-xl overflow-hidden max-h-48 overflow-y-auto"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-          }}
+          style={{ backgroundColor: "var(--color-surface)", boxShadow: "0 4px 16px rgba(0,0,0,0.12)" }}
         >
-          {results.map((r) => (
-            <li
+          {results.map((r, i) => (
+            <button
               key={r.ticker}
-              className="px-4 py-3 text-sm cursor-pointer hover:bg-(--color-g100) flex items-center justify-between"
-              onClick={() => {
-                onSelect(r);
-                setQuery("");
-                setResults([]);
-                setOpen(false);
+              ref={(el) => { itemRefs.current[i] = el; }}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); selectResult(r); }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setActiveIndex(Math.min(i + 1, results.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  if (i === 0) setActiveIndex(-1);
+                  else setActiveIndex(i - 1);
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  selectResult(r);
+                } else if (e.key === "Escape") {
+                  setOpen(false);
+                  setActiveIndex(-1);
+                }
               }}
+              className="w-full text-left px-4 py-3 text-sm cursor-pointer hover:bg-[var(--color-g100)] focus:bg-[var(--color-g100)] outline-none flex items-center justify-between border-b border-[var(--color-g100)] last:border-0 transition-colors"
+              style={{ color: "var(--color-text)" }}
             >
-              <span style={{ color: "var(--color-text)" }}>
+              <span>
                 {r.name}{" "}
                 <span className="text-xs" style={{ color: "var(--color-g400)" }}>
                   {r.ticker}
@@ -259,9 +305,9 @@ function StockSearch({
                 label={r.country === "KR" ? "국내" : "해외"}
                 color={r.country === "KR" ? "green" : "blue"}
               />
-            </li>
+            </button>
           ))}
-        </ul>
+        </div>
       )}
 
       {open && !searching && results.length === 0 && query.trim().length > 0 && (
@@ -368,15 +414,13 @@ export default function OnboardingPage() {
       .catch(() => {});
   }, []);
 
-  // 드롭다운 열림 상태 (계좌별 증권사 / Step 2 계좌)
-  const [brokerageDropOpen, setBrokerageDropOpen] = useState<number | null>(null);
+  // 드롭다운 열림 상태 (Step 2 계좌)
   const [tradeAccountDropOpen, setTradeAccountDropOpen] = useState(false);
 
   // 증권사 변경 시 기존 데이터 초기화 confirm
   const [pendingBrokerageChange, setPendingBrokerageChange] = useState<{ index: number; code: string } | null>(null);
 
   function selectBrokerage(index: number, code: string) {
-    setBrokerageDropOpen(null);
     const acc = accounts[index];
     const hasData = acc.cashKRW || acc.cashUSD || acc.holdings.length > 0;
     if (hasData && acc.accountCode !== code) {
@@ -739,42 +783,13 @@ export default function OnboardingPage() {
 
               {/* 증권사 선택 */}
               <div className="mb-4">
-                <label
-                  className="block text-xs font-medium mb-1"
-                  style={{ color: "var(--color-g500)" }}
-                >
-                  증권사
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setBrokerageDropOpen(brokerageDropOpen === accIdx ? null : accIdx)}
-                  className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b cursor-pointer"
-                  style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
-                >
-                  <span>{brokerages.find((b) => b.code === acc.accountCode)?.name ?? "증권사를 선택하세요"}</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-(--color-g400)" style={{ transform: brokerageDropOpen === accIdx ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                {brokerageDropOpen === accIdx && (
-                  <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-(--color-g200) bg-(--color-surface) shadow-lg">
-                    {brokerages.map((b) => (
-                      <button
-                        key={b.code}
-                        type="button"
-                        onClick={() => selectBrokerage(accIdx, b.code)}
-                        className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between"
-                        style={{
-                          backgroundColor: acc.accountCode === b.code ? "var(--color-primary-soft)" : "transparent",
-                          color: acc.accountCode === b.code ? "var(--color-primary)" : "var(--color-text)",
-                          fontWeight: acc.accountCode === b.code ? 600 : 400,
-                          borderBottom: "1px solid var(--color-g100)",
-                        }}
-                      >
-                        <span>{b.name}</span>
-                        {acc.accountCode === b.code && <span className="text-(--color-primary)">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <Select
+                  label="증권사"
+                  value={acc.accountCode}
+                  onChange={(code) => selectBrokerage(accIdx, code)}
+                  options={brokerages.map((b) => ({ value: b.code, label: b.name }))}
+                  placeholder="증권사를 선택하세요"
+                />
               </div>
 
               {/* 예수금 */}
@@ -944,7 +959,7 @@ export default function OnboardingPage() {
                             key={tag.label}
                             type="button"
                             onClick={() => toggleHoldingTag(accIdx, tag.label)}
-                            className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                            className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                               getHoldingForm(accIdx).tags.includes(tag.label)
                                 ? "bg-(--color-primary) text-white"
                                 : "bg-(--color-g200) text-(--color-g500) hover:bg-(--color-g200)"

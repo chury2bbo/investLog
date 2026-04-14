@@ -20,10 +20,10 @@ interface CashBalance {
 interface ImportModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (holdings: EditableHolding[], cashBalances: CashBalance[]) => void;
+  onConfirm: (holdings: EditableHolding[], cashBalances: CashBalance[]) => Promise<void>;
 }
 
-type Step = "upload" | "loading" | "confirm";
+type Step = "upload" | "loading" | "confirm" | "importing";
 
 export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
   const [step, setStep] = useState<Step>("upload");
@@ -160,7 +160,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
-      <BottomSheet open={open} onClose={handleClose} title="계좌 캡처 불러오기">
+      <BottomSheet open={open} onClose={step === "importing" ? () => {} : handleClose} title="계좌 캡처 불러오기">
         <p className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] -mt-2 mb-4">증권사 앱 잔고 화면을 캡처해서 업로드하세요</p>
         <div className="space-y-4">
 
@@ -221,6 +221,19 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                 </div>
               </Card>
             </>
+          )}
+
+          {/* 종목 등록 중 */}
+          {step === "importing" && (
+            <Card>
+              <div className="flex flex-col items-center py-6 gap-4">
+                <div className="w-10 h-10 rounded-full border-4 border-[var(--color-positive)] border-t-transparent animate-spin" />
+                <div className="text-center">
+                  <p className="text-sm font-bold text-[var(--color-text)]">종목을 등록하는 중이에요</p>
+                  <p className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-1">잠시만 기다려주세요</p>
+                </div>
+              </div>
+            </Card>
           )}
 
           {/* 확인 + 수정 */}
@@ -310,7 +323,14 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                   다시 업로드
                 </button>
                 <button
-                  onClick={() => { onConfirm(holdings.filter((h) => h.checked), cashBalances); handleClose(); }}
+                  onClick={async () => {
+                    setStep("importing");
+                    try {
+                      await onConfirm(holdings.filter((h) => h.checked), cashBalances);
+                    } finally {
+                      handleClose();
+                    }
+                  }}
                   disabled={!holdings.some((h) => h.checked)}
                   className="flex-1 py-3 rounded-xl bg-[var(--color-positive)] text-white text-sm font-bold cursor-pointer hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                   {holdings.filter((h) => h.checked).length}종목 가져오기
