@@ -101,6 +101,15 @@ export default function AccountDetailPage() {
   const [cashCurrency, setCashCurrency] = useState("KRW");
   const [cashAmount, setCashAmount] = useState("");
   const [cashSubmitting, setCashSubmitting] = useState(false);
+  const [cashError, setCashError] = useState("");
+  const cashAmountRef = useRef<HTMLInputElement>(null);
+
+  // 입출금 팝업 열릴 때 금액 입력란 자동 포커스
+  useEffect(() => {
+    if (cashModal !== null) {
+      setTimeout(() => cashAmountRef.current?.focus(), 100);
+    }
+  }, [cashModal]);
 
   // 계좌 삭제 모달
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -269,6 +278,7 @@ export default function AccountDetailPage() {
   async function handleCashSubmit() {
     if (!cashAmount || !account) return;
     setCashSubmitting(true);
+    setCashError("");
 
     const amount = parseFloat(cashAmount.replace(/,/g, ""));
     const type = cashModal === "deposit" ? "DEPOSIT" : "WITHDRAW";
@@ -288,10 +298,14 @@ export default function AccountDetailPage() {
       if (res.ok) {
         setCashModal(null);
         setCashAmount("");
+        setCashError("");
         fetchAccount();
+      } else {
+        const data = await res.json();
+        setCashError(data.error ?? "처리에 실패했습니다.");
       }
     } catch {
-      /* 실패 */
+      setCashError("네트워크 오류가 발생했습니다.");
     } finally {
       setCashSubmitting(false);
     }
@@ -1126,7 +1140,7 @@ export default function AccountDetailPage() {
       {/* ── 입출금 바텀시트 ── */}
       <BottomSheet
         open={cashModal !== null}
-        onClose={() => setCashModal(null)}
+        onClose={() => { setCashModal(null); setCashError(""); }}
         title={cashModal === "deposit" ? "입금" : "출금"}
       >
         <div className="space-y-5">
@@ -1135,7 +1149,7 @@ export default function AccountDetailPage() {
             {["KRW", "USD"].map((c) => (
               <button
                 key={c}
-                onClick={() => setCashCurrency(c)}
+                onClick={() => { setCashCurrency(c); setCashAmount(""); setCashError(""); setTimeout(() => cashAmountRef.current?.focus(), 0); }}
                 className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
                 style={{
                   backgroundColor:
@@ -1150,12 +1164,17 @@ export default function AccountDetailPage() {
 
           {/* 금액 */}
           <Input
+            ref={cashAmountRef}
             label="금액"
             inputMode="numeric"
             value={fmtNum(cashAmount)}
             onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
             placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
           />
+
+          {cashError && (
+            <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>
+          )}
 
           <Button
             size="lg"
