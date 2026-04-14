@@ -1027,6 +1027,7 @@ export default function TradesPage() {
             type="date"
             value={formDate}
             onChange={(e) => setFormDate(e.target.value)}
+            tooltip="날짜 선택"
           />
 
           {/* 매수/매도 토글 */}
@@ -1039,7 +1040,7 @@ export default function TradesPage() {
                 setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity("");
                 setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 formType === "BUY" ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
@@ -1053,7 +1054,7 @@ export default function TradesPage() {
                 setFormName(""); setFormTicker(""); setFormPrice(""); setFormQuantity("");
                 setStockQuery(""); setStockResults([]); setShowStockDropdown(false); setShowPrevTrades(false);
               }}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 formType === "SELL" ? "bg-[var(--color-negative)] text-white" : "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
@@ -1202,7 +1203,7 @@ export default function TradesPage() {
                   key={tag.label}
                   type="button"
                   onClick={() => toggleReasonTag(tag.label)}
-                  className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     formReasonTags.includes(tag.label)
                       ? "bg-[var(--color-primary)] text-white"
                       : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"
@@ -1225,7 +1226,7 @@ export default function TradesPage() {
                   key={em.label}
                   type="button"
                   onClick={() => setFormEmotion(formEmotion === em.label ? "" : em.label)}
-                  className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors ${
+                  className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
                     formEmotion === em.label
                       ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
                       : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"

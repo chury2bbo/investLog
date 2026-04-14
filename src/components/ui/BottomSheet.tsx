@@ -45,7 +45,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
 
       {/* 시트: 모바일 max 90vh / PC max 80vh */}
       <div
-        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] flex flex-col transition-all duration-300 ease-out bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)]"
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden flex flex-col transition-all duration-300 ease-out bg-[var(--color-surface)] dark:bg-[var(--color-card)] dark:border dark:border-[var(--color-border)]"
         style={{
           maxHeight: "80vh",
           transform: animating

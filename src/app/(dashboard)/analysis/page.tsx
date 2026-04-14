@@ -151,7 +151,10 @@ export default function AnalysisPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectIdRef = useRef(0);
 
@@ -218,11 +221,26 @@ export default function AnalysisPage() {
     function handleClick(e: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
+        setActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // activeIndex 변경 시 포커스 이동
+  useEffect(() => {
+    if (activeIndex === -1) {
+      inputRef.current?.focus();
+    } else {
+      itemRefs.current[activeIndex]?.focus();
+    }
+  }, [activeIndex]);
+
+  // 검색 결과 바뀌면 선택 초기화
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [results]);
 
   // ─── 종목 선택 → 데이터 로딩 ─────────────────────────
 
@@ -242,6 +260,7 @@ export default function AnalysisPage() {
     setSelected(stock);
     setQuery("");
     setShowDropdown(false);
+    setActiveIndex(-1);
     setReport(null);
 
     // 사용자 분석 이력 기록
@@ -286,6 +305,33 @@ export default function AnalysisPage() {
 
     // MDD 차트 데이터
     fetchHistory(stock.ticker, startDate, endDate);
+  }
+
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown" && showDropdown && results.length > 0) {
+      e.preventDefault();
+      setActiveIndex(0);
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+      setActiveIndex(-1);
+    }
+  }
+
+  function handleItemKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, i: number, stock: SearchResult) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex(Math.min(i + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (i === 0) setActiveIndex(-1);
+      else setActiveIndex(i - 1);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      selectStock(stock);
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+      setActiveIndex(-1);
+    }
   }
 
   async function fetchHistory(ticker: string, start: string, end: string) {
@@ -452,10 +498,12 @@ export default function AnalysisPage() {
                 <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
               </svg>
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
                 onFocus={() => results.length > 0 && setShowDropdown(true)}
+                onKeyDown={handleInputKeyDown}
                 placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)"
                 className="flex-1 text-sm bg-transparent outline-none text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-g600)]"
               />
@@ -464,11 +512,14 @@ export default function AnalysisPage() {
 
             {showDropdown && results.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg z-50 max-h-64 overflow-y-auto">
-                {results.map((r) => (
+                {results.map((r, i) => (
                   <button
                     key={`${r.ticker}-${r.country}`}
-                    onClick={() => selectStock(r)}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0"
+                    ref={(el) => { itemRefs.current[i] = el; }}
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); selectStock(r); }}
+                    onKeyDown={(e) => handleItemKeyDown(e, i, r)}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] focus:bg-[var(--color-g100)] dark:focus:bg-[var(--color-border)] outline-none transition-colors flex items-center justify-between border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0"
                   >
                     <div>
                       <span className="font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{r.name}</span>

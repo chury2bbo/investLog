@@ -66,6 +66,18 @@ function StockSearch({
   const [open, setOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
+  const speechSupported =
+    typeof window !== "undefined" &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+
+  useEffect(() => {
+    return () => { recognitionRef.current?.stop(); };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -102,6 +114,39 @@ function StockSearch({
         setSearching(false);
       }
     }, 300);
+  }
+
+  function startListening() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    const recognition = new SR();
+    recognitionRef.current = recognition;
+    recognition.lang = "ko-KR";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
+      const transcript: string = e.results[0][0].transcript;
+      setIsListening(false);
+      handleChange(transcript);
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (e: any) => {
+      setIsListening(false);
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setMicError("마이크 권한이 차단되어 있습니다. 브라우저 주소창 왼쪽 자물쇠 아이콘을 클릭해 마이크를 허용해 주세요.");
+      }
+    };
+    recognition.onend = () => setIsListening(false);
+    setMicError(null);
+    recognition.start();
+    setIsListening(true);
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop();
+    setIsListening(false);
   }
 
   // 선택된 종목이 있으면 이름+티커+X 표시
@@ -144,12 +189,46 @@ function StockSearch({
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
-          placeholder="종목명 또는 티커 입력"
+          placeholder={isListening ? "듣는 중..." : "종목명 또는 티커 입력"}
           className="flex-1 pb-2 text-sm bg-transparent outline-none border-b"
-          style={{ borderColor: "var(--color-g200)", color: "var(--color-text)" }}
+          style={{ borderColor: isListening ? "var(--color-negative)" : "var(--color-g200)", color: "var(--color-text)", transition: "border-color 0.2s" }}
         />
         {searching && <LoadingSpinner size={16} />}
+        {speechSupported && !searching && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={isListening ? stopListening : startListening}
+            className="relative flex-shrink-0 pb-2 group cursor-pointer"
+            style={{ color: isListening ? "var(--color-negative)" : "var(--color-g400)" }}
+          >
+            <span
+              className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+              style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+            >
+              {isListening ? "음성 인식 중지" : "음성으로 종목 검색"}
+              <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+            </span>
+            {isListening && (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full opacity-40" style={{ backgroundColor: "var(--color-negative)" }} />
+              </span>
+            )}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        )}
       </div>
+
+      {micError && (
+        <p className="mt-1 text-xs" style={{ color: "var(--color-negative)" }}>
+          {micError}
+        </p>
+      )}
 
       {open && results.length > 0 && (
         <ul

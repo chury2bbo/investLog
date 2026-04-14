@@ -460,13 +460,13 @@ export default function AccountsPage() {
                 <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
                   <button
                     onClick={(e) => { e.stopPropagation(); openEditModal(acc); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
                   >
                     수정
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ id: acc.id, name: acc.brokerageCompany.name }); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors cursor-pointer"
                   >
                     삭제
                   </button>

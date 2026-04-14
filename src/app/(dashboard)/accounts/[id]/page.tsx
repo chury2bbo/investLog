@@ -159,6 +159,16 @@ export default function AccountDetailPage() {
   const hItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const hAvgPriceRef = useRef<HTMLInputElement>(null);
 
+  // 음성 인식
+  const [hIsListening, setHIsListening] = useState(false);
+  const [hMicError, setHMicError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hRecognitionRef = useRef<any>(null);
+  const hSpeechSupported =
+    typeof window !== "undefined" &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+
   // ─── 데이터 로딩 ───────────────────────────────────────
 
   const fetchAccount = useCallback(async () => {
@@ -235,6 +245,11 @@ export default function AccountDetailPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 음성 인식 cleanup
+  useEffect(() => {
+    return () => { hRecognitionRef.current?.stop(); };
+  }, []);
+
   // 키보드 드롭다운 포커스 이동
   useEffect(() => {
     if (hActiveIndex === -1) {
@@ -295,6 +310,9 @@ export default function AccountDetailPage() {
     setHStockResults([]);
     setHShowDropdown(false);
     setHPriceLoading(false);
+    hRecognitionRef.current?.stop();
+    setHIsListening(false);
+    setHMicError(null);
   }
 
   function handleHStockQueryChange(val: string) {
@@ -322,6 +340,39 @@ export default function AccountDetailPage() {
         /* 검색 실패 */
       }
     }, 300);
+  }
+
+  function startHListening() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    const recognition = new SR();
+    hRecognitionRef.current = recognition;
+    recognition.lang = "ko-KR";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
+      const transcript: string = e.results[0][0].transcript;
+      setHIsListening(false);
+      handleHStockQueryChange(transcript);
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (e: any) => {
+      setHIsListening(false);
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setHMicError("마이크 권한이 차단되어 있습니다.\n브라우저 주소창 왼쪽 자물쇠 아이콘을 클릭해 마이크를 허용해 주세요.");
+      }
+    };
+    recognition.onend = () => setHIsListening(false);
+    setHMicError(null);
+    recognition.start();
+    setHIsListening(true);
+  }
+
+  function stopHListening() {
+    hRecognitionRef.current?.stop();
+    setHIsListening(false);
   }
 
   async function selectHStock(stock: { ticker: string; name: string; market: string }) {
@@ -1131,7 +1182,7 @@ export default function AccountDetailPage() {
           <button
             type="button"
             onClick={() => { setHoldingModal(false); setImportModalOpen(true); }}
-            className="w-full py-3 rounded-xl border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[var(--color-primary-soft)] transition-colors"
+            className="w-full py-3 rounded-xl border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[var(--color-primary-soft)] transition-colors cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
@@ -1151,7 +1202,7 @@ export default function AccountDetailPage() {
             <button
               type="button"
               onClick={() => { setHCountry("KR"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 hCountry === "KR"
                   ? "bg-[var(--color-primary)] text-white"
                   : "bg-white dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
@@ -1162,7 +1213,7 @@ export default function AccountDetailPage() {
             <button
               type="button"
               onClick={() => { setHCountry("US"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 hCountry === "US"
                   ? "bg-[#4285F4] text-white"
                   : "bg-white dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
@@ -1198,19 +1249,55 @@ export default function AccountDetailPage() {
                 </div>
               ) : (
                 <>
-                  <input
-                    ref={hInputRef}
-                    type="text"
-                    value={hStockQuery}
-                    onChange={(e) => handleHStockQueryChange(e.target.value)}
-                    onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
-                    onKeyDown={(e) => {
-                      if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
-                      else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
-                    }}
-                    placeholder="종목명 또는 티커 검색 (예: 삼성전자, 005930)"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={hInputRef}
+                      type="text"
+                      value={hStockQuery}
+                      onChange={(e) => handleHStockQueryChange(e.target.value)}
+                      onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                      onKeyDown={(e) => {
+                        if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
+                        else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                      }}
+                      placeholder={hIsListening ? "듣는 중..." : "종목명 또는 티커 검색 (예: 삼성전자, 005930)"}
+                      className="flex-1 pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
+                      style={hIsListening ? { borderColor: "var(--color-negative)", transition: "border-color 0.2s" } : undefined}
+                    />
+                    {hSpeechSupported && (
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={hIsListening ? stopHListening : startHListening}
+                        className="relative flex-shrink-0 pb-2 group cursor-pointer"
+                        style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
+                      >
+                        <span
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+                          style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+                        >
+                          {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+                        </span>
+                        {hIsListening && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full opacity-40" style={{ backgroundColor: "var(--color-negative)" }} />
+                          </span>
+                        )}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  {hMicError && (
+                    <p className="mt-1 text-xs whitespace-pre-line" style={{ color: "var(--color-negative)" }}>
+                      {hMicError}
+                    </p>
+                  )}
                   {hShowDropdown && (
                     <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
@@ -1278,19 +1365,55 @@ export default function AccountDetailPage() {
                 </div>
               ) : (
                 <>
-                  <input
-                    ref={hInputRef}
-                    type="text"
-                    value={hStockQuery}
-                    onChange={(e) => handleHStockQueryChange(e.target.value)}
-                    onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
-                    onKeyDown={(e) => {
-                      if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
-                      else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
-                    }}
-                    placeholder="종목명 또는 티커 검색 (예: NVIDIA, NVDA)"
-                    className="w-full pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={hInputRef}
+                      type="text"
+                      value={hStockQuery}
+                      onChange={(e) => handleHStockQueryChange(e.target.value)}
+                      onFocus={() => { if (hStockQuery) setHShowDropdown(true); }}
+                      onKeyDown={(e) => {
+                        if (e.key === "ArrowDown" && hShowDropdown && hStockResults.length > 0) { e.preventDefault(); setHActiveIndex(0); }
+                        else if (e.key === "Escape") { setHShowDropdown(false); setHActiveIndex(-1); }
+                      }}
+                      placeholder={hIsListening ? "듣는 중..." : "종목명 또는 티커 검색 (예: NVIDIA, NVDA)"}
+                      className="flex-1 pb-2 text-sm bg-transparent outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[var(--color-muted)]"
+                      style={hIsListening ? { borderColor: "var(--color-negative)", transition: "border-color 0.2s" } : undefined}
+                    />
+                    {hSpeechSupported && (
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={hIsListening ? stopHListening : startHListening}
+                        className="relative flex-shrink-0 pb-2 group cursor-pointer"
+                        style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
+                      >
+                        <span
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+                          style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+                        >
+                          {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+                        </span>
+                        {hIsListening && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full opacity-40" style={{ backgroundColor: "var(--color-negative)" }} />
+                          </span>
+                        )}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  {hMicError && (
+                    <p className="mt-1 text-xs whitespace-pre-line" style={{ color: "var(--color-negative)" }}>
+                      {hMicError}
+                    </p>
+                  )}
                   {hShowDropdown && (
                     <div className="mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
                       {hStockResults.length > 0 ? (
