@@ -28,7 +28,7 @@
 | DB | PostgreSQL | Supabase 클라우드 무료 티어 |
 | 국내 주가 | KIS Open API | 개발자 계정 1개, 사용자 한투 계좌 불필요 |
 | 해외 주가 | yahoo-finance2 | API 키 불필요 |
-| AI 분석 | Claude API | claude-sonnet-4 |
+| AI 분석 | Claude API | `claude-sonnet-4-6` (단일 모델 — `lib/prompts.ts` `CLAUDE_MODEL` 상수) |
 | 다크모드 | next-themes | - |
 
 ---
@@ -61,12 +61,25 @@ where: { account: { userId: session.user.id } }  // ← 격리 핵심
 해외 현재가    → yahoo-finance2 quote()
 ```
 
-### Claude API 비용
-- 기업 소개 요약: 티커당 영구 캐시 (`ticker_summary_cache`)
-- 종목 분석: 당일 캐시 (`ticker_analysis_cache`), 사용자당 10회/일 제한
-- 투자성향 진단: 캐시 없음 — 사용자당 1회/일 제한 (`api_usage_log`)
-- AI 코칭 리포트: 캐시 없음 — 사용자당 3회/일 제한 (`api_usage_log`)
-- 스크린샷 분석: 캐시 없음, 제한 없음
+### Claude API 호출 (총 5종)
+- 기업 소개 요약: 티커당 영구 캐시 (`ticker_summary_cache`), 제한 없음, max_tokens 512
+- 종목 분석: 당일 캐시 (`ticker_analysis_cache`), 사용자당 10회/일, max_tokens 2048
+- 투자성향 진단: 캐시 없음, 1회/일 통합 카운터, 마지막 결과는 `personality_result`에 저장
+  - **Level 1** (보유 종목 1개+, 매매 5건 미만) — max_tokens 384, 보유 구성만 분석
+  - **Level 2** (최근 6개월 매매 5건+) — max_tokens 1024, 매매 통계 + 보유 구성
+- AI 코칭 리포트: 캐시 없음, 사용자당 3회/일, max_tokens 2048, 최근 6개월 매매 10건+
+  - 결과는 `coaching_history`에 누적, 페이지에는 최근 5개 + 전체 보기 모달
+- 스크린샷 분석: 캐시 없음, 제한 없음, max_tokens 2048
+- **공통 규칙**:
+  - 모든 응답 JSON 파싱은 `lib/parseAiJson.ts` 헬퍼 사용 (코드블록 + greedy 추출 + try/catch)
+  - 사용량은 `api_usage_log`에 type별 누적 (count/inputTokens/outputTokens)
+  - 날짜 키는 KST 기준 YYYY-MM-DD
+  - 성향 진단·코칭·통계는 모두 **최근 6개월 매매**만 집계
+
+### TradeLog ↔ CashLog 1:1 외래 키
+- `cashLog.tradeLogId` (UNIQUE, FK CASCADE) — 매매 등록 시 같이 저장
+- 매매 삭제 시 `tradeLog.delete`만 호출하면 cashLog 자동 cascade
+- 매매와 무관한 입출금(`type: IN/OUT`)은 `tradeLogId = NULL`로 단독 존재
 
 ---
 
@@ -92,27 +105,40 @@ app/
   onboarding/            ← 가입 직후 1회
   (dashboard)/           ← middleware 인증 보호
     page.tsx             ← 통합 대시보드
+    accounts/            ← 계좌 관리
     accounts/[id]/       ← 계좌 상세
     trades/              ← 매매일지
     analysis/            ← 종목 분석
-    analysis/personality/← 투자성향 분석
+    personality/         ← 투자 성향 (진단 + 통계 + 코칭, 단일 페이지)
+    profile/             ← 회원정보
+    admin/               ← 관리자 (이메일 화이트리스트)
   api/
     auth/[...nextauth]/
     auth/register/
-    accounts/
-    holdings/
-    trades/
-    cash/
-    market/quote/        ← KIS + yahoo 주가
+    accounts/            ← 계좌 CRUD
+    holdings/            ← 종목 CRUD + 섹터 수동·자동
+    trades/              ← 매매 CRUD (cashLog 1:1 외래 키)
+    trades/[id]/         ← 매매 수정·삭제 (cashLog cascade)
+    trades/analysis/     ← 통계 (최근 6개월)
+    cash/                ← 예수금 입출금
+    market/quote/        ← KIS + yahoo 주가 + USDKRW
     market/search/       ← 종목 검색 (DB + yahoo)
-    analysis/summary/    ← 기업 소개 AI 요약 (영구 캐시)
-    analysis/report/     ← AI 종목 분석 (당일 캐시)
-    trades/analysis/ai-report/ ← AI 성향 리포트
+    market/history/      ← 시세 히스토리 (MDD)
+    analysis/summary/    ← 기업 소개 (영구 캐시)
+    analysis/report/     ← AI 종목 분석 (당일 캐시, 10회/일)
+    analysis/history/    ← 분석 본 종목 이력
+    analysis/quote/      ← 지표 + 차트 데이터
+    personality/summary/ ← 투자성향 진단 Level 1·2 (1회/일 통합)
+    personality/history/ ← AI 코칭 (3회/일)
+    import/analyze/      ← 스크린샷 종목 추출 (Claude Vision)
+    asset-snapshot/      ← 월별 자산 스냅샷
+    user/me/             ← 사용자 정보 + 회원탈퇴
+    admin/               ← 관리자 통계
 
-components/ui/           ← 공통 컴포넌트 (A가 먼저 생성)
-lib/                     ← KIS 래퍼, yahoo 래퍼, 유틸 함수
+components/ui/           ← 공통 컴포넌트 (Button, Card, BottomSheet, Skeleton 등 16종)
+lib/                     ← KIS/yahoo 래퍼, prompts, parseAiJson, prisma, format 등
 prisma/schema.prisma     ← DB 스키마
-middleware.ts            ← dashboard 전체 인증 보호
+middleware.ts            ← dashboard 전체 인증 보호 + /analysis/personality → /personality 리다이렉트
 ```
 
 ---
@@ -152,21 +178,22 @@ npx prisma db pull                       # 현재 DB 스키마 동기화 확인
 
 ---
 
-## 📊 현재 진행 상태
+## 📊 현재 진행 상태 (2026-04-10)
 
 ```
-[ ] 1주차 — 프로젝트 세팅 · Prisma · NextAuth · 공통 컴포넌트
-[ ] 2주차 — KIS/yahoo 래퍼 · KRX DB · 온보딩 UI
-[ ] 3주차 — 계좌·종목·예수금 API · 대시보드 · 계좌 상세
-[ ] 4주차 — 매매일지 API · 매매일지 UI
-[ ] 5주차 — Claude API 연동 · 종목 분석 화면 · MDD 차트
-[ ] 6주차 — 성향 통계 API · 투자성향 분석 화면
-[ ] 7주차 — 버그 수정 · 반응형 · UX 마무리
-[ ] 8주차 — 최종 점검 · 발표 준비
+[x] 1주차 — 프로젝트 세팅 · Prisma · NextAuth · 공통 컴포넌트
+[x] 2주차 — KIS/yahoo 래퍼 · KRX DB · 온보딩 UI
+[x] 3주차 — 계좌·종목·예수금 API · 대시보드 · 계좌 상세
+[x] 4주차 — 매매일지 API · 매매일지 UI
+[x] 5주차 — Claude API 연동 · 종목 분석 화면 · MDD 차트
+[x] 6주차 — 성향 통계 API · 투자 성향 페이지 (Level 1·2 + AI 코칭)
+[x] 추가 — 관리자 페이지 · 스크린샷 종목 등록 · TradeLog↔CashLog 외래 키
+[ ] 7주차 — 최종 QA · 반응형 마무리 · 발표 준비
+[ ] 8주차 — 발표
 ```
 
-**현재:** 개발 시작 전 세팅 단계
-**다음 작업:** 팀원 A — 프로젝트 초기화 / 팀원 B — clone 대기
+**현재:** 발표 직전 단계 (코드 안정화 + 문서 정리)
+**남은 작업:** 관리자 이메일 .env 이동, 빌드 검증, KIS API IP 확인, 최종 QA
 
 ---
 
@@ -249,6 +276,14 @@ ui-mockup.jsx 해당 컴포넌트 코드 붙여넣기 후:
 
 ### Progressive Disclosure 조건
 ```
-매매 5건 이상  → 섹터 차트, MDD 차트 노출
-매매 10건 이상 → AI 투자성향 분석 버튼 활성화
+보유 종목 1개 이상 → Level 1 투자성향 진단 (보유 구성 기반)
+최근 6개월 매매 3건 이상  → 데이터로 보는 내 패턴 (이유/감정/섹터/보유기간 차트)
+최근 6개월 매매 5건 이상  → Level 2 투자성향 진단 (매매 통계 + 통계 3칸)
+최근 6개월 매매 10건 이상 → AI 코칭 리포트 생성 가능 (3회/일)
 ```
+
+### 성향 페이지 구조 (단일 페이지)
+- 히어로 카드: Level 1·2 자동 분기 (`personality.winRate == null` 여부로 판별)
+- 데이터 패턴: 4개 탭 (매매 이유 / 감정 / 섹터 / 보유기간)
+- AI 코칭: `coaching_history` 누적, 메인에 최근 5개 + 전체 보기 BottomSheet
+- 페이지 진입 시 마지막 진단/코칭 1개 자동 펼침
