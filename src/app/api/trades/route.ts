@@ -151,7 +151,7 @@ export async function POST(req: Request) {
   let cashWarning = false;
 
   // 통화 결정: body에서 받은 country 우선, 없으면 기존 holding 또는 티커 패턴으로 판별
-  const country = bodyCountry ?? holding?.country ?? (ticker.length <= 6 && /^\d+$/.test(ticker) ? "KR" : "US");
+  const country = bodyCountry ?? holding?.country ?? (/^\d{6}$/.test(ticker) ? "KR" : "US");
   const currency = country === "KR" ? "KRW" : "USD";
   const cashBalance = account.cashBalances.find((c) => c.currency === currency);
   const currentCash = cashBalance?.amount ?? 0;
