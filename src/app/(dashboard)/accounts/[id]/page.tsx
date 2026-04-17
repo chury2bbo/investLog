@@ -17,6 +17,7 @@ import {
   ThemeToggle,
   Skeleton,
   Toast,
+  DatePicker,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -104,6 +105,12 @@ export default function AccountDetailPage() {
   const [cashSubmitting, setCashSubmitting] = useState(false);
   const [cashError, setCashError] = useState("");
   const cashAmountRef = useRef<HTMLInputElement>(null);
+
+  // 입금/출금 날짜
+  const [cashDate, setCashDate] = useState(() => {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    return kst.toISOString().slice(0, 10);
+  });
 
   // 배당금 전용 state
   const [divTicker, setDivTicker] = useState("");
@@ -322,7 +329,7 @@ export default function AccountDetailPage() {
           type,
           currency: cashCurrency,
           amount,
-          ...(cashModal === "dividend" && { ticker: divTicker, name: divName, date: divDate }),
+          ...(cashModal === "dividend" ? { ticker: divTicker, name: divName, date: divDate } : { date: cashDate }),
         }),
       });
 
@@ -651,6 +658,10 @@ export default function AccountDetailPage() {
         setDivDeleteConfirm(null);
         fetchAccount();
         showToast("삭제 완료", "배당 이력이 삭제되었습니다.", { variant: "success" });
+      } else {
+        const data = await res.json();
+        setDivDeleteConfirm(null);
+        showToast("삭제 실패", data.error ?? "삭제에 실패했습니다.", { variant: "error" });
       }
     } catch {
       /* 삭제 실패 */
@@ -1275,7 +1286,9 @@ export default function AccountDetailPage() {
           setCashModal(null); setCashError(""); setCashAmount("");
           setDivTicker(""); setDivName(""); setDivQuery(""); setDivShowHoldings(false);
           const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-          setDivDate(kst.toISOString().slice(0, 10));
+          const todayStr = kst.toISOString().slice(0, 10);
+          setCashDate(todayStr);
+          setDivDate(todayStr);
         }}
         title={
           cashModal === "deposit_choose" ? "입금"
@@ -1337,6 +1350,7 @@ export default function AccountDetailPage() {
                   </button>
                 ))}
               </div>
+              <DatePicker label="날짜 *" value={cashDate} onChange={setCashDate} />
               <Input
                 ref={cashAmountRef}
                 label="금액"
@@ -1450,15 +1464,7 @@ export default function AccountDetailPage() {
                 ))}
               </div>
               {/* 날짜 선택 */}
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">배당 수령일 *</label>
-                <input
-                  type="date"
-                  value={divDate}
-                  onChange={(e) => setDivDate(e.target.value)}
-                  className="w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] dark:text-[var(--color-text)]"
-                />
-              </div>
+              <DatePicker label="배당 수령일 *" value={divDate} onChange={setDivDate} />
               <Input
                 label="배당금액"
                 inputMode="numeric"
