@@ -67,6 +67,7 @@ interface CashLog {
   currency: string;
   amount: number;
   memo: string | null;
+  ticker: string | null;
 }
 
 interface AccountDetail {
@@ -97,12 +98,25 @@ export default function AccountDetailPage() {
   const [displayCurrency, setDisplayCurrency] = useState<"original" | "KRW">("original");
 
   // 입출금 모달
-  const [cashModal, setCashModal] = useState<"deposit" | "withdraw" | null>(null);
+  const [cashModal, setCashModal] = useState<"deposit_choose" | "deposit" | "withdraw" | "dividend" | null>(null);
   const [cashCurrency, setCashCurrency] = useState("KRW");
   const [cashAmount, setCashAmount] = useState("");
   const [cashSubmitting, setCashSubmitting] = useState(false);
   const [cashError, setCashError] = useState("");
   const cashAmountRef = useRef<HTMLInputElement>(null);
+
+  // 배당금 전용 state
+  const [divTicker, setDivTicker] = useState("");
+  const [divName, setDivName] = useState("");
+  const [divShowHoldings, setDivShowHoldings] = useState(false);
+  const [divQuery, setDivQuery] = useState("");
+  const [divDate, setDivDate] = useState(() => {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    return kst.toISOString().slice(0, 10);
+  });
+  const [divSearchResults, setDivSearchResults] = useState<{ ticker: string; name: string; market: string }[]>([]);
+  const [divShowDropdown, setDivShowDropdown] = useState(false);
+  const divSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 입출금 팝업 열릴 때 금액 입력란 자동 포커스
   useEffect(() => {
@@ -138,6 +152,13 @@ export default function AccountDetailPage() {
   // 종목 삭제 확인
   const [holdingDeleteConfirm, setHoldingDeleteConfirm] = useState<Holding | null>(null);
   const [holdingDeleting, setHoldingDeleting] = useState(false);
+
+  // 배당 이력
+  const [divLogs, setDivLogs] = useState<CashLog[]>([]);
+
+  // 배당 이력 삭제
+  const [divDeleteConfirm, setDivDeleteConfirm] = useState<number | null>(null);
+  const [divDeleting, setDivDeleting] = useState(false);
 
   // 섹터 편집 모달
   const [sectorEditModal, setSectorEditModal] = useState(false);
@@ -194,9 +215,14 @@ export default function AccountDetailPage() {
       const tradesJson = tradesRes.ok ? await tradesRes.json() : [];
       const trades = Array.isArray(tradesJson) ? tradesJson : tradesJson.data ?? [];
 
-      // 입출금 이력 조회
+      // 입출금 이력 조회 (배당 제외, 최근 20개)
       const cashLogsRes = await fetch(`/api/cash?accountId=${accountId}`);
       const cashLogs = cashLogsRes.ok ? await cashLogsRes.json() : [];
+
+      // 배당 이력 전체 조회
+      const divLogsRes = await fetch(`/api/cash?accountId=${accountId}&type=DIVIDEND`);
+      const divLogsJson = divLogsRes.ok ? await divLogsRes.json() : [];
+      setDivLogs(Array.isArray(divLogsJson) ? divLogsJson : []);
 
       const accountData = {
         ...acc,
@@ -277,11 +303,15 @@ export default function AccountDetailPage() {
 
   async function handleCashSubmit() {
     if (!cashAmount || !account) return;
+    if (cashModal === "dividend" && !divTicker) {
+      setCashError("종목을 선택해주세요.");
+      return;
+    }
     setCashSubmitting(true);
     setCashError("");
 
     const amount = parseFloat(cashAmount.replace(/,/g, ""));
-    const type = cashModal === "deposit" ? "DEPOSIT" : "WITHDRAW";
+    const type = cashModal === "deposit" ? "DEPOSIT" : cashModal === "withdraw" ? "WITHDRAW" : "DIVIDEND";
 
     try {
       const res = await fetch("/api/cash", {
@@ -292,6 +322,7 @@ export default function AccountDetailPage() {
           type,
           currency: cashCurrency,
           amount,
+          ...(cashModal === "dividend" && { ticker: divTicker, name: divName, date: divDate }),
         }),
       });
 
@@ -299,6 +330,10 @@ export default function AccountDetailPage() {
         setCashModal(null);
         setCashAmount("");
         setCashError("");
+        setDivTicker("");
+        setDivName("");
+        setDivQuery("");
+        setDivShowHoldings(false);
         fetchAccount();
       } else {
         const data = await res.json();
@@ -309,6 +344,34 @@ export default function AccountDetailPage() {
     } finally {
       setCashSubmitting(false);
     }
+  }
+
+  // ─── 배당금 종목 검색 ────────────────────────────────────
+
+  function handleDivQueryChange(val: string) {
+    setDivQuery(val);
+    setDivTicker("");
+    setDivName("");
+    if (divSearchTimerRef.current) clearTimeout(divSearchTimerRef.current);
+    if (!val.trim()) { setDivSearchResults([]); setDivShowDropdown(false); return; }
+    setDivShowDropdown(true);
+    divSearchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/market/search?q=${encodeURIComponent(val.trim())}&country=ALL`);
+        if (res.ok) {
+          const data = await res.json();
+          setDivSearchResults(Array.isArray(data) ? data : []);
+        }
+      } catch { /* 검색 실패 */ }
+    }, 300);
+  }
+
+  function selectDivStock(ticker: string, name: string) {
+    setDivTicker(ticker);
+    setDivName(name);
+    setDivQuery(name);
+    setDivSearchResults([]);
+    setDivShowDropdown(false);
   }
 
   // ─── 종목 등록 처리 ────────────────────────────────────
@@ -574,6 +637,25 @@ export default function AccountDetailPage() {
       /* 삭제 실패 */
     } finally {
       setDeleting(false);
+    }
+  }
+
+  // ─── 배당 이력 삭제 ───────────────────────────────────
+
+  async function handleDeleteDividend() {
+    if (divDeleteConfirm === null) return;
+    setDivDeleting(true);
+    try {
+      const res = await fetch(`/api/cash/${divDeleteConfirm}`, { method: "DELETE" });
+      if (res.ok) {
+        setDivDeleteConfirm(null);
+        fetchAccount();
+        showToast("삭제 완료", "배당 이력이 삭제되었습니다.", { variant: "success" });
+      }
+    } catch {
+      /* 삭제 실패 */
+    } finally {
+      setDivDeleting(false);
     }
   }
 
@@ -851,7 +933,7 @@ export default function AccountDetailPage() {
           <button
             onClick={() => {
               setCashCurrency("KRW");
-              setCashModal("deposit");
+              setCashModal("deposit_choose");
             }}
             className="flex-1 py-2.5 rounded-[10px] text-sm font-bold text-white cursor-pointer"
             style={{
@@ -1094,6 +1176,55 @@ export default function AccountDetailPage() {
         </Card>
       )}
 
+      {/* ── ④ 배당 이력 ── */}
+      {(() => {
+        if (divLogs.length === 0) return null;
+        return (
+          <div className="mt-4">
+            <SectionTitle title="배당 이력" />
+            <div className="space-y-3 max-h-[420px] overflow-y-auto">
+              {divLogs.map((l) => {
+                const d = new Date(l.date);
+                const dateStr = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+                const isKRW = l.currency === "KRW";
+                const amtStr = isKRW
+                  ? `+₩${Math.abs(l.amount).toLocaleString()}`
+                  : `+$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                const holding = account.holdings.find((h) => h.ticker === l.ticker);
+                const stockName = holding?.name ?? (l.memo && l.memo !== "배당금" ? l.memo : null);
+                return (
+                  <Card key={l.id}>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-[var(--color-g400)] w-9">{dateStr}</span>
+                        <div>
+                          <div className="text-sm font-semibold text-[var(--color-text)]">
+                            {stockName ?? l.ticker}
+                          </div>
+                          <div className="text-[11px] text-[var(--color-g400)]">
+                            {stockName ? l.ticker : "배당금"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold" style={{ color: "var(--color-primary)" }}>{amtStr}</span>
+                        <button
+                          type="button"
+                          onClick={() => setDivDeleteConfirm(l.id)}
+                          className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       </div>{/* 좌측 끝 */}
 
       {/* 우측: 섹터 분포 (PC) / 하단 (모바일) */}
@@ -1140,53 +1271,208 @@ export default function AccountDetailPage() {
       {/* ── 입출금 바텀시트 ── */}
       <BottomSheet
         open={cashModal !== null}
-        onClose={() => { setCashModal(null); setCashError(""); }}
-        title={cashModal === "deposit" ? "입금" : "출금"}
+        onClose={() => {
+          setCashModal(null); setCashError(""); setCashAmount("");
+          setDivTicker(""); setDivName(""); setDivQuery(""); setDivShowHoldings(false);
+          const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+          setDivDate(kst.toISOString().slice(0, 10));
+        }}
+        title={
+          cashModal === "deposit_choose" ? "입금"
+          : cashModal === "deposit" ? "일반 입금"
+          : cashModal === "dividend" ? "배당금 입금"
+          : "출금"
+        }
       >
         <div className="space-y-5">
-          {/* 통화 선택 */}
-          <div className="flex gap-2">
-            {["KRW", "USD"].map((c) => (
-              <button
-                key={c}
-                onClick={() => { setCashCurrency(c); setCashAmount(""); setCashError(""); setTimeout(() => cashAmountRef.current?.focus(), 0); }}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  backgroundColor:
-                    cashCurrency === c ? "var(--color-primary)" : "var(--color-g100)",
-                  color: cashCurrency === c ? "#fff" : "var(--color-g500)",
-                }}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
 
-          {/* 금액 */}
-          <Input
-            ref={cashAmountRef}
-            label="금액"
-            inputMode="numeric"
-            value={fmtNum(cashAmount)}
-            onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
-            placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
-          />
-
-          {cashError && (
-            <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>
+          {/* ── 입금 유형 선택 ── */}
+          {cashModal === "deposit_choose" && (
+            <>
+              <p className="text-sm text-[var(--color-g500)] text-center">입금 유형을 선택해주세요</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setCashModal("deposit"); setTimeout(() => cashAmountRef.current?.focus(), 100); }}
+                  className="flex-1 py-4 rounded-2xl border-2 border-[var(--color-g200)] dark:border-[var(--color-border)] flex flex-col items-center gap-1.5 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="6" width="20" height="14" rx="2" />
+                    <path d="M2 10h20" />
+                    <circle cx="12" cy="15" r="1.5" fill="var(--color-primary)" stroke="none" />
+                  </svg>
+                  <span className="text-sm font-bold text-[var(--color-text)]">일반 입금</span>
+                  <span className="text-[11px] text-[var(--color-g400)]">현금 입금</span>
+                </button>
+                <button
+                  onClick={() => { setCashModal("dividend"); setDivShowHoldings(false); }}
+                  className="flex-1 py-4 rounded-2xl border-2 border-[var(--color-g200)] dark:border-[var(--color-border)] flex flex-col items-center gap-1.5 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v10M9.5 9.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 2.5-2.5 4" />
+                    <circle cx="12" cy="16.5" r="0.75" fill="var(--color-primary)" stroke="none" />
+                  </svg>
+                  <span className="text-sm font-bold text-[var(--color-text)]">배당금</span>
+                  <span className="text-[11px] text-[var(--color-g400)]">종목 배당 수령</span>
+                </button>
+              </div>
+            </>
           )}
 
-          <Button
-            size="lg"
-            onClick={handleCashSubmit}
-            disabled={cashSubmitting || !cashAmount}
-          >
-            {cashSubmitting
-              ? "처리 중..."
-              : cashModal === "deposit"
-                ? "입금하기"
-                : "출금하기"}
-          </Button>
+          {/* ── 일반 입금 / 출금 폼 ── */}
+          {(cashModal === "deposit" || cashModal === "withdraw") && (
+            <>
+              <div className="flex gap-2">
+                {["KRW", "USD"].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCashCurrency(c); setCashAmount(""); setCashError(""); setTimeout(() => cashAmountRef.current?.focus(), 0); }}
+                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{
+                      backgroundColor: cashCurrency === c ? "var(--color-primary)" : "var(--color-g100)",
+                      color: cashCurrency === c ? "#fff" : "var(--color-g500)",
+                    }}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <Input
+                ref={cashAmountRef}
+                label="금액"
+                inputMode="numeric"
+                value={fmtNum(cashAmount)}
+                onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
+                placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
+              />
+              {cashError && <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>}
+              <Button size="lg" onClick={handleCashSubmit} disabled={cashSubmitting || !cashAmount}>
+                {cashSubmitting ? "처리 중..." : cashModal === "deposit" ? "입금하기" : "출금하기"}
+              </Button>
+            </>
+          )}
+
+          {/* ── 배당금 폼 ── */}
+          {cashModal === "dividend" && (
+            <>
+              {/* 종목 선택 */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-medium text-[var(--color-g500)]">종목 *</label>
+                  {account && account.holdings.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setDivShowHoldings(!divShowHoldings)}
+                      className="text-[11px] font-medium text-[var(--color-g500)] hover:text-[var(--color-primary)] transition-colors"
+                    >
+                      보유 종목 불러오기
+                    </button>
+                  )}
+                </div>
+
+                {/* 보유 종목 목록 */}
+                {divShowHoldings && account && (
+                  <div className="rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] p-2 max-h-32 overflow-y-auto space-y-1 mb-2">
+                    {account.holdings.map((h) => (
+                      <button
+                        key={h.ticker}
+                        type="button"
+                        onClick={() => { selectDivStock(h.ticker, h.name); setDivShowHoldings(false); }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
+                      >
+                        <span className="font-medium text-[var(--color-text)]">{h.name}</span>
+                        <span className="text-xs text-[var(--color-g400)]">{h.ticker}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 직접 검색 */}
+                {divTicker ? (
+                  <div className="flex items-center justify-between pb-2 border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">
+                    <div>
+                      <span className="text-sm font-semibold text-[var(--color-text)]">{divName}</span>
+                      <span className="text-xs text-[var(--color-g400)] ml-2">{divTicker}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setDivTicker(""); setDivName(""); setDivQuery(""); }}
+                      className="text-lg leading-none text-[var(--color-g400)] hover:text-[var(--color-negative)] transition-colors"
+                    >×</button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={divQuery}
+                      onChange={(e) => handleDivQueryChange(e.target.value)}
+                      placeholder="종목명 또는 티커 검색"
+                      className="w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] placeholder:text-[var(--color-g300)]"
+                    />
+                    {divShowDropdown && divSearchResults.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 z-[200] mt-1 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg overflow-hidden">
+                        <div className="max-h-40 overflow-y-auto">
+                          {divSearchResults.map((s) => (
+                            <button
+                              key={s.ticker}
+                              type="button"
+                              onMouseDown={(e) => { e.preventDefault(); selectDivStock(s.ticker, s.name); }}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors flex items-center justify-between"
+                            >
+                              <div>
+                                <span className="text-sm font-medium text-[var(--color-text)]">{s.name}</span>
+                                <span className="text-xs text-[var(--color-g400)] ml-2">{s.ticker}</span>
+                              </div>
+                              <span className="text-[10px] text-[var(--color-g400)]">{s.market}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 통화 + 금액 */}
+              <div className="flex gap-2">
+                {["KRW", "USD"].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCashCurrency(c); setCashAmount(""); setCashError(""); }}
+                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{
+                      backgroundColor: cashCurrency === c ? "var(--color-primary)" : "var(--color-g100)",
+                      color: cashCurrency === c ? "#fff" : "var(--color-g500)",
+                    }}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+              {/* 날짜 선택 */}
+              <div>
+                <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">배당 수령일 *</label>
+                <input
+                  type="date"
+                  value={divDate}
+                  onChange={(e) => setDivDate(e.target.value)}
+                  className="w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] dark:text-[var(--color-text)]"
+                />
+              </div>
+              <Input
+                label="배당금액"
+                inputMode="numeric"
+                value={fmtNum(cashAmount)}
+                onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
+                placeholder={cashCurrency === "KRW" ? "100,000" : "100"}
+              />
+              {cashError && <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>}
+              <Button size="lg" onClick={handleCashSubmit} disabled={cashSubmitting || !cashAmount || !divTicker}>
+                {cashSubmitting ? "처리 중..." : "배당금 등록"}
+              </Button>
+            </>
+          )}
+
         </div>
       </BottomSheet>
 
@@ -1561,6 +1847,17 @@ export default function AccountDetailPage() {
         confirmLoading={holdingDeleting}
         onConfirm={handleHoldingDelete}
         onCancel={() => setHoldingDeleteConfirm(null)}
+      />
+
+      <ConfirmDialog
+        open={divDeleteConfirm !== null}
+        title="배당 이력을 삭제할까요?"
+        message={"삭제 시 예수금도 함께 차감되며\n복구할 수 없습니다."}
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={divDeleting}
+        onConfirm={handleDeleteDividend}
+        onCancel={() => setDivDeleteConfirm(null)}
       />
 
       {/* ─── 섹터 편집 바텀시트 ───────────────────────────── */}

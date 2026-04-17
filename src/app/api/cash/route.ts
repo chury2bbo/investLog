@@ -11,6 +11,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const accountId = searchParams.get("accountId");
+  const type = searchParams.get("type");
 
   if (!accountId) {
     return Response.json({ error: "accountId 필요" }, { status: 400 });
@@ -25,9 +26,9 @@ export async function GET(req: Request) {
   }
 
   const logs = await prisma.cashLog.findMany({
-    where: { accountId: account.id },
+    where: { accountId: account.id, ...(type ? { type } : {}) },
     orderBy: { date: "desc" },
-    take: 20,
+    ...(type ? {} : { take: 20 }),
   });
 
   return Response.json(logs);
@@ -42,14 +43,18 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { accountId, type, currency, amount } = body;
+  const { accountId, type, currency, amount, ticker, name, date } = body;
 
   if (!accountId || !type || !currency || !amount) {
     return Response.json({ error: "필수 항목을 입력해주세요." }, { status: 400 });
   }
 
-  if (!["DEPOSIT", "WITHDRAW"].includes(type)) {
-    return Response.json({ error: "type은 DEPOSIT 또는 WITHDRAW" }, { status: 400 });
+  if (!["DEPOSIT", "WITHDRAW", "DIVIDEND"].includes(type)) {
+    return Response.json({ error: "type은 DEPOSIT, WITHDRAW 또는 DIVIDEND" }, { status: 400 });
+  }
+
+  if (type === "DIVIDEND" && !ticker) {
+    return Response.json({ error: "배당금은 종목(ticker)이 필요합니다." }, { status: 400 });
   }
 
   // 계좌 소유권 확인
@@ -63,7 +68,7 @@ export async function POST(req: Request) {
 
   const cashBalance = account.cashBalances.find((c) => c.currency === currency);
   const currentAmount = cashBalance?.amount ?? 0;
-  const delta = type === "DEPOSIT" ? amount : -amount;
+  const delta = type === "WITHDRAW" ? -amount : amount;
   const newAmount = currentAmount + delta;
 
   // 출금 시 잔고 부족 체크
@@ -86,12 +91,13 @@ export async function POST(req: Request) {
   // 입출금 로그
   const log = await prisma.cashLog.create({
     data: {
-      date: new Date(),
+      date: date ? new Date(date) : new Date(),
       accountId,
       type,
       currency,
       amount: delta,
-      memo: type === "DEPOSIT" ? "입금" : "출금",
+      memo: type === "DEPOSIT" ? "입금" : type === "WITHDRAW" ? "출금" : (name || "배당금"),
+      ticker: type === "DIVIDEND" ? ticker : null,
     },
   });
 

@@ -48,6 +48,7 @@ export type CashLogMinAggregateOutputType = {
   currency: string | null
   amount: number | null
   memo: string | null
+  ticker: string | null
   tradeLogId: number | null
   createdAt: Date | null
 }
@@ -60,6 +61,7 @@ export type CashLogMaxAggregateOutputType = {
   currency: string | null
   amount: number | null
   memo: string | null
+  ticker: string | null
   tradeLogId: number | null
   createdAt: Date | null
 }
@@ -72,6 +74,7 @@ export type CashLogCountAggregateOutputType = {
   currency: number
   amount: number
   memo: number
+  ticker: number
   tradeLogId: number
   createdAt: number
   _all: number
@@ -100,6 +103,7 @@ export type CashLogMinAggregateInputType = {
   currency?: true
   amount?: true
   memo?: true
+  ticker?: true
   tradeLogId?: true
   createdAt?: true
 }
@@ -112,6 +116,7 @@ export type CashLogMaxAggregateInputType = {
   currency?: true
   amount?: true
   memo?: true
+  ticker?: true
   tradeLogId?: true
   createdAt?: true
 }
@@ -124,6 +129,7 @@ export type CashLogCountAggregateInputType = {
   currency?: true
   amount?: true
   memo?: true
+  ticker?: true
   tradeLogId?: true
   createdAt?: true
   _all?: true
@@ -223,6 +229,7 @@ export type CashLogGroupByOutputType = {
   currency: string
   amount: number
   memo: string | null
+  ticker: string | null
   tradeLogId: number | null
   createdAt: Date
   _count: CashLogCountAggregateOutputType | null
@@ -258,6 +265,7 @@ export type CashLogWhereInput = {
   currency?: Prisma.StringFilter<"CashLog"> | string
   amount?: Prisma.FloatFilter<"CashLog"> | number
   memo?: Prisma.StringNullableFilter<"CashLog"> | string | null
+  ticker?: Prisma.StringNullableFilter<"CashLog"> | string | null
   tradeLogId?: Prisma.IntNullableFilter<"CashLog"> | number | null
   createdAt?: Prisma.DateTimeFilter<"CashLog"> | Date | string
   account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
@@ -272,6 +280,7 @@ export type CashLogOrderByWithRelationInput = {
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
+  ticker?: Prisma.SortOrderInput | Prisma.SortOrder
   tradeLogId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   account?: Prisma.InvestAccountOrderByWithRelationInput
@@ -290,6 +299,7 @@ export type CashLogWhereUniqueInput = Prisma.AtLeast<{
   currency?: Prisma.StringFilter<"CashLog"> | string
   amount?: Prisma.FloatFilter<"CashLog"> | number
   memo?: Prisma.StringNullableFilter<"CashLog"> | string | null
+  ticker?: Prisma.StringNullableFilter<"CashLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CashLog"> | Date | string
   account?: Prisma.XOR<Prisma.InvestAccountScalarRelationFilter, Prisma.InvestAccountWhereInput>
   tradeLog?: Prisma.XOR<Prisma.TradeLogNullableScalarRelationFilter, Prisma.TradeLogWhereInput> | null
@@ -303,6 +313,7 @@ export type CashLogOrderByWithAggregationInput = {
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
+  ticker?: Prisma.SortOrderInput | Prisma.SortOrder
   tradeLogId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.CashLogCountOrderByAggregateInput
@@ -323,6 +334,7 @@ export type CashLogScalarWhereWithAggregatesInput = {
   currency?: Prisma.StringWithAggregatesFilter<"CashLog"> | string
   amount?: Prisma.FloatWithAggregatesFilter<"CashLog"> | number
   memo?: Prisma.StringNullableWithAggregatesFilter<"CashLog"> | string | null
+  ticker?: Prisma.StringNullableWithAggregatesFilter<"CashLog"> | string | null
   tradeLogId?: Prisma.IntNullableWithAggregatesFilter<"CashLog"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CashLog"> | Date | string
 }
@@ -333,6 +345,7 @@ export type CashLogCreateInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   createdAt?: Date | string
   account: Prisma.InvestAccountCreateNestedOneWithoutCashLogsInput
   tradeLog?: Prisma.TradeLogCreateNestedOneWithoutCashLogInput
@@ -346,6 +359,7 @@ export type CashLogUncheckedCreateInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   tradeLogId?: number | null
   createdAt?: Date | string
 }
@@ -356,6 +370,7 @@ export type CashLogUpdateInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.InvestAccountUpdateOneRequiredWithoutCashLogsNestedInput
   tradeLog?: Prisma.TradeLogUpdateOneWithoutCashLogNestedInput
@@ -369,6 +384,7 @@ export type CashLogUncheckedUpdateInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tradeLogId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -381,6 +397,7 @@ export type CashLogCreateManyInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   tradeLogId?: number | null
   createdAt?: Date | string
 }
@@ -391,6 +408,7 @@ export type CashLogUpdateManyMutationInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -402,6 +420,7 @@ export type CashLogUncheckedUpdateManyInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tradeLogId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -429,6 +448,7 @@ export type CashLogCountOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  ticker?: Prisma.SortOrder
   tradeLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -448,6 +468,7 @@ export type CashLogMaxOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  ticker?: Prisma.SortOrder
   tradeLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -460,6 +481,7 @@ export type CashLogMinOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  ticker?: Prisma.SortOrder
   tradeLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -551,6 +573,7 @@ export type CashLogCreateWithoutAccountInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   createdAt?: Date | string
   tradeLog?: Prisma.TradeLogCreateNestedOneWithoutCashLogInput
 }
@@ -562,6 +585,7 @@ export type CashLogUncheckedCreateWithoutAccountInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   tradeLogId?: number | null
   createdAt?: Date | string
 }
@@ -603,6 +627,7 @@ export type CashLogScalarWhereInput = {
   currency?: Prisma.StringFilter<"CashLog"> | string
   amount?: Prisma.FloatFilter<"CashLog"> | number
   memo?: Prisma.StringNullableFilter<"CashLog"> | string | null
+  ticker?: Prisma.StringNullableFilter<"CashLog"> | string | null
   tradeLogId?: Prisma.IntNullableFilter<"CashLog"> | number | null
   createdAt?: Prisma.DateTimeFilter<"CashLog"> | Date | string
 }
@@ -613,6 +638,7 @@ export type CashLogCreateWithoutTradeLogInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   createdAt?: Date | string
   account: Prisma.InvestAccountCreateNestedOneWithoutCashLogsInput
 }
@@ -625,6 +651,7 @@ export type CashLogUncheckedCreateWithoutTradeLogInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   createdAt?: Date | string
 }
 
@@ -650,6 +677,7 @@ export type CashLogUpdateWithoutTradeLogInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.InvestAccountUpdateOneRequiredWithoutCashLogsNestedInput
 }
@@ -662,6 +690,7 @@ export type CashLogUncheckedUpdateWithoutTradeLogInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -672,6 +701,7 @@ export type CashLogCreateManyAccountInput = {
   currency: string
   amount: number
   memo?: string | null
+  ticker?: string | null
   tradeLogId?: number | null
   createdAt?: Date | string
 }
@@ -682,6 +712,7 @@ export type CashLogUpdateWithoutAccountInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tradeLog?: Prisma.TradeLogUpdateOneWithoutCashLogNestedInput
 }
@@ -693,6 +724,7 @@ export type CashLogUncheckedUpdateWithoutAccountInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tradeLogId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -704,6 +736,7 @@ export type CashLogUncheckedUpdateManyWithoutAccountInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ticker?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tradeLogId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -718,6 +751,7 @@ export type CashLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   currency?: boolean
   amount?: boolean
   memo?: boolean
+  ticker?: boolean
   tradeLogId?: boolean
   createdAt?: boolean
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
@@ -732,6 +766,7 @@ export type CashLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   currency?: boolean
   amount?: boolean
   memo?: boolean
+  ticker?: boolean
   tradeLogId?: boolean
   createdAt?: boolean
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
@@ -746,6 +781,7 @@ export type CashLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   currency?: boolean
   amount?: boolean
   memo?: boolean
+  ticker?: boolean
   tradeLogId?: boolean
   createdAt?: boolean
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
@@ -760,11 +796,12 @@ export type CashLogSelectScalar = {
   currency?: boolean
   amount?: boolean
   memo?: boolean
+  ticker?: boolean
   tradeLogId?: boolean
   createdAt?: boolean
 }
 
-export type CashLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "accountId" | "type" | "currency" | "amount" | "memo" | "tradeLogId" | "createdAt", ExtArgs["result"]["cashLog"]>
+export type CashLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "date" | "accountId" | "type" | "currency" | "amount" | "memo" | "ticker" | "tradeLogId" | "createdAt", ExtArgs["result"]["cashLog"]>
 export type CashLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.InvestAccountDefaultArgs<ExtArgs>
   tradeLog?: boolean | Prisma.CashLog$tradeLogArgs<ExtArgs>
@@ -792,6 +829,7 @@ export type $CashLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     currency: string
     amount: number
     memo: string | null
+    ticker: string | null
     tradeLogId: number | null
     createdAt: Date
   }, ExtArgs["result"]["cashLog"]>
@@ -1226,6 +1264,7 @@ export interface CashLogFieldRefs {
   readonly currency: Prisma.FieldRef<"CashLog", 'String'>
   readonly amount: Prisma.FieldRef<"CashLog", 'Float'>
   readonly memo: Prisma.FieldRef<"CashLog", 'String'>
+  readonly ticker: Prisma.FieldRef<"CashLog", 'String'>
   readonly tradeLogId: Prisma.FieldRef<"CashLog", 'Int'>
   readonly createdAt: Prisma.FieldRef<"CashLog", 'DateTime'>
 }

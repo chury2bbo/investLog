@@ -135,6 +135,7 @@ model CashLog {
   currency   String
   amount     Float
   memo       String?
+  ticker     String?
   tradeLogId Int?          @unique
   createdAt  DateTime      @default(now())
   account    InvestAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)

@@ -20,7 +20,8 @@
       "Bash(npm ls:*)",
       "Bash(node -e ':*)",
       "Bash(npx tsx -e ':*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(npx tsc *)"
     ],
     "additionalDirectories": [
       "d:\\project\\investLog\\src\\app\\api\\accounts",
