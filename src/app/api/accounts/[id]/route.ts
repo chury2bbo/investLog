@@ -16,7 +16,7 @@ export async function PUT(
   const { id } = await params;
   const accountId = parseInt(id, 10);
   const body = await req.json();
-  const { accountCode, memo } = body;
+  const { accountCode, accountNumber, memo } = body;
 
   // 소유권 확인
   const account = await prisma.investAccount.findFirst({
@@ -31,6 +31,7 @@ export async function PUT(
     where: { id: accountId },
     data: {
       ...(accountCode ? { accountCode } : {}),
+      accountNumber: accountNumber !== undefined ? accountNumber || null : undefined,
       memo: memo !== undefined ? memo || null : undefined,
     },
     include: {

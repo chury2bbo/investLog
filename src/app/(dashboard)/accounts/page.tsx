@@ -40,6 +40,7 @@ interface Holding {
 interface AccountData {
   id: number;
   accountCode: string;
+  accountNumber: string | null;
   memo: string | null;
   brokerageCompany: { code: string; name: string };
   holdings: Holding[];
@@ -83,6 +84,7 @@ export default function AccountsPage() {
 
   // 추가 모달 폼
   const [formCode, setFormCode] = useState("");
+  const [formAccountNumber, setFormAccountNumber] = useState("");
   const [formMemo, setFormMemo] = useState("");
   const [formCashKRW, setFormCashKRW] = useState("");
   const [formCashUSD, setFormCashUSD] = useState("");
@@ -93,6 +95,7 @@ export default function AccountsPage() {
   const [editModal, setEditModal] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [editCode, setEditCode] = useState("");
+  const [editAccountNumber, setEditAccountNumber] = useState("");
   const [editMemo, setEditMemo] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
 
@@ -179,6 +182,7 @@ export default function AccountsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           accountCode: formCode,
+          accountNumber: formAccountNumber || undefined,
           memo: formMemo || undefined,
           cashKRW: formCashKRW || undefined,
           cashUSD: formCashUSD || undefined,
@@ -210,6 +214,7 @@ export default function AccountsPage() {
   function openEditModal(acc: AccountData) {
     setEditId(acc.id);
     setEditCode(acc.accountCode);
+    setEditAccountNumber(acc.accountNumber ?? "");
     setEditMemo(acc.memo ?? "");
     setEditModal(true);
   }
@@ -223,6 +228,7 @@ export default function AccountsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           accountCode: editCode,
+          accountNumber: editAccountNumber || undefined,
           memo: editMemo,
         }),
       });
@@ -393,6 +399,7 @@ export default function AccountsPage() {
                         )}
                       </div>
                       <div className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mt-0.5">
+                        {acc.accountNumber && <span className="mr-1.5">{acc.accountNumber} ·</span>}
                         {typeLabel ? `${typeLabel} · ` : ""}{acc.holdings.length}종목
                       </div>
                     </div>
@@ -583,6 +590,15 @@ export default function AccountsPage() {
             placeholder="증권사를 선택하세요"
           />
 
+          {/* 계좌번호 */}
+          <Input
+            label="계좌번호 (선택)"
+            value={formAccountNumber}
+            onChange={(e) => setFormAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))}
+            placeholder="예: 12345678-01 (숫자, - 만 입력)"
+            inputMode="numeric"
+          />
+
           {/* 계좌명 */}
           <Input
             label="계좌명"
@@ -637,6 +653,15 @@ export default function AccountsPage() {
             onChange={setEditCode}
             options={brokerages.map((b) => ({ value: b.code, label: b.name }))}
             placeholder="증권사를 선택하세요"
+          />
+
+          {/* 계좌번호 */}
+          <Input
+            label="계좌번호 (선택)"
+            value={editAccountNumber}
+            onChange={(e) => setEditAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))}
+            placeholder="예: 12345678-01 (숫자, - 만 입력)"
+            inputMode="numeric"
           />
 
           {/* 계좌명 */}

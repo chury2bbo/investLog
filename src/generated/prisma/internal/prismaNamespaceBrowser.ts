@@ -144,6 +144,7 @@ export const InvestAccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   accountCode: 'accountCode',
+  accountNumber: 'accountNumber',
   memo: 'memo',
   createdAt: 'createdAt'
 } as const

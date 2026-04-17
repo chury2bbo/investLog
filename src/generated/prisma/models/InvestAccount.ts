@@ -38,6 +38,7 @@ export type InvestAccountMinAggregateOutputType = {
   id: number | null
   userId: string | null
   accountCode: string | null
+  accountNumber: string | null
   memo: string | null
   createdAt: Date | null
 }
@@ -46,6 +47,7 @@ export type InvestAccountMaxAggregateOutputType = {
   id: number | null
   userId: string | null
   accountCode: string | null
+  accountNumber: string | null
   memo: string | null
   createdAt: Date | null
 }
@@ -54,6 +56,7 @@ export type InvestAccountCountAggregateOutputType = {
   id: number
   userId: number
   accountCode: number
+  accountNumber: number
   memo: number
   createdAt: number
   _all: number
@@ -72,6 +75,7 @@ export type InvestAccountMinAggregateInputType = {
   id?: true
   userId?: true
   accountCode?: true
+  accountNumber?: true
   memo?: true
   createdAt?: true
 }
@@ -80,6 +84,7 @@ export type InvestAccountMaxAggregateInputType = {
   id?: true
   userId?: true
   accountCode?: true
+  accountNumber?: true
   memo?: true
   createdAt?: true
 }
@@ -88,6 +93,7 @@ export type InvestAccountCountAggregateInputType = {
   id?: true
   userId?: true
   accountCode?: true
+  accountNumber?: true
   memo?: true
   createdAt?: true
   _all?: true
@@ -183,6 +189,7 @@ export type InvestAccountGroupByOutputType = {
   id: number
   userId: string
   accountCode: string
+  accountNumber: string | null
   memo: string | null
   createdAt: Date
   _count: InvestAccountCountAggregateOutputType | null
@@ -214,6 +221,7 @@ export type InvestAccountWhereInput = {
   id?: Prisma.IntFilter<"InvestAccount"> | number
   userId?: Prisma.StringFilter<"InvestAccount"> | string
   accountCode?: Prisma.StringFilter<"InvestAccount"> | string
+  accountNumber?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   memo?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   createdAt?: Prisma.DateTimeFilter<"InvestAccount"> | Date | string
   cashBalances?: Prisma.CashBalanceListRelationFilter
@@ -228,6 +236,7 @@ export type InvestAccountOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   accountCode?: Prisma.SortOrder
+  accountNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   cashBalances?: Prisma.CashBalanceOrderByRelationAggregateInput
@@ -245,6 +254,7 @@ export type InvestAccountWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.InvestAccountWhereInput | Prisma.InvestAccountWhereInput[]
   userId?: Prisma.StringFilter<"InvestAccount"> | string
   accountCode?: Prisma.StringFilter<"InvestAccount"> | string
+  accountNumber?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   memo?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   createdAt?: Prisma.DateTimeFilter<"InvestAccount"> | Date | string
   cashBalances?: Prisma.CashBalanceListRelationFilter
@@ -259,6 +269,7 @@ export type InvestAccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   accountCode?: Prisma.SortOrder
+  accountNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.InvestAccountCountOrderByAggregateInput
@@ -275,11 +286,13 @@ export type InvestAccountScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"InvestAccount"> | number
   userId?: Prisma.StringWithAggregatesFilter<"InvestAccount"> | string
   accountCode?: Prisma.StringWithAggregatesFilter<"InvestAccount"> | string
+  accountNumber?: Prisma.StringNullableWithAggregatesFilter<"InvestAccount"> | string | null
   memo?: Prisma.StringNullableWithAggregatesFilter<"InvestAccount"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InvestAccount"> | Date | string
 }
 
 export type InvestAccountCreateInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -294,6 +307,7 @@ export type InvestAccountUncheckedCreateInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -303,6 +317,7 @@ export type InvestAccountUncheckedCreateInput = {
 }
 
 export type InvestAccountUpdateInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -317,6 +332,7 @@ export type InvestAccountUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -329,11 +345,13 @@ export type InvestAccountCreateManyInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
 }
 
 export type InvestAccountUpdateManyMutationInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -342,6 +360,7 @@ export type InvestAccountUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -360,6 +379,7 @@ export type InvestAccountCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   accountCode?: Prisma.SortOrder
+  accountNumber?: Prisma.SortOrder
   memo?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -372,6 +392,7 @@ export type InvestAccountMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   accountCode?: Prisma.SortOrder
+  accountNumber?: Prisma.SortOrder
   memo?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -380,6 +401,7 @@ export type InvestAccountMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   accountCode?: Prisma.SortOrder
+  accountNumber?: Prisma.SortOrder
   memo?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -542,6 +564,7 @@ export type InvestAccountUpdateOneRequiredWithoutCashLogsNestedInput = {
 }
 
 export type InvestAccountCreateWithoutBrokerageCompanyInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -554,6 +577,7 @@ export type InvestAccountCreateWithoutBrokerageCompanyInput = {
 export type InvestAccountUncheckedCreateWithoutBrokerageCompanyInput = {
   id?: number
   userId: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -595,11 +619,13 @@ export type InvestAccountScalarWhereInput = {
   id?: Prisma.IntFilter<"InvestAccount"> | number
   userId?: Prisma.StringFilter<"InvestAccount"> | string
   accountCode?: Prisma.StringFilter<"InvestAccount"> | string
+  accountNumber?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   memo?: Prisma.StringNullableFilter<"InvestAccount"> | string | null
   createdAt?: Prisma.DateTimeFilter<"InvestAccount"> | Date | string
 }
 
 export type InvestAccountCreateWithoutUserInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -612,6 +638,7 @@ export type InvestAccountCreateWithoutUserInput = {
 export type InvestAccountUncheckedCreateWithoutUserInput = {
   id?: number
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -647,6 +674,7 @@ export type InvestAccountUpdateManyWithWhereWithoutUserInput = {
 }
 
 export type InvestAccountCreateWithoutHoldingsInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -660,6 +688,7 @@ export type InvestAccountUncheckedCreateWithoutHoldingsInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -684,6 +713,7 @@ export type InvestAccountUpdateToOneWithWhereWithoutHoldingsInput = {
 }
 
 export type InvestAccountUpdateWithoutHoldingsInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -697,6 +727,7 @@ export type InvestAccountUncheckedUpdateWithoutHoldingsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -705,6 +736,7 @@ export type InvestAccountUncheckedUpdateWithoutHoldingsInput = {
 }
 
 export type InvestAccountCreateWithoutTradeLogsInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -718,6 +750,7 @@ export type InvestAccountUncheckedCreateWithoutTradeLogsInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -742,6 +775,7 @@ export type InvestAccountUpdateToOneWithWhereWithoutTradeLogsInput = {
 }
 
 export type InvestAccountUpdateWithoutTradeLogsInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -755,6 +789,7 @@ export type InvestAccountUncheckedUpdateWithoutTradeLogsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -763,6 +798,7 @@ export type InvestAccountUncheckedUpdateWithoutTradeLogsInput = {
 }
 
 export type InvestAccountCreateWithoutCashBalancesInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashLogs?: Prisma.CashLogCreateNestedManyWithoutAccountInput
@@ -776,6 +812,7 @@ export type InvestAccountUncheckedCreateWithoutCashBalancesInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashLogs?: Prisma.CashLogUncheckedCreateNestedManyWithoutAccountInput
@@ -800,6 +837,7 @@ export type InvestAccountUpdateToOneWithWhereWithoutCashBalancesInput = {
 }
 
 export type InvestAccountUpdateWithoutCashBalancesInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashLogs?: Prisma.CashLogUpdateManyWithoutAccountNestedInput
@@ -813,6 +851,7 @@ export type InvestAccountUncheckedUpdateWithoutCashBalancesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashLogs?: Prisma.CashLogUncheckedUpdateManyWithoutAccountNestedInput
@@ -821,6 +860,7 @@ export type InvestAccountUncheckedUpdateWithoutCashBalancesInput = {
 }
 
 export type InvestAccountCreateWithoutCashLogsInput = {
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceCreateNestedManyWithoutAccountInput
@@ -834,6 +874,7 @@ export type InvestAccountUncheckedCreateWithoutCashLogsInput = {
   id?: number
   userId: string
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
   cashBalances?: Prisma.CashBalanceUncheckedCreateNestedManyWithoutAccountInput
@@ -858,6 +899,7 @@ export type InvestAccountUpdateToOneWithWhereWithoutCashLogsInput = {
 }
 
 export type InvestAccountUpdateWithoutCashLogsInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -871,6 +913,7 @@ export type InvestAccountUncheckedUpdateWithoutCashLogsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -881,11 +924,13 @@ export type InvestAccountUncheckedUpdateWithoutCashLogsInput = {
 export type InvestAccountCreateManyBrokerageCompanyInput = {
   id?: number
   userId: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
 }
 
 export type InvestAccountUpdateWithoutBrokerageCompanyInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -898,6 +943,7 @@ export type InvestAccountUpdateWithoutBrokerageCompanyInput = {
 export type InvestAccountUncheckedUpdateWithoutBrokerageCompanyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -909,6 +955,7 @@ export type InvestAccountUncheckedUpdateWithoutBrokerageCompanyInput = {
 export type InvestAccountUncheckedUpdateManyWithoutBrokerageCompanyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -916,11 +963,13 @@ export type InvestAccountUncheckedUpdateManyWithoutBrokerageCompanyInput = {
 export type InvestAccountCreateManyUserInput = {
   id?: number
   accountCode: string
+  accountNumber?: string | null
   memo?: string | null
   createdAt?: Date | string
 }
 
 export type InvestAccountUpdateWithoutUserInput = {
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUpdateManyWithoutAccountNestedInput
@@ -933,6 +982,7 @@ export type InvestAccountUpdateWithoutUserInput = {
 export type InvestAccountUncheckedUpdateWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cashBalances?: Prisma.CashBalanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -944,6 +994,7 @@ export type InvestAccountUncheckedUpdateWithoutUserInput = {
 export type InvestAccountUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   accountCode?: Prisma.StringFieldUpdateOperationsInput | string
+  accountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1010,6 +1061,7 @@ export type InvestAccountSelect<ExtArgs extends runtime.Types.Extensions.Interna
   id?: boolean
   userId?: boolean
   accountCode?: boolean
+  accountNumber?: boolean
   memo?: boolean
   createdAt?: boolean
   cashBalances?: boolean | Prisma.InvestAccount$cashBalancesArgs<ExtArgs>
@@ -1025,6 +1077,7 @@ export type InvestAccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   userId?: boolean
   accountCode?: boolean
+  accountNumber?: boolean
   memo?: boolean
   createdAt?: boolean
   brokerageCompany?: boolean | Prisma.BrokerageCompanyDefaultArgs<ExtArgs>
@@ -1035,6 +1088,7 @@ export type InvestAccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   userId?: boolean
   accountCode?: boolean
+  accountNumber?: boolean
   memo?: boolean
   createdAt?: boolean
   brokerageCompany?: boolean | Prisma.BrokerageCompanyDefaultArgs<ExtArgs>
@@ -1045,11 +1099,12 @@ export type InvestAccountSelectScalar = {
   id?: boolean
   userId?: boolean
   accountCode?: boolean
+  accountNumber?: boolean
   memo?: boolean
   createdAt?: boolean
 }
 
-export type InvestAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "accountCode" | "memo" | "createdAt", ExtArgs["result"]["investAccount"]>
+export type InvestAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "accountCode" | "accountNumber" | "memo" | "createdAt", ExtArgs["result"]["investAccount"]>
 export type InvestAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cashBalances?: boolean | Prisma.InvestAccount$cashBalancesArgs<ExtArgs>
   cashLogs?: boolean | Prisma.InvestAccount$cashLogsArgs<ExtArgs>
@@ -1082,6 +1137,7 @@ export type $InvestAccountPayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: number
     userId: string
     accountCode: string
+    accountNumber: string | null
     memo: string | null
     createdAt: Date
   }, ExtArgs["result"]["investAccount"]>
@@ -1516,6 +1572,7 @@ export interface InvestAccountFieldRefs {
   readonly id: Prisma.FieldRef<"InvestAccount", 'Int'>
   readonly userId: Prisma.FieldRef<"InvestAccount", 'String'>
   readonly accountCode: Prisma.FieldRef<"InvestAccount", 'String'>
+  readonly accountNumber: Prisma.FieldRef<"InvestAccount", 'String'>
   readonly memo: Prisma.FieldRef<"InvestAccount", 'String'>
   readonly createdAt: Prisma.FieldRef<"InvestAccount", 'DateTime'>
 }
