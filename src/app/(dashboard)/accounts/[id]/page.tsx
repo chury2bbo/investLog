@@ -17,6 +17,7 @@ import {
   ThemeToggle,
   Skeleton,
   Toast,
+  DatePicker,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -68,6 +69,7 @@ interface CashLog {
   amount: number;
   memo: string | null;
   ticker: string | null;
+  tradeLogId: number | null;
 }
 
 interface AccountDetail {
@@ -94,6 +96,9 @@ export default function AccountDetailPage() {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [usdRate, setUsdRate] = useState(1400);
 
+  // 탭
+  const [activeTab, setActiveTab] = useState<"holdings" | "trades" | "cashflow">("holdings");
+
   // 통화 표시 토글 (외화 원본 / 원화 환산)
   const [displayCurrency, setDisplayCurrency] = useState<"original" | "KRW">("original");
 
@@ -104,6 +109,12 @@ export default function AccountDetailPage() {
   const [cashSubmitting, setCashSubmitting] = useState(false);
   const [cashError, setCashError] = useState("");
   const cashAmountRef = useRef<HTMLInputElement>(null);
+
+  // 입금/출금 날짜
+  const [cashDate, setCashDate] = useState(() => {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    return kst.toISOString().slice(0, 10);
+  });
 
   // 배당금 전용 state
   const [divTicker, setDivTicker] = useState("");
@@ -159,6 +170,8 @@ export default function AccountDetailPage() {
   // 배당 이력 삭제
   const [divDeleteConfirm, setDivDeleteConfirm] = useState<number | null>(null);
   const [divDeleting, setDivDeleting] = useState(false);
+  const [cashDeleteConfirm, setCashDeleteConfirm] = useState<number | null>(null);
+  const [cashDeleting, setCashDeleting] = useState(false);
 
   // 섹터 편집 모달
   const [sectorEditModal, setSectorEditModal] = useState(false);
@@ -211,7 +224,7 @@ export default function AccountDetailPage() {
       if (!acc) return;
 
       // 매매 이력 조회
-      const tradesRes = await fetch(`/api/trades?accountId=${accountId}&take=5`);
+      const tradesRes = await fetch(`/api/trades?accountId=${accountId}&take=10`);
       const tradesJson = tradesRes.ok ? await tradesRes.json() : [];
       const trades = Array.isArray(tradesJson) ? tradesJson : tradesJson.data ?? [];
 
@@ -226,7 +239,7 @@ export default function AccountDetailPage() {
 
       const accountData = {
         ...acc,
-        tradeLogs: trades.slice(0, 5),
+        tradeLogs: trades.slice(0, 10),
         cashLogs: Array.isArray(cashLogs) ? cashLogs : [],
       };
       setAccount(accountData);
@@ -322,7 +335,7 @@ export default function AccountDetailPage() {
           type,
           currency: cashCurrency,
           amount,
-          ...(cashModal === "dividend" && { ticker: divTicker, name: divName, date: divDate }),
+          ...(cashModal === "dividend" ? { ticker: divTicker, name: divName, date: divDate } : { date: cashDate }),
         }),
       });
 
@@ -642,6 +655,27 @@ export default function AccountDetailPage() {
 
   // ─── 배당 이력 삭제 ───────────────────────────────────
 
+  async function handleDeleteCashLog() {
+    if (cashDeleteConfirm === null) return;
+    setCashDeleting(true);
+    try {
+      const res = await fetch(`/api/cash/${cashDeleteConfirm}`, { method: "DELETE" });
+      if (res.ok) {
+        setCashDeleteConfirm(null);
+        fetchAccount();
+        showToast("삭제 완료", "입출금 이력이 삭제되었습니다.", { variant: "success" });
+      } else {
+        const data = await res.json();
+        setCashDeleteConfirm(null);
+        showToast("삭제 실패", data.error ?? "삭제에 실패했습니다.", { variant: "error" });
+      }
+    } catch {
+      /* 삭제 실패 */
+    } finally {
+      setCashDeleting(false);
+    }
+  }
+
   async function handleDeleteDividend() {
     if (divDeleteConfirm === null) return;
     setDivDeleting(true);
@@ -651,6 +685,10 @@ export default function AccountDetailPage() {
         setDivDeleteConfirm(null);
         fetchAccount();
         showToast("삭제 완료", "배당 이력이 삭제되었습니다.", { variant: "success" });
+      } else {
+        const data = await res.json();
+        setDivDeleteConfirm(null);
+        showToast("삭제 실패", data.error ?? "삭제에 실패했습니다.", { variant: "error" });
       }
     } catch {
       /* 삭제 실패 */
@@ -959,9 +997,37 @@ export default function AccountDetailPage() {
         </div>
       </div>
 
-      {/* PC 2컬럼 / 모바일 1컬럼 */}
+      {/* 탭 버튼 */}
+      <div className="flex gap-1 mt-4 p-1 rounded-2xl bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+        {([
+          { key: "holdings", label: "보유종목" },
+          { key: "trades",   label: "거래내역" },
+          { key: "cashflow", label: "입출금" },
+        ] as const).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+            style={{
+              background: activeTab === tab.key ? "var(--color-surface)" : "transparent",
+              color: activeTab === tab.key ? "var(--color-primary)" : "var(--color-text)",
+              fontWeight: activeTab === tab.key ? 700 : 500,
+              boxShadow: activeTab === tab.key ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
+              border: activeTab === tab.key ? "1.5px solid var(--color-primary)" : "1.5px solid var(--color-g200)",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 탭 콘텐츠 */}
+      <div className="mt-4">
+
+      {/* ══ 보유종목 탭 ══ */}
+      {activeTab === "holdings" && (
+      <>
       <div className="md:grid md:grid-cols-[1fr_340px] md:gap-5">
-      {/* 좌측: 종목 + 매매 이력 */}
       <div>
       {/* ── ① 보유 종목 리스트 ── */}
       <div className="flex items-center justify-between mb-3">
@@ -1120,7 +1186,39 @@ export default function AccountDetailPage() {
         </div>
       )}
 
-      {/* ── ③ 매매 이력 (최근 5건) ── */}
+      </div>{/* 보유종목 탭 좌측 끝 */}
+
+      {/* 보유종목 탭 우측: 섹터 분포 */}
+      <div>
+      <div className="mt-4 md:mt-0">
+        <SectionTitle title="섹터 분포" />
+        <Card>
+          <SectorDonutChart
+            holdings={account.holdings.map((h) => ({
+              ...h,
+              currentPrice: quotes[h.ticker]?.price ?? undefined,
+              exchangeRate: h.country !== "KR" ? usdRate : 1,
+            }))}
+          />
+        </Card>
+      </div>
+      </div>
+      </div>
+      <div className="mt-4">
+        <button
+          onClick={() => setDeleteConfirm(true)}
+          className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "var(--color-negative)" }}
+        >
+          계좌 삭제
+        </button>
+      </div>
+      </>
+      )}
+
+      {/* ══ 거래내역 탭 ══ */}
+      {activeTab === "trades" && (
+      <div>
       <SectionTitle title="최근 매매" />
 
       {account.tradeLogs.length === 0 ? (
@@ -1176,14 +1274,69 @@ export default function AccountDetailPage() {
         </Card>
       )}
 
-      {/* ── ④ 배당 이력 ── */}
+      </div>
+      )}{/* 거래내역 탭 끝 */}
+
+      {/* ══ 입출금 탭 ══ */}
+      {activeTab === "cashflow" && (
+      <div>
+      {/* 입출금 이력 (DEPOSIT/WITHDRAW) */}
+      {(() => {
+        const cashInOutLogs = account.cashLogs
+          .filter((l) => l.type !== "DIVIDEND" && !l.tradeLogId)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return (
+          <>
+            <SectionTitle title="입출금 이력" />
+            {cashInOutLogs.length === 0 ? (
+              <Card><p className="text-sm text-center py-4 text-[var(--color-g400)]">입출금 기록이 없습니다.</p></Card>
+            ) : (
+              <Card>
+                <div className="max-h-55 overflow-y-auto">
+                {cashInOutLogs.map((l, i) => {
+                  const d = new Date(l.date);
+                  const dateStr = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+                  const isDeposit = l.amount > 0;
+                  const isKRW = l.currency === "KRW";
+                  const amtStr = isKRW
+                    ? `${isDeposit ? "+" : ""}₩${Math.abs(l.amount).toLocaleString()}`
+                    : `${isDeposit ? "+" : ""}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  return (
+                    <div key={l.id} className="flex justify-between items-center py-2.5"
+                      style={{ borderBottom: i < cashInOutLogs.length - 1 ? "1px solid var(--color-g100)" : "none" }}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-[var(--color-g400)] w-9">{dateStr}</span>
+                        <span className="text-sm font-semibold text-[var(--color-text)]">{l.memo ?? (isDeposit ? "입금" : "출금")}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold" style={{ color: isDeposit ? "var(--color-primary)" : "var(--color-negative)" }}>{amtStr}</span>
+                        <button
+                          type="button"
+                          onClick={() => setCashDeleteConfirm(l.id)}
+                          className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                </div>
+              </Card>
+            )}
+          </>
+        );
+      })()}
+
+      {/* 배당 이력 */}
       {(() => {
         if (divLogs.length === 0) return null;
+        const sortedDivLogs = [...divLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         return (
           <div className="mt-4">
             <SectionTitle title="배당 이력" />
-            <div className="space-y-3 max-h-[420px] overflow-y-auto">
-              {divLogs.map((l) => {
+            <div className="space-y-3 max-h-100 overflow-y-auto">
+              {sortedDivLogs.map((l) => {
                 const d = new Date(l.date);
                 const dateStr = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
                 const isKRW = l.currency === "KRW";
@@ -1225,36 +1378,10 @@ export default function AccountDetailPage() {
         );
       })()}
 
-      </div>{/* 좌측 끝 */}
-
-      {/* 우측: 섹터 분포 (PC) / 하단 (모바일) */}
-      <div>
-      {/* ── ④ 섹터 분포 차트 ── */}
-      <div className="mt-4 md:mt-0">
-        <SectionTitle title="섹터 분포" />
-        <Card>
-          <SectorDonutChart
-            holdings={account.holdings.map((h) => ({
-              ...h,
-              currentPrice: quotes[h.ticker]?.price ?? undefined,
-              exchangeRate: h.country !== "KR" ? usdRate : 1,
-            }))}
-          />
-        </Card>
       </div>
-      </div>{/* 우측 끝 */}
-      </div>{/* 2컬럼 그리드 끝 */}
+      )}{/* 입출금 탭 끝 */}
 
-      {/* ── 계좌 삭제 ── */}
-      <div className="mt-4">
-        <button
-          onClick={() => setDeleteConfirm(true)}
-          className="w-full py-3.5 rounded-2xl text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "var(--color-negative)" }}
-        >
-          계좌 삭제
-        </button>
-      </div>
+      </div>{/* 탭 콘텐츠 끝 */}
 
       {/* 삭제 확인 모달 */}
       <ConfirmDialog
@@ -1275,7 +1402,9 @@ export default function AccountDetailPage() {
           setCashModal(null); setCashError(""); setCashAmount("");
           setDivTicker(""); setDivName(""); setDivQuery(""); setDivShowHoldings(false);
           const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-          setDivDate(kst.toISOString().slice(0, 10));
+          const todayStr = kst.toISOString().slice(0, 10);
+          setCashDate(todayStr);
+          setDivDate(todayStr);
         }}
         title={
           cashModal === "deposit_choose" ? "입금"
@@ -1337,6 +1466,7 @@ export default function AccountDetailPage() {
                   </button>
                 ))}
               </div>
+              <DatePicker label="날짜 *" value={cashDate} onChange={setCashDate} />
               <Input
                 ref={cashAmountRef}
                 label="금액"
@@ -1450,15 +1580,7 @@ export default function AccountDetailPage() {
                 ))}
               </div>
               {/* 날짜 선택 */}
-              <div>
-                <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">배당 수령일 *</label>
-                <input
-                  type="date"
-                  value={divDate}
-                  onChange={(e) => setDivDate(e.target.value)}
-                  className="w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] dark:text-[var(--color-text)]"
-                />
-              </div>
+              <DatePicker label="배당 수령일 *" value={divDate} onChange={setDivDate} />
               <Input
                 label="배당금액"
                 inputMode="numeric"
@@ -1847,6 +1969,17 @@ export default function AccountDetailPage() {
         confirmLoading={holdingDeleting}
         onConfirm={handleHoldingDelete}
         onCancel={() => setHoldingDeleteConfirm(null)}
+      />
+
+      <ConfirmDialog
+        open={cashDeleteConfirm !== null}
+        title="입출금 이력을 삭제할까요?"
+        message={"삭제 시 예수금도 함께 반영되며\n복구할 수 없습니다."}
+        confirmLabel="삭제"
+        destructive
+        confirmLoading={cashDeleting}
+        onConfirm={handleDeleteCashLog}
+        onCancel={() => setCashDeleteConfirm(null)}
       />
 
       <ConfirmDialog

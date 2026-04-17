@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { accountCode, memo, cashKRW, cashUSD } = body;
+  const { accountCode, accountNumber, memo, cashKRW, cashUSD } = body;
 
   if (!accountCode) {
     return Response.json(
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
       data: {
         userId: session.user.id,
         accountCode,
+        accountNumber: accountNumber || null,
         memo: memo || null,
       },
       include: {

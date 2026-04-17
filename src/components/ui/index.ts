@@ -13,3 +13,4 @@ export { Toast } from "./Toast";
 export { ThemeToggle } from "./ThemeToggle";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { Skeleton } from "./Skeleton";
+export { DatePicker } from "./DatePicker";

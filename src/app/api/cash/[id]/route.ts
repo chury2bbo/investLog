@@ -26,9 +26,16 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     where: { accountId: log.accountId, currency: log.currency },
   });
   if (cashBalance) {
+    const newAmount = cashBalance.amount - log.amount;
+    if (newAmount < 0) {
+      return Response.json(
+        { error: `예수금이 부족합니다. (현재 ${log.currency === "KRW" ? `₩${cashBalance.amount.toLocaleString()}` : `$${cashBalance.amount.toFixed(2)}`})` },
+        { status: 400 }
+      );
+    }
     await prisma.cashBalance.update({
       where: { id: cashBalance.id },
-      data: { amount: { increment: -log.amount } },
+      data: { amount: newAmount },
     });
   }
 
