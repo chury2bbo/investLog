@@ -88,20 +88,26 @@ export async function DELETE(
   const cashBalance = trade.account.cashBalances.find((c) => c.currency === currency);
 
   if (trade.type === "BUY") {
-    // ── 매수 삭제 → Holding 수량 차감 + 예수금 복원 ──
+    // ── 매수 삭제 → Holding 재집계 + 예수금 복원 ──
 
     if (holding) {
-      const newQty = holding.quantity - trade.quantity;
-      if (newQty <= 0) {
-        // 수량이 0 이하면 Holding 삭제
+      // 삭제 대상 제외한 전체 매매 재집계
+      const remaining = await prisma.tradeLog.findMany({
+        where: { accountId: trade.accountId, ticker: trade.ticker, id: { not: tradeId } },
+        select: { type: true, price: true, quantity: true },
+      });
+      const buys = remaining.filter((t) => t.type === "BUY");
+      const sellQty = remaining.filter((t) => t.type === "SELL").reduce((s, t) => s + t.quantity, 0);
+      const totalBuyQty = buys.reduce((s, t) => s + t.quantity, 0);
+      const newQty = totalBuyQty - sellQty;
+
+      if (newQty <= 0 || buys.length === 0) {
         await prisma.holding.delete({ where: { id: holding.id } });
       } else {
-        // 평단가 역산: (기존총액 - 삭제금액) / 남은수량
-        const prevTotal = holding.avgPrice * holding.quantity;
-        const newAvgPrice = (prevTotal - trade.price * trade.quantity) / newQty;
+        const totalBuyCost = buys.reduce((s, t) => s + t.price * t.quantity, 0);
         await prisma.holding.update({
           where: { id: holding.id },
-          data: { quantity: newQty, avgPrice: Math.max(0, newAvgPrice) },
+          data: { quantity: newQty, avgPrice: totalBuyCost / totalBuyQty },
         });
       }
     }

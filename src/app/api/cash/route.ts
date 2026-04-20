@@ -17,9 +17,12 @@ export async function GET(req: Request) {
     return Response.json({ error: "accountId 필요" }, { status: 400 });
   }
 
+  const parsedAccountId = parseInt(accountId, 10);
+  if (isNaN(parsedAccountId)) return Response.json({ error: "잘못된 accountId" }, { status: 400 });
+
   // 계좌 소유권 확인
   const account = await prisma.investAccount.findFirst({
-    where: { id: parseInt(accountId, 10), userId: session.user.id },
+    where: { id: parsedAccountId, userId: session.user.id },
   });
   if (!account) {
     return Response.json({ error: "계좌를 찾을 수 없습니다." }, { status: 404 });

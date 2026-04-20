@@ -3,12 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getYahooSector } from "@/lib/yahoo";
 import { getKisSector } from "@/lib/kis";
 
-export async function GET() {
-  return Response.json({});
-}
-
 // ─── POST: 보유 종목 직접 등록 (예수금 차감 없음 — 온보딩과 동일) ───
-
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -87,7 +82,7 @@ export async function POST(req: Request) {
         accountId,
         ticker,
         name,
-        country: country || (ticker.length <= 6 && /^\d+$/.test(ticker) ? "KR" : "US"),
+        country: country || (/^\d{6}$/.test(ticker) ? "KR" : "US"),
         avgPrice,
         quantity,
         ...(sectorAuto ? { sectorAuto } : {}),

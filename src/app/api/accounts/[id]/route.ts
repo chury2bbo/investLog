@@ -15,6 +15,7 @@ export async function PUT(
 
   const { id } = await params;
   const accountId = parseInt(id, 10);
+  if (isNaN(accountId)) return Response.json({ error: "잘못된 ID" }, { status: 400 });
   const body = await req.json();
   const { accountCode, accountNumber, memo } = body;
 
@@ -57,6 +58,7 @@ export async function DELETE(
 
   const { id } = await params;
   const accountId = parseInt(id, 10);
+  if (isNaN(accountId)) return Response.json({ error: "잘못된 ID" }, { status: 400 });
 
   // 소유권 확인
   const account = await prisma.investAccount.findFirst({

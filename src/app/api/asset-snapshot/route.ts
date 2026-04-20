@@ -51,7 +51,8 @@ export async function POST(req: Request) {
 
     // 당월 1일 날짜 계산
     const now = new Date();
-    const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const monthStart = new Date(Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), 1));
 
     const snapshot = await prisma.monthlyAssetSnapshot.upsert({
       where: {
