@@ -1,5 +1,5 @@
-# 🚀 AI 투자 관리 프로그램 — 업무 흐름 정리 v1.2
-> 최종 업데이트: 2026-04-10 | 2인 팀 · Claude Code 활용 개발
+# 🚀 AI 투자 관리 프로그램 — 업무 흐름 정리
+> 최종 업데이트: 2026-04-20 | 2인 팀 · Claude Code 활용 개발
 
 ---
 
@@ -124,10 +124,11 @@ WORK_LOG.md
 | **2주 후반 (04-06~07)** | 매매 수정·삭제 API + 자산 스냅샷 | 디자인 시스템 v1.0 + Skeleton + 팝업 통일 + 전면 리팩토링 | 디자인 완성 |
 | **3주 전반 (04-08~09)** | AI 프롬프트 통합 + 성향 분석 강화 + 관리자 페이지 | 성향 독립 페이지 + 대시보드 위젯 + 매매 필터 강화 | 성향/관리자 완성 |
 | **3주 후반 (04-10)** | 투자성향 Level 시스템 + TradeLog↔CashLog 외래 키 + 6개월 데이터 제한 + JSON 파싱 헬퍼 + 관리자/안정화 | 모바일 UI 통일 + 토글/스켈레톤 통일 + 잠금 카드 CTA + 다크모드 사이드바 정리 | 발표 준비 단계 |
+| **4주 (04-20)** | 입출금 이력 정렬 개선 (date+createdAt 이중 정렬) | Node.js v22 전환 + Tabs 공통 컴포넌트 추가 + BottomSheet titleRight prop + 계좌 상세·성향 탭 통일 + 매매일지 모바일 무한 스크롤 + 종목 분석 AI 분석일 표시 | 안정화 · QA |
 
 ---
 
-## 5. 구현 완료 현황 (2026-04-10 기준)
+## 5. 구현 완료 현황 (2026-04-20 기준)
 
 ### 페이지 (11개 — 전체 구현 완료)
 
@@ -177,10 +178,10 @@ WORK_LOG.md
 | 기타 | `/api/asset-snapshot` | GET/POST (월별 스냅샷 자동) |
 | 관리자 | `/api/admin` | GET (토큰/사용량/API 상태) |
 
-### 공통 컴포넌트 (16종)
+### 공통 컴포넌트 (17종)
 
 ```
-Button · Card · Tag · PnlTag · Input · Select · Divider
+Button · Card · Tag · PnlTag · Input · Select · Divider · Tabs
 BottomSheet · Toast · ConfirmDialog
 LoadingSpinner · Skeleton · EmptyState · SectionTitle · ThemeToggle
 index.ts (Barrel Export)

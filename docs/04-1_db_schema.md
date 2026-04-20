@@ -1,5 +1,5 @@
-# 🚀 AI 투자 관리 프로그램 — DB 스키마 v3.7
-> 최종 업데이트: 2026-04-17 | 실제 `prisma/schema.prisma` 기준
+# 🚀 AI 투자 관리 프로그램 — DB 스키마
+> 최종 업데이트: 2026-04-20 | 실제 `prisma/schema.prisma` 기준
 
 ---
 
@@ -363,15 +363,6 @@ model CoachingHistory {
 ```
 
 ---
-
-### 9-3. 스키마 변경 이력
-
-| 날짜 | 변경 내용 |
-|------|-----------|
-| 2026-04-17 | `CashLog.ticker` 필드 추가 (매매 연관 종목 코드) |
-| 2026-04-17 | `CashLog.tradeLogId` UNIQUE FK 추가 — TradeLog ↔ CashLog 1:1 cascade 구현 |
-| 2026-04-17 | `TradeLog.cashLog` 역방향 relation 추가 |
-| 2026-04-17 | `generator.previewFeatures = ["driverAdapters"]` 추가 |
 
 ---
 

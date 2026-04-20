@@ -19,45 +19,22 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts }: Trad
 
   return (
     <div className="px-4 py-3 space-y-2.5 border-b border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[#F8FAF8] dark:bg-[#111A14]">
-      {/* 1행: from~to | 기간선택 */}
+      {/* 1행: from~to + 기간선택 */}
       <div className="flex items-center gap-1.5">
-        {/* 시작 날짜 */}
-        <div className="relative group flex-1">
-          <input
-            type="date"
-            value={filters.dateFrom}
-            onChange={(e) => set("dateFrom", e.target.value)}
-            className="w-full px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-          />
-          <span
-            className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "var(--color-text)" }}
-          >
-            시작 날짜
-            <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
-          </span>
-        </div>
-
-        <span className="text-xs text-[var(--color-g400)]">~</span>
-
-        {/* 종료 날짜 */}
-        <div className="relative group flex-1">
-          <input
-            type="date"
-            value={filters.dateTo}
-            onChange={(e) => set("dateTo", e.target.value)}
-            className="w-full px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-          />
-          <span
-            className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "var(--color-text)" }}
-          >
-            종료 날짜
-            <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
-          </span>
-        </div>
-
-        <div className="relative">
+        <input
+          type="date"
+          value={filters.dateFrom}
+          onChange={(e) => set("dateFrom", e.target.value)}
+          className="flex-1 min-w-0 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+        />
+        <span className="shrink-0 text-xs text-[var(--color-g400)]">~</span>
+        <input
+          type="date"
+          value={filters.dateTo}
+          onChange={(e) => set("dateTo", e.target.value)}
+          className="flex-1 min-w-0 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+        />
+        <div className="relative shrink-0">
           <button
             onClick={() => setQuickDropOpen((v) => !v)}
             className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g500)] dark:text-[var(--color-muted)] whitespace-nowrap cursor-pointer"

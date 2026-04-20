@@ -1,5 +1,5 @@
-# 🚀 AI 투자 관리 프로그램 — 설계 문서 v3.7
-> 최종 업데이트: 2026-04-17 | 멀티유저 소규모 (~50명) · 2인 팀 · Claude Code 개발
+# 🚀 AI 투자 관리 프로그램 — 설계 문서
+> 최종 업데이트: 2026-04-20 | 멀티유저 소규모 (~50명) · 2인 팀 · Claude Code 개발
 
 ---
 
@@ -24,8 +24,13 @@
 [ ] npm run build — 빌드 오류 없는지 최종 확인
 [ ] KIS Open API 등록 IP 확인 (배포 환경 IP 변경 여부)
 [ ] 전체 기능 최종 QA (대시보드→계좌→매매→분석→성향 골든 패스)
-[ ] 모바일 반응형 마무리 (768px 미만 레이아웃 점검)
 [ ] Supabase 대시보드 활성 상태 확인
+
+[x] Node.js v24 → v22 LTS 다운그레이드 (Turbopack 프로세스 증식 버그 해결)
+[x] 모바일 탭 스타일 통일 (Tabs 공통 컴포넌트 적용 — 계좌 상세 / 성향 페이지)
+[x] 매매일지 모바일 무한 스크롤 (페이지네이션 → scroll 기반 자동 로딩)
+[x] 종목 분석 AI 리포트 분석일 표시 (Claude AI · YYYY-MM-DD)
+[x] 입출금 이력 정렬 개선 (date + createdAt 이중 정렬)
 ```
 
 ---
@@ -240,12 +245,13 @@ export const config = {
 
 ## 공통 컴포넌트 위치: components/ui/
 - Button        — variant: primary(#05C072) / secondary / black
-- Card          — 16px 모서리, 라이트/다크 모드 대응
+- Card          — 16px 모서리, 라이트/다크 모드 대응, onClick prop 지원
 - Tag           — 배경색+텍스트색 props
 - PnlTag        — 수익(그린)/손실(레드) 자동 색상
 - Input         — 언더라인 스타일, label 포함
 - Divider       — 1px 구분선
-- BottomSheet   — 하단에서 올라오는 모달 (핸들 바 포함)
+- Tabs          — 탭 전환 (variant: segment / chip, 제네릭 키 타입)
+- BottomSheet   — 하단에서 올라오는 모달 (핸들 바 포함, titleRight prop 지원)
 - LoadingSpinner — API 호출 중 표시
 - EmptyState    — 데이터 없을 때 안내 문구+아이콘
 - SectionTitle  — 섹션 제목 (15px bold)
@@ -643,5 +649,4 @@ Page 컴포넌트 → 팀원 B 담당
 
 ---
 
-*문서 버전: v3.7 | 2026-04-17 | 7주차 진행 상태 반영 — 추가 완료 항목(TradeLog↔CashLog·관리자·스크린샷·음성인식) + 신규 컴포넌트(Select·Skeleton·Toast·ConfirmDialog) + 성향/프로필/임포트 페이지 경로 업데이트*
 *프로젝트명: InvestLog | 개발팀: 2인 | 개발 도구: Claude Code | 실행: 로컬 (npm run dev) | DB: Supabase 클라우드*

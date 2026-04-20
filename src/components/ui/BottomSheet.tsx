@@ -6,10 +6,11 @@ interface BottomSheetProps {
   open: boolean;
   onClose: () => void;
   title: string;
+  titleRight?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, title, titleRight, children }: BottomSheetProps) {
   const [visible, setVisible] = useState(false);
   const [animating, setAnimating] = useState(false);
 
@@ -60,10 +61,11 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
         </div>
 
         {/* 타이틀 */}
-        <div className="px-6 pt-4 md:pt-6 pb-0 shrink-0">
+        <div className="px-6 pt-4 md:pt-6 pb-0 shrink-0 flex items-center justify-between">
           <h3 className="text-base font-bold text-[var(--color-text)]">
             {title}
           </h3>
+          {titleRight}
         </div>
 
         {/* 스크롤 가능한 컨텐츠 */}

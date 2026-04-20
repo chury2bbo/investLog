@@ -88,6 +88,16 @@ export default function TradesPage() {
   // 모바일 필터 패널 토글
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  // 모바일 무한스크롤
+  const [mobileList, setMobileList] = useState<TradeLog[]>([]);
+  const [mobileHasMore, setMobileHasMore] = useState(false);
+  const [mobileLoadingMore, setMobileLoadingMore] = useState(false);
+  const mobilePageRef = useRef(0);
+  const mobileHasMoreRef = useRef(false);
+  const mobileLoadingMoreRef = useRef(false);
+  const mobileFiltersRef = useRef(appliedFilters);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   // 매매 등록 폼
   const [formAccountId, setFormAccountId] = useState<number | null>(null);
   const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -164,6 +174,60 @@ export default function TradesPage() {
       setLoading(false);
     }
   }, [appliedFilters, page]);
+
+  const fetchMobileTrades = useCallback(async (pageNum: number, append: boolean) => {
+    if (mobileLoadingMoreRef.current && pageNum > 0) return;
+    mobileLoadingMoreRef.current = true;
+    setMobileLoadingMore(true);
+    try {
+      const f = mobileFiltersRef.current;
+      const params = new URLSearchParams();
+      if (f.accountId) params.set("accountId", f.accountId);
+      if (f.tradeType) params.set("type", f.tradeType);
+      if (f.market) params.set("market", f.market);
+      if (f.dateFrom) params.set("dateFrom", f.dateFrom);
+      if (f.dateTo) params.set("dateTo", f.dateTo);
+      if (f.keyword) params.set("keyword", f.keyword);
+      if (f.tagStatus) params.set("tagStatus", f.tagStatus);
+      params.set("skip", String(pageNum * pageSize));
+      params.set("take", String(pageSize));
+      const res = await fetch(`/api/trades?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        const items: TradeLog[] = data.data ?? [];
+        const totalCount: number = data.total ?? 0;
+        setMobileList(prev => append ? [...prev, ...items] : items);
+        mobilePageRef.current = pageNum;
+        const hasMore = (pageNum + 1) * pageSize < totalCount;
+        mobileHasMoreRef.current = hasMore;
+        setMobileHasMore(hasMore);
+      }
+    } catch { /* 조회 실패 */ }
+    finally {
+      mobileLoadingMoreRef.current = false;
+      setMobileLoadingMore(false);
+    }
+  }, [pageSize]);
+
+  // 필터 변경 시 모바일 리스트 초기화
+  useEffect(() => {
+    mobileFiltersRef.current = appliedFilters;
+    mobilePageRef.current = 0;
+    fetchMobileTrades(0, false);
+  }, [appliedFilters, fetchMobileTrades]);
+
+  // 무한스크롤 — scroll 이벤트 기반 (sentinel이 DOM에 없을 수 있는 race condition 회피)
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollBottom >= docHeight - 200 && mobileHasMoreRef.current && !mobileLoadingMoreRef.current) {
+        fetchMobileTrades(mobilePageRef.current + 1, true);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [fetchMobileTrades]);
 
   const fetchAccounts = useCallback(async () => {
     try {
@@ -792,12 +856,20 @@ export default function TradesPage() {
 
             {/* 리스트 or 빈 상태 */}
             <div className="px-4">
-              {trades.length === 0 ? (
+              {mobileList.length === 0 && !mobileLoadingMore ? (
                 <EmptyState message={total === 0 ? "아직 매매 기록이 없어요. 첫 매매를 등록해보세요." : "조건에 맞는 매매 기록이 없어요."} />
               ) : (
-                <TradesList trades={trades} onSelect={openDetail} />
+                <TradesList trades={mobileList} onSelect={openDetail} />
               )}
             </div>
+
+            {/* 무한스크롤 sentinel */}
+            <div ref={sentinelRef} className="h-1" />
+            {mobileLoadingMore && (
+              <div className="py-4 flex justify-center">
+                <LoadingSpinner />
+              </div>
+            )}
           </>
         ) : (
           <div className="px-4 py-2.5">
@@ -836,14 +908,14 @@ export default function TradesPage() {
             <div className="space-y-4">
               {/* 종목 + 유형 */}
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${isBuy ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"}`}>
+                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${isBuy ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"}`}>
                   {isBuy ? "매수" : "매도"}
                 </span>
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
                   {country === "KR" ? "국내" : "해외"}
                 </span>
-                <span className="text-base font-bold text-[var(--color-text)]">{detailTrade.name}</span>
-                <span className="text-xs text-[var(--color-g400)]">{detailTrade.ticker}</span>
+                <span className="min-w-0 text-base font-bold text-[var(--color-text)] truncate">{detailTrade.name}</span>
+                <span className="shrink-0 text-xs text-[var(--color-g400)]">{detailTrade.ticker}</span>
               </div>
 
               {/* 매매 정보 */}

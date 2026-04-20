@@ -105,6 +105,7 @@ interface ReportData {
   swotThreat: string;
   reasoning: string;
   recentIssues?: string;
+  cachedDate?: string;
 }
 
 interface HistoryPoint {
@@ -169,6 +170,7 @@ export default function AnalysisPage() {
   const [quote, setQuote] = useState<QuoteData | null>(null);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [report, setReport] = useState<ReportData | null>(null);
+  const [reportCached, setReportCached] = useState(false);
   const [history, setHistory] = useState<MddPoint[]>([]);
 
   // 로딩
@@ -356,6 +358,7 @@ export default function AnalysisPage() {
       const d = await res.json();
       if (res.ok) {
         setReport(d.report ?? null);
+        setReportCached(d.cached ?? false);
       } else {
         showToast("분석 실패", d.error ?? "AI 분석 리포트를 생성할 수 없습니다.", { variant: "error" });
       }
@@ -808,7 +811,19 @@ export default function AnalysisPage() {
               {/* 추천 + 적정가 */}
               <Card>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">투자 의견</span>
+                  <div>
+                    <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">투자 의견</span>
+                    {report.cachedDate && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-g400)]">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                          Claude AI · {report.cachedDate} 분석{reportCached ? " (캐시)" : ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   <span
                     className="px-3 py-1 rounded-full text-sm font-bold text-white"
                     style={{ backgroundColor: recColor }}

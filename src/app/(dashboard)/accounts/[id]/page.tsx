@@ -18,6 +18,7 @@ import {
   Skeleton,
   Toast,
   DatePicker,
+  Tabs,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -1018,28 +1019,17 @@ export default function AccountDetailPage() {
       </div>
 
       {/* 탭 버튼 */}
-      <div className="flex gap-1 mt-4 p-1 rounded-2xl bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
-        {([
+      <Tabs
+        variant="segment"
+        className="mt-4"
+        tabs={[
           { key: "holdings", label: "보유종목" },
           { key: "trades",   label: "거래내역" },
           { key: "cashflow", label: "입출금" },
-        ] as const).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-            style={{
-              background: activeTab === tab.key ? "var(--color-surface)" : "transparent",
-              color: activeTab === tab.key ? "var(--color-primary)" : "var(--color-text)",
-              fontWeight: activeTab === tab.key ? 700 : 500,
-              boxShadow: activeTab === tab.key ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
-              border: activeTab === tab.key ? "1.5px solid var(--color-primary)" : "1.5px solid var(--color-g200)",
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+        ]}
+        active={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* 탭 콘텐츠 */}
       <div className="mt-4">
@@ -1052,7 +1042,7 @@ export default function AccountDetailPage() {
       {/* ── ① 보유 종목 리스트 ── */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
+          <span className="text-[13px] font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">보유 종목</span>
           {/* 원화/외화 토글 */}
           {account.holdings.some((h) => h.country !== "KR") && (
             <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
@@ -1954,6 +1944,11 @@ export default function AccountDetailPage() {
         open={holdingTradesTarget !== null}
         onClose={() => setHoldingTradesTarget(null)}
         title={holdingTradesTarget ? `${holdingTradesTarget.name} 매매내역` : ""}
+        titleRight={
+          holdingTrades.length > 0
+            ? <span className="text-xs text-[var(--color-g400)]">총 {holdingTrades.length}건</span>
+            : undefined
+        }
       >
         {holdingTradesLoading ? (
           <div className="py-8 flex justify-center">
@@ -1965,11 +1960,12 @@ export default function AccountDetailPage() {
           </p>
         ) : (
           <div>
-            {holdingTrades.map((t, i) => {
+            {holdingTrades.slice(0, 10).map((t, i) => {
               const date = new Date(t.date);
               const dateStr = `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
               const isBuy = t.type === "BUY";
               const isKR = t.ticker.length <= 6 && /^\d+$/.test(t.ticker);
+              const displayCount = Math.min(holdingTrades.length, 10);
 
               return (
                 <div
@@ -1977,7 +1973,7 @@ export default function AccountDetailPage() {
                   className="flex justify-between items-center py-2.5"
                   style={{
                     borderBottom:
-                      i < holdingTrades.length - 1
+                      i < displayCount - 1
                         ? "1px solid var(--color-g100)"
                         : "none",
                   }}
@@ -2002,6 +1998,18 @@ export default function AccountDetailPage() {
                 </div>
               );
             })}
+            {holdingTrades.length > 10 && holdingTradesTarget && (
+              <button
+                onClick={() => {
+                  setHoldingTradesTarget(null);
+                  router.push(`/trades?accountId=${account.id}&ticker=${encodeURIComponent(holdingTradesTarget.ticker)}`);
+                }}
+                className="w-full text-sm font-bold pt-3 pb-1 text-center cursor-pointer"
+                style={{ color: "var(--color-primary)" }}
+              >
+                매매일지에서 전체 보기 →
+              </button>
+            )}
           </div>
         )}
       </BottomSheet>

@@ -737,6 +737,34 @@ export default function PreviewPage() {
                 </div>
               </Card>
             </div>
+
+            {/* ── 매매 통계 UI 옵션 ── */}
+            <div>
+              <h2 className="text-[13px] font-bold mb-4" style={{ color: text }}>매매 통계 UI 옵션</h2>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold text-white" style={{ backgroundColor: T.primary }}>Option 1</span>
+                    <span className="text-[12px] font-semibold" style={{ color: text }}>숫자 요약 카드</span>
+                  </div>
+                  <TradeStatsOption1 dark={dark} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold text-white" style={{ backgroundColor: T.primary }}>Option 2</span>
+                    <span className="text-[12px] font-semibold" style={{ color: text }}>최고/최악 하이라이트</span>
+                  </div>
+                  <TradeStatsOption2 dark={dark} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold text-white" style={{ backgroundColor: T.primary }}>Option 3</span>
+                    <span className="text-[12px] font-semibold" style={{ color: text }}>미니 수익률 바 차트</span>
+                  </div>
+                  <TradeStatsOption3 dark={dark} />
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -889,6 +917,157 @@ function BottomSheetPreview({ open, onClose }: { open: boolean; onClose: () => v
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 매매 통계 Option 1: 숫자 요약 카드 ──────────────────────────
+function TradeStatsOption1({ dark = false }: { dark?: boolean }) {
+  const bg = dark ? T.dkBg : T.bg;
+  const text = dark ? T.dkText : T.text;
+  const muted = dark ? T.dkMuted : T.g500;
+  const border = dark ? T.dkBorder : T.g200;
+
+  const stats = [
+    { label: "승률", value: "62%", sub: "매도 13건 중 8건", color: T.positive },
+    { label: "평균 수익률", value: "+3.2%", sub: "매도 기준", color: T.positive },
+    { label: "최고 거래", value: "+18.3%", sub: "삼성전자 · 03.12", color: T.positive },
+    { label: "최악 거래", value: "-12.1%", sub: "카카오 · 02.05", color: T.negative },
+  ];
+
+  return (
+    <div className="p-5 rounded-2xl" style={{ backgroundColor: dark ? T.dkCard : T.surface, border: `1px solid ${border}`, boxShadow: dark ? "none" : "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[13px] font-bold" style={{ color: text }}>매매 통계</span>
+        <span className="text-[11px]" style={{ color: muted }}>최근 6개월</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        {stats.map((s) => (
+          <div key={s.label} className="p-3 rounded-xl" style={{ backgroundColor: bg }}>
+            <div className="text-[11px] mb-1" style={{ color: muted }}>{s.label}</div>
+            <div className="text-[18px] font-extrabold tracking-tight" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-[10px] mt-0.5" style={{ color: muted }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── 매매 통계 Option 2: 최고/최악 하이라이트 카드 ────────────────
+function TradeStatsOption2({ dark = false }: { dark?: boolean }) {
+  const text = dark ? T.dkText : T.text;
+  const muted = dark ? T.dkMuted : T.g500;
+  const border = dark ? T.dkBorder : T.g200;
+  const cardBg = dark ? T.dkCard : T.surface;
+
+  return (
+    <div className="space-y-2.5">
+      {/* 요약 수치 행 */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { label: "총 매도", value: "13건" },
+          { label: "승률", value: "62%" },
+          { label: "평균 수익률", value: "+3.2%" },
+        ].map((s) => (
+          <div key={s.label} className="p-3 rounded-xl text-center" style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+            <div className="text-[10px] mb-1" style={{ color: muted }}>{s.label}</div>
+            <div className="text-sm font-extrabold" style={{ color: text }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* 최고/최악 카드 — 좌우 2열, 각 카드 내부도 좌(종목) 우(수익률) */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="p-4 rounded-2xl flex items-center justify-between gap-2" style={{ backgroundColor: T.positiveSoft, border: `1px solid ${T.positive}22` }}>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 mb-1.5">
+              <span className="text-sm">🏆</span>
+              <span className="text-[11px] font-bold" style={{ color: T.positive }}>최고 거래</span>
+            </div>
+            <div className="text-[13px] font-bold truncate" style={{ color: text }}>삼성전자</div>
+            <div className="text-[10px] mt-0.5" style={{ color: muted }}>매도 · 03.12</div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-[18px] font-extrabold tracking-tight leading-tight" style={{ color: T.positive }}>+18.3%</div>
+            <div className="text-[10px] mt-0.5" style={{ color: T.positive }}>+₩183,000</div>
+          </div>
+        </div>
+        <div className="p-4 rounded-2xl flex items-center justify-between gap-2" style={{ backgroundColor: T.negativeSoft, border: `1px solid ${T.negative}22` }}>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 mb-1.5">
+              <span className="text-sm">💀</span>
+              <span className="text-[11px] font-bold" style={{ color: T.negative }}>최악 거래</span>
+            </div>
+            <div className="text-[13px] font-bold truncate" style={{ color: text }}>카카오</div>
+            <div className="text-[10px] mt-0.5" style={{ color: muted }}>매도 · 02.05</div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-[18px] font-extrabold tracking-tight leading-tight" style={{ color: T.negative }}>-12.1%</div>
+            <div className="text-[10px] mt-0.5" style={{ color: T.negative }}>-₩96,000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 매매 통계 Option 3: 미니 수익률 바 차트 ─────────────────────
+function TradeStatsOption3({ dark = false }: { dark?: boolean }) {
+  const text = dark ? T.dkText : T.text;
+  const muted = dark ? T.dkMuted : T.g500;
+  const border = dark ? T.dkBorder : T.g200;
+  const cardBg = dark ? T.dkCard : T.surface;
+
+  const trades = [
+    { name: "삼성전자", rate: 18.3 },
+    { name: "SK하이닉스", rate: 9.1 },
+    { name: "NVIDIA", rate: 7.4 },
+    { name: "LG에너지", rate: 2.1 },
+    { name: "현대차", rate: -1.5 },
+    { name: "카카오뱅크", rate: -4.2 },
+    { name: "POSCO홀딩스", rate: -8.7 },
+    { name: "카카오", rate: -12.1 },
+  ];
+
+  const maxAbs = Math.max(...trades.map((t) => Math.abs(t.rate)));
+
+  return (
+    <div className="p-5 rounded-2xl" style={{ backgroundColor: cardBg, border: `1px solid ${border}`, boxShadow: dark ? "none" : "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)" }}>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[13px] font-bold" style={{ color: text }}>최근 매도 수익률</span>
+        <span className="text-[11px]" style={{ color: muted }}>최근 8건</span>
+      </div>
+      <div className="space-y-2">
+        {trades.map((t) => {
+          const pct = (Math.abs(t.rate) / maxAbs) * 100;
+          const pos = t.rate >= 0;
+          return (
+            <div key={t.name} className="flex items-center gap-2">
+              <span className="text-[11px] w-20 shrink-0 truncate" style={{ color: muted }}>{t.name}</span>
+              <div className="flex-1 flex items-center" style={{ height: 20 }}>
+                {pos ? (
+                  <div className="flex items-center w-full">
+                    <div className="flex-1" />
+                    <div className="h-[14px] rounded-r-full" style={{ width: `${pct / 2}%`, backgroundColor: T.positive, minWidth: 4 }} />
+                  </div>
+                ) : (
+                  <div className="flex items-center w-full">
+                    <div className="h-[14px] rounded-l-full" style={{ width: `${pct / 2}%`, backgroundColor: T.negative, minWidth: 4 }} />
+                    <div className="flex-1" />
+                  </div>
+                )}
+              </div>
+              <span className="text-[11px] w-12 text-right font-bold shrink-0" style={{ color: pos ? T.positive : T.negative }}>
+                {pos ? "+" : ""}{t.rate}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 pt-3 flex justify-center" style={{ borderTop: `1px solid ${border}` }}>
+        <div className="w-px h-3" style={{ backgroundColor: border }} />
       </div>
     </div>
   );

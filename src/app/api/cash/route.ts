@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
   const logs = await prisma.cashLog.findMany({
     where: { accountId: account.id, ...(type ? { type } : {}) },
-    orderBy: { date: "desc" },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     ...(type ? {} : { take: 20 }),
   });
 

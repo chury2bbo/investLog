@@ -11,6 +11,7 @@ import {
   Skeleton,
   ThemeToggle,
   BottomSheet,
+  Tabs,
 } from "@/components/ui";
 
 // ─── 타입 ────────────────────────────────────────────────
@@ -442,29 +443,18 @@ export default function PersonalityPage() {
       <SectionTitle title="데이터로 보는 내 패턴" />
 
       {/* 탭 바 */}
-      <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-hide">
-        {([
+      <Tabs
+        variant="segment"
+        className="mb-4"
+        tabs={[
           { key: "reason" as const, label: "매매 이유" },
           { key: "emotion" as const, label: "감정" },
           { key: "sector" as const, label: "섹터" },
           { key: "holding" as const, label: "보유기간" },
-        ]).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all"
-            style={{
-              border: activeTab === tab.key
-                ? "1.5px solid var(--color-primary)"
-                : "1px solid var(--color-g200)",
-              background: activeTab === tab.key ? "var(--color-primary-soft)" : "transparent",
-              color: activeTab === tab.key ? "var(--color-primary)" : "var(--color-g500)",
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+        ]}
+        active={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* ── [매매 이유] 탭 ── */}
       {activeTab === "reason" && (
