@@ -173,6 +173,26 @@ export default function AccountDetailPage() {
   const [cashDeleteConfirm, setCashDeleteConfirm] = useState<number | null>(null);
   const [cashDeleting, setCashDeleting] = useState(false);
 
+  // 보유종목 매매내역 조회 모달
+  const [holdingTradesTarget, setHoldingTradesTarget] = useState<Holding | null>(null);
+  const [holdingTrades, setHoldingTrades] = useState<TradeLog[]>([]);
+  const [holdingTradesLoading, setHoldingTradesLoading] = useState(false);
+
+  const openHoldingTrades = useCallback(async (h: Holding) => {
+    setHoldingTradesTarget(h);
+    setHoldingTrades([]);
+    setHoldingTradesLoading(true);
+    try {
+      const res = await fetch(`/api/trades?accountId=${accountId}&ticker=${encodeURIComponent(h.ticker)}&take=1000`);
+      const json = await res.json();
+      setHoldingTrades(json.data ?? []);
+    } catch {
+      setHoldingTrades([]);
+    } finally {
+      setHoldingTradesLoading(false);
+    }
+  }, [accountId]);
+
   // 섹터 편집 모달
   const [sectorEditModal, setSectorEditModal] = useState(false);
   const [sectorEditHolding, setSectorEditHolding] = useState<Holding | null>(null);
@@ -1105,7 +1125,11 @@ export default function AccountDetailPage() {
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
-              <Card key={h.id}>
+              <Card
+                key={h.id}
+                onClick={() => openHoldingTrades(h)}
+                className="cursor-pointer transition-colors hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)]"
+              >
                 <div className="flex justify-between items-start gap-3 mb-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">
@@ -1161,19 +1185,19 @@ export default function AccountDetailPage() {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <button
-                      onClick={() => openSectorEdit(h)}
+                      onClick={(e) => { e.stopPropagation(); openSectorEdit(h); }}
                       className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
                       섹터
                     </button>
                     <button
-                      onClick={() => openHoldingEdit(h)}
+                      onClick={(e) => { e.stopPropagation(); openHoldingEdit(h); }}
                       className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
                       수정
                     </button>
                     <button
-                      onClick={() => setHoldingDeleteConfirm(h)}
+                      onClick={(e) => { e.stopPropagation(); setHoldingDeleteConfirm(h); }}
                       className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
                     >
                       삭제
@@ -1924,6 +1948,63 @@ export default function AccountDetailPage() {
         onClose={() => setImportModalOpen(false)}
         onConfirm={(holdings) => handleImportConfirm(holdings)}
       />
+
+      {/* ─── 보유종목 매매내역 조회 바텀시트 ────────────────── */}
+      <BottomSheet
+        open={holdingTradesTarget !== null}
+        onClose={() => setHoldingTradesTarget(null)}
+        title={holdingTradesTarget ? `${holdingTradesTarget.name} 매매내역` : ""}
+      >
+        {holdingTradesLoading ? (
+          <div className="py-8 flex justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : holdingTrades.length === 0 ? (
+          <p className="text-sm text-center py-8 text-[var(--color-g400)]">
+            이 계좌에서 매매 기록이 없습니다.
+          </p>
+        ) : (
+          <div>
+            {holdingTrades.map((t, i) => {
+              const date = new Date(t.date);
+              const dateStr = `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+              const isBuy = t.type === "BUY";
+              const isKR = t.ticker.length <= 6 && /^\d+$/.test(t.ticker);
+
+              return (
+                <div
+                  key={t.id}
+                  className="flex justify-between items-center py-2.5"
+                  style={{
+                    borderBottom:
+                      i < holdingTrades.length - 1
+                        ? "1px solid var(--color-g100)"
+                        : "none",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-[var(--color-g400)] w-9">
+                      {dateStr}
+                    </span>
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">
+                        {t.name}
+                      </div>
+                      <div className="text-[11px] text-[var(--color-g400)]">
+                        {t.quantity}주 · {isKR ? `₩${Math.floor(t.price).toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      </div>
+                    </div>
+                  </div>
+                  <Tag
+                    label={isBuy ? "매수" : "매도"}
+                    color={isBuy ? "green" : "orange"}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </BottomSheet>
 
       {/* ─── 종목 수정 바텀시트 ────────────────────────────── */}
       <BottomSheet

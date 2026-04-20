@@ -13,6 +13,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const accountId = searchParams.get("accountId");
+  const ticker = searchParams.get("ticker");
   const type = searchParams.get("type"); // BUY | SELL
   const reasonTag = searchParams.get("reasonTag");
   const dateFrom = searchParams.get("dateFrom");
@@ -29,6 +30,7 @@ export async function GET(req: Request) {
   };
 
   if (accountId) where.accountId = parseInt(accountId, 10);
+  if (ticker) where.ticker = ticker;
   if (type) where.type = type;
   if (reasonTag) where.reasonTags = { has: reasonTag };
 
