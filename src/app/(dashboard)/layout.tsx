@@ -92,7 +92,7 @@ function IconSidebar() {
               {/* 툴팁 */}
               {hovered === item.id && (
                 <div
-                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+                  className="absolute left-[70px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1D2720]"
                   style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                 >
                   {item.label}
@@ -101,7 +101,7 @@ function IconSidebar() {
                     style={{
                       borderTop: "5px solid transparent",
                       borderBottom: "5px solid transparent",
-                      borderRight: "5px solid var(--color-text)",
+                      borderRight: "5px solid #1D2720",
                     }}
                   />
                 </div>
@@ -132,7 +132,7 @@ function IconSidebar() {
           </Link>
           {hovered === "profile" && (
             <div
-              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1D2720]"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
             >
               회원정보
@@ -141,7 +141,7 @@ function IconSidebar() {
                 style={{
                   borderTop: "5px solid transparent",
                   borderBottom: "5px solid transparent",
-                  borderRight: "5px solid var(--color-text)",
+                  borderRight: "5px solid #1D2720",
                 }}
               />
             </div>
@@ -165,7 +165,7 @@ function IconSidebar() {
           </button>
           {hovered === "logout" && (
             <div
-              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[var(--color-text)]"
+              className="absolute left-[46px] top-1/2 -translate-y-1/2 text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg whitespace-nowrap z-[300] bg-[#1D2720]"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
             >
               로그아웃
@@ -174,7 +174,7 @@ function IconSidebar() {
                 style={{
                   borderTop: "5px solid transparent",
                   borderBottom: "5px solid transparent",
-                  borderRight: "5px solid var(--color-text)",
+                  borderRight: "5px solid #1D2720",
                 }}
               />
             </div>

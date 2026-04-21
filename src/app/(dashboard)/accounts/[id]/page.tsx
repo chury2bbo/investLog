@@ -723,22 +723,31 @@ export default function AccountDetailPage() {
   async function handleImportConfirm(
     importedHoldings: { ticker: string; name: string; avgPrice: string; quantity: string; country: string }[]
   ) {
+    const failed: string[] = [];
     for (const h of importedHoldings) {
-      await fetch("/api/holdings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId: parseInt(accountId, 10),
-          ticker: h.ticker,
-          name: h.name,
-          country: h.country,
-          avgPrice: parseFloat(h.avgPrice),
-          quantity: parseInt(h.quantity, 10),
-          replace: true,
-        }),
-      });
+      try {
+        const res = await fetch("/api/holdings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId: parseInt(accountId, 10),
+            ticker: h.ticker,
+            name: h.name,
+            country: h.country,
+            avgPrice: parseFloat(h.avgPrice),
+            quantity: parseInt(h.quantity, 10),
+            replace: true,
+          }),
+        });
+        if (!res.ok) failed.push(h.name);
+      } catch {
+        failed.push(h.name);
+      }
     }
     fetchAccount();
+    if (failed.length > 0) {
+      showToast("일부 종목 등록 실패", `${failed.join(", ")} 등록에 실패했습니다.`, { variant: "error" });
+    }
   }
 
   // ─── 섹터 분포: SectorDonutChart 컴포넌트 내부에서 계산 ───

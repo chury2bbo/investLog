@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -117,6 +118,8 @@ const DONUT_COLORS = [
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [hoveredStock, setHoveredStock] = useState<string | null>(null);
@@ -902,11 +905,11 @@ export default function DashboardPage() {
               <AreaChart data={snapshots} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradEval" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={isDark ? 0.5 : 0.25} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={isDark ? 0.08 : 0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-g200)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2A3828" : "var(--color-g200)"} vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
                 <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />

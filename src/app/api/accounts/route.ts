@@ -40,17 +40,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // 동일 증권사 중복 체크
-  const existing = await prisma.investAccount.findFirst({
-    where: { userId: session.user.id, accountCode },
-  });
-  if (existing) {
-    return Response.json(
-      { error: "이미 등록된 증권사입니다." },
-      { status: 409 }
-    );
-  }
-
   let account;
   try {
     account = await prisma.investAccount.create({

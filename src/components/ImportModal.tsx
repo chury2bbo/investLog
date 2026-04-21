@@ -285,9 +285,20 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                           {h.country}
                         </span>
                       </div>
-                      {!h.ticker && (
-                        <p className="text-[10px] text-[var(--color-negative)] mb-2">종목코드를 인식하지 못해 제외됩니다</p>
-                      )}
+                      <div className="mb-2">
+                        <label className="text-[10px] text-[#9AA99A] block mb-0.5">종목코드</label>
+                        <input
+                          type="text"
+                          value={h.ticker}
+                          onChange={(e) => updateHolding(i, "ticker", e.target.value.toUpperCase())}
+                          disabled={!h.checked}
+                          className={`w-full bg-white dark:bg-[var(--color-card)] border rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-positive)] disabled:opacity-40 ${h.ticker ? "border-[var(--color-g200)] dark:border-[var(--color-border)]" : "border-[var(--color-negative)]"}`}
+                          placeholder={h.country === "KR" ? "6자리 코드 (예: 367380)" : "영문 티커 (예: NVDA)"}
+                        />
+                        {!h.ticker && (
+                          <p className="text-[10px] text-[var(--color-negative)] mt-1">종목코드가 없으면 등록되지 않습니다</p>
+                        )}
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] text-[#9AA99A] block mb-0.5">평단가</label>

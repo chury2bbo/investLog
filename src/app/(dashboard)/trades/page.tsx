@@ -986,7 +986,7 @@ export default function TradesPage() {
                         onClick={() => setDetailEmotion(detailEmotion === em.label ? "" : em.label)}
                         className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
                           detailEmotion === em.label
-                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
+                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
                             : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
                         }`}
                       >
@@ -1300,7 +1300,7 @@ export default function TradesPage() {
                   onClick={() => setFormEmotion(formEmotion === em.label ? "" : em.label)}
                   className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
                     formEmotion === em.label
-                      ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6] ring-1 ring-[#8B5CF6]"
+                      ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
                       : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
                   }`}
                 >

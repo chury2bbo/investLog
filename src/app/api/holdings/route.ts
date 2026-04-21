@@ -50,44 +50,48 @@ export async function POST(req: Request) {
   }
 
   let holding;
-  if (existing) {
-    if (replace) {
-      // 캡처 불러오기: 현재 잔고 그대로 덮어쓰기
-      holding = await prisma.holding.update({
-        where: { id: existing.id },
+  try {
+    if (existing) {
+      if (replace) {
+        holding = await prisma.holding.update({
+          where: { id: existing.id },
+          data: {
+            avgPrice,
+            quantity,
+            ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+          },
+        });
+      } else {
+        const totalQty = existing.quantity + quantity;
+        const newAvgPrice =
+          (existing.avgPrice * existing.quantity + avgPrice * quantity) / totalQty;
+
+        holding = await prisma.holding.update({
+          where: { id: existing.id },
+          data: {
+            avgPrice: newAvgPrice,
+            quantity: totalQty,
+            ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+          },
+        });
+      }
+    } else {
+      holding = await prisma.holding.create({
         data: {
+          accountId,
+          ticker,
+          name,
+          country: country || (/^\d{6}$/.test(ticker) ? "KR" : "US"),
           avgPrice,
           quantity,
-          ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
-        },
-      });
-    } else {
-      // 수동 등록: 평균 매수가 재계산
-      const totalQty = existing.quantity + quantity;
-      const newAvgPrice =
-        (existing.avgPrice * existing.quantity + avgPrice * quantity) / totalQty;
-
-      holding = await prisma.holding.update({
-        where: { id: existing.id },
-        data: {
-          avgPrice: newAvgPrice,
-          quantity: totalQty,
-          ...(sectorAuto && !existing.sectorAuto ? { sectorAuto } : {}),
+          ...(sectorAuto ? { sectorAuto } : {}),
         },
       });
     }
-  } else {
-    holding = await prisma.holding.create({
-      data: {
-        accountId,
-        ticker,
-        name,
-        country: country || (/^\d{6}$/.test(ticker) ? "KR" : "US"),
-        avgPrice,
-        quantity,
-        ...(sectorAuto ? { sectorAuto } : {}),
-      },
-    });
+  } catch (err: unknown) {
+    console.error("holding upsert error:", err);
+    const message = err instanceof Error ? err.message : "DB 오류";
+    return Response.json({ error: message }, { status: 500 });
   }
 
   return Response.json(holding, { status: 201 });
