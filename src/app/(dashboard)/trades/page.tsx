@@ -604,7 +604,7 @@ export default function TradesPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
+              <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
               </button>
               <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">매매일지</h1>
@@ -713,7 +713,7 @@ export default function TradesPage() {
         {/* 타이틀 — 계좌 관리와 동일 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -724,7 +724,7 @@ export default function TradesPage() {
             {/* 뷰 전환 아이콘 */}
             <button
               onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
               aria-label="뷰 전환"
             >
               {viewMode === "list" ? (
@@ -893,7 +893,7 @@ export default function TradesPage() {
         {detailTrade && (() => {
           const country = getCountryFromTicker(detailTrade.ticker);
           const accountName = `${detailTrade.account.brokerageCompany.name}${detailTrade.account.memo ? ` · ${detailTrade.account.memo}` : ""}`;
-          const emotionData = EMOTIONS.find((e) => e.label === detailTrade.emotion);
+
           const isBuy = detailTrade.type === "BUY";
           const total = detailTrade.price * detailTrade.quantity;
           const isForeign = country !== "KR";
@@ -995,13 +995,22 @@ export default function TradesPage() {
                       </button>
                     ))}
                   </div>
-                ) : emotionData ? (
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">
-                    <span className="[&>svg]:w-[14px] [&>svg]:h-[14px]">{emotionData.icon}</span>
-                    <span className="text-xs font-medium">{detailTrade.emotion}</span>
-                  </div>
                 ) : (
-                  <span className="text-xs text-[var(--color-g400)]">없음</span>
+                  <div className="flex gap-2">
+                    {EMOTIONS.map((em) => (
+                      <div
+                        key={em.label}
+                        className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs ${
+                          detailTrade.emotion === em.label
+                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
+                            : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] opacity-30"
+                        }`}
+                      >
+                        <span>{em.icon}</span>
+                        <span className="font-medium">{em.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -1287,7 +1296,7 @@ export default function TradesPage() {
                   title={tag.desc}
                 >
                   {tag.label}
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[var(--color-text)] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1D2720] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
                 </button>
               ))}
             </div>

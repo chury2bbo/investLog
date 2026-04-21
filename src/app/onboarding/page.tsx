@@ -238,11 +238,11 @@ function StockSearch({
             style={{ color: isListening ? "var(--color-negative)" : "var(--color-g400)" }}
           >
             <span
-              className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+              className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#1D2720] z-10"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
             >
               {isListening ? "음성 인식 중지" : "음성으로 종목 검색"}
-              <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+              <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
             </span>
             {isListening && (
               <span className="absolute inset-0 flex items-center justify-center">

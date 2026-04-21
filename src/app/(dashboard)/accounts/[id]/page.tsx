@@ -874,7 +874,7 @@ export default function AccountDetailPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors">
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div>
@@ -1716,11 +1716,11 @@ export default function AccountDetailPage() {
                         style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
                       >
                         <span
-                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#1D2720] z-10"
                           style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                         >
                           {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
-                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
                         </span>
                         {hIsListening && (
                           <span className="absolute inset-0 flex items-center justify-center">
@@ -1832,11 +1832,11 @@ export default function AccountDetailPage() {
                         style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
                       >
                         <span
-                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[var(--color-text)] z-10"
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#1D2720] z-10"
                           style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                         >
                           {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
-                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
                         </span>
                         {hIsListening && (
                           <span className="absolute inset-0 flex items-center justify-center">

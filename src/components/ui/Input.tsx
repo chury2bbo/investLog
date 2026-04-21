@@ -67,10 +67,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {tooltip && (
           <span
             className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "var(--color-text)" }}
+            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "#1D2720" }}
           >
             {tooltip}
-            <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-text)" }} />
+            <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
           </span>
         )}
       </div>

@@ -27,7 +27,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
       {/* 타이틀 행 — 계좌 관리와 동일 */}
       <div className="flex items-center justify-between px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer">
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -44,18 +44,25 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5 shrink-0">
             {(["", "BUY", "SELL"] as const).map((t) => {
               const active = filters.tradeType === t;
-              const label = t === "" ? "전체" : t === "BUY" ? "매수" : "매도";
+              const label = t === "" ? null : t === "BUY" ? "매수" : "매도";
               return (
                 <button
                   key={t}
                   onClick={() => set("tradeType", t)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center ${
                     active
                       ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                       : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
                   }`}
                 >
-                  {label}
+                  {label ?? (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                      <rect x="0" y="0" width="5" height="5" rx="1"/>
+                      <rect x="7" y="0" width="5" height="5" rx="1"/>
+                      <rect x="0" y="7" width="5" height="5" rx="1"/>
+                      <rect x="7" y="7" width="5" height="5" rx="1"/>
+                    </svg>
+                  )}
                 </button>
               );
             })}
@@ -65,18 +72,25 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5 shrink-0">
             {(["", "KR", "US"] as const).map((m) => {
               const active = filters.market === m;
-              const label = m === "" ? "전체" : m === "KR" ? "국내" : "해외";
+              const label = m === "" ? null : m === "KR" ? "국내" : "해외";
               return (
                 <button
                   key={m}
                   onClick={() => set("market", m)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center ${
                     active
                       ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                       : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
                   }`}
                 >
-                  {label}
+                  {label ?? (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                      <rect x="0" y="0" width="5" height="5" rx="1"/>
+                      <rect x="7" y="0" width="5" height="5" rx="1"/>
+                      <rect x="0" y="7" width="5" height="5" rx="1"/>
+                      <rect x="7" y="7" width="5" height="5" rx="1"/>
+                    </svg>
+                  )}
                 </button>
               );
             })}
@@ -87,7 +101,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           {/* 뷰 전환 아이콘 */}
           <button
             onClick={onToggleView}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
             aria-label="뷰 전환"
           >
             {viewMode === "list" ? (
@@ -111,17 +125,14 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           {/* 필터 버튼 */}
           <button
             onClick={onToggleFilter}
-            className="relative flex items-center gap-1 h-9 px-3 rounded-xl text-xs font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+            className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${filterOpen ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"}`}
+            aria-label="필터"
           >
-            필터
             {hasActiveFilter && (
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-primary)]" />
             )}
-            <svg
-              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className={`transition-transform ${filterOpen ? "rotate-180" : ""}`}
-            >
-              <path d="M6 9l6 6 6-6" />
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
           </button>
         </div>

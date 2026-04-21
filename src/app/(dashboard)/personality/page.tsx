@@ -953,11 +953,22 @@ function CoachingCard({
 // ─── 헤더 컴포넌트 ───────────────────────────────────────
 
 function Header() {
+  const router = useRouter();
   return (
     <div className="flex items-center justify-between mb-6">
-      <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
-        투자 성향
-      </h1>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => router.back()}
+          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">
+          투자 성향
+        </h1>
+      </div>
       <div className="md:hidden"><ThemeToggle /></div>
     </div>
   );
