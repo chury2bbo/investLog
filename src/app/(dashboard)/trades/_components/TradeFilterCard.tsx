@@ -31,7 +31,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) => set("dateFrom", e.target.value)}
-                className="px-2 py-1.5 text-xs rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-transparent text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
               <span
                 className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
@@ -50,7 +50,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) => set("dateTo", e.target.value)}
-                className="px-2 py-1.5 text-xs rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-transparent text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
               <span
                 className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
@@ -66,12 +66,12 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
           <div className="relative">
             <button
               onClick={() => setQuickDropOpen((v) => !v)}
-              className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
+              className="px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
             >
               빠른선택 ▾
             </button>
             {quickDropOpen && (
-              <div className="absolute top-full left-0 mt-1 min-w-[120px] rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 min-w-[120px] rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] shadow-lg z-50 overflow-hidden">
                 {QUICK_DATE_OPTIONS.map((opt) => (
                   <button
                     key={opt.label}
@@ -96,7 +96,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
           <select
             value={filters.accountId}
             onChange={(e) => set("accountId", e.target.value)}
-            className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none cursor-pointer"
+            className="px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none cursor-pointer"
           >
             <option value="">전체 계좌</option>
             {accounts.map((a) => (
@@ -109,13 +109,13 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
           {/* 버튼 */}
           <button
             onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "", tagStatus: "" })}
-            className="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+            className="px-2.5 py-2 text-xs font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
           >
             초기화
           </button>
           <button
             onClick={onSearch}
-            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer"
+            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer"
           >
             조회
           </button>
@@ -130,7 +130,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
               onChange={(v) => set("keyword", v)}
               onEnter={onSearch}
               placeholder="종목명 또는 티커 검색"
-              className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-transparent text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A] outline-none"
+              className="w-full px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A] outline-none"
             />
           </div>
 
@@ -146,7 +146,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={t}
                     onClick={() => set("tradeType", t)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                         : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
@@ -171,7 +171,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={m}
                     onClick={() => set("market", m)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                         : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
@@ -196,7 +196,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
                   <button
                     key={s}
                     onClick={() => set("tagStatus", s)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                         : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
