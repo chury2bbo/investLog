@@ -852,7 +852,9 @@ export default function AccountDetailPage() {
   const fmtKRW = (v: number) =>
     useOk
       ? `₩${(Math.floor((v / 1_0000_0000) * 10) / 10).toLocaleString()}억`
-      : `₩${Math.floor(v / 10000).toLocaleString()}만`;
+      : v >= 10000
+      ? `₩${(Math.floor((v / 10000) * 10) / 10).toLocaleString()}만`
+      : `₩${Math.floor(v).toLocaleString()}`;
   const totalPnl = totalEvalKRW - totalInvested;
   const totalPnlRate = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
 
@@ -1124,11 +1126,11 @@ export default function AccountDetailPage() {
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
-              <Card
-                key={h.id}
-                onClick={() => openHoldingTrades(h)}
-                className="cursor-pointer transition-colors hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)]"
-              >
+              <Card key={h.id}>
+                <div
+                  onClick={() => openHoldingTrades(h)}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
                 <div className="flex justify-between items-start gap-3 mb-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">
@@ -1166,15 +1168,16 @@ export default function AccountDetailPage() {
                   <span>평단가 {fmtPrice(h.avgPrice)}</span>
                   <span>평가금액 {fmtPrice(evalValue)}</span>
                 </div>
+                </div>
 
                 <Divider />
 
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex justify-between items-center mt-1">
                   <div className="flex gap-1 flex-wrap">
                     {h.sectorManual ? (
                       <Tag label={h.sectorManual} color="gray" />
                     ) : (
-                      <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] px-2 py-1 rounded-md border border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)]">
+                      <span className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] px-2 py-0.5 rounded-md border border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)]">
                         내섹터 미지정
                       </span>
                     )}
@@ -1185,21 +1188,26 @@ export default function AccountDetailPage() {
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <button
                       onClick={(e) => { e.stopPropagation(); openSectorEdit(h); }}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                      title="섹터"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
-                      섹터
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); openHoldingEdit(h); }}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                      title="수정"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
-                      수정
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); setHoldingDeleteConfirm(h); }}
-                      className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
+                      title="삭제"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors"
                     >
-                      삭제
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                     </button>
                   </div>
                 </div>
@@ -1258,13 +1266,7 @@ export default function AccountDetailPage() {
             return (
               <div
                 key={t.id}
-                className="flex justify-between items-center py-2.5"
-                style={{
-                  borderBottom:
-                    i < account.tradeLogs.length - 1
-                      ? "1px solid var(--color-g100)"
-                      : "none",
-                }}
+                className={`flex justify-between items-center py-2.5 ${i < account.tradeLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[var(--color-g400)] w-9">
@@ -1325,20 +1327,15 @@ export default function AccountDetailPage() {
                     ? `${isDeposit ? "+" : ""}₩${Math.abs(l.amount).toLocaleString()}`
                     : `${isDeposit ? "+" : ""}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                   return (
-                    <div key={l.id} className="flex justify-between items-center py-2.5"
-                      style={{ borderBottom: i < cashInOutLogs.length - 1 ? "1px solid var(--color-g100)" : "none" }}>
+                    <div key={l.id} className={`flex justify-between items-center py-2.5 ${i < cashInOutLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-[var(--color-g400)] w-9">{dateStr}</span>
                         <span className="text-sm font-semibold text-[var(--color-text)]">{l.memo ?? (isDeposit ? "입금" : "출금")}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-sm font-bold" style={{ color: isDeposit ? "var(--color-primary)" : "var(--color-negative)" }}>{amtStr}</span>
-                        <button
-                          type="button"
-                          onClick={() => setCashDeleteConfirm(l.id)}
-                          className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
-                        >
-                          삭제
+                        <button type="button" onClick={() => setCashDeleteConfirm(l.id)} title="삭제" className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                         </button>
                       </div>
                     </div>
@@ -1358,8 +1355,9 @@ export default function AccountDetailPage() {
         return (
           <div className="mt-4">
             <SectionTitle title="배당 이력" />
-            <div className="space-y-3 max-h-100 overflow-y-auto">
-              {sortedDivLogs.map((l) => {
+            <Card>
+              <div className="max-h-55 overflow-y-auto">
+              {sortedDivLogs.map((l, i) => {
                 const d = new Date(l.date);
                 const dateStr = `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
                 const isKRW = l.currency === "KRW";
@@ -1369,34 +1367,29 @@ export default function AccountDetailPage() {
                 const holding = account.holdings.find((h) => h.ticker === l.ticker);
                 const stockName = holding?.name ?? (l.memo && l.memo !== "배당금" ? l.memo : null);
                 return (
-                  <Card key={l.id}>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-[var(--color-g400)] w-9">{dateStr}</span>
-                        <div>
-                          <div className="text-sm font-semibold text-[var(--color-text)]">
-                            {stockName ?? l.ticker}
-                          </div>
-                          <div className="text-[11px] text-[var(--color-g400)]">
-                            {stockName ? l.ticker : "배당금"}
-                          </div>
+                  <div key={l.id} className={`flex justify-between items-center py-2.5 ${i < sortedDivLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-[var(--color-g400)] w-9">{dateStr}</span>
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--color-text)]">
+                          {stockName ?? l.ticker}
+                        </div>
+                        <div className="text-[11px] text-[var(--color-g400)]">
+                          {stockName ? l.ticker : "배당금"}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-bold" style={{ color: "var(--color-primary)" }}>{amtStr}</span>
-                        <button
-                          type="button"
-                          onClick={() => setDivDeleteConfirm(l.id)}
-                          className="px-2.5 py-1 text-[11px] font-medium rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors"
-                        >
-                          삭제
-                        </button>
-                      </div>
                     </div>
-                  </Card>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-bold" style={{ color: "var(--color-primary)" }}>{amtStr}</span>
+                      <button type="button" onClick={() => setDivDeleteConfirm(l.id)} title="삭제" className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
-            </div>
+              </div>
+            </Card>
           </div>
         );
       })()}
@@ -1456,7 +1449,7 @@ export default function AccountDetailPage() {
                   <span className="text-[11px] text-[var(--color-g400)]">현금 입금</span>
                 </button>
                 <button
-                  onClick={() => { setCashModal("dividend"); setDivShowHoldings(false); }}
+                  onClick={() => { setCashModal("dividend"); setDivShowHoldings(!!(account && account.holdings.length > 0)); }}
                   className="flex-1 py-4 rounded-2xl border-2 border-[var(--color-g200)] dark:border-[var(--color-border)] flex flex-col items-center gap-1.5 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
                 >
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1979,13 +1972,7 @@ export default function AccountDetailPage() {
               return (
                 <div
                   key={t.id}
-                  className="flex justify-between items-center py-2.5"
-                  style={{
-                    borderBottom:
-                      i < displayCount - 1
-                        ? "1px solid var(--color-g100)"
-                        : "none",
-                  }}
+                  className={`flex justify-between items-center py-2.5 ${i < displayCount - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-[var(--color-g400)] w-9">

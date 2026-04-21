@@ -377,7 +377,9 @@ export default function AccountsPage() {
             const fmtKRW = (v: number) =>
               useOk
                 ? `₩${(Math.floor((v / 1_0000_0000) * 10) / 10).toLocaleString()}억`
-                : `₩${Math.floor(v / 10000).toLocaleString()}만`;
+                : v >= 10000
+                ? `₩${(Math.floor((v / 10000) * 10) / 10).toLocaleString()}만`
+                : `₩${Math.floor(v).toLocaleString()}`;
 
             return (
               <Card key={acc.id}>
@@ -466,16 +468,20 @@ export default function AccountsPage() {
                 {/* 수정 / 삭제 버튼 */}
                 <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
                   <button
+                    type="button"
                     onClick={(e) => { e.stopPropagation(); openEditModal(acc); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+                    title="수정"
+                    className="p-2.5 rounded-lg bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
                   >
-                    수정
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
                   <button
+                    type="button"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ id: acc.id, name: acc.brokerageCompany.name }); }}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-negative-soft)] dark:bg-[rgba(240,68,82,0.15)] text-[var(--color-negative)] hover:bg-[var(--color-negative-soft)] dark:hover:bg-[rgba(240,68,82,0.25)] transition-colors cursor-pointer"
+                    title="삭제"
+                    className="p-2.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer"
                   >
-                    삭제
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                   </button>
                 </div>
               </Card>

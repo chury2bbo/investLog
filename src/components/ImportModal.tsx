@@ -281,8 +281,8 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                           onChange={(e) => updateHolding(i, "checked", e.target.checked)}
                           className="accent-[var(--color-positive)] w-4 h-4 shrink-0 cursor-pointer" />
                         <span className="text-sm font-semibold text-[var(--color-text)] flex-1 truncate">{h.name}</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${h.country === "KR" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"}`}>
-                          {h.country}
+                        <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                          {h.country === "KR" ? "국내" : "해외"}
                         </span>
                       </div>
                       <div className="mb-2">
