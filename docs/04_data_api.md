@@ -1,5 +1,5 @@
 # 🚀 AI 투자 관리 프로그램 — 설계 문서
-> 최종 업데이트: 2026-04-20 | 멀티유저 소규모 (~50명) · 2인 팀 · Claude Code 개발
+> 최종 업데이트: 2026-04-21 | 멀티유저 소규모 (~50명) · 2인 팀 · Claude Code 개발
 
 ---
 
@@ -46,6 +46,9 @@
 | 차트 (MDD용) | KIS Open API 일봉 | yahoo-finance2 chart() |
 | 섹터 정보 | KIS Open API (`bstp_kor_isnm`) | yahoo-finance2 `quoteSummary(assetProfile)` |
 | 기업 소개 | KIS → Claude API 한국어 요약 | yahoo-finance2 → Claude API 요약 |
+| 벤치마크 YTD | — | yahoo-finance2 chart() (KOSPI/S&P500/NASDAQ/BTC/금/달러) + 한국부동산원 R-ONE API (서울아파트) |
+
+> 벤치마크 비교: `/api/benchmark` — 당해 연도 1/1~현재 수익률 계산, 인증 필요, 별도 캐시 없음
 
 > 섹터 자동 조회: 종목 등록(POST /api/holdings), 매매 등록(POST /api/trades) 시 신규 종목이면 자동 조회하여 `sectorAuto`에 저장. 수동 새로고침은 POST /api/holdings/[id]/sector/refresh.
 

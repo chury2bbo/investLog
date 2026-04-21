@@ -1,5 +1,5 @@
 # 🚀 AI 투자 관리 프로그램 — 업무 흐름 정리
-> 최종 업데이트: 2026-04-20 | 2인 팀 · Claude Code 활용 개발
+> 최종 업데이트: 2026-04-21 | 2인 팀 · Claude Code 활용 개발
 
 ---
 
@@ -125,6 +125,7 @@ WORK_LOG.md
 | **3주 전반 (04-08~09)** | AI 프롬프트 통합 + 성향 분석 강화 + 관리자 페이지 | 성향 독립 페이지 + 대시보드 위젯 + 매매 필터 강화 | 성향/관리자 완성 |
 | **3주 후반 (04-10)** | 투자성향 Level 시스템 + TradeLog↔CashLog 외래 키 + 6개월 데이터 제한 + JSON 파싱 헬퍼 + 관리자/안정화 | 모바일 UI 통일 + 토글/스켈레톤 통일 + 잠금 카드 CTA + 다크모드 사이드바 정리 | 발표 준비 단계 |
 | **4주 (04-20)** | 입출금 이력 정렬 개선 (date+createdAt 이중 정렬) | Node.js v22 전환 + Tabs 공통 컴포넌트 추가 + BottomSheet titleRight prop + 계좌 상세·성향 탭 통일 + 매매일지 모바일 무한 스크롤 + 종목 분석 AI 분석일 표시 | 안정화 · QA |
+| **4주 후반 (04-21)** | 한국부동산원 R-ONE API 연동 (서울아파트 주간지수) | 수익률 비교 BenchmarkSheet 기능 + 모바일 필터 바 아이콘화 + 다크모드 버튼 bg 제거 + 투자성향 뒤로가기 버튼 + 매매 심리상태 UI 통일 | UI 안정화 |
 
 ---
 
@@ -175,6 +176,7 @@ WORK_LOG.md
 | 성향/코칭 | `/api/personality/summary` | GET (Level 1·2 자동 분기, 1회/일 통합, `?last=true` 조회) |
 | | `/api/personality/history` | GET/POST (AI 코칭, 3회/일) |
 | AI 분석 | `/api/import/analyze` | POST (스크린샷 → 종목 추출, max_tokens 2048) |
+| 벤치마크 | `/api/benchmark` | GET (KOSPI/S&P500/NASDAQ/BTC/금/달러 YTD — yahoo-finance2, 서울아파트 — R-ONE API) |
 | 기타 | `/api/asset-snapshot` | GET/POST (월별 스냅샷 자동) |
 | 관리자 | `/api/admin` | GET (토큰/사용량/API 상태) |
 
@@ -195,6 +197,7 @@ index.ts (Barrel Export)
 | KIS Open API | 국내 현재가 + 섹터 조회 | ✅ 운영 중 |
 | yahoo-finance2 | 해외 검색 + 주가 + 섹터 + USDKRW 환율 | ✅ 운영 중 |
 | Claude API (claude-sonnet-4-6) | 기업 소개 / 종목 분석 / 성향 진단 Level 1·2 / AI 코칭 / 스크린샷 종목 추출 | ✅ 운영 중 |
+| 한국부동산원 R-ONE API | 서울 아파트 주간 매매가격지수 (벤치마크 비교용, REB_API_KEY) | ✅ 운영 중 |
 | Google OAuth | 소셜 로그인 | ✅ 운영 중 |
 | Kakao OAuth | 소셜 로그인 | ✅ 운영 중 |
 

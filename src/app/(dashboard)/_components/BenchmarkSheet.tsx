@@ -74,7 +74,7 @@ export function BenchmarkSheet({ open, onClose, myReturnRate }: BenchmarkSheetPr
                         style={{
                           width: `${Math.round((Math.abs(row.rate) / maxAbs) * 100)}%`,
                           minWidth: "2px",
-                          backgroundColor: row.isMe ? "var(--color-negative)" : "#FCDDE0",
+                          backgroundColor: row.isMe ? "var(--color-negative)" : "rgba(240,68,82,0.25)",
                         }}
                       />
                     )}
