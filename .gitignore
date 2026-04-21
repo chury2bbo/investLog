@@ -46,3 +46,6 @@ env
 scripts/seed-demo.ts
 .gitignore
 scripts/seed-snapshot.ts
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
