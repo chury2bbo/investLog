@@ -15,6 +15,7 @@ import {
   ThemeToggle,
   Skeleton,
 } from "@/components/ui";
+import { BenchmarkSheet } from "./_components/BenchmarkSheet";
 
 // ─── 타입 ────────────────────────────────────────────────
 
@@ -140,6 +141,7 @@ export default function DashboardPage() {
   const [noTagCount, setNoTagCount] = useState(0);
   const [personalityTradeCount, setPersonalityTradeCount] = useState(0);
   const [personalityLoading, setPersonalityLoading] = useState(true);
+  const [benchmarkOpen, setBenchmarkOpen] = useState(false);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -795,31 +797,46 @@ export default function DashboardPage() {
             value: `${accounts.length}개`,
             color: undefined,
           },
-        ].map((s) => (
-          <Card key={s.label} className="!p-3">
-            <div className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-1">
-              {s.label}
-            </div>
-            <div
-              className="flex items-center gap-1 text-[14px] md:text-[15px] font-extrabold tracking-tight leading-tight"
-              style={{
-                color: s.color ?? undefined,
-              }}
+        ].map((s) => {
+          const isReturnCard = s.label === "총 수익률";
+          return (
+            <Card
+              key={s.label}
+              className={`!p-3 ${isReturnCard ? "cursor-pointer hover:ring-1 hover:ring-[var(--color-primary)] transition-shadow" : ""}`}
+              onClick={isReturnCard ? () => setBenchmarkOpen(true) : undefined}
             >
-              {s.color && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" stroke={s.color} className="shrink-0">
-                  {s.color === "var(--color-positive)"
-                    ? <><path d="M7 17L17 7" /><path d="M7 7h10v10" /></>
-                    : <><path d="M7 7l10 10" /><path d="M17 7v10H7" /></>
-                  }
-                </svg>
-              )}
-              <span className={s.color ? "" : "text-[var(--color-text)] dark:text-[var(--color-text)]"}>
-                {s.value}
-              </span>
-            </div>
-          </Card>
-        ))}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+                  {s.label}
+                </span>
+                {isReturnCard && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    비교
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <div
+                className="flex items-center gap-1 text-[14px] md:text-[15px] font-extrabold tracking-tight leading-tight"
+                style={{ color: s.color ?? undefined }}
+              >
+                {s.color && (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" stroke={s.color} className="shrink-0">
+                    {s.color === "var(--color-positive)"
+                      ? <><path d="M7 17L17 7" /><path d="M7 7h10v10" /></>
+                      : <><path d="M7 7l10 10" /><path d="M17 7v10H7" /></>
+                    }
+                  </svg>
+                )}
+                <span className={s.color ? "" : "text-[var(--color-text)] dark:text-[var(--color-text)]"}>
+                  {s.value}
+                </span>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       {/* PC 2컬럼 / 모바일 1컬럼 */}
@@ -1273,6 +1290,12 @@ export default function DashboardPage() {
           </div>
         );
       })()}
+
+      <BenchmarkSheet
+        open={benchmarkOpen}
+        onClose={() => setBenchmarkOpen(false)}
+        myReturnRate={summary.totalPnlRate}
+      />
     </div>
   );
 }
