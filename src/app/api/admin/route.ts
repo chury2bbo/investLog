@@ -77,7 +77,7 @@ export async function GET() {
       map[l.date].output += l.outputTokens;
     });
     return Object.entries(map)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => b.localeCompare(a))
       .map(([date, d]) => ({ date, ...d, cost: calcCost(d.input, d.output) }));
   })();
 
@@ -140,6 +140,14 @@ async function checkApiStatus() {
     status: process.env.ANTHROPIC_API_KEY ? "ok" : "error",
     latency: 0,
     message: process.env.ANTHROPIC_API_KEY ? "API Key 설정됨" : "API Key 미설정",
+  });
+
+  // 한국부동산원 R-ONE API (키 유효성만 체크)
+  results.push({
+    name: "R-ONE API (한국부동산원)",
+    status: process.env.REB_API_KEY ? "ok" : "error",
+    latency: 0,
+    message: process.env.REB_API_KEY ? "API Key 설정됨" : "API Key 미설정",
   });
 
   return results;

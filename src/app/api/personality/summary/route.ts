@@ -119,7 +119,7 @@ export async function GET(req: Request) {
 
   buyTrades.forEach((buy) => {
     const sell = sellTrades.find(
-      (s) => s.ticker === buy.ticker && new Date(s.date) > new Date(buy.date) && !usedSellIds.has(s.id)
+      (s) => s.ticker === buy.ticker && s.accountId === buy.accountId && new Date(s.date) > new Date(buy.date) && !usedSellIds.has(s.id)
     );
     if (!sell) return;
     usedSellIds.add(sell.id);
