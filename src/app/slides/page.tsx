@@ -516,16 +516,17 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
               <div className="text-lg font-bold" style={{ color: T.text }}>통합 포트폴리오</div>
             </div>
-            <div className="flex-1 min-h-0 rounded-xl overflow-hidden mb-2" style={{ backgroundColor: T.cardAlt }}>
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden" style={{ backgroundColor: T.cardAlt }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/slides/img_portfolio_1.png" alt="대시보드" className="w-full h-full object-contain object-top" />
-            </div>
-            <div className="flex flex-col gap-1.5 shrink-0">
-              {["국내 + 해외 주식 실시간 통합", "환율 자동 환산 · 수익률 추이 차트", "계좌별 비중 · MDD 분석"].map(pt => (
-                <div key={pt} className="flex items-center gap-2 text-[11px]" style={{ color: T.muted }}>
-                  <span style={{ color: T.primary }}>·</span>{pt}
-                </div>
-              ))}
+              <img src="/slides/img_portfolio_1.png" alt="대시보드" className="w-full h-full object-cover object-top" />
+              <div className="absolute bottom-0 left-0 right-0 px-3 py-2.5 flex flex-col gap-1"
+                style={{ background: `linear-gradient(transparent, ${T.card} 45%)` }}>
+                {["국내 + 해외 주식 실시간 통합", "환율 자동 환산 · 수익률 추이 차트", "계좌별 비중 · MDD 분석"].map(pt => (
+                  <div key={pt} className="flex items-center gap-2 text-[11px]" style={{ color: T.muted }}>
+                    <span style={{ color: T.primary }}>·</span>{pt}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -541,26 +542,29 @@ function Slide4a({ T }: { T: Theme }) {
                 <div className="text-[10px] font-bold mt-0.5" style={{ color: T.primary }}>핵심 차별점</div>
               </div>
             </div>
-            <div className="flex-1 min-h-0 rounded-xl overflow-hidden mb-2" style={{ backgroundColor: T.cardAlt }}>
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden" style={{ backgroundColor: T.cardAlt }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/slides/img_portfolio_3.png" alt="매매등록" className="w-full h-full object-contain object-top" />
-            </div>
-            <div className="shrink-0 mb-1.5">
-              <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>매매 이유 태그</div>
-              <div className="flex flex-wrap gap-1">
-                {reasonTags.map(tag => (
-                  <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                    style={{ backgroundColor: T.primarySoft, color: T.primary }}>{tag}</span>
-                ))}
-              </div>
-            </div>
-            <div className="shrink-0">
-              <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>심리 상태</div>
-              <div className="flex gap-1.5">
-                {emotionTags.map(e => (
-                  <span key={e.label} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-                    style={{ backgroundColor: e.color + "18", color: e.color, border: `1px solid ${e.color}40` }}>{e.label}</span>
-                ))}
+              <div className="absolute bottom-0 left-0 right-0 px-3 py-2.5 flex flex-col gap-1.5"
+                style={{ background: `linear-gradient(transparent, ${T.card} 45%)` }}>
+                <div>
+                  <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>매매 이유 태그</div>
+                  <div className="flex flex-wrap gap-1">
+                    {reasonTags.map(tag => (
+                      <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                        style={{ backgroundColor: T.primarySoft, color: T.primary }}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>심리 상태</div>
+                  <div className="flex gap-1.5">
+                    {emotionTags.map(e => (
+                      <span key={e.label} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                        style={{ backgroundColor: e.color + "18", color: e.color, border: `1px solid ${e.color}40` }}>{e.label}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1098,8 +1102,13 @@ export default function SlidesPage() {
               style={{ backgroundColor: T.primary, color: "#fff" }}>
               다음 <Icon d={I.arrow_r} size={13} color="white" strokeWidth={2} />
             </button>
+            <button onClick={() => window.print()}
+              className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer flex items-center gap-1.5 transition-opacity ml-1"
+              style={{ backgroundColor: T.cardAlt, border: `1px solid ${T.border}`, color: T.muted }}>
+              PDF
+            </button>
             <button onClick={() => setDark(d => !d)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer ml-2 transition-colors"
+              className="w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-colors"
               style={{ backgroundColor: T.cardAlt, border: `1px solid ${T.border}` }}>
               <Icon d={dark ? I.sun : I.moon} size={15} color={T.muted} strokeWidth={1.8} />
             </button>
