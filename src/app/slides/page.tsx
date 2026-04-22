@@ -10,7 +10,7 @@ const LIGHT = {
   negative: "#F04452", negativeSoft: "#FFF0F1",
   warning: "#FF7B00", warningSoft: "#FFF5ED",
   blue: "#4285F4",
-  glow: "radial-gradient(circle, rgba(5,192,114,0.22) 0%, rgba(5,192,114,0.07) 45%, transparent 70%)",
+  glow: "radial-gradient(circle, rgba(5,192,114,0.22) 0%, rgba(5,192,114,0.07) 45%, rgba(245,247,245,0) 70%)",
 };
 const DARK = {
   bg: "#0D1210", card: "#1D2720", cardAlt: "#151C14", border: "#2A3828",
@@ -19,7 +19,7 @@ const DARK = {
   negative: "#F04452", negativeSoft: "rgba(240,68,82,0.12)",
   warning: "#FF7B00", warningSoft: "rgba(255,123,0,0.12)",
   blue: "#4285F4",
-  glow: "radial-gradient(circle, rgba(5,192,114,0.45) 0%, rgba(5,192,114,0.15) 45%, transparent 70%)",
+  glow: "radial-gradient(circle, rgba(5,192,114,0.45) 0%, rgba(5,192,114,0.15) 45%, rgba(13,18,16,0) 70%)",
 };
 type Theme = typeof LIGHT;
 
@@ -94,10 +94,10 @@ function Slide1({ T }: { T: Theme }) {
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center overflow-hidden"
       style={{ backgroundColor: T.bg }}>
       {/* 배경 dot grid */}
-      <div className="absolute inset-0 opacity-[0.06]"
+      <div className="print-hide absolute inset-0 opacity-[0.06]"
         style={{ backgroundImage: `radial-gradient(circle, ${T.primary} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
       {/* 그린 글로우 */}
-      <div className="absolute rounded-full pointer-events-none"
+      <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 800, height: 800, background: T.glow, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
       <div className="relative z-10 flex flex-col items-center">
@@ -179,7 +179,7 @@ function SlideBackground({ T }: { T: Theme }) {
             <div className="text-[10px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>THE PROBLEM</div>
             {problems.map((p, i) => (
               <div key={p.title} className={`flex gap-3 items-start p-4 rounded-xl fade-up-${i + 2}`}
-                style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderLeft: `3px solid ${p.color}` }}>
+                style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, borderLeft: `3px solid ${p.color}` }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                   style={{ backgroundColor: p.color + "18" }}>
                   <Icon d={p.icon} size={17} color={p.color} strokeWidth={1.8} />
@@ -326,7 +326,7 @@ function SlideCompetitor({ T }: { T: Theme }) {
           </p>
         </div>
 
-        <div className="fade-up-2">
+        <div className="fade-up-2 rounded-2xl overflow-hidden" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
           <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
             <thead>
               <tr>
@@ -517,7 +517,7 @@ function Slide4b({ T }: { T: Theme }) {
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden" style={{ padding: "0 64px" }}>
       {/* subtle AI 그린 글로우 */}
-      <div className="absolute rounded-full pointer-events-none"
+      <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 700, height: 700, background: "radial-gradient(circle, rgba(5,192,114,0.1) 0%, transparent 65%)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
       <div className="relative max-w-5xl mx-auto w-full">
@@ -896,10 +896,10 @@ function Slide8({ T }: { T: Theme }) {
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 overflow-hidden"
       style={{ backgroundColor: T.bg }}>
       {/* 배경 dot grid — 커버와 동일 */}
-      <div className="absolute inset-0 opacity-[0.06]"
+      <div className="print-hide absolute inset-0 opacity-[0.06]"
         style={{ backgroundImage: `radial-gradient(circle, ${T.primary} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
       {/* 그린 글로우 — 커버와 동일 강도 */}
-      <div className="absolute rounded-full pointer-events-none"
+      <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 800, height: 800, background: T.glow, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
       <div className="relative z-10 flex flex-col items-center w-full">
@@ -973,15 +973,18 @@ export default function SlidesPage() {
         .fade-up-6  { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 600ms both; }
 
         /* ── 인쇄 ── */
+        @page { size: landscape; margin: 0; }
         @media print {
-          @page { size: landscape; margin: 0; }
           html, body, * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .screen-only { display: none !important; }
           .print-container { display: block !important; }
+          .print-hide { display: none !important; }
           .print-page {
             position: relative;
             width: 100vw; height: 100vh;
             overflow: hidden;
+            clip-path: inset(0);
+            isolation: isolate;
             page-break-after: always;
             break-after: page;
           }
@@ -1033,7 +1036,18 @@ export default function SlidesPage() {
               style={{ backgroundColor: T.primary, color: "#fff" }}>
               다음 <Icon d={I.arrow_r} size={13} color="white" strokeWidth={2} />
             </button>
-            <button onClick={() => window.print()}
+            <button onClick={() => {
+                const prev = document.getElementById("__print_page__");
+                if (prev) prev.remove();
+                const s = document.createElement("style");
+                s.id = "__print_page__";
+                s.textContent = "@page { size: landscape !important; margin: 0 !important; }";
+                document.head.insertBefore(s, document.head.firstChild);
+                setTimeout(() => {
+                  window.print();
+                  setTimeout(() => s.remove(), 1000);
+                }, 80);
+              }}
               className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer flex items-center gap-1.5 transition-opacity ml-1"
               style={{ backgroundColor: T.cardAlt, border: `1px solid ${T.border}`, color: T.muted }}>
               PDF
