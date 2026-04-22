@@ -2207,6 +2207,11 @@ export default function AccountDetailPage() {
                       )}
                     </span>
                   </div>
+                  {!isKR && (
+                    <p className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)] text-right">
+                      환율 ₩{Math.round(usdRate).toLocaleString()} 기준
+                    </p>
+                  )}
                 </div>
               )}
             </div>
