@@ -133,6 +133,11 @@ export default function DashboardPage() {
   const [snapshots, setSnapshots] = useState<{ month: string; invested: number; evaluated: number }[]>([]);
 
   // ─── 성향 위젯 데이터 ──────────────────────────────────
+  const [assetGoal, setAssetGoal] = useState<number | null>(null);
+  const [goalEditMode, setGoalEditMode] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+  const [goalSaving, setGoalSaving] = useState(false);
+
   const [personalityType, setPersonalityType] = useState<string | null>(null);
   const [personalitySummary, setPersonalitySummary] = useState<string | null>(null);
   const [latestCoachingGoal, setLatestCoachingGoal] = useState<string | null>(null);
@@ -200,6 +205,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchData();
+    fetch("/api/user/me")
+      .then((r) => r.json())
+      .then((d) => { if (d.assetGoal != null) setAssetGoal(d.assetGoal); })
+      .catch(() => {});
   }, [fetchData]);
 
   // ─── 월별 스냅샷 기록 + 조회 ──────────────────────────────
@@ -344,6 +353,30 @@ export default function DashboardPage() {
       /* 실패 */
     } finally {
       setFxRefreshing(false);
+    }
+  }
+
+  // ─── 자산 목표 저장 ────────────────────────────────────
+
+  async function saveGoal() {
+    const parsed = Number(goalInput.replace(/,/g, ""));
+    if (!goalInput || isNaN(parsed) || parsed <= 0) {
+      setGoalEditMode(false);
+      setGoalInput("");
+      return;
+    }
+    setGoalSaving(true);
+    try {
+      const res = await fetch("/api/user/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assetGoal: parsed }),
+      });
+      if (res.ok) setAssetGoal(parsed);
+    } catch { /* 실패 무시 */ } finally {
+      setGoalSaving(false);
+      setGoalEditMode(false);
+      setGoalInput("");
     }
   }
 
@@ -716,8 +749,99 @@ export default function DashboardPage() {
           </span>
         </div>
 
+        {/* 자산 목표 프로그레스 바 */}
+        <div className="mt-5 mb-1">
+          {goalEditMode ? (
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  value={goalInput}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, "");
+                    setGoalInput(raw ? Number(raw).toLocaleString() : "");
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") saveGoal(); if (e.key === "Escape") { setGoalEditMode(false); setGoalInput(""); } }}
+                  placeholder="목표 금액 입력 (원)"
+                  className="w-full bg-white/15 text-white placeholder-white/40 text-sm rounded-xl px-3 py-2 outline-none border border-white/30 focus:border-white/60"
+                />
+              </div>
+              <button
+                onClick={saveGoal}
+                disabled={goalSaving}
+                className="text-xs font-bold px-3 py-2 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                저장
+              </button>
+              <button
+                onClick={() => { setGoalEditMode(false); setGoalInput(""); }}
+                className="text-xs px-3 py-2 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors cursor-pointer"
+              >
+                취소
+              </button>
+            </div>
+          ) : assetGoal ? (
+            (() => {
+              const pct = Math.min((summary.totalAsset / assetGoal) * 100, 100);
+              const remaining = assetGoal - summary.totalAsset;
+              const reached = remaining <= 0;
+              return (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      자산 목표
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-white">
+                        {reached ? "달성!" : `${formatCompact(remaining, "KRW")} 남음`}
+                      </span>
+                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        / {formatCompact(assetGoal, "KRW")}
+                      </span>
+                      <button
+                        onClick={() => { setGoalInput(assetGoal.toLocaleString()); setGoalEditMode(true); }}
+                        className="p-1 rounded bg-white/15 text-white/60 hover:bg-white/25 transition-colors cursor-pointer"
+                        title="목표 수정"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${pct}%`,
+                        background: reached ? "#FFD700" : "rgba(255,255,255,0.85)",
+                      }}
+                    />
+                  </div>
+                  <div className="text-[12px] font-bold mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    {pct.toFixed(1)}% 달성
+                  </div>
+                </div>
+              );
+            })()
+          ) : (
+            <button
+              onClick={() => setGoalEditMode(true)}
+              className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" />
+              </svg>
+              자산 목표 설정
+            </button>
+          )}
+        </div>
+
         {/* 미니 카드 4개 — 모바일 2x2 / 데스크톱 4컬럼 */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
           {[
             {
               label: "국내 평가금",

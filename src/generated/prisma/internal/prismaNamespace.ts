@@ -1734,6 +1734,7 @@ export const UserScalarFieldEnum = {
   password: 'password',
   provider: 'provider',
   onboardingDone: 'onboardingDone',
+  assetGoal: 'assetGoal',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   emailVerified: 'emailVerified',
@@ -2012,6 +2013,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt'
+ */
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt[]'
+ */
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 

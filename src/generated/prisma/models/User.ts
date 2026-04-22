@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  assetGoal: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  assetGoal: bigint | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type UserMinAggregateOutputType = {
   password: string | null
   provider: string | null
   onboardingDone: boolean | null
+  assetGoal: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
   emailVerified: Date | null
@@ -44,6 +55,7 @@ export type UserMaxAggregateOutputType = {
   password: string | null
   provider: string | null
   onboardingDone: boolean | null
+  assetGoal: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
   emailVerified: Date | null
@@ -57,6 +69,7 @@ export type UserCountAggregateOutputType = {
   password: number
   provider: number
   onboardingDone: number
+  assetGoal: number
   createdAt: number
   updatedAt: number
   emailVerified: number
@@ -65,6 +78,14 @@ export type UserCountAggregateOutputType = {
 }
 
 
+export type UserAvgAggregateInputType = {
+  assetGoal?: true
+}
+
+export type UserSumAggregateInputType = {
+  assetGoal?: true
+}
+
 export type UserMinAggregateInputType = {
   id?: true
   email?: true
@@ -72,6 +93,7 @@ export type UserMinAggregateInputType = {
   password?: true
   provider?: true
   onboardingDone?: true
+  assetGoal?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -85,6 +107,7 @@ export type UserMaxAggregateInputType = {
   password?: true
   provider?: true
   onboardingDone?: true
+  assetGoal?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -98,6 +121,7 @@ export type UserCountAggregateInputType = {
   password?: true
   provider?: true
   onboardingDone?: true
+  assetGoal?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -143,6 +167,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -173,6 +209,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -184,11 +222,14 @@ export type UserGroupByOutputType = {
   password: string | null
   provider: string | null
   onboardingDone: boolean
+  assetGoal: bigint | null
   createdAt: Date
   updatedAt: Date
   emailVerified: Date | null
   image: string | null
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -218,6 +259,7 @@ export type UserWhereInput = {
   password?: Prisma.StringNullableFilter<"User"> | string | null
   provider?: Prisma.StringNullableFilter<"User"> | string | null
   onboardingDone?: Prisma.BoolFilter<"User"> | boolean
+  assetGoal?: Prisma.BigIntNullableFilter<"User"> | bigint | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   emailVerified?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -236,6 +278,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   provider?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingDone?: Prisma.SortOrder
+  assetGoal?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -257,6 +300,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringNullableFilter<"User"> | string | null
   provider?: Prisma.StringNullableFilter<"User"> | string | null
   onboardingDone?: Prisma.BoolFilter<"User"> | boolean
+  assetGoal?: Prisma.BigIntNullableFilter<"User"> | bigint | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   emailVerified?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -275,13 +319,16 @@ export type UserOrderByWithAggregationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   provider?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingDone?: Prisma.SortOrder
+  assetGoal?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -294,6 +341,7 @@ export type UserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   provider?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   onboardingDone?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  assetGoal?: Prisma.BigIntNullableWithAggregatesFilter<"User"> | bigint | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   emailVerified?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -307,6 +355,7 @@ export type UserCreateInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -325,6 +374,7 @@ export type UserUncheckedCreateInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -343,6 +393,7 @@ export type UserUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -361,6 +412,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -379,6 +431,7 @@ export type UserCreateManyInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -392,6 +445,7 @@ export type UserUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -405,6 +459,7 @@ export type UserUncheckedUpdateManyInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -418,10 +473,15 @@ export type UserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   onboardingDone?: Prisma.SortOrder
+  assetGoal?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  assetGoal?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -431,6 +491,7 @@ export type UserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   onboardingDone?: Prisma.SortOrder
+  assetGoal?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -444,10 +505,15 @@ export type UserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   provider?: Prisma.SortOrder
   onboardingDone?: Prisma.SortOrder
+  assetGoal?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  assetGoal?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -461,6 +527,14 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type NullableBigIntFieldUpdateOperationsInput = {
+  set?: bigint | number | null
+  increment?: bigint | number
+  decrement?: bigint | number
+  multiply?: bigint | number
+  divide?: bigint | number
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -544,6 +618,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -561,6 +636,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -594,6 +670,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -611,6 +688,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -628,6 +706,7 @@ export type UserCreateWithoutSessionsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -645,6 +724,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -678,6 +758,7 @@ export type UserUpdateWithoutSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -695,6 +776,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -712,6 +794,7 @@ export type UserCreateWithoutInvestAccountsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -729,6 +812,7 @@ export type UserUncheckedCreateWithoutInvestAccountsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -762,6 +846,7 @@ export type UserUpdateWithoutInvestAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -779,6 +864,7 @@ export type UserUncheckedUpdateWithoutInvestAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -796,6 +882,7 @@ export type UserCreateWithoutAnalysisLogsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -813,6 +900,7 @@ export type UserUncheckedCreateWithoutAnalysisLogsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -846,6 +934,7 @@ export type UserUpdateWithoutAnalysisLogsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -863,6 +952,7 @@ export type UserUncheckedUpdateWithoutAnalysisLogsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -880,6 +970,7 @@ export type UserCreateWithoutAssetSnapshotsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -897,6 +988,7 @@ export type UserUncheckedCreateWithoutAssetSnapshotsInput = {
   password?: string | null
   provider?: string | null
   onboardingDone?: boolean
+  assetGoal?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: Date | string | null
@@ -930,6 +1022,7 @@ export type UserUpdateWithoutAssetSnapshotsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -947,6 +1040,7 @@ export type UserUncheckedUpdateWithoutAssetSnapshotsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1031,6 +1125,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   provider?: boolean
   onboardingDone?: boolean
+  assetGoal?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
@@ -1050,6 +1145,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   provider?: boolean
   onboardingDone?: boolean
+  assetGoal?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
@@ -1063,6 +1159,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   provider?: boolean
   onboardingDone?: boolean
+  assetGoal?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
@@ -1076,13 +1173,14 @@ export type UserSelectScalar = {
   password?: boolean
   provider?: boolean
   onboardingDone?: boolean
+  assetGoal?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
   image?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "provider" | "onboardingDone" | "createdAt" | "updatedAt" | "emailVerified" | "image", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "provider" | "onboardingDone" | "assetGoal" | "createdAt" | "updatedAt" | "emailVerified" | "image", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   investAccounts?: boolean | Prisma.User$investAccountsArgs<ExtArgs>
@@ -1110,6 +1208,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     password: string | null
     provider: string | null
     onboardingDone: boolean
+    assetGoal: bigint | null
     createdAt: Date
     updatedAt: Date
     emailVerified: Date | null
@@ -1548,6 +1647,7 @@ export interface UserFieldRefs {
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly provider: Prisma.FieldRef<"User", 'String'>
   readonly onboardingDone: Prisma.FieldRef<"User", 'Boolean'>
+  readonly assetGoal: Prisma.FieldRef<"User", 'BigInt'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly emailVerified: Prisma.FieldRef<"User", 'DateTime'>

@@ -10,7 +10,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { onboardingDone: true, name: true, email: true, password: true },
+    select: { onboardingDone: true, name: true, email: true, password: true, assetGoal: true },
   });
 
   return Response.json({
@@ -18,6 +18,7 @@ export async function GET() {
     name: user?.name ?? "",
     email: user?.email ?? "",
     hasPassword: !!user?.password,
+    assetGoal: user?.assetGoal ? Number(user.assetGoal) : null,
   });
 }
 
@@ -27,7 +28,7 @@ export async function PATCH(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { name, currentPassword, newPassword } = await req.json();
+  const { name, currentPassword, newPassword, assetGoal } = await req.json();
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -49,9 +50,10 @@ export async function PATCH(req: Request) {
     // 소셜 계정(password 없음)은 현재 비밀번호 없이 새로 설정 가능
   }
 
-  const updateData: Record<string, string> = {};
+  const updateData: Record<string, unknown> = {};
   if (name !== undefined) updateData.name = name;
   if (newPassword) updateData.password = await bcrypt.hash(newPassword, 12);
+  if (assetGoal !== undefined) updateData.assetGoal = assetGoal === null ? null : BigInt(assetGoal);
 
   if (Object.keys(updateData).length === 0) {
     return Response.json({ error: "변경할 내용이 없습니다." }, { status: 400 });

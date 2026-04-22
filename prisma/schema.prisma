@@ -23,6 +23,7 @@ model User {
   password       String?
   provider       String?
   onboardingDone Boolean         @default(false)
+  assetGoal      BigInt?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   emailVerified  DateTime?
