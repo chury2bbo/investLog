@@ -194,6 +194,17 @@ export default function AccountDetailPage() {
     }
   }, [accountId]);
 
+  // 물타기 계산기
+  const [avgDownHolding, setAvgDownHolding] = useState<Holding | null>(null);
+  const [avgDownPrice, setAvgDownPrice] = useState("");
+  const [avgDownQty, setAvgDownQty] = useState("");
+  const avgDownQtyRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!avgDownHolding) return;
+    const t = setTimeout(() => avgDownQtyRef.current?.focus(), 200);
+    return () => clearTimeout(t);
+  }, [avgDownHolding]);
+
   // 섹터 편집 모달
   const [sectorEditModal, setSectorEditModal] = useState(false);
   const [sectorEditHolding, setSectorEditHolding] = useState<Holding | null>(null);
@@ -1203,6 +1214,14 @@ export default function AccountDetailPage() {
                     </button>
                     <button
                       type="button"
+                      onClick={(e) => { e.stopPropagation(); setAvgDownHolding(h); const cp = quotes[h.ticker]?.price; setAvgDownPrice(cp ? String(h.country === "KR" ? Math.floor(cp) : cp) : ""); setAvgDownQty(""); }}
+                      title="물타기 계산기"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
+                    </button>
+                    <button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); setHoldingDeleteConfirm(h); }}
                       title="삭제"
                       className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors"
@@ -2105,6 +2124,94 @@ export default function AccountDetailPage() {
             {sectorEditSubmitting ? "저장 중..." : "저장"}
           </Button>
         </div>
+      </BottomSheet>
+
+      {/* ─── 물타기 계산기 바텀시트 ──────────────────────── */}
+      <BottomSheet
+        open={avgDownHolding !== null}
+        onClose={() => setAvgDownHolding(null)}
+        title={`물타기 계산기 — ${avgDownHolding?.name ?? ""}`}
+      >
+        {avgDownHolding && (() => {
+          const isKR = avgDownHolding.country === "KR";
+          const fmt = (v: number) => isKR
+            ? `₩${Math.floor(Math.abs(v)).toLocaleString()}`
+            : `$${Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          const addPrice = parseFloat(avgDownPrice.replace(/,/g, "")) || 0;
+          const addQty = parseInt(avgDownQty.replace(/,/g, "")) || 0;
+          const hasInput = addPrice > 0 && addQty > 0;
+          const newTotalQty = avgDownHolding.quantity + addQty;
+          const newAvgPrice = hasInput
+            ? (avgDownHolding.avgPrice * avgDownHolding.quantity + addPrice * addQty) / newTotalQty
+            : 0;
+          const requiredCapital = addPrice * addQty;
+
+          return (
+            <div className="space-y-4">
+              {/* 현재 상태 */}
+              <div className="flex justify-between text-xs p-3 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                <div>
+                  <div className="text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-0.5">현재 평단가</div>
+                  <div className="font-bold text-[var(--color-text)]">{fmt(avgDownHolding.avgPrice)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-0.5">보유 수량</div>
+                  <div className="font-bold text-[var(--color-text)]">{avgDownHolding.quantity.toLocaleString()}주</div>
+                </div>
+              </div>
+
+              {/* 입력 */}
+              <Input
+                label="추가 매수 단가"
+                inputMode={isKR ? "numeric" : "decimal"}
+                value={fmtNum(avgDownPrice)}
+                onChange={(e) => setAvgDownPrice(stripNum(e.target.value, !isKR))}
+                placeholder={isKR ? "원" : "USD"}
+              />
+              <Input
+                ref={avgDownQtyRef}
+                label="추가 매수 수량"
+                inputMode="numeric"
+                value={fmtNum(avgDownQty)}
+                onChange={(e) => setAvgDownQty(stripNum(e.target.value))}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                    e.preventDefault();
+                    const cur = parseInt(avgDownQty.replace(/,/g, "")) || 0;
+                    const next = Math.max(1, cur + (e.key === "ArrowUp" ? 1 : -1));
+                    setAvgDownQty(String(next));
+                  }
+                }}
+                placeholder="주"
+              />
+
+              {/* 결과 */}
+              {hasInput && (
+                <div className="p-4 rounded-xl border border-[var(--color-primary)] bg-[rgba(5,192,114,0.05)] space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)]">매수 후 평단가</span>
+                    <span className="text-base font-bold text-[var(--color-primary)]">{fmt(newAvgPrice)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)]">매수 후 수량</span>
+                    <span className="text-sm font-semibold text-[var(--color-text)]">{newTotalQty.toLocaleString()}주</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)]">필요 자금</span>
+                    <span className="text-sm font-semibold text-[var(--color-text)]">
+                      {fmt(requiredCapital)}
+                      {!isKR && (
+                        <span className="ml-1 text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                          (₩{Math.round(requiredCapital * usdRate).toLocaleString()})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </BottomSheet>
 
       {/* 모바일 FAB — 종목 등록 */}
