@@ -278,55 +278,170 @@ function SlideBackground({ T }: { T: Theme }) {
 // ─── S2: 철학·개발목표 ───────────────────────────────────────────────────────
 function Slide3({ T }: { T: Theme }) {
   const scope = [
-    { icon: I.chart,      label: "통합 포트폴리오" },
-    { icon: I.edit,       label: "매매일지" },
-    { icon: I.brain,      label: "AI 성향 진단" },
-    { icon: I.search,     label: "AI 종목 분석" },
-    { icon: I.cpu,        label: "AI 코칭 리포트" },
-    { icon: I.camera,     label: "스크린샷 등록" },
+    { icon: I.chart,  label: "통합 포트폴리오" },
+    { icon: I.edit,   label: "매매일지" },
+    { icon: I.brain,  label: "AI 성향 진단" },
+    { icon: I.search, label: "AI 종목 분석" },
+    { icon: I.cpu,    label: "AI 코칭 리포트" },
+    { icon: I.camera, label: "스크린샷 등록" },
   ];
-
   return (
-    <div className="flex flex-col justify-center h-full px-20 max-w-5xl mx-auto w-full">
-      <SlideHeader num="02" title="개발 목표 & 구현 범위" T={T} />
-      <div className="grid grid-cols-2 gap-10 items-center">
-
-        <div className="fade-up-2">
-          <div className="text-[11px] font-bold mb-5 tracking-widest" style={{ color: T.dim }}>CORE PHILOSOPHY</div>
-          <blockquote className="text-5xl font-extrabold leading-tight mb-8" style={{ color: T.text }}>
-            "수기 입력의<br />마찰 자체가<br />
-            <span style={{ color: T.primary }}>제품 가치"</span>
-          </blockquote>
-          <div className="p-4 rounded-2xl" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <p className="text-lg leading-relaxed" style={{ color: T.muted }}>
-              매매 이유 태그를 고르는 순간,<br />
-              <span className="font-bold" style={{ color: T.text }}>"이게 FOMO인가, 진짜 확신인가"</span>를<br />
-              한 번 더 생각하게 됩니다.
-            </p>
-          </div>
-        </div>
-
-        <div className="fade-up-3">
-          <div className="text-[11px] font-bold mb-5 tracking-widest" style={{ color: T.dim }}>IMPLEMENTATION SCOPE</div>
-          <div className="grid grid-cols-2 gap-2.5 mb-4">
-            {scope.map(s => (
-              <div key={s.label} className="flex items-center gap-3 p-3.5 rounded-xl"
-                style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: T.primarySoft }}>
-                  <Icon d={s.icon} size={14} color={T.primary} strokeWidth={2} />
-                </div>
-                <span className="text-base font-medium" style={{ color: T.text }}>{s.label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="p-4 rounded-2xl" style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}33` }}>
-            <div className="flex items-center gap-2">
-              <Icon d={I.trending} size={16} color={T.primary} strokeWidth={2} />
-              <span className="text-base font-bold" style={{ color: T.primary }}>
-                기록 → 패턴 인식 → 투자 개선 사이클
-              </span>
+    <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-20">
+      <div className="max-w-5xl mx-auto w-full">
+        <SlideHeader num="02" title="개발 목표 & 구현 범위" T={T} />
+        <div className="grid grid-cols-2 gap-10 items-start">
+          <div className="fade-up-2">
+            <div className="text-[11px] font-bold mb-5 tracking-widest" style={{ color: T.dim }}>CORE PHILOSOPHY</div>
+            <blockquote className="text-5xl font-extrabold leading-tight mb-6" style={{ color: T.text }}>
+              "수기 입력의<br />마찰 자체가<br />
+              <span style={{ color: T.primary }}>제품 가치"</span>
+            </blockquote>
+            <div className="p-4 rounded-2xl" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              <p className="text-base leading-relaxed" style={{ color: T.muted }}>
+                매매 이유 태그를 고르는 순간,<br />
+                <span className="font-bold" style={{ color: T.text }}>"이게 FOMO인가, 진짜 확신인가"</span>를<br />
+                한 번 더 생각하게 됩니다.
+              </p>
             </div>
           </div>
+          <div className="fade-up-3">
+            <div className="text-[11px] font-bold mb-4 tracking-widest" style={{ color: T.dim }}>IMPLEMENTATION SCOPE</div>
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              {scope.map(s => (
+                <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl"
+                  style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: T.primarySoft }}>
+                    <Icon d={s.icon} size={14} color={T.primary} strokeWidth={2} />
+                  </div>
+                  <span className="text-sm font-medium" style={{ color: T.text }}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 rounded-2xl" style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}33` }}>
+              <div className="text-[10px] font-bold mb-2 tracking-widest" style={{ color: T.dim }}>EXPECTED EFFECT</div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { icon: I.trending, label: "패턴 파악",     desc: "매매 이유 태그로\n나의 투자 습관 시각화" },
+                  { icon: I.repeat,   label: "반복 손실 방지", desc: "AI 코칭으로\n실수 패턴 인식 · 개선" },
+                  { icon: I.brain,    label: "투자 심리 개선", desc: "심리 기록 → 감정\n주도 매매 줄이기" },
+                ].map(item => (
+                  <div key={item.label} className="flex flex-col items-center text-center gap-1 p-2.5 rounded-xl"
+                    style={{ backgroundColor: T.card, border: `1px solid ${T.primary}22` }}>
+                    <Icon d={item.icon} size={14} color={T.primary} strokeWidth={2} />
+                    <div className="text-xs font-bold leading-tight" style={{ color: T.primary }}>{item.label}</div>
+                    <div className="text-[10px] leading-tight whitespace-pre-line" style={{ color: T.muted }}>{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── S2-2: 경쟁사 비교 ───────────────────────────────────────────────────────
+function SlideCompetitor({ T }: { T: Theme }) {
+  type Mark = "check" | "x" | "partial";
+  const rows: { section?: string; label?: string; cols?: Mark[] }[] = [
+    { section: "포트폴리오" },
+    { label: "국내 + 해외 통합 관리",    cols: ["check", "check", "x",       "check"] },
+    { label: "실시간 환율 원화 환산",    cols: ["check", "check", "partial", "check"] },
+    { label: "스크린샷 종목 일괄 등록",  cols: ["x",     "x",     "x",       "check"] },
+    { section: "매매 기록" },
+    { label: "매매일지 (수기 기록)",     cols: ["check", "x",     "x",       "check"] },
+    { label: "매매 이유 태그 기록",      cols: ["x",     "x",     "x",       "check"] },
+    { label: "매매 심리 상태 기록",      cols: ["partial","x",    "x",       "check"] },
+    { section: "AI 분석" },
+    { label: "AI 투자성향 진단",         cols: ["x",     "x",     "x",       "check"] },
+    { label: "AI 패턴 코칭 리포트",      cols: ["x",     "x",     "x",       "check"] },
+    { label: "AI 종목 분석 (SWOT·적정가)", cols: ["x",   "partial","x",       "check"] },
+    { label: "벤치마크 수익률 비교",     cols: ["partial","x",    "partial", "check"] },
+  ];
+
+  const Mark = ({ m }: { m: Mark }) => {
+    if (m === "check") return (
+      <div className="inline-flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: `${T.primary}20`, color: T.primary }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+    );
+    if (m === "x") return (
+      <div className="inline-flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: `${T.negative}18`, color: T.negative }}>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </div>
+    );
+    return (
+      <div className="inline-flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: `${T.warning}18`, color: T.warning }}>
+        <span className="text-xs font-bold">△</span>
+      </div>
+    );
+  };
+
+  const usColStyle = { background: `${T.primary}08`, borderLeft: `1px solid ${T.primary}20`, borderRight: `1px solid ${T.primary}20` };
+
+  return (
+    <div className="absolute inset-0 flex flex-col justify-center overflow-hidden" style={{ padding: "0 72px" }}>
+      <div className="max-w-5xl mx-auto w-full">
+        <SlideHeader num="02-2" title="기존 앱이 못한 것, 버텨일지가 합니다" T={T} />
+
+        <div className="fade-up-2">
+          <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
+            <thead>
+              <tr>
+                <th className="text-left py-3 px-3 text-[11px] font-bold" style={{ color: T.dim, width: 220 }}></th>
+                {["더리치", "도미노", "증권사 앱"].map(name => (
+                  <th key={name} className="py-3 px-3 text-center text-[12px] font-bold" style={{ color: T.muted }}>{name}</th>
+                ))}
+                <th className="py-3 px-3 text-center text-[12px] font-bold rounded-t-xl" style={{ color: T.primary, ...usColStyle }}>
+                  <span className="flex items-center justify-center gap-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icon.png" alt="" style={{ width: 16, height: 16, borderRadius: 4 }} />
+                    버텨일지
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => row.section ? (
+                <tr key={i}>
+                  <td colSpan={4} className="pt-3 pb-1 px-3 text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>{row.section.toUpperCase()}</td>
+                  <td style={usColStyle}></td>
+                </tr>
+              ) : (
+                <tr key={i} style={{ borderBottom: `1px solid ${T.border}60` }}>
+                  <td className="py-2.5 px-3 text-[13px] font-medium" style={{ color: T.muted }}>{row.label}</td>
+                  {row.cols!.slice(0, 3).map((m, j) => (
+                    <td key={j} className="py-2.5 px-3 text-center"><Mark m={m} /></td>
+                  ))}
+                  <td className="py-2.5 px-3 text-center" style={usColStyle}><Mark m={row.cols![3]} /></td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan={4}></td>
+                <td className="rounded-b-xl" style={{ ...usColStyle, borderBottom: `1px solid ${T.primary}20`, height: 8 }}></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mt-5 fade-up-3">
+          {[
+            { icon: I.brain,  title: "왜 기록하는가",    desc: "다른 앱은 결과만 보여줌\n버텨일지는 이유와 심리까지 기록해 패턴을 만듦" },
+            { icon: I.cpu,    title: "AI의 깊이가 다름",  desc: "단순 뉴스 요약이 아닌\n누적 행동 데이터 기반 성향 진단 + 코칭" },
+            { icon: I.camera, title: "온보딩 마찰 제로",  desc: "증권사 앱 캡처 한 장으로\n보유종목 전체 자동 등록 (Claude Vision)" },
+          ].map(p => (
+            <div key={p.title} className="flex items-start gap-3 p-4 rounded-2xl"
+              style={{ backgroundColor: `${T.primary}08`, border: `1px solid ${T.primary}18` }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${T.primary}18` }}>
+                <Icon d={p.icon} size={16} color={T.primary} strokeWidth={2} />
+              </div>
+              <div>
+                <div className="text-[12px] font-bold mb-1" style={{ color: T.primary }}>{p.title}</div>
+                <div className="text-[11px] whitespace-pre-line leading-relaxed" style={{ color: T.muted }}>{p.desc}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -377,60 +492,82 @@ function OcrVideo({ T }: { T: Theme }) {
 }
 
 function Slide4a({ T }: { T: Theme }) {
+  const reasonTags = ["FOMO", "저평가", "실적발표", "기술적분석", "지인추천"];
+  const emotionTags = [
+    { label: "확신", color: T.primary },
+    { label: "불안", color: T.warning },
+    { label: "FOMO", color: T.negative },
+  ];
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ padding: "28px 64px" }}>
       <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0">
-        <div className="flex items-center gap-3 mb-4 fade-up-1">
-          <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: T.primarySoft, color: T.primary }}>03</span>
+        <div className="flex items-center gap-3 mb-3 shrink-0 fade-up-1">
+          <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: T.primarySoft, color: T.primary }}>05</span>
           <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: T.text }}>핵심 기능</h2>
         </div>
         <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
 
           {/* 통합 포트폴리오 */}
-          <div className="p-4 rounded-2xl flex flex-col fade-up-2"
+          <div className="p-4 rounded-2xl flex flex-col fade-up-2 overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="flex items-center gap-3 mb-2 shrink-0">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: T.primarySoft }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={I.chart} size={18} color={T.primary} strokeWidth={2} />
               </div>
               <div className="text-lg font-bold" style={{ color: T.text }}>통합 포트폴리오</div>
             </div>
-            <div className="flex flex-col gap-2 flex-1 min-h-0">
-              <div className="flex-[2] min-h-0 rounded-xl overflow-hidden" style={{ backgroundColor: T.cardAlt }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/slides/img_portfolio_1.png" alt="대시보드"
-                  className="w-full h-full object-contain object-top" />
-              </div>
-              <div className="flex-[1] min-h-0 rounded-xl overflow-hidden" style={{ backgroundColor: T.cardAlt }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/slides/img_portfolio_2.png" alt="자산추이"
-                  className="w-full h-full object-contain object-center" />
-              </div>
+            <div className="flex-1 min-h-0 rounded-xl overflow-hidden mb-2" style={{ backgroundColor: T.cardAlt }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/slides/img_portfolio_1.png" alt="대시보드" className="w-full h-full object-contain object-top" />
+            </div>
+            <div className="flex flex-col gap-1.5 shrink-0">
+              {["국내 + 해외 주식 실시간 통합", "환율 자동 환산 · 수익률 추이 차트", "계좌별 비중 · MDD 분석"].map(pt => (
+                <div key={pt} className="flex items-center gap-2 text-[11px]" style={{ color: T.muted }}>
+                  <span style={{ color: T.primary }}>·</span>{pt}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* 매매일지 */}
-          <div className="p-4 rounded-2xl flex flex-col fade-up-3"
-            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+          {/* 매매일지 — 핵심 차별점 */}
+          <div className="p-4 rounded-2xl flex flex-col fade-up-3 overflow-hidden"
+            style={{ backgroundColor: T.card, border: `2px solid ${T.primary}55`, boxShadow: `0 0 24px ${T.primary}18` }}>
             <div className="flex items-center gap-3 mb-2 shrink-0">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: T.primarySoft }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={I.edit} size={18} color={T.primary} strokeWidth={2} />
               </div>
-              <div className="text-lg font-bold" style={{ color: T.text }}>매매일지</div>
+              <div>
+                <div className="text-lg font-bold leading-none" style={{ color: T.text }}>매매일지</div>
+                <div className="text-[10px] font-bold mt-0.5" style={{ color: T.primary }}>핵심 차별점</div>
+              </div>
             </div>
-            <div className="flex-1 min-h-0 rounded-xl overflow-hidden"
-              style={{ backgroundColor: T.cardAlt }}>
+            <div className="flex-1 min-h-0 rounded-xl overflow-hidden mb-2" style={{ backgroundColor: T.cardAlt }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/slides/img_portfolio_3.png" alt="매매등록"
-                className="w-full h-full object-contain object-top" />
+              <img src="/slides/img_portfolio_3.png" alt="매매등록" className="w-full h-full object-contain object-top" />
+            </div>
+            <div className="shrink-0 mb-1.5">
+              <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>매매 이유 태그</div>
+              <div className="flex flex-wrap gap-1">
+                {reasonTags.map(tag => (
+                  <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    style={{ backgroundColor: T.primarySoft, color: T.primary }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div className="shrink-0">
+              <div className="text-[10px] font-bold mb-1" style={{ color: T.dim }}>심리 상태</div>
+              <div className="flex gap-1.5">
+                {emotionTags.map(e => (
+                  <span key={e.label} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                    style={{ backgroundColor: e.color + "18", color: e.color, border: `1px solid ${e.color}40` }}>{e.label}</span>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* 스크린샷 등록 */}
-          <div className="p-4 rounded-2xl flex flex-col fade-up-4"
-            style={{ backgroundColor: T.card, border: `2px solid ${T.primary}66`, boxShadow: `0 0 32px ${T.primary}22` }}>
+          <div className="p-4 rounded-2xl flex flex-col fade-up-4 overflow-hidden"
+            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="flex items-center gap-3 mb-2 shrink-0">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
@@ -544,129 +681,105 @@ function Slide4b({ T }: { T: Theme }) {
 
 // ─── S4: 기술 스택 ───────────────────────────────────────────────────────────
 function Slide5({ T }: { T: Theme }) {
-  const rows = [
-    { label: "FRONTEND", items: [          // CLIENT 레이어 → 파랑
-      { label: "Next.js 16",  sub: "App Router",  color: T.blue },
-      { label: "TypeScript",  sub: "Strict Mode",  color: T.blue },
-      { label: "Tailwind v4", sub: "CSS",           color: T.blue },
-      { label: "Recharts",    sub: "차트",           color: T.blue },
-      { label: "next-themes", sub: "다크모드",       color: T.blue },
-    ]},
-    { label: "BACKEND & DB", items: [     // SERVER→그린 / DATA→주황
-      { label: "NextAuth v5",    sub: "인증",         color: T.primary },
-      { label: "KIS Open API",   sub: "국내 주가",    color: T.primary },
-      { label: "yahoo-finance2", sub: "해외 주가",    color: T.primary },
-      { label: "Prisma 7",       sub: "ORM",          color: T.warning },
-      { label: "PostgreSQL",     sub: "Supabase",      color: T.warning },
-    ]},
-    { label: "AI & TOOLS", items: [       // NEXT.JS SERVER 레이어 → 그린
-      { label: "Claude API",    sub: "claude-sonnet-4-6", color: T.primary },
-      { label: "Claude Vision", sub: "스크린샷 OCR",       color: T.primary },
-      { label: "Claude Code",   sub: "AI 개발 도구",       color: T.primary },
-      { label: "Google OAuth",  sub: "소셜 로그인",        color: T.primary },
-      { label: "Kakao OAuth",   sub: "소셜 로그인",        color: T.primary },
-    ]},
+  const techSections = [
+    {
+      label: "Frontend",
+      items: [
+        { name: "Next.js 16",  desc: "App Router · TypeScript strict" },
+        { name: "Tailwind v4", desc: "CSS · 다크모드" },
+        { name: "Recharts 3",  desc: "차트 · 도넛 · MDD" },
+      ],
+    },
+    {
+      label: "Backend · DB",
+      items: [
+        { name: "NextAuth v5", desc: "JWT · Google · Kakao" },
+        { name: "Prisma 7",    desc: "ORM · PostgreSQL" },
+        { name: "Supabase",    desc: "클라우드 DB · 2인 공유" },
+      ],
+    },
+    {
+      label: "시세 · 데이터",
+      items: [
+        { name: "KIS Open API",    desc: "국내 실시간 시세 · 섹터" },
+        { name: "yahoo-finance2",  desc: "해외 주가 · API키 불필요" },
+        { name: "R-ONE API",       desc: "서울아파트 벤치마크" },
+      ],
+    },
+  ];
+  const aiPoints = [
+    { tag: "Vision",  tagColor: T.blue,    tagBg: `${T.blue}18`,
+      title: "스크린샷 종목 등록",
+      desc: "증권사 앱 캡처 → 종목명·평단가·수량 자동 추출\n규칙 기반 OCR 불가 → LLM이 유일한 해법" },
+    { tag: "분석",    tagColor: "#ffb832", tagBg: "rgba(255,184,50,0.12)",
+      title: "AI 종목 분석 리포트",
+      desc: "SWOT · 적정 매수/매도가 · 호재/악재\n당일 캐시 → 동일 종목 1회 호출" },
+    { tag: "성향",    tagColor: "#c87aff", tagBg: "rgba(180,100,255,0.12)",
+      title: "투자성향 진단 + 코칭",
+      desc: "최근 6개월 매매 패턴 → 유형 분류 + 강점/약점\n누적 행동 데이터 기반 — 단순 뉴스 요약과 다름" },
+    { tag: "요약",    tagColor: T.primary, tagBg: `${T.primary}18`,
+      title: "기업 소개 한국어 요약",
+      desc: "티커당 영구 캐시 → API 비용 최소화\n초보 투자자 눈높이 2~3줄 요약" },
+  ];
+  const stats = [
+    { num: "6",   label: "Claude 호출 포인트", sub: "Vision · 분석 · 성향 · 코칭 · 요약 · 코드개발" },
+    { num: "$0",  label: "DB 비용",            sub: "Supabase 무료 티어로 운영" },
+    { num: "~$9", label: "Claude API 월 예상비용", sub: "캐시 전략으로 실사용 최소화" },
   ];
 
   return (
-    <div className="flex flex-col justify-center h-full px-16 max-w-5xl mx-auto w-full gap-4">
-      <SlideHeader num="04" title="기술 스택 & 아키텍처" T={T} />
+    <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-14">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+        <SlideHeader num="03" title="기술 스택 & AI 활용" T={T} />
 
-      {/* 기술 스택 — 풀폭 */}
-      <div className="space-y-3 fade-up-2">
-        {rows.map(row => (
-          <div key={row.label}>
-            <div className="text-[10px] font-bold mb-2 tracking-widest" style={{ color: T.dim }}>{row.label}</div>
-            <div className="grid grid-cols-5 gap-2">
-              {row.items.map(item => <TechBadge key={item.label} {...item} T={T} />)}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 아키텍처 — 하단 풀폭 */}
-      <div className="p-5 rounded-2xl fade-up-4" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-        <div className="text-[10px] font-bold mb-4 tracking-widest" style={{ color: T.dim }}>ARCHITECTURE</div>
-
-        {/* 3레이어 — CLIENT / NEXT.JS SERVER / DATA LAYER */}
-        <div className="flex items-start gap-2 mb-4">
-
-          {/* CLIENT */}
-          <div className="flex flex-col items-center gap-1.5 flex-1">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-md"
-              style={{ backgroundColor: T.blue + "22", color: T.blue }}>CLIENT</span>
-            <div className="w-full py-3 px-2 rounded-xl text-center"
-              style={{ backgroundColor: T.blue + "18", border: `2px solid ${T.blue}44` }}>
-              <div className="text-sm font-extrabold" style={{ color: T.blue }}>Browser</div>
-            </div>
+        <div className="grid grid-cols-2 gap-5 fade-up-2">
+          {/* 왼쪽: 기술 목록 */}
+          <div className="flex flex-col gap-3">
+            {techSections.map((sec) => (
+              <div key={sec.label} className="rounded-2xl px-5 py-4"
+                style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+                <div className="text-[10px] font-bold tracking-widest mb-3" style={{ color: T.dim }}>{sec.label.toUpperCase()}</div>
+                {sec.items.map((item, i) => (
+                  <div key={item.name} className="flex items-center justify-between py-2"
+                    style={{ borderBottom: i < sec.items.length - 1 ? `1px solid ${T.border}60` : "none" }}>
+                    <span className="text-[13px] font-bold" style={{ color: T.text }}>{item.name}</span>
+                    <span className="text-[11px]" style={{ color: T.muted }}>{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
 
-          <span className="text-xl font-black mt-7 shrink-0" style={{ color: T.dim }}>→</span>
-
-          {/* NEXT.JS SERVER */}
-          <div className="flex flex-col items-center gap-1.5 flex-[2]">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-md"
-              style={{ backgroundColor: T.primary + "22", color: T.primary }}>NEXT.JS SERVER</span>
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 py-3 px-2 rounded-xl text-center"
-                style={{ backgroundColor: T.primary + "18", border: `2px solid ${T.primary}44` }}>
-                <div className="text-sm font-extrabold" style={{ color: T.primary }}>App Router</div>
-              </div>
-              <span className="text-base font-black shrink-0" style={{ color: T.dim }}>→</span>
-              <div className="flex-1 py-3 px-2 rounded-xl text-center"
-                style={{ backgroundColor: T.primary + "18", border: `2px solid ${T.primary}44` }}>
-                <div className="text-sm font-extrabold leading-snug" style={{ color: T.primary }}>API Routes<br />30+</div>
-              </div>
+          {/* 오른쪽: AI 활용 포인트 */}
+          <div className="rounded-2xl px-5 py-4 flex flex-col gap-0"
+            style={{ backgroundColor: `${T.primary}06`, border: `1px solid ${T.primary}20` }}>
+            <div className="text-[10px] font-bold tracking-widest mb-3 flex items-center gap-2" style={{ color: T.primary }}>
+              <span>🤖</span> CLAUDE API 활용 포인트
             </div>
-          </div>
-
-          <span className="text-xl font-black mt-7 shrink-0" style={{ color: T.dim }}>→</span>
-
-          {/* DATA LAYER */}
-          <div className="flex flex-col items-center gap-1.5 flex-[2]">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-md"
-              style={{ backgroundColor: T.warning + "22", color: T.warning }}>DATA LAYER</span>
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 py-3 px-2 rounded-xl text-center"
-                style={{ backgroundColor: T.warning + "18", border: `2px solid ${T.warning}44` }}>
-                <div className="text-sm font-extrabold" style={{ color: T.warning }}>Prisma ORM</div>
+            {aiPoints.map((item) => (
+              <div key={item.tag} className="flex items-start gap-3 py-3"
+                style={{ borderBottom: `1px solid ${T.primary}10` }}>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold shrink-0 mt-0.5"
+                  style={{ backgroundColor: item.tagBg, color: item.tagColor }}>{item.tag}</span>
+                <div>
+                  <div className="text-[13px] font-bold mb-1" style={{ color: T.text }}>{item.title}</div>
+                  <div className="text-[11px] whitespace-pre-line leading-relaxed" style={{ color: T.muted }}>{item.desc}</div>
+                </div>
               </div>
-              <span className="text-base font-black shrink-0" style={{ color: T.dim }}>→</span>
-              <div className="flex-1 py-3 px-2 rounded-xl text-center"
-                style={{ backgroundColor: T.warning + "18", border: `2px solid ${T.warning}44` }}>
-                <div className="text-sm font-extrabold" style={{ color: T.warning }}>Supabase DB</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* 외부 API 연결 */}
-        <div className="flex items-center gap-3 justify-center mb-4">
-          <span className="text-sm font-medium" style={{ color: T.dim }}>↑ 외부 연동 (API Routes)</span>
-          <div className="w-px h-5" style={{ backgroundColor: T.border }} />
-          {[
-            { label: "KIS Open API",   color: T.primary },
-            { label: "yahoo-finance2", color: T.primary },
-            { label: "Claude API",     color: T.primary },
-            { label: "R-ONE API",      color: T.warning },
-          ].map(api => (
-            <div key={api.label} className="px-4 py-2 rounded-xl text-sm font-bold"
-              style={{ backgroundColor: api.color + "18", color: api.color, border: `2px solid ${api.color}44` }}>
-              {api.label}
-            </div>
-          ))}
-        </div>
-
-        {/* 팀 롤 — 작은 텍스트 */}
-        <div className="flex items-center justify-center gap-6 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
-          {[
-            { name: "김수현", role: "Frontend · UI/UX" },
-            { name: "최우철", role: "Backend · API · DB" },
-          ].map(m => (
-            <div key={m.name} className="flex items-center gap-2">
-              <Icon d={I.person} size={12} color={T.primary} strokeWidth={2} />
-              <span className="text-xs font-bold" style={{ color: T.text }}>{m.name}</span>
-              <span className="text-xs" style={{ color: T.dim }}>{m.role}</span>
+        {/* 하단 스탯 바 */}
+        <div className="grid grid-cols-3 gap-3 fade-up-4">
+          {stats.map((s) => (
+            <div key={s.num} className="flex items-center gap-3 px-5 py-3.5 rounded-2xl"
+              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              <div className="text-[22px] font-extrabold shrink-0" style={{ color: T.primary }}>{s.num}</div>
+              <div>
+                <div className="text-[12px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                <div className="text-[11px]" style={{ color: T.muted }}>{s.sub}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -678,94 +791,181 @@ function Slide5({ T }: { T: Theme }) {
 // ─── S5: 개발 에피소드 ───────────────────────────────────────────────────────
 function Slide6({ T }: { T: Theme }) {
   const weeks = useCounter(4, 800);
-  const pages = useCounter(12, 1000);
-  const apis  = useCounter(30, 1200);
-  const stats = [
-    { label: "개발 기간", value: `${weeks}주` },
-    { label: "페이지",    value: `${pages}개` },
-    { label: "API Route", value: `${apis}+` },
-  ];
+  const apis  = useCounter(30, 1000);
+  const pages = useCounter(12, 1200);
 
   return (
-    <div className="flex flex-col justify-center h-full px-16 max-w-5xl mx-auto w-full">
-      <SlideHeader num="05" title="개발 에피소드" T={T} />
+    <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-14">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+        <SlideHeader num="04" title="개발 에피소드" T={T} />
 
-      {/* 숫자 단독 크게 */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {stats.map((s, i) => (
-          <div key={s.label} className={`text-center py-6 rounded-2xl fade-up-${i + 2}`}
-            style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}33` }}>
-            <div className="text-7xl font-extrabold tabular-nums" style={{ color: T.primary }}>{s.value}</div>
-            <div className="text-lg mt-2 font-medium" style={{ color: T.muted }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { num: "01", icon: I.cpu,    title: "Claude Code — 설계문서가 맥락",
-            desc: "CLAUDE.md + 00~08 설계 문서 첨부\n실질적인 제3의 팀원" },
-          { num: "02", icon: I.users,  title: "MOCK→API 병렬 개발",
-            desc: "백엔드 전 USE_MOCK 플래그로\n프론트 독립 개발, 연결 마찰 최소화" },
-          { num: "03", icon: I.camera, title: "OCR 정확도 난관",
-            desc: "정규식 불가 → Claude Vision 전환\n\"LLM이 더 실용적인 케이스\"" },
-        ].map((ep, i) => (
-          <div key={ep.num} className={`p-5 rounded-2xl fade-up-${i + 4}`}
-            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: T.primarySoft }}>
-                <Icon d={ep.icon} size={16} color={T.primary} strokeWidth={2} />
+        {/* 상단 통계 */}
+        <div className="grid grid-cols-3 gap-3 fade-up-2">
+          {[
+            { num: weeks, suffix: "주", label: "개발 기간",  sub: "업무 중 틈틈이 · 2인 팀" },
+            { num: apis,  suffix: "+",  label: "API Route",  sub: "자체 개발 · 별도 서버 없음" },
+            { num: pages, suffix: "",   label: "페이지",      sub: "반응형 · 다크모드 전체 지원" },
+          ].map((s) => (
+            <div key={s.label} className="flex items-center gap-3 px-5 py-3.5 rounded-2xl"
+              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              <div className="text-[26px] font-extrabold shrink-0 tabular-nums" style={{ color: T.primary }}>{s.num}{s.suffix}</div>
+              <div>
+                <div className="text-[12px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                <div className="text-[11px]" style={{ color: T.muted }}>{s.sub}</div>
               </div>
-              <span className="text-sm font-bold" style={{ color: T.primary }}>EP {ep.num}</span>
             </div>
-            <div className="text-xl font-bold mb-2" style={{ color: T.text }}>{ep.title}</div>
-            <div className="text-base leading-relaxed whitespace-pre-line" style={{ color: T.muted }}>{ep.desc}</div>
+          ))}
+        </div>
+
+        {/* EP 카드 3개 */}
+        <div className="grid grid-cols-3 gap-3">
+
+          {/* EP 01 */}
+          <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-3"
+            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 01</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.primarySoft }}>
+              <Icon d={I.cpu} size={20} color={T.primary} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>Claude Code가<br />제3의 팀원</div>
+              <div className="text-[11px] font-bold" style={{ color: T.primary }}>AI 활용 · 설계문서 = 맥락</div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {["설계문서 전체를 CLAUDE.md에 연결 — 매 세션 컨텍스트 유지", "단순 코드 생성이 아닌 설계 → 분업 → 구현까지 함께", "2인이 부족한 자리를 Claude Code가 채움"].map(t => (
+                <div key={t} className="flex items-start gap-1.5 text-[11px]" style={{ color: T.muted }}>
+                  <span className="shrink-0 mt-0.5" style={{ color: T.primary }}>→</span>{t}
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"PM처럼 설계하고, 팀원처럼 코딩했다"</div>
           </div>
-        ))}
+
+          {/* EP 02 */}
+          <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-4"
+            style={{ backgroundColor: `${T.primary}04`, border: `1px solid ${T.primary}20` }}>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 02</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary }}>⭐ 팀워크</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.blue + "18" }}>
+              <Icon d={I.zap} size={20} color={T.blue} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>쓰다 보니<br />기능이 생겼다</div>
+              <div className="text-[11px] font-bold" style={{ color: T.primary }}>실제 투자자가 만든 앱</div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {["직접 쓰면서 불편한 것이 바로 다음 기능이 됨", "벤치마크 비교 — \"비트코인·금·서울집값에 넣었으면?\" 실제로 궁금해서 추가", "KOSPI 비교 → 금·BTC·서울아파트까지 확장"].map(t => (
+                <div key={t} className="flex items-start gap-1.5 text-[11px]" style={{ color: T.muted }}>
+                  <span className="shrink-0 mt-0.5" style={{ color: T.primary }}>→</span>{t}
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"사용자가 곧 개발자 — 진짜 필요한 것만 만들었다"</div>
+          </div>
+
+          {/* EP 03 */}
+          <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-5"
+            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 03</span>
+            </div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(180,100,255,0.12)" }}>
+              <Icon d={I.camera} size={20} color="#c87aff" strokeWidth={2} />
+            </div>
+            <div>
+              <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>팀원 아이디어가<br />핵심 기능이 됐다</div>
+              <div className="text-[11px] font-bold" style={{ color: T.primary }}>예상 외 에피소드 · OCR → Vision</div>
+            </div>
+            <div className="flex flex-col gap-2">
+              {[
+                { badge: "아이디어", badgeColor: T.muted,    badgeBg: `${T.border}80`,   text: "\"캡처 한 장으로 종목 등록되면?\" — 설계에 없던 기능" },
+                { badge: "실패",     badgeColor: T.negative, badgeBg: `${T.negative}15`, text: "규칙 기반 OCR — 증권사마다 레이아웃 달라서 불가" },
+                { badge: "해결",     badgeColor: T.primary,  badgeBg: `${T.primary}15`,  text: "Claude Vision 전환 — 오히려 더 정확하고 빠름" },
+              ].map((f, i) => (
+                <div key={i} className="flex items-start gap-2 text-[11px]">
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0" style={{ backgroundColor: f.badgeBg, color: f.badgeColor }}>{f.badge}</span>
+                  <span style={{ color: T.muted }}>{f.text}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"팀원 아이디어 + AI = 설계 밖에서 핵심 기능 탄생"</div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── DEMO: 큐카드 ────────────────────────────────────────────────────────────
+// ─── DEMO: 내러티브 + 큐카드 ─────────────────────────────────────────────────
 function Slide7({ T }: { T: Theme }) {
-  const steps = [
-    { num: "01", icon: I.camera,    label: "신중한 시작",  desc: "온보딩 + OCR 일괄 등록" },
-    { num: "02", icon: I.zap,       label: "FOMO 손실",    desc: "충동매매 기록\n이유: FOMO · 심리: 불안" },
-    { num: "03", icon: I.chart,     label: "패턴 발견",    desc: "AI 성향 진단\n'FOMO 패턴' 생성" },
-    { num: "04", icon: I.brain,     label: "AI 코칭",      desc: "잘한 것 / 실수\n/ 이번 달 목표" },
+  const narrative = [
+    { phase: "6개월 전",    label: "FOMO 충동매수",    desc: "급등 소식에 이유 없이 매수",           color: T.negative },
+    { phase: "반복",        label: "기록 없음 → 재실수", desc: "왜 샀는지 기억 못함, 패턴 모름",       color: T.warning },
+    { phase: "버텨일지 시작", label: "매매 이유 태그",   desc: "\"이게 FOMO인가\" 한 번 더 생각",      color: T.primary },
+    { phase: "2개월 후",    label: "AI 성향 진단",      desc: "FOMO 패턴 발견 + 개선 코칭",          color: T.primary },
+    { phase: "지금",        label: "수익률 개선",        desc: "기록이 투자 그릇을 키운다",            color: T.primary },
   ];
-
   return (
-    <div className="flex flex-col justify-center h-full px-20 max-w-5xl mx-auto w-full">
-      <SlideHeader num="06" title="DEMO" T={T} />
-      <div className="grid grid-cols-4 gap-3 w-full max-w-4xl mb-8">
-        {steps.map((s, i) => (
-          <div key={s.num} className="flex items-center">
-            <div className={`flex-1 fade-up-${i + 2}`}>
-              <div className="p-5 rounded-2xl" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-                <div className="flex flex-col items-center py-1">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
-                    style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
-                    <Icon d={s.icon} size={22} color="white" strokeWidth={2} />
-                  </div>
-                  <div className="text-[10px] font-bold mb-1" style={{ color: T.primary }}>STEP {s.num}</div>
-                  <div className="text-xl font-bold mb-2" style={{ color: T.text }}>{s.label}</div>
-                  <div className="text-sm leading-relaxed whitespace-pre-line" style={{ color: T.muted }}>{s.desc}</div>
+    <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+        <SlideHeader num="06" title="DEMO" T={T} />
+
+        {/* 내러티브 타임라인 */}
+        <div className="fade-up-2 rounded-2xl p-5" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+          <div className="text-[10px] font-bold mb-4 tracking-widest" style={{ color: T.dim }}>USER JOURNEY — 데모에서 보여줄 흐름</div>
+          <div className="flex items-start gap-0">
+            {narrative.map((n, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center text-center relative">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center mb-2 z-10"
+                  style={{ backgroundColor: n.color + "20", border: `2px solid ${n.color}60` }}>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: n.color }} />
                 </div>
+                {i < narrative.length - 1 && (
+                  <div className="absolute top-4 left-1/2 w-full h-px" style={{ backgroundColor: T.border }} />
+                )}
+                <div className="text-[9px] font-bold mb-1" style={{ color: n.color }}>{n.phase}</div>
+                <div className="text-[11px] font-bold mb-1 leading-tight" style={{ color: T.text }}>{n.label}</div>
+                <div className="text-[10px] leading-snug" style={{ color: T.muted }}>{n.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 데모 큐카드 */}
+        <div className="grid grid-cols-4 gap-3 fade-up-3">
+          {[
+            { num: "01", icon: I.camera, label: "온보딩", desc: "OCR로 보유종목\n일괄 등록" },
+            { num: "02", icon: I.edit,   label: "매매 기록", desc: "이유 태그 + 심리\n상태 기록" },
+            { num: "03", icon: I.brain,  label: "AI 성향 진단", desc: "FOMO 패턴\n시각화" },
+            { num: "04", icon: I.cpu,    label: "AI 코칭", desc: "잘한 것 / 실수\n이번 달 목표" },
+          ].map((s, i) => (
+            <div key={s.num} className={`p-4 rounded-2xl fade-up-${i + 3}`}
+              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
+                  <Icon d={s.icon} size={18} color="white" strokeWidth={2} />
+                </div>
+                <div className="text-[10px] font-bold" style={{ color: T.primary }}>STEP {s.num}</div>
+                <div className="text-sm font-bold" style={{ color: T.text }}>{s.label}</div>
+                <div className="text-[11px] whitespace-pre-line leading-snug" style={{ color: T.muted }}>{s.desc}</div>
               </div>
             </div>
-            {i < steps.length - 1 && (
-              <div className="mx-1 shrink-0">
-                <Icon d={I.arrow_r} size={16} color={T.dim} strokeWidth={1.5} />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="px-8 py-4 rounded-2xl fade-up-6" style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}44` }}>
-        <div className="text-lg font-bold" style={{ color: T.primary }}>localhost:3000</div>
-        <div className="text-base mt-1" style={{ color: T.muted }}>demo@demo.com / demo1234</div>
+          ))}
+        </div>
+
+        {/* URL 바 */}
+        <div className="flex items-center gap-4 px-5 py-3 rounded-2xl fade-up-6"
+          style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}44` }}>
+          <Icon d={I.globe} size={16} color={T.primary} strokeWidth={2} />
+          <span className="text-base font-extrabold" style={{ color: T.primary }}>localhost:3000</span>
+          <span className="text-sm" style={{ color: T.muted }}>demo@demo.com · demo1234</span>
+        </div>
       </div>
     </div>
   );
@@ -810,7 +1010,7 @@ function Slide8({ T }: { T: Theme }) {
 }
 
 // ─── 메인 ────────────────────────────────────────────────────────────────────
-const SLIDE_LIST = [Slide1, SlideBackground, Slide3, Slide4a, Slide4b, Slide5, Slide6, Slide7, Slide8];
+const SLIDE_LIST = [Slide1, SlideBackground, Slide3, SlideCompetitor, Slide5, Slide6, Slide4a, Slide4b, Slide7, Slide8];
 const TOTAL = SLIDE_LIST.length;
 
 export default function SlidesPage() {
