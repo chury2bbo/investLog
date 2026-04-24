@@ -1,5 +1,6 @@
 # 🎤 버텨일지 — 발표 슬라이드 구성 계획
-> 최종 업데이트: 2026-04-20 | 발표일: 2026-05-22(금) | 발표시간: 15분 + DEMO
+> 최종 업데이트: 2026-04-24 | 발표일: 2026-05-22(금) | 발표시간: 15분 + DEMO
+> **구현 상태**: `/app/slides/page.tsx` 단일 파일로 구현 완료 — 10개 슬라이드, 키보드 네비, 라이트/다크 모드, PDF 출력
 
 ---
 
@@ -252,62 +253,76 @@
 
 ---
 
-## 3. 슬라이드 제작 순서 (권장)
+## 3. 구현 현황 ✅ 완료
+
+**방식 변경**: 멀티 파일 → 단일 파일 (`/app/slides/page.tsx`) 로 구현 완료
+
+### 실제 슬라이드 구성 (10개)
+
+| 순서 | 슬라이드 | 번호 | 상태 |
+|------|----------|------|------|
+| 1 | Slide1 — 커버 (버텨일지 로고·팀원·날짜) | - | ✅ |
+| 2 | SlideBackground — 왜 만들었나 (기존 도구 한계 + 3가지 문제) | 01 | ✅ |
+| 3 | Slide3 — 개발 목표 & 구현 범위 (철학 인용구 + 6가지 범위) | 02 | ✅ |
+| 4 | SlideCompetitor — 경쟁사 비교 (더리치·도미노·증권사앱 vs 버텨일지 ✓/✗/△ 표) | 02-2 | ✅ |
+| 5 | Slide5 — 기술 스택 & AI 활용 (Frontend·Backend·시세 + Claude API 4포인트 + 통계) | 03 | ✅ |
+| 6 | Slide6 — 개발 에피소드 (4주·30+ API·12페이지 카운터 + EP01~03 카드) | 04 | ✅ |
+| 7 | Slide4a — 핵심 기능 (통합 포트폴리오·매매일지·스크린샷 등록 — 실제 앱 이미지+영상) | 05 | ✅ |
+| 8 | Slide4b — AI가 만드는 차별점 (성향 진단·코칭 리포트·종목 분석 SWOT 목업) | 06 | ✅ |
+| 9 | Slide7 — DEMO (User Journey 타임라인 + 4단계 큐카드 + demo URL 바) | 07 | ✅ |
+| 10 | Slide8 — 클로징 (감사합니다 · 버텨야 이긴다 · 팀원 카드) | - | ✅ |
+
+### 구현 기능
 
 ```
-Phase 1 — 뼈대 (우선)
-  /app/slides/layout.tsx    ← 풀스크린 레이아웃, 키보드 네비
-  /app/slides/page.tsx      ← 슬라이드 컨트롤러
-  /app/slides/slides/00_cover.tsx
-  /app/slides/slides/01_problem.tsx
-  /app/slides/slides/02_philosophy.tsx
-
-Phase 2 — 핵심 슬라이드
-  /app/slides/slides/03_features.tsx  ← GIF 삽입 포함
-  /app/slides/slides/04_tech.tsx      ← 아키텍처 다이어그램
-  /app/slides/slides/05_episode.tsx
-
-Phase 3 — 데모 전환 + 클로징
-  /app/slides/slides/06_demo_cue.tsx  ← "데모 시작" 큐카드 슬라이드
-  /app/slides/slides/07_closing.tsx
-
-Phase 4 — 폴리싱
-  브랜드 컬러 (#05C072) 일관 적용
-  GIF/영상 클립 삽입
-  키보드(← →) + 슬라이드 번호 표시
-  발표자 노트 영역 (선택)
+✅ 키보드 ← → / Space 네비게이션
+✅ 하단 도트 인디케이터 (클릭으로 슬라이드 이동)
+✅ 라이트/다크 모드 토글 (기본: 다크)
+✅ PDF 출력 버튼 (landscape @page 설정)
+✅ 슬라이드 번호 표시 (N / 10)
+✅ fadeUp 애니메이션 (6단계 staggered)
+✅ useCounter 숫자 카운팅 애니메이션
+✅ 스크린샷 등록 MP4 자동 반복 재생 (OcrVideo 컴포넌트)
+✅ 핵심 기능 카드 실제 앱 스크린샷 삽입 (/slides/img_portfolio_*.png)
+✅ 전체 폰트 업스케일 (발표 가독성 개선)
 ```
 
 ---
 
-## 4. 슬라이드 기술 구현 방향
+## 4. 슬라이드 기술 구현 방향 (실제 구현)
 
-**방식**: Next.js 14 App Router (`/app/slides`) — 순수 Tailwind, 외부 라이브러리 없음
+**방식**: Next.js App Router (`/app/slides/page.tsx`) — 단일 파일, 순수 Tailwind + inline style
 
-**이유**
-- 기존 CSS 변수·컴포넌트 그대로 재사용 가능
-- 실제 컴포넌트(성향 카드, 도넛 차트 등) 직접 임베드 가능
-- 빌드 통합 — 별도 파일 불필요
+**구조**
+- 테마 토큰(`LIGHT`/`DARK`) 객체로 라이트/다크 모드 분리
+- 각 슬라이드는 독립 함수 컴포넌트 (`Slide1`, `SlideBackground`, …)
+- `SLIDE_LIST` 배열로 순서 관리, `current` state로 렌더링
+- 인쇄 시 `print-container` div에 전체 슬라이드 렌더링 (PDF 출력용)
 
-**핵심 기능**
-- 키보드 `← →` 네비게이션
-- 슬라이드 번호 표시 (예: 3 / 8)
-- 풀스크린 모드
-- 발표자 노트 토글 (선택)
+**디자인 토큰 (slides 전용)**
+```
+Primary:  #05C072  primarySoft / primaryDark / primaryMid
+Text:     #1A221A (light) / #DCE8DC (dark)
+Card:     #FFFFFF (light) / #1D2720 (dark)
+Negative: #F04452
+Warning:  #FF7B00
+Blue:     #4285F4
+```
 
 **참고 파일**
 - 디자인 시스템: `02_ux_ui.md` §4 컬러·컴포넌트
-- 화면 구조: `08_screen_flow.md`
 - 기술 스택 상세: `01_project.md` §2
 
 ---
 
 ## 5. 데모 준비 체크리스트
 
+- [x] 슬라이드 `/slides` 구현 완료
 - [ ] 6개월 샘플 데이터 DB 입력 완료 (내러티브 스토리 반영)
 - [ ] `localhost:3000` 정상 실행 확인
 - [ ] AI 성향 진단 실시간 생성 동작 확인
-- [ ] 스크린샷 OCR 테스트 이미지 준비
-- [ ] 슬라이드 탭 / 앱 탭 전환 순서 리허설
+- [ ] 스크린샷 OCR 테스트 이미지 준비 (`/slides/img_portfolio_*.png` 포함)
+- [ ] 슬라이드 탭 ↔ 앱 탭 전환 순서 리허설
 - [ ] 다크모드 토글 시연 준비
 - [ ] Skeleton 로딩 시연 (네트워크 throttle 또는 딜레이 추가)
+- [ ] 슬라이드 PDF 출력 최종 확인 (landscape 방향)
