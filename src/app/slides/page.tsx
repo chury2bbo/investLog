@@ -83,7 +83,7 @@ function SlideHeader({ num, title, T, center }: { num: string; title: string; T:
   return (
     <div className={`flex items-center gap-3 mb-8 fade-up-1 ${center ? "justify-center" : ""}`}>
       <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: T.primarySoft, color: T.primary }}>{num}</span>
-      <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: T.text }}>{title}</h2>
+      <h2 className="text-4xl font-extrabold tracking-tight" style={{ color: T.text }}>{title}</h2>
     </div>
   );
 }
@@ -158,7 +158,7 @@ function SlideBackground({ T }: { T: Theme }) {
 
           {/* 왼쪽: 기존 도구의 한계 */}
           <div className="flex flex-col gap-2.5">
-            <div className="text-[10px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>TOOL LIMITATIONS</div>
+            <div className="text-[12px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>TOOL LIMITATIONS</div>
             {limits.map((l, i) => (
               <div key={l.title} className={`flex gap-3.5 items-start p-4 rounded-xl fade-up-${i + 2}`}
                 style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
@@ -167,8 +167,8 @@ function SlideBackground({ T }: { T: Theme }) {
                   <Icon d={l.icon} size={17} color={l.iconColor} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div className="text-[13px] font-black mb-1" style={{ color: l.titleColor ?? T.text }}>{l.title}</div>
-                  <div className="text-[12px] leading-relaxed" style={{ color: T.muted }}>{l.desc}</div>
+                  <div className="text-[15px] font-black mb-1" style={{ color: l.titleColor ?? T.text }}>{l.title}</div>
+                  <div className="text-[14px] leading-relaxed" style={{ color: T.muted }}>{l.desc}</div>
                 </div>
               </div>
             ))}
@@ -176,7 +176,7 @@ function SlideBackground({ T }: { T: Theme }) {
 
           {/* 오른쪽: 개미 투자자의 3가지 문제 */}
           <div className="flex flex-col gap-2.5">
-            <div className="text-[10px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>THE PROBLEM</div>
+            <div className="text-[12px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>THE PROBLEM</div>
             {problems.map((p, i) => (
               <div key={p.title} className={`flex gap-3 items-start p-4 rounded-xl fade-up-${i + 2}`}
                 style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, borderLeft: `3px solid ${p.color}` }}>
@@ -185,8 +185,8 @@ function SlideBackground({ T }: { T: Theme }) {
                   <Icon d={p.icon} size={17} color={p.color} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <div className="text-[13px] font-black mb-1" style={{ color: p.color }}>{p.title}</div>
-                  <div className="text-[12px] leading-relaxed" style={{ color: T.muted }}>{p.desc}</div>
+                  <div className="text-[15px] font-black mb-1" style={{ color: p.color }}>{p.title}</div>
+                  <div className="text-[14px] leading-relaxed" style={{ color: T.muted }}>{p.desc}</div>
                 </div>
               </div>
             ))}
@@ -198,8 +198,8 @@ function SlideBackground({ T }: { T: Theme }) {
         <div className="flex items-center gap-4 px-6 py-4 rounded-xl fade-up-6"
           style={{ backgroundColor: `${T.primary}10`, border: `1px solid ${T.primary}33` }}>
           <Icon d={I.trending} size={20} color={T.primary} strokeWidth={2} />
-          <p className="text-[13px] leading-relaxed" style={{ color: T.muted }}>
-            비교 대상은 다른 사람이 아닌 <strong style={{ color: T.primary, fontSize: 14 }}>"과거의 나"</strong> —
+          <p className="text-[15px] leading-relaxed" style={{ color: T.muted }}>
+            비교 대상은 다른 사람이 아닌 <strong style={{ color: T.primary, fontSize: 16 }}>"과거의 나"</strong> —
             나의 심리와 패턴을 모니터링하는 도구, 버텨일지
           </p>
           <div className="ml-auto shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-full text-[12px] font-black"
@@ -234,15 +234,14 @@ function Slide3({ T }: { T: Theme }) {
           {/* 왼쪽: 핵심 철학 */}
           <div className="fade-up-2">
             <div className="mb-8">
-              <div className="text-[10px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>CORE PHILOSOPHY</div>
-              <div className="text-[34px] font-black leading-tight" style={{ color: T.text, letterSpacing: "-0.5px" }}>
-                "수기 입력의<br />마찰 자체가<br />
-                <span style={{ color: T.primary }}>제품 가치"</span>
+              <div className="text-[12px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>CORE PHILOSOPHY</div>
+              <div className="text-[38px] font-black leading-tight whitespace-nowrap" style={{ color: T.text, letterSpacing: "-0.5px" }}>
+                "수기 입력의 마찰 자체가 <span style={{ color: T.primary }}>제품 가치"</span>
               </div>
             </div>
             <div className="px-5 py-4 fade-up-2"
               style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, borderRadius: "0 8px 8px 0" }}>
-              <p className="text-[13px] leading-7" style={{ color: T.muted }}>
+              <p className="text-[15px] leading-7" style={{ color: T.muted }}>
                 매매 이유 태그를 고르는 순간,<br />
                 <strong style={{ color: T.text }}>"이게 FOMO인가, 진짜 확신인가"</strong>를<br />
                 한 번 더 생각하게 됩니다.
@@ -252,7 +251,7 @@ function Slide3({ T }: { T: Theme }) {
 
           {/* 오른쪽: 구현 범위 */}
           <div className="fade-up-3">
-            <div className="text-[10px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>IMPLEMENTATION SCOPE</div>
+            <div className="text-[12px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>IMPLEMENTATION SCOPE</div>
             <div className="grid grid-cols-2 gap-2.5">
               {scope.map(s => (
                 <div key={s.label} className="flex items-center gap-3 p-4 rounded-xl"
@@ -262,8 +261,8 @@ function Slide3({ T }: { T: Theme }) {
                     <Icon d={s.icon} size={17} color={T.primary} strokeWidth={1.8} />
                   </div>
                   <div>
-                    <div className="text-[13px] font-bold" style={{ color: T.text }}>{s.label}</div>
-                    <div className="text-[11px] mt-0.5" style={{ color: T.dim }}>{s.sub}</div>
+                    <div className="text-[15px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                    <div className="text-[13px] mt-0.5" style={{ color: T.dim }}>{s.sub}</div>
                   </div>
                 </div>
               ))}
@@ -307,7 +306,7 @@ function SlideCompetitor({ T }: { T: Theme }) {
     );
   };
 
-  const usColStyle = { background: `${T.primary}08`, borderLeft: `1px solid ${T.primary}20`, borderRight: `1px solid ${T.primary}20` };
+  const usColStyle = { background: `${T.primary}22`, borderLeft: `2px solid ${T.primary}50`, borderRight: `2px solid ${T.primary}50` };
 
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden" style={{ padding: "0 72px" }}>
@@ -317,7 +316,7 @@ function SlideCompetitor({ T }: { T: Theme }) {
         <div className="mb-6 fade-up-1">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: T.primarySoft, color: T.primary }}>02-2</span>
-            <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: T.text }}>
+            <h2 className="text-4xl font-extrabold tracking-tight" style={{ color: T.text }}>
               비교 대상은 시장이 아닌 <span style={{ color: T.primary }}>"과거의 나"</span>
             </h2>
           </div>
@@ -332,9 +331,9 @@ function SlideCompetitor({ T }: { T: Theme }) {
               <tr>
                 <th className="text-left py-3 px-3 text-[11px] font-bold" style={{ color: T.dim, width: 220 }}></th>
                 {["더리치", "도미노", "증권사 앱"].map(name => (
-                  <th key={name} className="py-3 px-3 text-center text-[12px] font-bold" style={{ color: T.muted }}>{name}</th>
+                  <th key={name} className="py-3 px-3 text-center text-[14px] font-bold" style={{ color: T.muted }}>{name}</th>
                 ))}
-                <th className="py-3 px-3 text-center text-[12px] font-bold rounded-t-xl" style={{ color: T.primary, ...usColStyle }}>
+                <th className="py-3 px-3 text-center text-[14px] font-bold rounded-t-xl" style={{ color: T.primary, ...usColStyle, borderTop: `2px solid ${T.primary}50` }}>
                   <span className="flex items-center justify-center gap-1.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/icon.png" alt="" style={{ width: 16, height: 16, borderRadius: 4 }} />
@@ -346,13 +345,13 @@ function SlideCompetitor({ T }: { T: Theme }) {
             <tbody>
               {rows.map((row, i) => row.section ? (
                 <tr key={i}>
-                  <td colSpan={4} className="pt-3 pb-1 px-3 text-[10px] font-bold tracking-widest"
+                  <td colSpan={4} className="pt-3 pb-1 px-3 text-[12px] font-bold tracking-widest"
                     style={{ color: T.primary }}>{row.section.toUpperCase()}</td>
                   <td style={usColStyle}></td>
                 </tr>
               ) : (
-                <tr key={i} style={{ borderBottom: `1px solid ${T.border}60` }}>
-                  <td className="py-3 px-3 text-[13px] font-medium" style={{ color: T.muted }}>{row.label}</td>
+                <tr key={i}>
+                  <td className="py-3 px-3 text-[15px] font-medium" style={{ color: T.muted }}>{row.label}</td>
                   {row.cols!.slice(0, 3).map((m, j) => (
                     <td key={j} className="py-3 px-3 text-center"><Mark m={m} /></td>
                   ))}
@@ -361,7 +360,7 @@ function SlideCompetitor({ T }: { T: Theme }) {
               ))}
               <tr>
                 <td colSpan={4}></td>
-                <td className="rounded-b-xl" style={{ ...usColStyle, borderBottom: `1px solid ${T.primary}20`, height: 8 }}></td>
+                <td className="rounded-b-xl" style={{ ...usColStyle, borderBottom: `2px solid ${T.primary}50`, height: 8 }}></td>
               </tr>
             </tbody>
           </table>
@@ -380,8 +379,8 @@ function SlideCompetitor({ T }: { T: Theme }) {
                 <Icon d={p.icon} size={18} color={T.primary} strokeWidth={1.8} />
               </div>
               <div>
-                <div className="text-[14px] font-black mb-1.5" style={{ color: T.primary }}>{p.title}</div>
-                <div className="text-[12px] leading-relaxed" style={{ color: T.muted }}>{p.desc}</div>
+                <div className="text-[15px] font-black mb-1.5" style={{ color: T.primary }}>{p.title}</div>
+                <div className="text-[14px] leading-relaxed" style={{ color: T.muted }}>{p.desc}</div>
               </div>
             </div>
           ))}
@@ -449,7 +448,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>통합 포트폴리오</div>
-                <div className="text-[12px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
                   <span style={{ color: T.primary, fontWeight: 700 }}>국내·해외</span> 실시간 원화 환산
                 </div>
               </div>
@@ -470,7 +469,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>매매일지</div>
-                <div className="text-[12px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
                   <span style={{ color: T.primary, fontWeight: 700 }}>이유 태그 + 심리 상태</span> 수기 기록<br />
                   기록하는 행위 자체가 투자 반성의 계기
                 </div>
@@ -496,7 +495,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>스크린샷 등록</div>
-                <div className="text-[12px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
                   캡처 한 장 → <span style={{ color: T.primary, fontWeight: 700 }}>자동 등록</span>
                 </div>
               </div>
@@ -528,8 +527,8 @@ function Slide4b({ T }: { T: Theme }) {
           <div className="rounded-2xl fade-up-2 flex flex-col overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="p-5 flex flex-col flex-1">
-              <div className="text-[11px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>나의 투자자 유형</div>
-              <div className="text-2xl font-extrabold mb-3" style={{ color: T.text }}>FOMO형 중기 투자자</div>
+              <div className="text-[13px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>나의 투자자 유형</div>
+              <div className="text-3xl font-extrabold mb-3" style={{ color: T.text }}>FOMO형 중기 투자자</div>
               <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: T.muted }}>
                 실적 기반의 확신 매매에서 +23%의 성과를 낸 것처럼, 근거 있는 판단을 내릴 때는 뚜렷한 수익 잠재력을 보여줍니다. 다만 매매의 83%가 FOMO와 지인추천·테마 추종에서 비롯된 손절로 이어지고 있습니다.
               </p>
@@ -542,7 +541,7 @@ function Slide4b({ T }: { T: Theme }) {
                   <div key={s.label} className="text-center py-2.5 rounded-xl"
                     style={{ backgroundColor: T.primarySoft }}>
                     <div className="text-base font-extrabold" style={{ color: T.primary }}>{s.value}</div>
-                    <div className="text-[10px] mt-0.5" style={{ color: T.muted }}>{s.label}</div>
+                    <div className="text-[12px] mt-0.5" style={{ color: T.muted }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -553,8 +552,8 @@ function Slide4b({ T }: { T: Theme }) {
           <div className="rounded-2xl fade-up-3 flex flex-col overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="p-5 flex flex-col flex-1">
-              <div className="text-[11px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>이번 달 AI 코칭</div>
-              <div className="text-2xl font-extrabold mb-3" style={{ color: T.text }}>패턴 기반 피드백</div>
+              <div className="text-[13px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>이번 달 AI 코칭</div>
+              <div className="text-3xl font-extrabold mb-3" style={{ color: T.text }}>패턴 기반 피드백</div>
               <div className="flex flex-col gap-2.5 flex-1">
                 {[
                   { label: "잘한 것",      color: T.primary,  text: "손절 라인을 지킨 3번의 매도" },
@@ -563,8 +562,8 @@ function Slide4b({ T }: { T: Theme }) {
                 ].map(item => (
                   <div key={item.label} className="p-3 rounded-xl"
                     style={{ backgroundColor: item.color + "12", border: `1px solid ${item.color}33` }}>
-                    <div className="text-[11px] font-bold mb-0.5" style={{ color: item.color }}>{item.label}</div>
-                    <div className="text-[13px]" style={{ color: T.text }}>{item.text}</div>
+                    <div className="text-[13px] font-bold mb-0.5" style={{ color: item.color }}>{item.label}</div>
+                    <div className="text-[15px]" style={{ color: T.text }}>{item.text}</div>
                   </div>
                 ))}
               </div>
@@ -575,9 +574,9 @@ function Slide4b({ T }: { T: Theme }) {
           <div className="rounded-2xl fade-up-4 flex flex-col overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="p-5 flex flex-col flex-1">
-              <div className="text-[11px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>AI 종목 분석</div>
+              <div className="text-[13px] font-bold mb-2 tracking-wide" style={{ color: T.muted }}>AI 종목 분석</div>
               <div className="flex items-center gap-2.5 mb-3">
-                <span className="text-2xl font-extrabold" style={{ color: T.text }}>NVDA</span>
+                <span className="text-3xl font-extrabold" style={{ color: T.text }}>NVDA</span>
                 <span className="px-2 py-0.5 rounded-lg text-xs font-extrabold"
                   style={{ backgroundColor: T.primary, color: "#fff" }}>BUY</span>
                 <span className="text-base font-bold" style={{ color: T.primary }}>$850 ~ $900</span>
@@ -589,7 +588,7 @@ function Slide4b({ T }: { T: Theme }) {
                   { label: "O", color: T.blue,     text: "데이터센터 수요 급증" },
                   { label: "T", color: T.warning,  text: "미중 무역규제 리스크" },
                 ].map(item => (
-                  <div key={item.label} className="flex items-center gap-2.5 text-[13px]">
+                  <div key={item.label} className="flex items-center gap-2.5 text-[15px]">
                     <span className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0"
                       style={{ backgroundColor: item.color + "20", color: item.color }}>{item.label}</span>
                     <span style={{ color: T.muted }}>{item.text}</span>
@@ -664,12 +663,12 @@ function Slide5({ T }: { T: Theme }) {
             {techSections.map((sec) => (
               <div key={sec.label} className="rounded-2xl px-5 py-4"
                 style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-                <div className="text-[10px] font-bold tracking-widest mb-3" style={{ color: T.dim }}>{sec.label.toUpperCase()}</div>
+                <div className="text-[12px] font-bold tracking-widest mb-3" style={{ color: T.dim }}>{sec.label.toUpperCase()}</div>
                 {sec.items.map((item, i) => (
                   <div key={item.name} className="flex items-center justify-between py-2"
                     style={{ borderBottom: i < sec.items.length - 1 ? `1px solid ${T.border}60` : "none" }}>
-                    <span className="text-[13px] font-bold" style={{ color: T.text }}>{item.name}</span>
-                    <span className="text-[11px]" style={{ color: T.muted }}>{item.desc}</span>
+                    <span className="text-[15px] font-bold" style={{ color: T.text }}>{item.name}</span>
+                    <span className="text-[13px]" style={{ color: T.muted }}>{item.desc}</span>
                   </div>
                 ))}
               </div>
@@ -679,18 +678,18 @@ function Slide5({ T }: { T: Theme }) {
           {/* 오른쪽: AI 활용 포인트 */}
           <div className="rounded-2xl px-5 py-4 flex flex-col"
             style={{ backgroundColor: `${T.primary}06`, border: `1px solid ${T.primary}20` }}>
-            <div className="text-[10px] font-bold tracking-widest mb-3 flex items-center gap-2" style={{ color: T.primary }}>
+            <div className="text-[12px] font-bold tracking-widest mb-3 flex items-center gap-2" style={{ color: T.primary }}>
               <Icon d={I.cpu} size={12} color={T.primary} strokeWidth={2} />
               CLAUDE API 활용 포인트
             </div>
             {aiPoints.map((item, i) => (
               <div key={item.tag} className="flex items-center gap-3 py-3"
                 style={{ borderBottom: i < aiPoints.length - 1 ? `1px solid ${T.primary}10` : "none" }}>
-                <span className="py-0.5 rounded text-[10px] font-bold shrink-0 text-center"
+                <span className="py-0.5 rounded text-[12px] font-bold shrink-0 text-center"
                   style={{ backgroundColor: item.tagBg, color: item.tagColor, minWidth: 52 }}>{item.tag}</span>
                 <div>
-                  <div className="text-[13px] font-bold mb-0.5" style={{ color: T.text }}>{item.title}</div>
-                  <div className="text-[11px] whitespace-pre-line leading-relaxed" style={{ color: T.muted }}>{item.desc}</div>
+                  <div className="text-[15px] font-bold mb-0.5" style={{ color: T.text }}>{item.title}</div>
+                  <div className="text-[13px] whitespace-pre-line leading-relaxed" style={{ color: T.muted }}>{item.desc}</div>
                 </div>
               </div>
             ))}
@@ -702,10 +701,10 @@ function Slide5({ T }: { T: Theme }) {
           {stats.map((s) => (
             <div key={s.num} className="flex items-center gap-3 px-5 py-3.5 rounded-2xl"
               style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-              <div className="text-[22px] font-extrabold shrink-0 tabular-nums" style={{ color: T.primary }}>{s.num}</div>
+              <div className="text-[26px] font-extrabold shrink-0 tabular-nums" style={{ color: T.primary }}>{s.num}</div>
               <div>
-                <div className="text-[12px] font-bold" style={{ color: T.text }}>{s.label}</div>
-                <div className="text-[11px]" style={{ color: T.muted }}>{s.sub}</div>
+                <div className="text-[14px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                <div className="text-[13px]" style={{ color: T.muted }}>{s.sub}</div>
               </div>
             </div>
           ))}
@@ -735,10 +734,10 @@ function Slide6({ T }: { T: Theme }) {
           ].map((s) => (
             <div key={s.label} className="flex items-center gap-3 px-5 py-3.5 rounded-2xl"
               style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-              <div className="text-[26px] font-extrabold shrink-0 tabular-nums" style={{ color: T.primary }}>{s.num}{s.suffix}</div>
+              <div className="text-[30px] font-extrabold shrink-0 tabular-nums" style={{ color: T.primary }}>{s.num}{s.suffix}</div>
               <div>
-                <div className="text-[12px] font-bold" style={{ color: T.text }}>{s.label}</div>
-                <div className="text-[11px]" style={{ color: T.muted }}>{s.sub}</div>
+                <div className="text-[14px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                <div className="text-[13px]" style={{ color: T.muted }}>{s.sub}</div>
               </div>
             </div>
           ))}
@@ -751,67 +750,67 @@ function Slide6({ T }: { T: Theme }) {
           <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-3"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 01</span>
+              <span className="text-[12px] font-bold tracking-widest" style={{ color: T.dim }}>EP 01</span>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.primarySoft }}>
               <Icon d={I.cpu} size={20} color={T.primary} strokeWidth={2} />
             </div>
             <div>
               <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>Claude Code가 제3의 팀원</div>
-              <div className="text-[11px] font-bold" style={{ color: T.primary }}>AI 활용 · 설계문서 = 맥락</div>
+              <div className="text-[13px] font-bold" style={{ color: T.primary }}>AI 활용 · 설계문서 = 맥락</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-start gap-1.5 text-[11px]" style={{ color: T.muted }}>
+              <div className="flex items-start gap-1.5 text-[13px]" style={{ color: T.muted }}>
                 <span className="shrink-0 mt-0.5" style={{ color: T.primary }}>→</span>
                 <span>설계문서 전체를 CLAUDE.md에 연결 —<br /><strong style={{ color: T.text }}>매 세션 컨텍스트 유지, 제3의 팀원</strong></span>
               </div>
             </div>
-            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"PM처럼 설계하고, 팀원처럼 코딩했다"</div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[13px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"PM처럼 설계하고, 팀원처럼 코딩했다"</div>
           </div>
 
           {/* EP 02 */}
           <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-4"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 02</span>
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary }}><Icon d={I.zap} size={10} color={T.primary} strokeWidth={2.5} />팀워크</span>
+              <span className="text-[12px] font-bold tracking-widest" style={{ color: T.dim }}>EP 02</span>
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[12px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary }}><Icon d={I.zap} size={10} color={T.primary} strokeWidth={2.5} />팀워크</span>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: T.blue + "18" }}>
               <Icon d={I.zap} size={20} color={T.blue} strokeWidth={2} />
             </div>
             <div>
               <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>쓰다 보니 기능이 생겼다</div>
-              <div className="text-[11px] font-bold" style={{ color: T.primary }}>실제 투자자가 만든 앱</div>
+              <div className="text-[13px] font-bold" style={{ color: T.primary }}>실제 투자자가 만든 앱</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-start gap-1.5 text-[11px]" style={{ color: T.muted }}>
+              <div className="flex items-start gap-1.5 text-[13px]" style={{ color: T.muted }}>
                 <span className="shrink-0 mt-0.5" style={{ color: T.primary }}>→</span>
                 <span>직접 투자하다 궁금한 것이 —<br /><strong style={{ color: T.text }}>바로 다음 기능이 됐다</strong></span>
               </div>
             </div>
-            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"사용자가 곧 개발자 — 진짜 필요한 것만 만들었다"</div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[13px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"사용자가 곧 개발자 — 진짜 필요한 것만 만들었다"</div>
           </div>
 
           {/* EP 03 */}
           <div className="p-4 rounded-2xl flex flex-col gap-3 fade-up-5"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-widest" style={{ color: T.dim }}>EP 03</span>
+              <span className="text-[12px] font-bold tracking-widest" style={{ color: T.dim }}>EP 03</span>
             </div>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(180,100,255,0.12)" }}>
               <Icon d={I.camera} size={20} color="#c87aff" strokeWidth={2} />
             </div>
             <div>
               <div className="text-base font-extrabold leading-snug mb-1" style={{ color: T.text }}>팀원 아이디어가 핵심 기능이 됐다</div>
-              <div className="text-[11px] font-bold" style={{ color: T.primary }}>예상 외 에피소드 · OCR → Vision</div>
+              <div className="text-[13px] font-bold" style={{ color: T.primary }}>예상 외 에피소드 · OCR → Vision</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-start gap-1.5 text-[11px]" style={{ color: T.muted }}>
+              <div className="flex items-start gap-1.5 text-[13px]" style={{ color: T.muted }}>
                 <span className="shrink-0 mt-0.5" style={{ color: T.primary }}>→</span>
                 <span>팀원 아이디어 → OCR 실패 →<br /><strong style={{ color: T.text }}>Claude Vision으로 해결</strong></span>
               </div>
             </div>
-            <div className="mt-auto px-3 py-2 rounded-lg text-[11px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"팀원 아이디어 + AI = 설계 밖에서 핵심 기능 탄생"</div>
+            <div className="mt-auto px-3 py-2 rounded-lg text-[13px] italic" style={{ background: `${T.primary}08`, borderLeft: `2px solid ${T.primary}`, color: T.muted }}>"팀원 아이디어 + AI = 설계 밖에서 핵심 기능 탄생"</div>
           </div>
 
         </div>
@@ -836,7 +835,7 @@ function Slide7({ T }: { T: Theme }) {
 
         {/* 내러티브 타임라인 */}
         <div className="fade-up-2 rounded-2xl p-5" style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-          <div className="text-[10px] font-bold mb-4 tracking-widest" style={{ color: T.dim }}>USER JOURNEY — 데모에서 보여줄 흐름</div>
+          <div className="text-[12px] font-bold mb-4 tracking-widest" style={{ color: T.dim }}>USER JOURNEY — 데모에서 보여줄 흐름</div>
           <div className="flex items-start gap-0">
             {narrative.map((n, i) => (
               <div key={i} className="flex-1 flex flex-col items-center text-center relative">
@@ -847,9 +846,9 @@ function Slide7({ T }: { T: Theme }) {
                 {i < narrative.length - 1 && (
                   <div className="absolute top-4 left-1/2 w-full h-px" style={{ backgroundColor: T.border }} />
                 )}
-                <div className="text-[9px] font-bold mb-1" style={{ color: n.color }}>{n.phase}</div>
-                <div className="text-[11px] font-bold mb-1 leading-tight" style={{ color: T.text }}>{n.label}</div>
-                <div className="text-[10px] leading-snug" style={{ color: T.muted }}>{n.desc}</div>
+                <div className="text-[11px] font-bold mb-1" style={{ color: n.color }}>{n.phase}</div>
+                <div className="text-[13px] font-bold mb-1 leading-tight" style={{ color: T.text }}>{n.label}</div>
+                <div className="text-[12px] leading-snug" style={{ color: T.muted }}>{n.desc}</div>
               </div>
             ))}
           </div>
@@ -870,9 +869,9 @@ function Slide7({ T }: { T: Theme }) {
                   style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
                   <Icon d={s.icon} size={18} color="white" strokeWidth={2} />
                 </div>
-                <div className="text-[10px] font-bold" style={{ color: T.primary }}>STEP {s.num}</div>
+                <div className="text-[12px] font-bold" style={{ color: T.primary }}>STEP {s.num}</div>
                 <div className="text-sm font-bold" style={{ color: T.text }}>{s.label}</div>
-                <div className="text-[11px] whitespace-pre-line leading-snug" style={{ color: T.muted }}>{s.desc}</div>
+                <div className="text-[13px] whitespace-pre-line leading-snug" style={{ color: T.muted }}>{s.desc}</div>
               </div>
             </div>
           ))}

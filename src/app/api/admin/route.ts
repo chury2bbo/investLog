@@ -3,9 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getKisQuote } from "@/lib/kis";
 import { getYahooQuote } from "@/lib/yahoo";
 
-// 관리자 이메일 (필요 시 .env로 이동)
-const ADMIN_EMAILS = ["bbbb@bbbb.com", "aaaa@aaaa.com"];
-
 // Claude sonnet-4 요금 (USD per 1M tokens)
 const PRICE_INPUT = 3; // $3 / 1M input tokens
 const PRICE_OUTPUT = 15; // $15 / 1M output tokens
@@ -14,15 +11,6 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // 관리자 체크
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { email: true },
-  });
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
-    return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const today = new Date().toISOString().slice(0, 10);

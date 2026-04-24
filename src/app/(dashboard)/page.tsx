@@ -14,6 +14,7 @@ import {
   EmptyState,
   ThemeToggle,
   Skeleton,
+  BottomSheet,
 } from "@/components/ui";
 import { BenchmarkSheet } from "./_components/BenchmarkSheet";
 
@@ -147,6 +148,7 @@ export default function DashboardPage() {
   const [personalityTradeCount, setPersonalityTradeCount] = useState(0);
   const [personalityLoading, setPersonalityLoading] = useState(true);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
+  const [holdingSheetOpen, setHoldingSheetOpen] = useState(false);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -915,6 +917,7 @@ export default function DashboardPage() {
             label: "보유 종목",
             value: `${summary.holdingCount}종목`,
             color: undefined,
+            onClick: holdingWeights.length > 0 ? () => setHoldingSheetOpen(true) : undefined,
           },
           {
             label: "총 계좌",
@@ -923,11 +926,13 @@ export default function DashboardPage() {
           },
         ].map((s) => {
           const isReturnCard = s.label === "총 수익률";
+          const isHoldingCard = s.label === "보유 종목";
+          const isClickable = isReturnCard || (isHoldingCard && holdingWeights.length > 0);
           return (
             <Card
               key={s.label}
-              className={`!p-3 ${isReturnCard ? "cursor-pointer hover:ring-1 hover:ring-[var(--color-primary)] transition-shadow" : ""}`}
-              onClick={isReturnCard ? () => setBenchmarkOpen(true) : undefined}
+              className={`!p-3 ${isClickable ? "cursor-pointer hover:ring-1 hover:ring-[var(--color-primary)] transition-shadow" : ""}`}
+              onClick={"onClick" in s ? s.onClick : isReturnCard ? () => setBenchmarkOpen(true) : undefined}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
@@ -936,6 +941,14 @@ export default function DashboardPage() {
                 {isReturnCard && (
                   <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
                     비교
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
+                {isHoldingCard && holdingWeights.length > 0 && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    비중
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 18l6-6-6-6"/>
                     </svg>
@@ -1414,6 +1427,59 @@ export default function DashboardPage() {
           </div>
         );
       })()}
+
+      {/* ── 종목별 비중 전체보기 BottomSheet ── */}
+      <BottomSheet
+        open={holdingSheetOpen}
+        onClose={() => setHoldingSheetOpen(false)}
+        title="종목별 비중"
+        titleRight={
+          <span className="text-xs text-[var(--color-g400)]">총 {holdingWeights.length}종목</span>
+        }
+      >
+        <div className="space-y-2.5">
+          {holdingWeights.map((h, i) => {
+            const pct = holdingTotal > 0 ? Math.round((h.value / holdingTotal) * 100) : 0;
+            const isTop = i === 0;
+            return (
+              <div key={h.name} className="flex items-center">
+                {/* 종목명 + 배지 */}
+                <div className="w-[32%] flex items-center gap-1.5 min-w-0 pr-1">
+                  <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                    {h.country === "KR" ? "국" : "해"}
+                  </span>
+                  <span className={`text-xs truncate ${isTop ? "font-bold text-[var(--color-text)]" : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"}`}>
+                    {h.label}
+                  </span>
+                </div>
+
+                {/* 중심선 */}
+                <div className="w-px h-6 bg-[var(--color-g300)] dark:bg-[var(--color-border)] shrink-0" />
+
+                {/* 비율 바 */}
+                <div className="flex-1 flex pl-1.5">
+                  <div
+                    className="h-5 rounded-r-md transition-all duration-500"
+                    style={{
+                      width: `${pct}%`,
+                      minWidth: "2px",
+                      backgroundColor: isTop ? "var(--color-primary)" : "rgba(5,192,114,0.25)",
+                    }}
+                  />
+                </div>
+
+                {/* 비율 수치 */}
+                <div className="ml-2 text-xs font-semibold w-10 text-right shrink-0 text-[var(--color-positive)]">
+                  {pct}%
+                </div>
+              </div>
+            );
+          })}
+          <p className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)] pt-2 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
+            * 평가금액 기준 비중입니다.
+          </p>
+        </div>
+      </BottomSheet>
 
       <BenchmarkSheet
         open={benchmarkOpen}
