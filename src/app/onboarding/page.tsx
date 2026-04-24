@@ -505,7 +505,6 @@ export default function OnboardingPage() {
           if (isDuplicate) {
             const brokerage = brokerages.find((b) => b.code === value);
             showToast("중복 증권사", `${brokerage?.name ?? value}은 이미 추가된 계좌입니다.`);
-            setBrokerageDropOpen(null);
             return { ...acc, accountCode: "", accountName: "" };
           }
           const brokerage = brokerages.find((b) => b.code === value);
@@ -1247,7 +1246,7 @@ export default function OnboardingPage() {
       <ImportModal
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
-        onConfirm={(holdings, cashBalances) => applyImportResult(holdings, cashBalances, importAccIdx)}
+        onConfirm={async (holdings, cashBalances) => applyImportResult(holdings, cashBalances, importAccIdx)}
       />
       <ConfirmDialog
         open={!!pendingBrokerageChange}

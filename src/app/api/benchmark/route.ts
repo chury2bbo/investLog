@@ -96,9 +96,9 @@ export async function GET() {
   // 서울 아파트 (R-ONE API)
   try {
     const aptRate = await getSeoulAptReturnRate(year);
-    benchmarks.push({ name: "서울아파트", returnRate: aptRate });
+    benchmarks.push({ name: "서울아파트", ticker: "", returnRate: aptRate });
   } catch {
-    benchmarks.push({ name: "서울아파트", returnRate: null });
+    benchmarks.push({ name: "서울아파트", ticker: "", returnRate: null });
   }
 
   return Response.json({ year, benchmarks });

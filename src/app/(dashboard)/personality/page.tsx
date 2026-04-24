@@ -291,6 +291,7 @@ export default function PersonalityPage() {
   // 히어로 + Level 1 진단만 보여주고, 데이터 패턴/감정 등 통계 섹션은 매매 부족 안내
 
   // ─── 데이터 추출 ──────────────────────────────────────
+  if (!stats) return null;
 
   const {
     tagDistribution = [],

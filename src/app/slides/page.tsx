@@ -81,7 +81,7 @@ const I = {
 // ─── 공통 ────────────────────────────────────────────────────────────────────
 function SlideHeader({ num, title, T, center }: { num: string; title: string; T: Theme; center?: boolean }) {
   return (
-    <div className={`flex items-center gap-3 mb-8 fade-up-1 ${center ? "justify-center" : ""}`}>
+    <div className={`flex items-center gap-3 fade-up-1 ${center ? "justify-center" : ""}`}>
       <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: T.primarySoft, color: T.primary }}>{num}</span>
       <h2 className="text-4xl font-extrabold tracking-tight" style={{ color: T.text }}>{title}</h2>
     </div>
@@ -115,11 +115,15 @@ function Slide1({ T }: { T: Theme }) {
           기록이 수익이 된다
         </p>
 
-        <div className="flex items-center gap-4 mb-10 fade-up-5">
-          {["김수현", "최우철"].map(name => (
-            <div key={name} className="flex items-center gap-2.5 px-6 py-3 rounded-full text-base font-bold"
-              style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, color: T.text }}>
-              <Icon d={I.person} size={15} color={T.primary} strokeWidth={2} /> {name}
+        <div className="flex gap-4 mb-10 fade-up-5">
+          {[{ name: "김수현", role: "Frontend · UI/UX" }, { name: "최우철", role: "Backend · API · DB" }].map(m => (
+            <div key={m.name} className="flex items-center gap-3 px-6 py-4 rounded-2xl"
+              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              <Icon d={I.person} size={16} color={T.primary} strokeWidth={2} />
+              <div className="text-left">
+                <div className="text-lg font-bold" style={{ color: T.text }}>{m.name}</div>
+                <div className="text-sm" style={{ color: T.muted }}>{m.role}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -150,7 +154,7 @@ function SlideBackground({ T }: { T: Theme }) {
   ];
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
-      <div className="max-w-5xl mx-auto w-full flex flex-col gap-4">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-7">
 
         <SlideHeader num="01" title="왜 만들었나" T={T} />
 
@@ -158,7 +162,6 @@ function SlideBackground({ T }: { T: Theme }) {
 
           {/* 왼쪽: 기존 도구의 한계 */}
           <div className="flex flex-col gap-2.5">
-            <div className="text-[12px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>TOOL LIMITATIONS</div>
             {limits.map((l, i) => (
               <div key={l.title} className={`flex gap-3.5 items-start p-4 rounded-xl fade-up-${i + 2}`}
                 style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
@@ -176,7 +179,6 @@ function SlideBackground({ T }: { T: Theme }) {
 
           {/* 오른쪽: 개미 투자자의 3가지 문제 */}
           <div className="flex flex-col gap-2.5">
-            <div className="text-[12px] font-bold tracking-[2px] mb-1" style={{ color: T.dim }}>THE PROBLEM</div>
             {problems.map((p, i) => (
               <div key={p.title} className={`flex gap-3 items-start p-4 rounded-xl fade-up-${i + 2}`}
                 style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, borderLeft: `3px solid ${p.color}` }}>
@@ -229,12 +231,11 @@ function Slide3({ T }: { T: Theme }) {
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
       <div className="max-w-5xl mx-auto w-full">
         <SlideHeader num="02" title="개발 목표 & 구현 범위" T={T} />
-        <div className="grid grid-cols-2 gap-12 items-center">
+        <div className="mt-7 grid grid-cols-2 gap-12 items-center">
 
           {/* 왼쪽: 핵심 철학 */}
           <div className="fade-up-2">
             <div className="mb-8">
-              <div className="text-[12px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>CORE PHILOSOPHY</div>
               <div className="text-[38px] font-black leading-tight whitespace-nowrap" style={{ color: T.text, letterSpacing: "-0.5px" }}>
                 "수기 입력의 마찰 자체가 <span style={{ color: T.primary }}>제품 가치"</span>
               </div>
@@ -251,7 +252,6 @@ function Slide3({ T }: { T: Theme }) {
 
           {/* 오른쪽: 구현 범위 */}
           <div className="fade-up-3">
-            <div className="text-[12px] font-bold tracking-[2px] mb-4" style={{ color: T.dim }}>IMPLEMENTATION SCOPE</div>
             <div className="grid grid-cols-2 gap-2.5">
               {scope.map(s => (
                 <div key={s.label} className="flex items-center gap-3 p-4 rounded-xl"
@@ -434,7 +434,7 @@ function OcrVideo({ T }: { T: Theme }) {
 function Slide4a({ T }: { T: Theme }) {
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ padding: "28px 64px" }}>
-      <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0">
+      <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0 gap-7">
         <SlideHeader num="05" title="핵심 기능" T={T} />
         <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
 
@@ -519,7 +519,7 @@ function Slide4b({ T }: { T: Theme }) {
       <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 700, height: 700, background: "radial-gradient(circle, rgba(5,192,114,0.1) 0%, transparent 65%)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
-      <div className="relative max-w-5xl mx-auto w-full">
+      <div className="relative max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="06" title="AI가 만드는 차별점" T={T} />
         <div className="grid grid-cols-3 gap-4">
 
@@ -579,7 +579,7 @@ function Slide4b({ T }: { T: Theme }) {
                 <span className="text-3xl font-extrabold" style={{ color: T.text }}>NVDA</span>
                 <span className="px-2 py-0.5 rounded-lg text-xs font-extrabold"
                   style={{ backgroundColor: T.primary, color: "#fff" }}>BUY</span>
-                <span className="text-base font-bold" style={{ color: T.primary }}>$850 ~ $900</span>
+                <span className="text-base font-bold" style={{ color: T.primary }}>$185 ~ $235</span>
               </div>
               <div className="flex flex-col gap-2 flex-1">
                 {[
@@ -654,7 +654,7 @@ function Slide5({ T }: { T: Theme }) {
 
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
-      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="03" title="기술 스택 & AI 활용" T={T} />
 
         <div className="grid grid-cols-2 gap-5 fade-up-2">
@@ -722,7 +722,7 @@ function Slide6({ T }: { T: Theme }) {
 
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
-      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="04" title="개발 에피소드" T={T} />
 
         {/* 상단 통계 */}
@@ -830,7 +830,7 @@ function Slide7({ T }: { T: Theme }) {
   ];
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
-      <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="07" title="DEMO" T={T} />
 
         {/* 내러티브 타임라인 */}
@@ -877,13 +877,6 @@ function Slide7({ T }: { T: Theme }) {
           ))}
         </div>
 
-        {/* URL 바 */}
-        <div className="flex items-center gap-4 px-5 py-3 rounded-2xl fade-up-6"
-          style={{ backgroundColor: T.primarySoft, border: `1px solid ${T.primary}44` }}>
-          <Icon d={I.globe} size={16} color={T.primary} strokeWidth={2} />
-          <span className="text-base font-extrabold" style={{ color: T.primary }}>localhost:3000</span>
-          <span className="text-sm" style={{ color: T.muted }}>demo@demo.com · demo1234</span>
-        </div>
       </div>
     </div>
   );
