@@ -177,27 +177,28 @@ npm run dev                        # 개발 서버 실행 → localhost:3000
 
 ## 7. 운영 체크리스트
 
-### 개발 시작 전
+### 외부 서비스 상태 확인
 
-- [ ] [Supabase 대시보드](https://supabase.com/dashboard) 접속 — 프로젝트 활성 상태 확인
-  > ⚠️ 7일 이상 비활성 시 자동 일시 중지
-- [ ] `git pull` — 팀원 작업 반영
-- [ ] `npm run dev` — 서버 정상 기동 확인
+- [ ] **Supabase** — 대시보드에서 프로젝트 활성 상태 확인
+  > ⚠️ 7일 이상 비활성 시 자동 일시 중지 — 주 1회 이상 접속 권장
+- [ ] **KIS Open API** — 현재가 조회 정상 응답 확인 · 장애 시 yahoo-finance2 폴백 자동 적용
+- [ ] **Claude API** — 종목 분석 · 성향 진단 · 코칭 정상 응답 확인
 
-### 개발 중
+### API 사용량 모니터링
 
-- [ ] KIS API 오류 시 → 서버 재시작 (토큰 자동 재발급)
-- [ ] Claude API 사용량 한도 확인
+- [ ] `/admin` 관리자 페이지에서 사용자별 Claude API 호출 횟수 · 토큰 사용량 확인
   - 종목 분석: 사용자당 10회/일
   - AI 코칭: 사용자당 3회/일
   - 투자성향 진단: 사용자당 1회/일
-- [ ] DB 스키마 변경 시 → `npx prisma migrate dev --name 변경내용` 실행 후 팀원 공유
+- [ ] Anthropic Console에서 전체 비용 모니터링
 
-### 발표 전 최종 점검
+### DB 관리
 
-- [ ] `npm run build` — 빌드 오류 없는지 확인
-- [ ] 테스트 계정 + 샘플 데이터 준비
-- [ ] 라이트/다크모드 전환 확인
-- [ ] PC · 모바일 반응형 레이아웃 확인
-- [ ] 외부 API 정상 응답 확인 (KIS · Claude · R-ONE)
-- [ ] `/slides` 발표 슬라이드 PDF 출력 확인
+- [ ] 스키마 변경 시 → `npx prisma migrate dev --name 변경내용` 실행
+- [ ] `npx prisma studio` — 데이터 브라우저로 DB 상태 확인 (localhost:5555)
+
+### 보안 점검
+
+- [ ] `.env.local` git 커밋 여부 확인 (`.gitignore` 등록 필수)
+- [ ] KIS · Claude · OAuth API 키 만료 여부 주기적 확인
+- [ ] NextAuth Secret 32바이트 이상 유지 확인
