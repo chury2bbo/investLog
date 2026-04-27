@@ -80,6 +80,8 @@ interface AccountSummary {
   evalUSD: number;
   totalKRW: number;
   pnlRate: number;
+  pnl: number;
+  invested: number;
 }
 
 import { formatKRW, formatCompact } from "@/lib/format";
@@ -149,6 +151,8 @@ export default function DashboardPage() {
   const [personalityLoading, setPersonalityLoading] = useState(true);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
   const [holdingSheetOpen, setHoldingSheetOpen] = useState(false);
+  const [pnlSheetOpen, setPnlSheetOpen] = useState(false);
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -492,6 +496,8 @@ export default function DashboardPage() {
         evalUSD,
         totalKRW,
         pnlRate,
+        pnl: currentValue - invested,
+        invested,
       };
     });
   }
@@ -912,6 +918,7 @@ export default function DashboardPage() {
             label: "총 수익금",
             value: `${pnlPositive ? "+" : ""}${formatCompact(summary.totalPnl, "KRW")}`,
             color: pnlPositive ? "var(--color-positive)" : "var(--color-negative)",
+            onClick: () => setPnlSheetOpen(true),
           },
           {
             label: "보유 종목",
@@ -923,11 +930,14 @@ export default function DashboardPage() {
             label: "총 계좌",
             value: `${accounts.length}개`,
             color: undefined,
+            onClick: accounts.length > 0 ? () => setAccountSheetOpen(true) : undefined,
           },
         ].map((s) => {
           const isReturnCard = s.label === "총 수익률";
+          const isPnlCard = s.label === "총 수익금";
           const isHoldingCard = s.label === "보유 종목";
-          const isClickable = isReturnCard || (isHoldingCard && holdingWeights.length > 0);
+          const isAccountCard = s.label === "총 계좌";
+          const isClickable = isReturnCard || isPnlCard || (isHoldingCard && holdingWeights.length > 0) || (isAccountCard && accounts.length > 0);
           return (
             <Card
               key={s.label}
@@ -946,9 +956,25 @@ export default function DashboardPage() {
                     </svg>
                   </span>
                 )}
+                {isPnlCard && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    계좌별
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
                 {isHoldingCard && holdingWeights.length > 0 && (
                   <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
                     비중
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
+                {isAccountCard && accounts.length > 0 && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    상세
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 18l6-6-6-6"/>
                     </svg>
@@ -1486,6 +1512,91 @@ export default function DashboardPage() {
         onClose={() => setBenchmarkOpen(false)}
         myReturnRate={summary.totalPnlRate}
       />
+
+      {/* ── 총 수익금 계좌별 BottomSheet ── */}
+      <BottomSheet
+        open={pnlSheetOpen}
+        onClose={() => setPnlSheetOpen(false)}
+        title="계좌별 수익금"
+        titleRight={
+          <span className="text-xs text-[var(--color-g400)]">총 {accountSummaries.length}개 계좌</span>
+        }
+      >
+        <div className="space-y-2">
+          {/* 총합 */}
+          <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+            <span className="text-sm font-bold text-[var(--color-text)]">전체 합계</span>
+            <span
+              className="text-sm font-extrabold"
+              style={{ color: summary.totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}
+            >
+              {summary.totalPnl >= 0 ? "+" : ""}{formatKRW(summary.totalPnl)}
+            </span>
+          </div>
+          {/* 계좌별 */}
+          {accountSummaries.map((acc) => (
+            <div
+              key={acc.id}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-[var(--color-g100)] dark:border-[var(--color-border)]"
+            >
+              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                <span className="text-sm font-semibold text-[var(--color-text)] truncate">{acc.name}</span>
+                <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                  매수 {formatCompact(acc.invested, "KRW")}
+                </span>
+              </div>
+              <div className="flex flex-col items-end gap-0.5 shrink-0 ml-3">
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: acc.pnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}
+                >
+                  {acc.pnl >= 0 ? "+" : ""}{formatCompact(acc.pnl, "KRW")}
+                </span>
+                <PnlTag value={acc.pnlRate} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
+
+      {/* ── 총 계좌 목록 BottomSheet ── */}
+      <BottomSheet
+        open={accountSheetOpen}
+        onClose={() => setAccountSheetOpen(false)}
+        title="계좌 목록"
+        titleRight={
+          <span className="text-xs text-[var(--color-g400)]">총 {accounts.length}개</span>
+        }
+      >
+        <div className="space-y-2">
+          {accountSummaries.map((acc) => (
+            <div
+              key={acc.id}
+              className="flex items-center justify-between px-3 py-3 rounded-xl border border-[var(--color-g100)] dark:border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors"
+              onClick={() => { setAccountSheetOpen(false); router.push(`/accounts/${acc.id}`); }}
+            >
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)] shrink-0">
+                    {acc.type}
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--color-text)] truncate">{acc.name}</span>
+                </div>
+                {acc.memo && (
+                  <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] truncate">{acc.memo}</span>
+                )}
+                <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                  {acc.stockCount}종목 · 총 {formatCompact(acc.totalKRW, "KRW")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <PnlTag value={acc.pnlRate} />
+                <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)]">›</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
     </div>
   );
 }
