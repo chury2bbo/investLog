@@ -127,7 +127,6 @@ function Slide1({ T }: { T: Theme }) {
             </div>
           ))}
         </div>
-        <div className="text-base fade-up-6" style={{ color: T.dim }}>2026.05.22</div>
       </div>
     </div>
   );
@@ -914,7 +913,6 @@ function Slide8({ T }: { T: Theme }) {
             </div>
           ))}
         </div>
-        <div className="mt-6 text-base fade-up-6" style={{ color: T.dim }}>2026.05.22</div>
       </div>
     </div>
   );
