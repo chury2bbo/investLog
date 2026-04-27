@@ -22,7 +22,7 @@
 | 기능 | 설명 |
 |------|------|
 | 통합 포트폴리오 | 국내·해외 종목 구분 없이 계좌별 보유 종목 · 수익률 통합 관리 |
-| 매매일지 | 매매 이유 태그 + 심리 상태 + 자유 메모 — 가계부 방식 기록 |
+| 매매일지 | 매매 이유 태그 + 심리 상태 + 자유 메모 — 가계부 방식 기록. 캘린더 뷰에서 일별 투자 다이어리 메모 입력 가능 |
 | AI 투자성향 진단 | 매매 패턴 기반 투자자 유형 분류 (Level 1·2 자동 분기) |
 | AI 코칭 리포트 | 잘하는 점 / 반복 실수 / 개선 목표 제시 · 히스토리 누적 |
 | AI 종목 분석 | SWOT · 적정가 · 최근 호재/악재 요약 |
@@ -92,7 +92,7 @@
 | `src/lib/parseAiJson.ts` | AI 응답 JSON 파싱 헬퍼 (코드블록 + greedy 추출) |
 | `src/lib/format.ts` | 숫자 · 날짜 포맷 유틸 |
 | `components/ui/**` (17종) | Button · Card · BottomSheet · Skeleton 등 공통 UI 컴포넌트 |
-| `prisma/schema.prisma` | DB 스키마 전체 (14개 모델) |
+| `prisma/schema.prisma` | DB 스키마 전체 (15개 모델) |
 | `middleware.ts` | 인증 보호 라우트 · 리다이렉트 처리 |
 | `auth.ts` | NextAuth 설정 (JWT · Credentials · Google · Kakao) |
 

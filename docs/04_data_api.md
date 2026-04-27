@@ -141,7 +141,7 @@ users
         └── cash_log (1:N, tradeLogId=null이면 순수 입출금)
 
 brokerage_company / stock_master / ticker_*_cache /
-api_usage_log / personality_result / coaching_history
+api_usage_log / personality_result / coaching_history / daily_memo
 ```
 
 ### 9-2. Prisma 스키마

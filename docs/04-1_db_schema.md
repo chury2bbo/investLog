@@ -1,5 +1,5 @@
 # 🚀 AI 투자 관리 프로그램 — DB 스키마
-> 최종 업데이트: 2026-04-20 | 실제 `prisma/schema.prisma` 기준
+> 최종 업데이트: 2026-04-27 | 실제 `prisma/schema.prisma` 기준
 
 ---
 
@@ -13,6 +13,7 @@ users (onboardingDone)
   ├── sessions (1:N)
   ├── user_analysis_logs (1:N)      ← 사용자가 분석 본 종목 이력
   ├── monthly_asset_snapshots (1:N) ← 월별 자산 스냅샷 (자산 추이 차트)
+  ├── daily_memo (1:N)              ← 캘린더 일별 투자 메모 (다이어리)
   └── accounts [InvestAccount] (1:N)
         ├── holdings (1:N)          ← sectorAuto / sectorManual / tags
         ├── trade_log (1:N)         ← reasonTags / emotion / reasonMemo
@@ -359,6 +360,22 @@ model CoachingHistory {
 
   @@index([userId])
   @@map("coaching_history")
+}
+
+// 캘린더 일별 투자 메모 (날짜별 자유 기록 — 다이어리 기능)
+// DB 테이블명: "daily_memo"
+model DailyMemo {
+  id        Int      @id @default(autoincrement()) // 메모 고유 ID
+  userId    String                                 // 사용자 ID (User.id)
+  date      String                                 // 메모 날짜 (KST 기준 "YYYY-MM-DD" 문자열)
+  content   String                                 // 메모 내용 (자유 텍스트, 빈 내용 저장 시 행 삭제)
+  createdAt DateTime @default(now())               // 생성 일시
+  updatedAt DateTime @updatedAt                    // 마지막 수정 일시
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date]) // 사용자당 날짜별 메모 1개 (upsert 기준)
+  @@map("daily_memo")
 }
 ```
 
