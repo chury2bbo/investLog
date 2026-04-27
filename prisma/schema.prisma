@@ -33,6 +33,7 @@ model User {
   analysisLogs   UserAnalysisLog[]
   assetSnapshots MonthlyAssetSnapshot[]
   oauthAccounts  Account[]
+  dailyMemos     DailyMemo[]
 }
 
 model Account {
@@ -250,4 +251,17 @@ model CoachingHistory {
 
   @@index([userId])
   @@map("coaching_history")
+}
+
+model DailyMemo {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  date      String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("daily_memo")
 }

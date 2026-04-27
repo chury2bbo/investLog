@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { DayPicker } from "react-day-picker";
 import { ko } from "react-day-picker/locale";
-import { LoadingSpinner, EmptyState } from "@/components/ui";
+import { LoadingSpinner, EmptyState, Button } from "@/components/ui";
 import { ReasonTagChip } from "@/app/(dashboard)/trades/_components/ReasonTagChip";
 
 // ── 타입 ────────────────────────────────────────────────────
@@ -70,7 +70,13 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(toDateKey(new Date()));
 
-  // 월별 데이터 fetch
+  // 메모 states
+  const [memoedDates, setMemoedDates] = useState<Set<string>>(new Set());
+  const [memoContent, setMemoContent] = useState("");
+  const [memoSaving, setMemoSaving] = useState(false);
+  const [memoLoaded, setMemoLoaded] = useState(false);
+
+  // 월별 매매 fetch
   const fetchMonthTrades = useCallback(async (d: Date) => {
     setLoading(true);
     try {
@@ -89,9 +95,73 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
     }
   }, [tradeType, market]);
 
+  // 월별 메모 있는 날짜 목록 fetch
+  const fetchMemoedDates = useCallback(async (d: Date) => {
+    try {
+      const res = await fetch(`/api/trades/memo?month=${formatMonthParam(d)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMemoedDates(new Set<string>(data.dates ?? []));
+      }
+    } catch { /* */ }
+  }, []);
+
+  // 선택된 날짜 메모 fetch
+  const fetchMemo = useCallback(async (date: string) => {
+    setMemoLoaded(false);
+    setMemoContent("");
+    try {
+      const res = await fetch(`/api/trades/memo?date=${date}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMemoContent(data.content ?? "");
+      }
+    } catch { /* */ } finally {
+      setMemoLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMonthTrades(month);
-  }, [month, fetchMonthTrades]);
+    fetchMemoedDates(month);
+  }, [month, fetchMonthTrades, fetchMemoedDates]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchMemo(selectedDate);
+    } else {
+      setMemoContent("");
+      setMemoLoaded(false);
+    }
+  }, [selectedDate, fetchMemo]);
+
+  // 메모 저장
+  async function saveMemo() {
+    if (!selectedDate) return;
+    setMemoSaving(true);
+    try {
+      const res = await fetch("/api/trades/memo", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: selectedDate, content: memoContent }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("[memo] PUT failed", res.status, err);
+        return;
+      }
+      setMemoedDates((prev) => {
+        const next = new Set(prev);
+        if (memoContent.trim()) next.add(selectedDate);
+        else next.delete(selectedDate);
+        return next;
+      });
+    } catch (e) {
+      console.error("[memo] PUT error", e);
+    } finally {
+      setMemoSaving(false);
+    }
+  }
 
   // 날짜별 매매 그룹
   const tradesByDate: Record<string, Trade[]> = {};
@@ -183,6 +253,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                 const dayTrades = tradesByDate[key];
                 const hasBuy = dayTrades?.some((t) => t.type === "BUY");
                 const hasSell = dayTrades?.some((t) => t.type === "SELL");
+                const hasMemo = memoedDates.has(key);
                 const isSelected = selectedDate === key;
                 return (
                   <button
@@ -194,10 +265,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     }`}
                   >
                     {day.date.getDate()}
-                    {(hasBuy || hasSell) && (
+                    {(hasBuy || hasSell || hasMemo) && (
                       <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
                         {hasBuy && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-positive)]" />}
                         {hasSell && <span className="w-1.5 h-1.5 rounded-full bg-[#F07D05]" />}
+                        {hasMemo && <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />}
                       </span>
                     )}
                   </button>
@@ -206,7 +278,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
             }}
           />
 
-          {/* 선택된 날짜 매매 리스트 */}
+          {/* 선택된 날짜 섹션 */}
           <div className="mt-4 border-t border-[var(--color-g100)] dark:border-[var(--color-border)] pt-4">
             {selectedDate ? (
               <>
@@ -216,6 +288,8 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     {selectedTrades.length}건
                   </span>
                 </div>
+
+                {/* 매매 목록 */}
                 {selectedTrades.length === 0 ? (
                   <EmptyState message="해당 날짜에 매매 기록이 없습니다." />
                 ) : (
@@ -226,7 +300,6 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                         onClick={() => onSelect?.(t as unknown as Trade)}
                         className="px-1 py-2.5 border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0 cursor-pointer active:bg-[var(--color-g100)] dark:active:bg-[var(--color-border)] transition-colors rounded-lg"
                       >
-                        {/* 1행 */}
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span
@@ -255,7 +328,6 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                             {formatTotal(t.price, t.quantity, t.ticker)}
                           </span>
                         </div>
-                        {/* 2행 */}
                         <div className="flex justify-between items-center">
                           <span className="text-[12px] text-[#9AA99A] dark:text-[#5A6A5A] truncate">
                             {formatPrice(t.price, t.ticker)} × {t.quantity}주 · {t.account.brokerageCompany.name}
@@ -268,6 +340,43 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     ))}
                   </div>
                 )}
+
+                {/* 일별 메모 섹션 */}
+                <div className="mt-4 pt-4 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
+                  <div className="flex items-center gap-1.5 mb-2 px-1">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-[#9AA99A] dark:text-[#5A6A5A] shrink-0">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="text-[12px] font-medium text-[#9AA99A] dark:text-[#5A6A5A]">오늘의 메모</span>
+                  </div>
+                  {!memoLoaded ? (
+                    <div className="px-1 space-y-2">
+                      <div className="h-3.5 bg-[var(--color-g100)] dark:bg-[var(--color-border)] rounded animate-pulse w-3/4" />
+                      <div className="h-3.5 bg-[var(--color-g100)] dark:bg-[var(--color-border)] rounded animate-pulse w-1/2" />
+                    </div>
+                  ) : (
+                    <div className="px-1">
+                      <textarea
+                        value={memoContent}
+                        onChange={(e) => setMemoContent(e.target.value)}
+                        placeholder="이 날의 시장 흐름, 투자 일지, 감정 등을 자유롭게 기록하세요"
+                        className="w-full text-[13px] text-[var(--color-text)] bg-transparent placeholder:text-[#C4CCC4] dark:placeholder:text-[#3D4D40] resize-none outline-none border-b border-[var(--color-g200)] dark:border-[var(--color-border)] pb-2 pt-1 min-h-[64px] leading-relaxed"
+                        rows={3}
+                      />
+                      <div className="flex justify-end mt-2">
+                        <Button
+                          variant="black"
+                          size="sm"
+                          onClick={saveMemo}
+                          disabled={memoSaving}
+                        >
+                          {memoSaving ? "저장 중..." : "저장"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <p className="text-[12px] text-center text-[#9AA99A] dark:text-[#5A6A5A] py-4">

@@ -269,6 +269,7 @@ export type UserWhereInput = {
   analysisLogs?: Prisma.UserAnalysisLogListRelationFilter
   assetSnapshots?: Prisma.MonthlyAssetSnapshotListRelationFilter
   oauthAccounts?: Prisma.AccountListRelationFilter
+  dailyMemos?: Prisma.DailyMemoListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -288,6 +289,7 @@ export type UserOrderByWithRelationInput = {
   analysisLogs?: Prisma.UserAnalysisLogOrderByRelationAggregateInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotOrderByRelationAggregateInput
   oauthAccounts?: Prisma.AccountOrderByRelationAggregateInput
+  dailyMemos?: Prisma.DailyMemoOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -310,6 +312,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   analysisLogs?: Prisma.UserAnalysisLogListRelationFilter
   assetSnapshots?: Prisma.MonthlyAssetSnapshotListRelationFilter
   oauthAccounts?: Prisma.AccountListRelationFilter
+  dailyMemos?: Prisma.DailyMemoListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -365,6 +368,7 @@ export type UserCreateInput = {
   analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -384,6 +388,7 @@ export type UserUncheckedCreateInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -403,6 +408,7 @@ export type UserUpdateInput = {
   analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -422,6 +428,7 @@ export type UserUncheckedUpdateInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -611,6 +618,20 @@ export type UserUpdateOneRequiredWithoutAssetSnapshotsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssetSnapshotsInput, Prisma.UserUpdateWithoutAssetSnapshotsInput>, Prisma.UserUncheckedUpdateWithoutAssetSnapshotsInput>
 }
 
+export type UserCreateNestedOneWithoutDailyMemosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyMemosInput, Prisma.UserUncheckedCreateWithoutDailyMemosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyMemosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDailyMemosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyMemosInput, Prisma.UserUncheckedCreateWithoutDailyMemosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyMemosInput
+  upsert?: Prisma.UserUpsertWithoutDailyMemosInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDailyMemosInput, Prisma.UserUpdateWithoutDailyMemosInput>, Prisma.UserUncheckedUpdateWithoutDailyMemosInput>
+}
+
 export type UserCreateWithoutOauthAccountsInput = {
   id?: string
   email: string
@@ -627,6 +648,7 @@ export type UserCreateWithoutOauthAccountsInput = {
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
   analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -645,6 +667,7 @@ export type UserUncheckedCreateWithoutOauthAccountsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
   analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -679,6 +702,7 @@ export type UserUpdateWithoutOauthAccountsInput = {
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
   analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -697,6 +721,7 @@ export type UserUncheckedUpdateWithoutOauthAccountsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
   analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -715,6 +740,7 @@ export type UserCreateWithoutSessionsInput = {
   analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -733,6 +759,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -767,6 +794,7 @@ export type UserUpdateWithoutSessionsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -785,6 +813,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvestAccountsInput = {
@@ -803,6 +832,7 @@ export type UserCreateWithoutInvestAccountsInput = {
   analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvestAccountsInput = {
@@ -821,6 +851,7 @@ export type UserUncheckedCreateWithoutInvestAccountsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvestAccountsInput = {
@@ -855,6 +886,7 @@ export type UserUpdateWithoutInvestAccountsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvestAccountsInput = {
@@ -873,6 +905,7 @@ export type UserUncheckedUpdateWithoutInvestAccountsInput = {
   analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAnalysisLogsInput = {
@@ -891,6 +924,7 @@ export type UserCreateWithoutAnalysisLogsInput = {
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAnalysisLogsInput = {
@@ -909,6 +943,7 @@ export type UserUncheckedCreateWithoutAnalysisLogsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAnalysisLogsInput = {
@@ -943,6 +978,7 @@ export type UserUpdateWithoutAnalysisLogsInput = {
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnalysisLogsInput = {
@@ -961,6 +997,7 @@ export type UserUncheckedUpdateWithoutAnalysisLogsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
   assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAssetSnapshotsInput = {
@@ -979,6 +1016,7 @@ export type UserCreateWithoutAssetSnapshotsInput = {
   investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
   analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAssetSnapshotsInput = {
@@ -997,6 +1035,7 @@ export type UserUncheckedCreateWithoutAssetSnapshotsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
   analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
   oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  dailyMemos?: Prisma.DailyMemoUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAssetSnapshotsInput = {
@@ -1031,6 +1070,7 @@ export type UserUpdateWithoutAssetSnapshotsInput = {
   investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
   analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssetSnapshotsInput = {
@@ -1049,6 +1089,99 @@ export type UserUncheckedUpdateWithoutAssetSnapshotsInput = {
   investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
   analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
   oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  dailyMemos?: Prisma.DailyMemoUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDailyMemosInput = {
+  id?: string
+  email: string
+  name?: string | null
+  password?: string | null
+  provider?: string | null
+  onboardingDone?: boolean
+  assetGoal?: bigint | number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  emailVerified?: Date | string | null
+  image?: string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  investAccounts?: Prisma.InvestAccountCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogCreateNestedManyWithoutUserInput
+  assetSnapshots?: Prisma.MonthlyAssetSnapshotCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDailyMemosInput = {
+  id?: string
+  email: string
+  name?: string | null
+  password?: string | null
+  provider?: string | null
+  onboardingDone?: boolean
+  assetGoal?: bigint | number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  emailVerified?: Date | string | null
+  image?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  investAccounts?: Prisma.InvestAccountUncheckedCreateNestedManyWithoutUserInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedCreateNestedManyWithoutUserInput
+  assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedCreateNestedManyWithoutUserInput
+  oauthAccounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDailyMemosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyMemosInput, Prisma.UserUncheckedCreateWithoutDailyMemosInput>
+}
+
+export type UserUpsertWithoutDailyMemosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDailyMemosInput, Prisma.UserUncheckedUpdateWithoutDailyMemosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyMemosInput, Prisma.UserUncheckedCreateWithoutDailyMemosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDailyMemosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDailyMemosInput, Prisma.UserUncheckedUpdateWithoutDailyMemosInput>
+}
+
+export type UserUpdateWithoutDailyMemosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  investAccounts?: Prisma.InvestAccountUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUpdateManyWithoutUserNestedInput
+  assetSnapshots?: Prisma.MonthlyAssetSnapshotUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDailyMemosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingDone?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  assetGoal?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  investAccounts?: Prisma.InvestAccountUncheckedUpdateManyWithoutUserNestedInput
+  analysisLogs?: Prisma.UserAnalysisLogUncheckedUpdateManyWithoutUserNestedInput
+  assetSnapshots?: Prisma.MonthlyAssetSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1062,6 +1195,7 @@ export type UserCountOutputType = {
   analysisLogs: number
   assetSnapshots: number
   oauthAccounts: number
+  dailyMemos: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1070,6 +1204,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   analysisLogs?: boolean | UserCountOutputTypeCountAnalysisLogsArgs
   assetSnapshots?: boolean | UserCountOutputTypeCountAssetSnapshotsArgs
   oauthAccounts?: boolean | UserCountOutputTypeCountOauthAccountsArgs
+  dailyMemos?: boolean | UserCountOutputTypeCountDailyMemosArgs
 }
 
 /**
@@ -1117,6 +1252,13 @@ export type UserCountOutputTypeCountOauthAccountsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.AccountWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDailyMemosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DailyMemoWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1135,6 +1277,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   analysisLogs?: boolean | Prisma.User$analysisLogsArgs<ExtArgs>
   assetSnapshots?: boolean | Prisma.User$assetSnapshotsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
+  dailyMemos?: boolean | Prisma.User$dailyMemosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1187,6 +1330,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   analysisLogs?: boolean | Prisma.User$analysisLogsArgs<ExtArgs>
   assetSnapshots?: boolean | Prisma.User$assetSnapshotsArgs<ExtArgs>
   oauthAccounts?: boolean | Prisma.User$oauthAccountsArgs<ExtArgs>
+  dailyMemos?: boolean | Prisma.User$dailyMemosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1200,6 +1344,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     analysisLogs: Prisma.$UserAnalysisLogPayload<ExtArgs>[]
     assetSnapshots: Prisma.$MonthlyAssetSnapshotPayload<ExtArgs>[]
     oauthAccounts: Prisma.$AccountPayload<ExtArgs>[]
+    dailyMemos: Prisma.$DailyMemoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1612,6 +1757,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   analysisLogs<T extends Prisma.User$analysisLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$analysisLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAnalysisLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assetSnapshots<T extends Prisma.User$assetSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assetSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MonthlyAssetSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthAccounts<T extends Prisma.User$oauthAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dailyMemos<T extends Prisma.User$dailyMemosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyMemosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyMemoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2162,6 +2308,30 @@ export type User$oauthAccountsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+}
+
+/**
+ * User.dailyMemos
+ */
+export type User$dailyMemosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DailyMemo
+   */
+  select?: Prisma.DailyMemoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DailyMemo
+   */
+  omit?: Prisma.DailyMemoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DailyMemoInclude<ExtArgs> | null
+  where?: Prisma.DailyMemoWhereInput
+  orderBy?: Prisma.DailyMemoOrderByWithRelationInput | Prisma.DailyMemoOrderByWithRelationInput[]
+  cursor?: Prisma.DailyMemoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DailyMemoScalarFieldEnum | Prisma.DailyMemoScalarFieldEnum[]
 }
 
 /**

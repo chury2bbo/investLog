@@ -400,7 +400,8 @@ export const ModelName = {
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog',
   PersonalityResult: 'PersonalityResult',
-  CoachingHistory: 'CoachingHistory'
+  CoachingHistory: 'CoachingHistory',
+  DailyMemo: 'DailyMemo'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog" | "personalityResult" | "coachingHistory"
+    modelProps: "brokerageCompany" | "user" | "account" | "session" | "investAccount" | "holding" | "tradeLog" | "cashBalance" | "cashLog" | "stockMaster" | "tickerSummaryCache" | "tickerAnalysisCache" | "userAnalysisLog" | "monthlyAssetSnapshot" | "apiUsageLog" | "personalityResult" | "coachingHistory" | "dailyMemo"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1678,6 +1679,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DailyMemo: {
+      payload: Prisma.$DailyMemoPayload<ExtArgs>
+      fields: Prisma.DailyMemoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DailyMemoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DailyMemoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        findFirst: {
+          args: Prisma.DailyMemoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DailyMemoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        findMany: {
+          args: Prisma.DailyMemoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>[]
+        }
+        create: {
+          args: Prisma.DailyMemoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        createMany: {
+          args: Prisma.DailyMemoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DailyMemoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>[]
+        }
+        delete: {
+          args: Prisma.DailyMemoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        update: {
+          args: Prisma.DailyMemoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        deleteMany: {
+          args: Prisma.DailyMemoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DailyMemoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DailyMemoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>[]
+        }
+        upsert: {
+          args: Prisma.DailyMemoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyMemoPayload>
+        }
+        aggregate: {
+          args: Prisma.DailyMemoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDailyMemo>
+        }
+        groupBy: {
+          args: Prisma.DailyMemoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyMemoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DailyMemoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyMemoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1951,6 +2026,18 @@ export const CoachingHistoryScalarFieldEnum = {
 export type CoachingHistoryScalarFieldEnum = (typeof CoachingHistoryScalarFieldEnum)[keyof typeof CoachingHistoryScalarFieldEnum]
 
 
+export const DailyMemoScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyMemoScalarFieldEnum = (typeof DailyMemoScalarFieldEnum)[keyof typeof DailyMemoScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2169,6 +2256,7 @@ export type GlobalOmitConfig = {
   apiUsageLog?: Prisma.ApiUsageLogOmit
   personalityResult?: Prisma.PersonalityResultOmit
   coachingHistory?: Prisma.CoachingHistoryOmit
+  dailyMemo?: Prisma.DailyMemoOmit
 }
 
 /* Types for Logging */

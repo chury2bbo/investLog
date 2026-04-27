@@ -67,7 +67,8 @@ export const ModelName = {
   MonthlyAssetSnapshot: 'MonthlyAssetSnapshot',
   ApiUsageLog: 'ApiUsageLog',
   PersonalityResult: 'PersonalityResult',
-  CoachingHistory: 'CoachingHistory'
+  CoachingHistory: 'CoachingHistory',
+  DailyMemo: 'DailyMemo'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -318,6 +319,18 @@ export const CoachingHistoryScalarFieldEnum = {
 } as const
 
 export type CoachingHistoryScalarFieldEnum = (typeof CoachingHistoryScalarFieldEnum)[keyof typeof CoachingHistoryScalarFieldEnum]
+
+
+export const DailyMemoScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyMemoScalarFieldEnum = (typeof DailyMemoScalarFieldEnum)[keyof typeof DailyMemoScalarFieldEnum]
 
 
 export const SortOrder = {

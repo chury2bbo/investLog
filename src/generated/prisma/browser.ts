@@ -102,3 +102,8 @@ export type PersonalityResult = Prisma.PersonalityResultModel
  * 
  */
 export type CoachingHistory = Prisma.CoachingHistoryModel
+/**
+ * Model DailyMemo
+ * 
+ */
+export type DailyMemo = Prisma.DailyMemoModel
