@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DatePicker } from "@/components/ui";
 import { StockSearchInput } from "./StockSearchInput";
 import { type Filters, type AccountOption, QUICK_DATE_OPTIONS, getDateFrom } from "./types";
 
@@ -21,18 +22,18 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts }: Trad
     <div className="px-4 py-3 space-y-2.5 border-b border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[#F8FAF8] dark:bg-[#111A14]">
       {/* 1행: from~to + 기간선택 */}
       <div className="flex items-center gap-1.5">
-        <input
-          type="date"
+        <DatePicker
           value={filters.dateFrom}
-          onChange={(e) => set("dateFrom", e.target.value)}
-          className="flex-1 min-w-0 px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+          onChange={(v) => set("dateFrom", v)}
+          inputClassName="w-full px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer"
+          wrapperClassName="flex-1 min-w-0"
         />
         <span className="shrink-0 text-xs text-[var(--color-g400)]">~</span>
-        <input
-          type="date"
+        <DatePicker
           value={filters.dateTo}
-          onChange={(e) => set("dateTo", e.target.value)}
-          className="flex-1 min-w-0 px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+          onChange={(v) => set("dateTo", v)}
+          inputClassName="w-full px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer"
+          wrapperClassName="flex-1 min-w-0"
         />
         <div className="relative shrink-0">
           <button

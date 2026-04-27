@@ -8,9 +8,19 @@ interface DatePickerProps {
   label?: string;
   value: string; // YYYY-MM-DD
   onChange: (value: string) => void;
+  inputClassName?: string;
+  wrapperClassName?: string;
+  maxDate?: Date;
 }
 
-export function DatePicker({ label, value, onChange }: DatePickerProps) {
+export function DatePicker({
+  label,
+  value,
+  onChange,
+  inputClassName,
+  wrapperClassName = "w-full",
+  maxDate = new Date(),
+}: DatePickerProps) {
   const selected = value ? new Date(value) : new Date();
 
   function handleChange(date: Date | null) {
@@ -19,10 +29,13 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
     onChange(kst.toISOString().slice(0, 10));
   }
 
+  const defaultInputClassName =
+    "w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] dark:text-[var(--color-text)] cursor-pointer";
+
   return (
     <div>
       {label && (
-        <label className="block text-xs font-medium mb-1 text-[var(--color-g500)] dark:text-[var(--color-muted)]">
+        <label className="block text-xs font-medium mb-1 text-(--color-g500) dark:text-(--color-muted)">
           {label}
         </label>
       )}
@@ -31,9 +44,9 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
         onChange={handleChange}
         locale={ko}
         dateFormat="yyyy.MM.dd"
-        maxDate={new Date()}
-        className="w-full pb-2 text-sm bg-transparent border-b border-[var(--color-g200)] dark:border-[var(--color-border)] outline-none text-[var(--color-text)] dark:text-[var(--color-text)] cursor-pointer"
-        wrapperClassName="w-full"
+        maxDate={maxDate}
+        className={inputClassName ?? defaultInputClassName}
+        wrapperClassName={wrapperClassName}
         calendarClassName="investlog-calendar"
         popperPlacement="bottom-start"
         portalId="datepicker-portal"
@@ -51,16 +64,40 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
           overflow: hidden;
           background: var(--color-surface);
           color: var(--color-text);
+          padding: 4px;
         }
         .investlog-calendar .react-datepicker__header {
           background: var(--color-surface);
           border-bottom: 1px solid var(--color-g100);
-          padding-top: 14px;
+          padding: 12px 4px 8px;
         }
         .investlog-calendar .react-datepicker__current-month {
           font-size: 14px;
           font-weight: 700;
           color: var(--color-text);
+          margin-bottom: 8px;
+        }
+        .investlog-calendar .react-datepicker__day-names {
+          display: flex;
+          justify-content: space-around;
+          margin: 0;
+        }
+        .investlog-calendar .react-datepicker__week {
+          display: flex;
+          justify-content: space-around;
+        }
+        .investlog-calendar .react-datepicker__day-name,
+        .investlog-calendar .react-datepicker__day {
+          width: 2rem;
+          height: 2rem;
+          line-height: 2rem;
+          margin: 2px 0;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+          box-sizing: border-box;
         }
         .investlog-calendar .react-datepicker__day-name {
           color: var(--color-g400);
@@ -69,7 +106,6 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
         }
         .investlog-calendar .react-datepicker__day {
           color: var(--color-text);
-          border-radius: 8px;
           font-size: 13px;
         }
         .investlog-calendar .react-datepicker__day:hover {
@@ -80,12 +116,16 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
           background: var(--color-primary) !important;
           color: #fff !important;
           font-weight: 700;
+          border-radius: 50% !important;
         }
-        .investlog-calendar .react-datepicker__day--today {
+        .investlog-calendar .react-datepicker__day--today:not(.react-datepicker__day--selected) {
           font-weight: 700;
           color: var(--color-primary);
         }
         .investlog-calendar .react-datepicker__day--disabled {
+          color: var(--color-g300);
+        }
+        .investlog-calendar .react-datepicker__day--outside-month {
           color: var(--color-g300);
         }
         .investlog-calendar .react-datepicker__navigation-icon::before {
@@ -93,6 +133,9 @@ export function DatePicker({ label, value, onChange }: DatePickerProps) {
         }
         .investlog-calendar .react-datepicker__triangle {
           display: none;
+        }
+        .investlog-calendar .react-datepicker__month {
+          margin: 4px 0 0;
         }
       `}</style>
     </div>
