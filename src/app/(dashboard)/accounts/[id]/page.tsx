@@ -418,6 +418,8 @@ export default function AccountDetailPage() {
     setDivQuery(name);
     setDivSearchResults([]);
     setDivShowDropdown(false);
+    setCashCurrency(/^\d{6}$/.test(ticker) ? "KRW" : "USD");
+    setTimeout(() => cashAmountRef.current?.focus(), 100);
   }
 
   // ─── 종목 등록 처리 ────────────────────────────────────
@@ -1623,7 +1625,8 @@ export default function AccountDetailPage() {
                   <button
                     key={c}
                     onClick={() => { setCashCurrency(c); setCashAmount(""); setCashError(""); }}
-                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                    disabled={!!divTicker}
+                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       backgroundColor: cashCurrency === c ? "var(--color-primary)" : "var(--color-g100)",
                       color: cashCurrency === c ? "#fff" : "var(--color-g500)",
@@ -1636,6 +1639,7 @@ export default function AccountDetailPage() {
               {/* 날짜 선택 */}
               <DatePicker label="배당 수령일 *" value={divDate} onChange={setDivDate} />
               <Input
+                ref={cashAmountRef}
                 label="배당금액"
                 inputMode="numeric"
                 value={fmtNum(cashAmount)}
