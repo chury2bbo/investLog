@@ -10,9 +10,10 @@ interface TradeFilterCardProps {
   onChange: (f: Filters) => void;
   onSearch: () => void;
   accounts: AccountOption[];
+  isSearching?: boolean;
 }
 
-export function TradeFilterCard({ filters, onChange, onSearch, accounts }: TradeFilterCardProps) {
+export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearching }: TradeFilterCardProps) {
   const [quickDropOpen, setQuickDropOpen] = useState(false);
 
   const set = (key: keyof Filters, value: string) =>
@@ -93,9 +94,10 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
           </button>
           <button
             onClick={onSearch}
-            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer"
+            disabled={isSearching}
+            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            조회
+            {isSearching ? "조회 중..." : "조회"}
           </button>
         </div>
 

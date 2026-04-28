@@ -10,9 +10,10 @@ interface TradeFilterPanelProps {
   onChange: (f: Filters) => void;
   onSearch: () => void;
   accounts: AccountOption[];
+  isSearching?: boolean;
 }
 
-export function TradeFilterPanel({ filters, onChange, onSearch, accounts }: TradeFilterPanelProps) {
+export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSearching }: TradeFilterPanelProps) {
   const [quickDropOpen, setQuickDropOpen] = useState(false);
 
   const set = (key: keyof Filters, value: string) =>
@@ -128,9 +129,10 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts }: Trad
         </button>
         <button
           onClick={onSearch}
-          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer"
+          disabled={isSearching}
+          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          조회
+          {isSearching ? "조회 중..." : "조회"}
         </button>
       </div>
     </div>

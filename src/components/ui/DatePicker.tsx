@@ -128,6 +128,9 @@ export function DatePicker({
         .investlog-calendar .react-datepicker__day--outside-month {
           color: var(--color-g300);
         }
+        .investlog-calendar .react-datepicker__navigation {
+          top: 13px;
+        }
         .investlog-calendar .react-datepicker__navigation-icon::before {
           border-color: var(--color-g400);
         }

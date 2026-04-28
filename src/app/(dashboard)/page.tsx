@@ -15,6 +15,7 @@ import {
   ThemeToggle,
   Skeleton,
   BottomSheet,
+  Tooltip,
 } from "@/components/ui";
 import { BenchmarkSheet } from "./_components/BenchmarkSheet";
 
@@ -86,7 +87,7 @@ interface AccountSummary {
 
 import { formatKRW, formatCompact } from "@/lib/format";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
 } from "recharts";
 
@@ -708,12 +709,12 @@ export default function DashboardPage() {
           >
             총 보유 자산
           </span>
+          <Tooltip text="주가 새로고침" placement="bottom">
           <button
             onClick={() => fetchData(true)}
             disabled={quotesRefreshing}
             className="w-5 h-5 rounded flex items-center justify-center transition-opacity cursor-pointer disabled:cursor-default"
             style={{ opacity: quotesRefreshing ? 0.4 : 0.6 }}
-            title="주가 새로고침"
           >
             <svg
               width="13"
@@ -732,6 +733,7 @@ export default function DashboardPage() {
               <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
             </svg>
           </button>
+          </Tooltip>
         </div>
         <div className="text-[32px] md:text-[40px] font-extrabold text-white tracking-tight leading-tight">
           {Math.floor(summary.totalAsset).toLocaleString()}
@@ -808,16 +810,17 @@ export default function DashboardPage() {
                       <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
                         / {formatCompact(assetGoal, "KRW")}
                       </span>
+                      <Tooltip text="목표 수정" placement="bottom">
                       <button
                         onClick={() => { setGoalInput(assetGoal.toLocaleString()); setGoalEditMode(true); }}
                         className="p-1 rounded bg-white/15 text-white/60 hover:bg-white/25 transition-colors cursor-pointer"
-                        title="목표 수정"
                       >
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
+                      </Tooltip>
                     </div>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
@@ -1092,7 +1095,7 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2A3828" : "var(--color-g200)"} vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
-                <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
+                <RechartsTooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
                 <Area type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} fill="url(#gradEval)" dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
                 <Area type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" fill="none" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
               </AreaChart>
@@ -1197,7 +1200,7 @@ export default function DashboardPage() {
                         <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip
+                    <RechartsTooltip
                       content={({ active, payload }) => {
                         if (!active || !payload?.[0]) return null;
                         const data = payload[0].payload as { name: string; label: string; value: number };
