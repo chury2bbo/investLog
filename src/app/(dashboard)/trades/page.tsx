@@ -14,6 +14,7 @@ import {
   ConfirmDialog,
   Skeleton,
   ThemeToggle,
+  DatePicker,
 } from "@/components/ui";
 import { TradeFilterCard } from "./_components/TradeFilterCard";
 import { TradesTable } from "./_components/TradesTable";
@@ -759,6 +760,7 @@ export default function TradesPage() {
               onChange={handleFilterChange}
               onSearch={handleSearch}
               accounts={accounts}
+              isSearching={loading && trades.length > 0}
             />
 
             {/* 요약 칩 */}
@@ -846,6 +848,7 @@ export default function TradesPage() {
                 onChange={handleFilterChange}
                 onSearch={() => { handleSearch(); setMobileFilterOpen(false); }}
                 accounts={accounts}
+                isSearching={loading && trades.length > 0}
               />
             )}
 
@@ -1107,12 +1110,10 @@ export default function TradesPage() {
           />
 
           {/* 매매 날짜 */}
-          <Input
+          <DatePicker
             label="매매 날짜"
-            type="date"
             value={formDate}
-            onChange={(e) => setFormDate(e.target.value)}
-            tooltip="날짜 선택"
+            onChange={(v) => setFormDate(v)}
           />
 
           {/* 매수/매도 토글 */}

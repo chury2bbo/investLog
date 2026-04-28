@@ -15,3 +15,4 @@ export { ConfirmDialog } from "./ConfirmDialog";
 export { Skeleton } from "./Skeleton";
 export { DatePicker } from "./DatePicker";
 export { Tabs } from "./Tabs";
+export { Tooltip } from "./Tooltip";

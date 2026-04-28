@@ -19,6 +19,7 @@ import {
   Toast,
   DatePicker,
   Tabs,
+  Tooltip,
 } from "@/components/ui";
 import SectorDonutChart from "@/components/SectorDonutChart";
 import { ImportModal } from "@/components/ImportModal";
@@ -1197,37 +1198,41 @@ export default function AccountDetailPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <Tooltip text="섹터">
                     <button
                       onClick={(e) => { e.stopPropagation(); openSectorEdit(h); }}
-                      title="섹터"
                       className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                     </button>
+                    </Tooltip>
+                    <Tooltip text="수정">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); openHoldingEdit(h); }}
-                      title="수정"
                       className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
+                    </Tooltip>
+                    <Tooltip text="물타기 계산기">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setAvgDownHolding(h); const cp = quotes[h.ticker]?.price; setAvgDownPrice(cp ? String(h.country === "KR" ? Math.floor(cp) : cp) : ""); setAvgDownQty(""); }}
-                      title="물타기 계산기"
                       className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
                     </button>
+                    </Tooltip>
+                    <Tooltip text="삭제">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setHoldingDeleteConfirm(h); }}
-                      title="삭제"
                       className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                     </button>
+                    </Tooltip>
                   </div>
                 </div>
               </Card>
@@ -1343,8 +1348,8 @@ export default function AccountDetailPage() {
                   const isDeposit = l.amount > 0;
                   const isKRW = l.currency === "KRW";
                   const amtStr = isKRW
-                    ? `${isDeposit ? "+" : ""}₩${Math.abs(l.amount).toLocaleString()}`
-                    : `${isDeposit ? "+" : ""}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    ? `${isDeposit ? "+" : "-"}₩${Math.abs(l.amount).toLocaleString()}`
+                    : `${isDeposit ? "+" : "-"}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                   return (
                     <div key={l.id} className={`flex justify-between items-center py-2.5 ${i < cashInOutLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}>
                       <div className="flex items-center gap-3">
@@ -1353,9 +1358,9 @@ export default function AccountDetailPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-sm font-bold" style={{ color: isDeposit ? "var(--color-primary)" : "var(--color-negative)" }}>{amtStr}</span>
-                        <button type="button" onClick={() => setCashDeleteConfirm(l.id)} title="삭제" className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
+                        <Tooltip text="삭제" placement="right"><button type="button" onClick={() => setCashDeleteConfirm(l.id)} className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                        </button>
+                        </button></Tooltip>
                       </div>
                     </div>
                   );
@@ -1400,9 +1405,9 @@ export default function AccountDetailPage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-sm font-bold" style={{ color: "var(--color-primary)" }}>{amtStr}</span>
-                      <button type="button" onClick={() => setDivDeleteConfirm(l.id)} title="삭제" className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
+                      <Tooltip text="삭제" placement="right"><button type="button" onClick={() => setDivDeleteConfirm(l.id)} className="p-1.5 rounded-lg bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                      </button>
+                      </button></Tooltip>
                     </div>
                   </div>
                 );
@@ -1510,7 +1515,21 @@ export default function AccountDetailPage() {
                 onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
                 placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
               />
-              {cashError && <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>}
+              {cashError && (
+                <div className="text-center -mt-1 space-y-0.5">
+                  <p className="text-sm text-[var(--color-negative)]">{cashError}</p>
+                  {cashModal === "withdraw" && (
+                    <p className="text-xs text-[var(--color-g400)]">
+                      출금 가능:{" "}
+                      <span className="font-semibold text-[var(--color-text)]">
+                        {cashCurrency === "KRW"
+                          ? `₩${Math.floor(cashKRW).toLocaleString()}`
+                          : `$${cashUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
               <Button size="lg" onClick={handleCashSubmit} disabled={cashSubmitting || !cashAmount}>
                 {cashSubmitting ? "처리 중..." : cashModal === "deposit" ? "입금하기" : "출금하기"}
               </Button>

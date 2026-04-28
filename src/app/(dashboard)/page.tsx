@@ -15,6 +15,7 @@ import {
   ThemeToggle,
   Skeleton,
   BottomSheet,
+  Tooltip,
 } from "@/components/ui";
 import { BenchmarkSheet } from "./_components/BenchmarkSheet";
 
@@ -80,11 +81,13 @@ interface AccountSummary {
   evalUSD: number;
   totalKRW: number;
   pnlRate: number;
+  pnl: number;
+  invested: number;
 }
 
 import { formatKRW, formatCompact } from "@/lib/format";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend,
 } from "recharts";
 
@@ -149,6 +152,8 @@ export default function DashboardPage() {
   const [personalityLoading, setPersonalityLoading] = useState(true);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
   const [holdingSheetOpen, setHoldingSheetOpen] = useState(false);
+  const [pnlSheetOpen, setPnlSheetOpen] = useState(false);
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
   const userName = session?.user?.name ?? "투자자";
 
@@ -492,6 +497,8 @@ export default function DashboardPage() {
         evalUSD,
         totalKRW,
         pnlRate,
+        pnl: currentValue - invested,
+        invested,
       };
     });
   }
@@ -702,12 +709,12 @@ export default function DashboardPage() {
           >
             총 보유 자산
           </span>
+          <Tooltip text="주가 새로고침" placement="bottom">
           <button
             onClick={() => fetchData(true)}
             disabled={quotesRefreshing}
             className="w-5 h-5 rounded flex items-center justify-center transition-opacity cursor-pointer disabled:cursor-default"
             style={{ opacity: quotesRefreshing ? 0.4 : 0.6 }}
-            title="주가 새로고침"
           >
             <svg
               width="13"
@@ -726,6 +733,7 @@ export default function DashboardPage() {
               <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
             </svg>
           </button>
+          </Tooltip>
         </div>
         <div className="text-[32px] md:text-[40px] font-extrabold text-white tracking-tight leading-tight">
           {Math.floor(summary.totalAsset).toLocaleString()}
@@ -802,16 +810,17 @@ export default function DashboardPage() {
                       <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
                         / {formatCompact(assetGoal, "KRW")}
                       </span>
+                      <Tooltip text="목표 수정" placement="bottom">
                       <button
                         onClick={() => { setGoalInput(assetGoal.toLocaleString()); setGoalEditMode(true); }}
                         className="p-1 rounded bg-white/15 text-white/60 hover:bg-white/25 transition-colors cursor-pointer"
-                        title="목표 수정"
                       >
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
+                      </Tooltip>
                     </div>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
@@ -912,6 +921,7 @@ export default function DashboardPage() {
             label: "총 수익금",
             value: `${pnlPositive ? "+" : ""}${formatCompact(summary.totalPnl, "KRW")}`,
             color: pnlPositive ? "var(--color-positive)" : "var(--color-negative)",
+            onClick: () => setPnlSheetOpen(true),
           },
           {
             label: "보유 종목",
@@ -923,11 +933,14 @@ export default function DashboardPage() {
             label: "총 계좌",
             value: `${accounts.length}개`,
             color: undefined,
+            onClick: accounts.length > 0 ? () => setAccountSheetOpen(true) : undefined,
           },
         ].map((s) => {
           const isReturnCard = s.label === "총 수익률";
+          const isPnlCard = s.label === "총 수익금";
           const isHoldingCard = s.label === "보유 종목";
-          const isClickable = isReturnCard || (isHoldingCard && holdingWeights.length > 0);
+          const isAccountCard = s.label === "총 계좌";
+          const isClickable = isReturnCard || isPnlCard || (isHoldingCard && holdingWeights.length > 0) || (isAccountCard && accounts.length > 0);
           return (
             <Card
               key={s.label}
@@ -946,9 +959,25 @@ export default function DashboardPage() {
                     </svg>
                   </span>
                 )}
+                {isPnlCard && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    계좌별
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
                 {isHoldingCard && holdingWeights.length > 0 && (
                   <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
                     비중
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </span>
+                )}
+                {isAccountCard && accounts.length > 0 && (
+                  <span className="text-[10px] font-medium text-[var(--color-primary)] flex items-center gap-0.5">
+                    상세
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 18l6-6-6-6"/>
                     </svg>
@@ -1066,7 +1095,7 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2A3828" : "var(--color-g200)"} vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-g400)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--color-g400)" }} tickFormatter={(v) => v >= 10000 ? `${(v / 10000).toFixed(1)}억` : `${(Math.round(v / 10) * 10).toLocaleString()}만`} axisLine={false} tickLine={false} domain={["dataMin - 200", "dataMax + 200"]} />
-                <Tooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
+                <RechartsTooltip formatter={(v: unknown) => [`₩${formatKRW((v as number) * 10000)}`, ""]} contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid var(--color-g200)", backgroundColor: "var(--color-surface)", color: "var(--color-text)" }} />
                 <Area type="monotone" dataKey="evaluated" stroke="var(--color-primary)" strokeWidth={2} fill="url(#gradEval)" dot={{ r: 3, fill: "var(--color-primary)" }} name="평가금 기준" />
                 <Area type="monotone" dataKey="invested" stroke="var(--color-g300)" strokeWidth={2} strokeDasharray="5 3" fill="none" dot={{ r: 3, fill: "var(--color-g300)" }} name="원금 기준" />
               </AreaChart>
@@ -1171,7 +1200,7 @@ export default function DashboardPage() {
                         <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip
+                    <RechartsTooltip
                       content={({ active, payload }) => {
                         if (!active || !payload?.[0]) return null;
                         const data = payload[0].payload as { name: string; label: string; value: number };
@@ -1486,6 +1515,91 @@ export default function DashboardPage() {
         onClose={() => setBenchmarkOpen(false)}
         myReturnRate={summary.totalPnlRate}
       />
+
+      {/* ── 총 수익금 계좌별 BottomSheet ── */}
+      <BottomSheet
+        open={pnlSheetOpen}
+        onClose={() => setPnlSheetOpen(false)}
+        title="계좌별 수익금"
+        titleRight={
+          <span className="text-xs text-[var(--color-g400)]">총 {accountSummaries.length}개 계좌</span>
+        }
+      >
+        <div className="space-y-2">
+          {/* 총합 */}
+          <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+            <span className="text-sm font-bold text-[var(--color-text)]">전체 합계</span>
+            <span
+              className="text-sm font-extrabold"
+              style={{ color: summary.totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}
+            >
+              {summary.totalPnl >= 0 ? "+" : ""}{formatKRW(summary.totalPnl)}
+            </span>
+          </div>
+          {/* 계좌별 */}
+          {accountSummaries.map((acc) => (
+            <div
+              key={acc.id}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-[var(--color-g100)] dark:border-[var(--color-border)]"
+            >
+              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                <span className="text-sm font-semibold text-[var(--color-text)] truncate">{acc.name}</span>
+                <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                  매수 {formatCompact(acc.invested, "KRW")}
+                </span>
+              </div>
+              <div className="flex flex-col items-end gap-0.5 shrink-0 ml-3">
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: acc.pnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}
+                >
+                  {acc.pnl >= 0 ? "+" : ""}{formatCompact(acc.pnl, "KRW")}
+                </span>
+                <PnlTag value={acc.pnlRate} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
+
+      {/* ── 총 계좌 목록 BottomSheet ── */}
+      <BottomSheet
+        open={accountSheetOpen}
+        onClose={() => setAccountSheetOpen(false)}
+        title="계좌 목록"
+        titleRight={
+          <span className="text-xs text-[var(--color-g400)]">총 {accounts.length}개</span>
+        }
+      >
+        <div className="space-y-2">
+          {accountSummaries.map((acc) => (
+            <div
+              key={acc.id}
+              className="flex items-center justify-between px-3 py-3 rounded-xl border border-[var(--color-g100)] dark:border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors"
+              onClick={() => { setAccountSheetOpen(false); router.push(`/accounts/${acc.id}`); }}
+            >
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)] shrink-0">
+                    {acc.type}
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--color-text)] truncate">{acc.name}</span>
+                </div>
+                {acc.memo && (
+                  <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] truncate">{acc.memo}</span>
+                )}
+                <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
+                  {acc.stockCount}종목 · 총 {formatCompact(acc.totalKRW, "KRW")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <PnlTag value={acc.pnlRate} />
+                <span className="text-[var(--color-g400)] dark:text-[var(--color-muted)]">›</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </BottomSheet>
     </div>
   );
 }

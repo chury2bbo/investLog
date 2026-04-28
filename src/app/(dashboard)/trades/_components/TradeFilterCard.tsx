@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui";
+import { Card, DatePicker } from "@/components/ui";
 import { StockSearchInput } from "./StockSearchInput";
 import { type Filters, type AccountOption, QUICK_DATE_OPTIONS, getDateFrom } from "./types";
 
@@ -10,9 +10,10 @@ interface TradeFilterCardProps {
   onChange: (f: Filters) => void;
   onSearch: () => void;
   accounts: AccountOption[];
+  isSearching?: boolean;
 }
 
-export function TradeFilterCard({ filters, onChange, onSearch, accounts }: TradeFilterCardProps) {
+export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearching }: TradeFilterCardProps) {
   const [quickDropOpen, setQuickDropOpen] = useState(false);
 
   const set = (key: keyof Filters, value: string) =>
@@ -25,41 +26,19 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
         <div className="flex flex-wrap items-end gap-2.5">
           {/* 기간 */}
           <div className="flex items-center gap-1.5">
-            {/* 시작 날짜 */}
-            <div className="relative group">
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => set("dateFrom", e.target.value)}
-                className="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              />
-              <span
-                className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "#1D2720" }}
-              >
-                시작 날짜
-                <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
-              </span>
-            </div>
-
+            <DatePicker
+              value={filters.dateFrom}
+              onChange={(v) => set("dateFrom", v)}
+              inputClassName="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer w-[120px]"
+              wrapperClassName=""
+            />
             <span className="text-xs text-[var(--color-g400)]">~</span>
-
-            {/* 종료 날짜 */}
-            <div className="relative group">
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => set("dateTo", e.target.value)}
-                className="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              />
-              <span
-                className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)", backgroundColor: "#1D2720" }}
-              >
-                종료 날짜
-                <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
-              </span>
-            </div>
+            <DatePicker
+              value={filters.dateTo}
+              onChange={(v) => set("dateTo", v)}
+              inputClassName="px-2 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer w-[120px]"
+              wrapperClassName=""
+            />
           </div>
 
           {/* 빠른선택 */}
@@ -115,9 +94,10 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts }: Trade
           </button>
           <button
             onClick={onSearch}
-            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer"
+            disabled={isSearching}
+            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            조회
+            {isSearching ? "조회 중..." : "조회"}
           </button>
         </div>
 

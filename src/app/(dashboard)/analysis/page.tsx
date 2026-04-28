@@ -12,6 +12,7 @@ import {
   Divider,
   ThemeToggle,
   Toast,
+  DatePicker,
 } from "@/components/ui";
 import {
   AreaChart,
@@ -679,18 +680,20 @@ export default function AnalysisPage() {
           <Card>
             {/* 기간 입력 */}
             <div className="flex items-center gap-2 mb-4">
-              <input
-                type="date"
+              <DatePicker
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none"
+                onChange={setStartDate}
+                inputClassName="w-full px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer"
+                wrapperClassName="flex-1"
+                maxDate={new Date()}
               />
               <span className="text-xs text-[var(--color-g400)]">~</span>
-              <input
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] outline-none"
+                onChange={setEndDate}
+                inputClassName="w-full px-2 py-1.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-card)] text-[var(--color-text)] outline-none cursor-pointer"
+                wrapperClassName="flex-1"
+                maxDate={new Date()}
               />
               <Button size="sm" onClick={handleDateChange}>
                 조회

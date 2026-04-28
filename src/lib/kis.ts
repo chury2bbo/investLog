@@ -101,33 +101,35 @@ export interface KisSectorInfo {
 }
 
 export async function getKisSector(ticker: string): Promise<KisSectorInfo> {
-  try {
-    const token = await getToken();
+  const MAX_RETRY = 3;
+  for (let attempt = 0; attempt < MAX_RETRY; attempt++) {
+    try {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
+      const token = await getToken();
 
-    const params = new URLSearchParams({
-      FID_COND_MRKT_DIV_CODE: "J",
-      FID_INPUT_ISCD: ticker,
-    });
+      const params = new URLSearchParams({
+        FID_COND_MRKT_DIV_CODE: "J",
+        FID_INPUT_ISCD: ticker,
+      });
 
-    const res = await fetch(
-      `${KIS_DOMAIN}/uapi/domestic-stock/v1/quotations/inquire-price?${params}`,
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-          appkey: process.env.KIS_APP_KEY!,
-          appsecret: process.env.KIS_APP_SECRET!,
-          tr_id: "FHKST01010100",
-        },
-      }
-    );
+      const res = await fetch(
+        `${KIS_DOMAIN}/uapi/domestic-stock/v1/quotations/inquire-price?${params}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+            appkey: process.env.KIS_APP_KEY!,
+            appsecret: process.env.KIS_APP_SECRET!,
+            tr_id: "FHKST01010100",
+          },
+        }
+      );
 
-    if (!res.ok) return { sector: null };
+      if (!res.ok) continue;
 
-    const data = await res.json();
-    const sector = data.output?.bstp_kor_isnm ?? null;
-
-    return { sector };
-  } catch {
-    return { sector: null };
+      const data = await res.json();
+      const sector = data.output?.bstp_kor_isnm ?? null;
+      if (sector) return { sector };
+    } catch { /* 다음 재시도 */ }
   }
+  return { sector: null };
 }

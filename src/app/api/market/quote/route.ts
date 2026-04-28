@@ -1,6 +1,8 @@
+import { after } from "next/server";
 import { auth } from "@/auth";
-import { getKisQuote } from "@/lib/kis";
+import { getKisQuote, getKisSector } from "@/lib/kis";
 import { getYahooQuote, getYahooFinancials, getUsdKrwRate } from "@/lib/yahoo";
+import { prisma } from "@/lib/prisma";
 
 function isDomestic(ticker: string) {
   return /^\d{6}$/.test(ticker);
@@ -74,6 +76,31 @@ export async function GET(req: Request) {
       }
     })
   );
+
+  // 응답 전송 후 sectorAuto가 null인 국내 종목 자가 치유
+  const domesticTickers = tickers.filter(isDomestic);
+  if (domesticTickers.length > 0) {
+    const userId = session.user.id;
+    after(async () => {
+      const nullSectorHoldings = await prisma.holding.findMany({
+        where: {
+          ticker: { in: domesticTickers },
+          sectorAuto: null,
+          account: { userId },
+        },
+        select: { id: true, ticker: true },
+      });
+      for (const h of nullSectorHoldings) {
+        const { sector } = await getKisSector(h.ticker);
+        if (sector) {
+          await prisma.holding.update({
+            where: { id: h.id },
+            data: { sectorAuto: sector },
+          });
+        }
+      }
+    });
+  }
 
   return Response.json({ quotes });
 }
