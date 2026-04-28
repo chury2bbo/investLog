@@ -115,14 +115,14 @@ function Slide1({ T }: { T: Theme }) {
           기록이 수익이 된다
         </p>
 
-        <div className="flex gap-4 mb-10 fade-up-5">
+        <div className="flex gap-4 mb-10 fade-up-5 justify-center">
           {[{ name: "김수현", role: "Frontend · UI/UX" }, { name: "최우철", role: "Backend · API · DB" }].map(m => (
-            <div key={m.name} className="flex items-center gap-3 px-6 py-4 rounded-2xl"
+            <div key={m.name} className="flex items-center gap-2.5 px-5 py-3 rounded-2xl w-48"
               style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-              <Icon d={I.person} size={16} color={T.primary} strokeWidth={2} />
+              <Icon d={I.person} size={14} color={T.primary} strokeWidth={2} />
               <div className="text-left">
-                <div className="text-lg font-bold" style={{ color: T.text }}>{m.name}</div>
-                <div className="text-sm" style={{ color: T.muted }}>{m.role}</div>
+                <div className="text-base font-bold" style={{ color: T.text }}>{m.name}</div>
+                <div className="text-xs" style={{ color: T.muted }}>{m.role}</div>
               </div>
             </div>
           ))}
@@ -210,7 +210,7 @@ function Slide3({ T }: { T: Theme }) {
   const scope = [
     { icon: I.chart,  label: "통합 포트폴리오", sub: "국내 + 해외",      core: false },
     { icon: I.edit,   label: "매매일지",        sub: "이유 태그 + 심리", core: true },
-    { icon: I.camera, label: "스크린샷 등록",   sub: "Claude Vision",    core: false },
+    { icon: I.camera, label: "스크린샷 등록",   sub: "Claude Vision",    core: true },
     { icon: I.brain,  label: "AI 성향 진단",    sub: "Level 1 · 2",      core: true },
     { icon: I.cpu,    label: "AI 코칭 리포트",  sub: "패턴 · 개선 목표", core: false },
     { icon: I.search, label: "AI 종목 분석",    sub: "SWOT · 적정가",    core: false },
@@ -244,7 +244,7 @@ function Slide3({ T }: { T: Theme }) {
         <div className="grid grid-cols-3 gap-2.5 fade-up-3">
           {scope.map(s => (
             <div key={s.label} className="flex items-center gap-3 p-4 rounded-xl"
-              style={{ backgroundColor: T.card, border: `1px solid ${s.core ? T.primary + "60" : T.border}` }}>
+              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={s.icon} size={17} color={T.primary} strokeWidth={1.8} />
@@ -431,14 +431,15 @@ function Slide4a({ T }: { T: Theme }) {
           {/* 통합 포트폴리오 */}
           <div className="rounded-2xl flex flex-col fade-up-2 overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 145 }}>
+            <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={I.chart} size={20} color={T.primary} strokeWidth={2} />
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>통합 포트폴리오</div>
-                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[13px] font-semibold mt-0.5 mb-1" style={{ color: T.primary }}>국내·해외를 하나의 원화로</div>
+                <div className="text-[14px] leading-snug" style={{ color: T.dim }}>
                   <span style={{ color: T.primary, fontWeight: 700 }}>국내·해외</span> 실시간 원화 환산
                 </div>
                 <div className="text-[12px] mt-1.5" style={{ color: T.dim }}>
@@ -455,14 +456,15 @@ function Slide4a({ T }: { T: Theme }) {
           {/* 매매일지 — 핵심 기능 */}
           <div className="rounded-2xl flex flex-col fade-up-3 overflow-hidden"
             style={{ backgroundColor: T.card, border: `1.5px solid ${T.primary}70`, boxShadow: `0 0 28px ${T.primary}18` }}>
-            <div className="relative flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 145 }}>
+            <div className="relative flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={I.edit} size={20} color={T.primary} strokeWidth={2} />
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>매매일지</div>
-                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[13px] font-semibold mt-0.5 mb-1" style={{ color: T.primary }}>왜 샀는지 기억하는 유일한 앱</div>
+                <div className="text-[14px] leading-snug" style={{ color: T.dim }}>
                   <span style={{ color: T.primary, fontWeight: 700 }}>이유 태그 + 심리 상태</span> 수기 기록
                 </div>
                 <div className="flex flex-wrap gap-1 mt-2">
@@ -493,14 +495,15 @@ function Slide4a({ T }: { T: Theme }) {
           {/* 스크린샷 등록 */}
           <div className="rounded-2xl flex flex-col fade-up-4 overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 145 }}>
+            <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
                 <Icon d={I.camera} size={20} color="white" strokeWidth={2} />
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>스크린샷 등록</div>
-                <div className="text-[14px] mt-1 leading-snug" style={{ color: T.dim }}>
+                <div className="text-[13px] font-semibold mt-0.5 mb-1" style={{ color: T.primary }}>캡처 한 장으로 즉시 등록</div>
+                <div className="text-[14px] leading-snug" style={{ color: T.dim }}>
                   캡처 한 장 → <span style={{ color: T.primary, fontWeight: 700 }}>자동 등록</span>
                 </div>
                 <div className="text-[12px] mt-1.5" style={{ color: T.dim }}>
@@ -540,10 +543,13 @@ function Slide4b({ T }: { T: Theme }) {
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 6개월 데이터</span>
               </div>
               <div className="text-4xl font-extrabold mb-4" style={{ color: T.text }}>FOMO형 중기 투자자</div>
-              <p className="text-sm leading-relaxed mb-5 flex-1" style={{ color: T.muted }}>
+              <p className="text-sm leading-relaxed mb-5" style={{ color: T.muted }}>
                 실적 기반의 확신 매매에서 +23%의 성과를 낸 것처럼, 근거 있는 판단을 내릴 때는 뚜렷한 수익 잠재력을 보여줍니다. 다만 매매의 83%가 FOMO와 지인추천·테마 추종에서 비롯된 손절로 이어지고 있습니다.
               </p>
-              <div className="grid grid-cols-3 gap-3 mt-auto">
+              <p className="text-sm leading-relaxed mb-6" style={{ color: T.muted }}>
+                6개월간 누적된 매매 이유 태그 데이터를 기반으로 AI가 분석한 투자 성향입니다. 태그를 고를수록 진단 정밀도가 높아집니다.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: "승률",     value: "16.7%" },
                   { label: "평균보유", value: "43일" },
@@ -866,7 +872,7 @@ function Slide8({ T }: { T: Theme }) {
       <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 800, height: 800, background: T.glow, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
-      <div className="relative z-10 flex flex-col items-center justify-center gap-12 h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center gap-20 h-full">
 
         {/* 상단: 로고 + 타이틀 */}
         <div className="flex flex-col items-center text-center fade-up-1">
@@ -878,11 +884,7 @@ function Slide8({ T }: { T: Theme }) {
 
         {/* 하단: 기대 효과 3단계 플로우 */}
         <div className="w-full max-w-2xl fade-up-3">
-          <div className="flex items-center gap-4 mb-7">
-            <div className="flex-1 h-px" style={{ backgroundColor: T.border }} />
-            <div className="text-[13px] font-bold tracking-widest" style={{ color: T.dim }}>기대 효과</div>
-            <div className="flex-1 h-px" style={{ backgroundColor: T.border }} />
-          </div>
+          <div className="mb-7" />
           <div className="flex items-start">
             {effects.map((e, i) => (
               <div key={e.title} className="flex-1 flex flex-col items-center text-center relative">
