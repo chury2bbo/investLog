@@ -1343,8 +1343,8 @@ export default function AccountDetailPage() {
                   const isDeposit = l.amount > 0;
                   const isKRW = l.currency === "KRW";
                   const amtStr = isKRW
-                    ? `${isDeposit ? "+" : ""}₩${Math.abs(l.amount).toLocaleString()}`
-                    : `${isDeposit ? "+" : ""}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    ? `${isDeposit ? "+" : "-"}₩${Math.abs(l.amount).toLocaleString()}`
+                    : `${isDeposit ? "+" : "-"}$${Math.abs(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                   return (
                     <div key={l.id} className={`flex justify-between items-center py-2.5 ${i < cashInOutLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}>
                       <div className="flex items-center gap-3">
@@ -1510,7 +1510,21 @@ export default function AccountDetailPage() {
                 onChange={(e) => setCashAmount(stripNum(e.target.value, true))}
                 placeholder={cashCurrency === "KRW" ? "1,000,000" : "1,000"}
               />
-              {cashError && <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{cashError}</p>}
+              {cashError && (
+                <div className="text-center -mt-1 space-y-0.5">
+                  <p className="text-sm text-[var(--color-negative)]">{cashError}</p>
+                  {cashModal === "withdraw" && (
+                    <p className="text-xs text-[var(--color-g400)]">
+                      출금 가능:{" "}
+                      <span className="font-semibold text-[var(--color-text)]">
+                        {cashCurrency === "KRW"
+                          ? `₩${Math.floor(cashKRW).toLocaleString()}`
+                          : `$${cashUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
               <Button size="lg" onClick={handleCashSubmit} disabled={cashSubmitting || !cashAmount}>
                 {cashSubmitting ? "처리 중..." : cashModal === "deposit" ? "입금하기" : "출금하기"}
               </Button>
