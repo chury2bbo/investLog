@@ -1253,23 +1253,48 @@ export default function TradesPage() {
             </div>
 
             {/* 가격 / 수량 */}
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                ref={formPriceRef}
-                label="가격 *"
-                inputMode="decimal"
-                value={fmtNum(formPrice)}
-                onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
-                placeholder={formPriceLoading ? "조회 중..." : "72,000"}
-                disabled={formPriceLoading}
-              />
-              <Input
-                label="수량 *"
-                inputMode="numeric"
-                value={fmtNum(formQuantity)}
-                onChange={(e) => setFormQuantity(stripNum(e.target.value))}
-                placeholder="10"
-              />
+            <div className="grid grid-cols-2 gap-3 items-end">
+              <div>
+                <div className="flex items-center justify-between mb-1" style={{ minHeight: "20px" }}>
+                  <span className="text-xs font-medium text-[var(--color-g500)]">가격 *</span>
+                </div>
+                <Input
+                  ref={formPriceRef}
+                  inputMode="decimal"
+                  value={fmtNum(formPrice)}
+                  onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
+                  placeholder={formPriceLoading ? "조회 중..." : "72,000"}
+                  disabled={formPriceLoading}
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1" style={{ minHeight: "20px" }}>
+                  <span className="text-xs font-medium text-[var(--color-g500)]">수량 *</span>
+                  {formType === "SELL" && formTicker && (() => {
+                    const holdingQty = accounts.find((a) => a.id === formAccountId)?.holdings.find((h) => h.ticker === formTicker)?.quantity;
+                    return holdingQty ? (
+                      <button
+                        type="button"
+                        onClick={() => setFormQuantity(String(holdingQty))}
+                        className="px-2 py-0.5 text-xs font-semibold rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors cursor-pointer"
+                      >
+                        전량매도 ({holdingQty.toLocaleString()}주)
+                      </button>
+                    ) : null;
+                  })()}
+                </div>
+                <Input
+                  inputMode="numeric"
+                  value={fmtNum(formQuantity)}
+                  onChange={(e) => setFormQuantity(stripNum(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (!formTicker) return;
+                    if (e.key === "ArrowUp") { e.preventDefault(); setFormQuantity((v) => String(Math.max(1, parseInt(v || "0") + 1))); }
+                    if (e.key === "ArrowDown") { e.preventDefault(); setFormQuantity((v) => String(Math.max(1, parseInt(v || "0") - 1))); }
+                  }}
+                  placeholder="10"
+                />
+              </div>
             </div>
           </div>
 
