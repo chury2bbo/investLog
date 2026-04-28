@@ -208,12 +208,12 @@ function SlideBackground({ T }: { T: Theme }) {
 // ─── S2: 철학·개발목표 ───────────────────────────────────────────────────────
 function Slide3({ T }: { T: Theme }) {
   const scope = [
-    { icon: I.chart,  label: "통합 포트폴리오", sub: "국내 + 해외" },
-    { icon: I.edit,   label: "매매일지",        sub: "이유 태그 + 심리" },
-    { icon: I.brain,  label: "AI 성향 진단",    sub: "Level 1 · 2" },
-    { icon: I.search, label: "AI 종목 분석",    sub: "SWOT · 적정가" },
-    { icon: I.cpu,    label: "AI 코칭 리포트",  sub: "패턴 · 개선 목표" },
-    { icon: I.camera, label: "스크린샷 등록",   sub: "Claude Vision" },
+    { icon: I.chart,  label: "통합 포트폴리오", sub: "국내 + 해외",      core: false },
+    { icon: I.edit,   label: "매매일지",        sub: "이유 태그 + 심리", core: true },
+    { icon: I.camera, label: "스크린샷 등록",   sub: "Claude Vision",    core: false },
+    { icon: I.brain,  label: "AI 성향 진단",    sub: "Level 1 · 2",      core: true },
+    { icon: I.cpu,    label: "AI 코칭 리포트",  sub: "패턴 · 개선 목표", core: false },
+    { icon: I.search, label: "AI 종목 분석",    sub: "SWOT · 적정가",    core: false },
   ];
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden px-16">
@@ -244,13 +244,16 @@ function Slide3({ T }: { T: Theme }) {
         <div className="grid grid-cols-3 gap-2.5 fade-up-3">
           {scope.map(s => (
             <div key={s.label} className="flex items-center gap-3 p-4 rounded-xl"
-              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+              style={{ backgroundColor: T.card, border: `1px solid ${s.core ? T.primary + "60" : T.border}` }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
                 <Icon d={s.icon} size={17} color={T.primary} strokeWidth={1.8} />
               </div>
-              <div>
-                <div className="text-[15px] font-bold" style={{ color: T.text }}>{s.label}</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="text-[15px] font-bold" style={{ color: T.text }}>{s.label}</div>
+                  {s.core && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}20`, color: T.primary }}>핵심</span>}
+                </div>
                 <div className="text-[13px] mt-0.5" style={{ color: T.dim }}>{s.sub}</div>
               </div>
             </div>
@@ -526,29 +529,29 @@ function Slide4b({ T }: { T: Theme }) {
 
       <div className="relative max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="05" title="AI가 만드는 차별점" T={T} />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-6">
 
           {/* AI 투자성향 진단 */}
           <div className="rounded-2xl fade-up-2 flex flex-col overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex items-center justify-between mb-2">
+            <div className="p-6 flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-3">
                 <div className="text-[13px] font-bold tracking-wide" style={{ color: T.muted }}>나의 투자자 유형</div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 분석 예시</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 6개월 데이터</span>
               </div>
-              <div className="text-3xl font-extrabold mb-3" style={{ color: T.text }}>FOMO형 중기 투자자</div>
-              <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: T.muted }}>
+              <div className="text-4xl font-extrabold mb-4" style={{ color: T.text }}>FOMO형 중기 투자자</div>
+              <p className="text-sm leading-relaxed mb-5 flex-1" style={{ color: T.muted }}>
                 실적 기반의 확신 매매에서 +23%의 성과를 낸 것처럼, 근거 있는 판단을 내릴 때는 뚜렷한 수익 잠재력을 보여줍니다. 다만 매매의 83%가 FOMO와 지인추천·테마 추종에서 비롯된 손절로 이어지고 있습니다.
               </p>
-              <div className="grid grid-cols-3 gap-2 mt-auto">
+              <div className="grid grid-cols-3 gap-3 mt-auto">
                 {[
                   { label: "승률",     value: "16.7%" },
                   { label: "평균보유", value: "43일" },
                   { label: "손절비율", value: "83.3%" },
                 ].map(s => (
-                  <div key={s.label} className="text-center py-2.5 rounded-xl"
+                  <div key={s.label} className="text-center py-3 rounded-xl"
                     style={{ backgroundColor: T.primarySoft }}>
-                    <div className="text-base font-extrabold" style={{ color: T.primary }}>{s.value}</div>
+                    <div className="text-lg font-extrabold" style={{ color: T.primary }}>{s.value}</div>
                     <div className="text-[12px] mt-0.5" style={{ color: T.muted }}>{s.label}</div>
                   </div>
                 ))}
@@ -559,53 +562,22 @@ function Slide4b({ T }: { T: Theme }) {
           {/* AI 코칭 리포트 */}
           <div className="rounded-2xl fade-up-3 flex flex-col overflow-hidden"
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex items-center justify-between mb-2">
+            <div className="p-6 flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-3">
                 <div className="text-[13px] font-bold tracking-wide" style={{ color: T.muted }}>이번 달 AI 코칭</div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 분석 예시</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 6개월 데이터</span>
               </div>
-              <div className="text-3xl font-extrabold mb-3" style={{ color: T.text }}>패턴 기반 피드백</div>
-              <div className="flex flex-col gap-2.5 flex-1">
+              <div className="text-4xl font-extrabold mb-4" style={{ color: T.text }}>패턴 기반 피드백</div>
+              <div className="flex flex-col gap-3 flex-1">
                 {[
                   { label: "잘한 것",      color: T.primary,  text: "손절 라인을 지킨 3번의 매도" },
                   { label: "반복 실수",    color: T.negative, text: "급등 직후 FOMO 매수 2회 반복" },
                   { label: "이번 달 목표", color: T.warning,  text: "매수 전 이유 태그 필수 작성" },
                 ].map(item => (
-                  <div key={item.label} className="p-3 rounded-xl"
+                  <div key={item.label} className="p-4 rounded-xl"
                     style={{ backgroundColor: item.color + "12", border: `1px solid ${item.color}33` }}>
-                    <div className="text-[13px] font-bold mb-0.5" style={{ color: item.color }}>{item.label}</div>
-                    <div className="text-[15px]" style={{ color: T.text }}>{item.text}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* AI 종목 분석 */}
-          <div className="rounded-2xl fade-up-4 flex flex-col overflow-hidden"
-            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-            <div className="p-5 flex flex-col flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[13px] font-bold tracking-wide" style={{ color: T.muted }}>AI 종목 분석</div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 분석 예시</span>
-              </div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="text-3xl font-extrabold" style={{ color: T.text }}>NVDA</span>
-                <span className="px-2 py-0.5 rounded-lg text-xs font-extrabold"
-                  style={{ backgroundColor: T.primary, color: "#fff" }}>BUY</span>
-                <span className="text-base font-bold" style={{ color: T.primary }}>$185 ~ $235</span>
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                {[
-                  { label: "S", color: T.primary,  text: "AI 반도체 독점적 시장 지위" },
-                  { label: "W", color: T.negative, text: "고PER 밸류에이션 부담" },
-                  { label: "O", color: T.blue,     text: "데이터센터 수요 급증" },
-                  { label: "T", color: T.warning,  text: "미중 무역규제 리스크" },
-                ].map(item => (
-                  <div key={item.label} className="flex items-center gap-2.5 text-[15px]">
-                    <span className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0"
-                      style={{ backgroundColor: item.color + "20", color: item.color }}>{item.label}</span>
-                    <span style={{ color: T.muted }}>{item.text}</span>
+                    <div className="text-[13px] font-bold mb-1" style={{ color: item.color }}>{item.label}</div>
+                    <div className="text-[16px]" style={{ color: T.text }}>{item.text}</div>
                   </div>
                 ))}
               </div>
@@ -928,6 +900,9 @@ function Slide8({ T }: { T: Theme }) {
                 <div className="text-[13px] leading-snug" style={{ color: T.muted }}>{e.desc}</div>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-6 text-[13px]" style={{ color: T.dim }}>
+            이유 태그 기반 심리 데이터 — <span style={{ color: T.primary, fontWeight: 700 }}>버텨일지</span>에만 있는 기반입니다
           </div>
         </div>
 
