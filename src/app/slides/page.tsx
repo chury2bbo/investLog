@@ -894,19 +894,23 @@ function Slide8({ T }: { T: Theme }) {
       <div className="print-hide absolute rounded-full pointer-events-none"
         style={{ width: 800, height: 800, background: T.glow, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
-      <div className="relative z-10 flex flex-col items-center justify-center gap-10 h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center gap-12 h-full">
 
-        {/* 상단: 로고 + 타이틀 + 슬로건 */}
+        {/* 상단: 로고 + 타이틀 */}
         <div className="flex flex-col items-center text-center fade-up-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.png" alt="버텨일지" className="mb-5"
-            style={{ width: 80, height: 80, borderRadius: 20, boxShadow: "0 0 40px rgba(5,192,114,0.45), 0 10px 20px rgba(0,0,0,0.4)" }} />
-          <h2 className="text-7xl font-extrabold tracking-tight" style={{ color: T.text }}>감사합니다</h2>
+          <img src="/icon.png" alt="버텨일지" className="mb-6"
+            style={{ width: 100, height: 100, borderRadius: 24, boxShadow: "0 0 50px rgba(5,192,114,0.5), 0 15px 30px rgba(0,0,0,0.5)" }} />
+          <h2 className="text-8xl font-extrabold tracking-tight" style={{ color: T.text }}>감사합니다</h2>
         </div>
 
-        {/* 중단: 기대 효과 3단계 플로우 */}
+        {/* 하단: 기대 효과 3단계 플로우 */}
         <div className="w-full max-w-2xl fade-up-3">
-          <div className="text-[14px] font-bold tracking-widest text-center mb-6" style={{ color: T.dim }}>기대 효과</div>
+          <div className="flex items-center gap-4 mb-7">
+            <div className="flex-1 h-px" style={{ backgroundColor: T.border }} />
+            <div className="text-[13px] font-bold tracking-widest" style={{ color: T.dim }}>기대 효과</div>
+            <div className="flex-1 h-px" style={{ backgroundColor: T.border }} />
+          </div>
           <div className="flex items-start">
             {effects.map((e, i) => (
               <div key={e.title} className="flex-1 flex flex-col items-center text-center relative">
@@ -925,20 +929,6 @@ function Slide8({ T }: { T: Theme }) {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* 하단: 팀원 카드 */}
-        <div className="flex gap-4 fade-up-5 mt-8">
-          {[{ name: "김수현", role: "Frontend · UI/UX" }, { name: "최우철", role: "Backend · API · DB" }].map(m => (
-            <div key={m.name} className="flex items-center gap-3 px-6 py-4 rounded-2xl"
-              style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
-              <Icon d={I.person} size={16} color={T.primary} strokeWidth={2} />
-              <div className="text-left">
-                <div className="text-lg font-bold" style={{ color: T.text }}>{m.name}</div>
-                <div className="text-sm" style={{ color: T.muted }}>{m.role}</div>
-              </div>
-            </div>
-          ))}
         </div>
 
       </div>
