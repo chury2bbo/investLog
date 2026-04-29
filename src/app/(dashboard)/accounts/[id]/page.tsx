@@ -1959,6 +1959,10 @@ export default function AccountDetailPage() {
               inputMode="numeric"
               value={fmtNum(hQuantity)}
               onChange={(e) => setHQuantity(stripNum(e.target.value))}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowUp") { e.preventDefault(); setHQuantity((v) => String(Math.max(1, parseInt(v || "0") + 1))); }
+                if (e.key === "ArrowDown") { e.preventDefault(); setHQuantity((v) => String(Math.max(1, parseInt(v || "0") - 1))); }
+              }}
               placeholder="50"
             />
           </div>
@@ -2071,6 +2075,10 @@ export default function AccountDetailPage() {
             inputMode="numeric"
             value={fmtNum(holdingEditQty)}
             onChange={(e) => setHoldingEditQty(stripNum(e.target.value))}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowUp") { e.preventDefault(); setHoldingEditQty((v) => String(Math.max(1, parseInt(v || "0") + 1))); }
+              if (e.key === "ArrowDown") { e.preventDefault(); setHoldingEditQty((v) => String(Math.max(1, parseInt(v || "0") - 1))); }
+            }}
             placeholder="보유 주수"
           />
           {holdingEditError && (
