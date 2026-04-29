@@ -57,29 +57,29 @@ export function TradesTable({ trades, page, total, pageSize, onPageChange, onSel
   return (
     <div>
       <div className="overflow-x-auto rounded-2xl bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-        <table className="w-full text-left">
+        <table className="w-full">
           <thead>
             <tr className="border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] uppercase tracking-wider">
-              <th className="px-3 py-2.5 w-[86px] font-medium">
-                <button onClick={() => handleSort("date")} className="flex items-center gap-1 hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
+              <th className="px-3 py-2.5 w-[86px] font-medium text-center">
+                <button onClick={() => handleSort("date")} className="inline-flex items-center gap-1 hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
                   일자 <span className="text-[10px]">{sortIcon("date")}</span>
                 </button>
               </th>
-              <th className="px-2 py-2.5 w-[64px] font-medium">구분</th>
-              <th className="px-2 py-2.5 w-[64px] font-medium">시장</th>
-              <th className="px-2 py-2.5 font-medium">종목</th>
-              <th className="px-3 py-2.5 w-[88px] text-right font-medium">
+              <th className="px-2 py-2.5 w-[64px] font-medium text-center">구분</th>
+              <th className="px-2 py-2.5 w-[64px] font-medium text-center">시장</th>
+              <th className="px-2 py-2.5 font-medium text-left">종목</th>
+              <th className="px-3 py-2.5 w-[88px] font-medium text-right">
                 <button onClick={() => handleSort("price")} className="flex items-center gap-1 ml-auto hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
                   단가 <span className="text-[10px]">{sortIcon("price")}</span>
                 </button>
               </th>
-              <th className="px-2 py-2.5 w-[50px] text-right font-medium">수량</th>
-              <th className="px-3 py-2.5 w-[104px] text-right font-medium">
+              <th className="px-2 py-2.5 w-[50px] font-medium text-right">수량</th>
+              <th className="px-3 py-2.5 w-[104px] font-medium text-right">
                 <button onClick={() => handleSort("total")} className="flex items-center gap-1 ml-auto hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
                   체결금액 <span className="text-[10px]">{sortIcon("total")}</span>
                 </button>
               </th>
-              <th className="px-2 py-2.5 w-[110px] font-medium">이유태그</th>
+              <th className="px-2 py-2.5 w-[110px] font-medium text-left">이유태그</th>
             </tr>
           </thead>
           <tbody>
@@ -95,12 +95,8 @@ export function TradesTable({ trades, page, total, pageSize, onPageChange, onSel
                   <td className="px-3 py-2.5 text-xs text-[var(--color-text)] dark:text-[var(--color-text)]">
                     {formatTradeDate(trade.date)}
                   </td>
-                  <td className="px-2 py-2.5">
-                    <TypeBadge type={trade.type} />
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <MarketBadge market={market} />
-                  </td>
+                  <td className="px-2 py-2.5"><div className="flex justify-center"><TypeBadge type={trade.type} /></div></td>
+                  <td className="px-2 py-2.5"><div className="flex justify-center"><MarketBadge market={market} /></div></td>
                   <td className="px-2 py-2.5">
                     <div className="text-[13px] font-medium text-[var(--color-text)] dark:text-[var(--color-text)] leading-tight">
                       {trade.name}

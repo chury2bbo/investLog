@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import { ko } from "react-day-picker/locale";
-import { LoadingSpinner, EmptyState, Button } from "@/components/ui";
+import { LoadingSpinner, EmptyState, Button, Toast } from "@/components/ui";
 import { ReasonTagChip } from "@/app/(dashboard)/trades/_components/ReasonTagChip";
 
 // ── 타입 ────────────────────────────────────────────────────
@@ -18,6 +18,20 @@ interface Trade {
   reasonTags: string[];
   emotion: string | null;
   memo: string | null;
+  account: {
+    memo: string | null;
+    brokerageCompany: { name: string };
+  };
+}
+
+interface DividendEntry {
+  id: number;
+  date: string;
+  ticker: string | null;
+  memo: string | null;
+  currency: string;
+  amount: number;
+  accountId: number;
   account: {
     memo: string | null;
     brokerageCompany: { name: string };
@@ -59,7 +73,7 @@ function formatTotal(price: number, quantity: number, ticker: string): string {
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────
 interface TradeCalendarProps {
-  tradeType?: "" | "BUY" | "SELL";
+  tradeType?: "" | "BUY" | "SELL" | "DIVIDEND";
   market?: "" | "KR" | "US";
   onSelect?: (trade: Trade) => void;
 }
@@ -67,17 +81,28 @@ interface TradeCalendarProps {
 export default function TradeCalendar({ tradeType = "", market = "", onSelect }: TradeCalendarProps) {
   const [month, setMonth] = useState(new Date());
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [dividends, setDividends] = useState<DividendEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(toDateKey(new Date()));
+
+  // 월 전체 순매수 계산용 (BUY/SELL 필터 시 매도/매수 데이터가 없어서 별도 fetch)
+  const [monthNetBuy, setMonthNetBuy] = useState(0);
 
   // 메모 states
   const [memoedDates, setMemoedDates] = useState<Set<string>>(new Set());
   const [memoContent, setMemoContent] = useState("");
   const [memoSaving, setMemoSaving] = useState(false);
   const [memoLoaded, setMemoLoaded] = useState(false);
+  const [toast, setToast] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: "", message: "" });
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 월별 매매 fetch
   const fetchMonthTrades = useCallback(async (d: Date) => {
+    if (tradeType === "DIVIDEND") {
+      setTrades([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const params = new URLSearchParams({ month: formatMonthParam(d) });
@@ -94,6 +119,43 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
       setLoading(false);
     }
   }, [tradeType, market]);
+
+  // BUY/SELL 필터 시 순매수 계산을 위해 전체 매매 summary fetch
+  const fetchMonthNetBuy = useCallback(async (d: Date) => {
+    if (tradeType !== "BUY" && tradeType !== "SELL") return;
+    try {
+      const params = new URLSearchParams({ month: formatMonthParam(d) });
+      if (market) params.set("market", market);
+      const res = await fetch(`/api/trades?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        const all: Trade[] = Array.isArray(data) ? data : data.data ?? [];
+        const bTotal = all.filter((t) => t.type === "BUY").reduce((sum, t) => {
+          return sum + t.price * t.quantity * (getCountry(t.ticker) === "US" ? 1400 : 1);
+        }, 0);
+        const sTotal = all.filter((t) => t.type === "SELL").reduce((sum, t) => {
+          return sum + t.price * t.quantity * (getCountry(t.ticker) === "US" ? 1400 : 1);
+        }, 0);
+        setMonthNetBuy(bTotal - sTotal);
+      }
+    } catch { /* */ }
+  }, [tradeType, market]);
+
+  // 월별 배당 fetch
+  const fetchMonthDividends = useCallback(async (d: Date) => {
+    try {
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const dateFrom = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      const dateTo = `${year}-${String(month + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+      const res = await fetch(`/api/cash?type=DIVIDEND&dateFrom=${dateFrom}&dateTo=${dateTo}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDividends(Array.isArray(data) ? data : []);
+      }
+    } catch { /* */ }
+  }, []);
 
   // 월별 메모 있는 날짜 목록 fetch
   const fetchMemoedDates = useCallback(async (d: Date) => {
@@ -124,7 +186,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
   useEffect(() => {
     fetchMonthTrades(month);
     fetchMemoedDates(month);
-  }, [month, fetchMonthTrades, fetchMemoedDates]);
+    fetchMonthDividends(month);
+    fetchMonthNetBuy(month);
+  }, [month, fetchMonthTrades, fetchMemoedDates, fetchMonthDividends, fetchMonthNetBuy]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -156,6 +220,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
         else next.delete(selectedDate);
         return next;
       });
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      setToast({ visible: true, title: "메모 저장 완료", message: "오늘의 메모가 저장되었습니다." });
+      toastTimer.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3000);
     } catch (e) {
       console.error("[memo] PUT error", e);
     } finally {
@@ -169,6 +236,14 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
     const key = toDateKey(t.date);
     if (!tradesByDate[key]) tradesByDate[key] = [];
     tradesByDate[key].push(t);
+  });
+
+  // 날짜별 배당 그룹
+  const dividendsByDate: Record<string, DividendEntry[]> = {};
+  dividends.forEach((d) => {
+    const key = toDateKey(d.date);
+    if (!dividendsByDate[key]) dividendsByDate[key] = [];
+    dividendsByDate[key].push(d);
   });
 
   // 월간 요약
@@ -187,9 +262,18 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
       return sum + t.price * t.quantity * rate;
     }, 0);
   const netBuy = buyTotal - sellTotal;
+  const filteredDividends = dividends.filter((d) => {
+    if (!market) return true;
+    const isDomestic = d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW";
+    return market === "KR" ? isDomestic : !isDomestic;
+  });
+  const divCount = filteredDividends.length;
+  const divKrw = filteredDividends.filter((d) => d.currency === "KRW").reduce((s, d) => s + d.amount, 0);
+  const divUsd = filteredDividends.filter((d) => d.currency === "USD").reduce((s, d) => s + d.amount, 0);
 
-  // 선택된 날짜의 매매
+  // 선택된 날짜의 매매 / 배당
   const selectedTrades = selectedDate ? tradesByDate[selectedDate] ?? [] : [];
+  const selectedDividends = selectedDate ? dividendsByDate[selectedDate] ?? [] : [];
 
   // 날짜 클릭
   function handleDayClick(day: Date) {
@@ -201,20 +285,72 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
 
   return (
     <div>
+      <Toast
+        title={toast.title}
+        message={toast.message}
+        visible={toast.visible}
+        variant="success"
+        onClose={() => setToast((p) => ({ ...p, visible: false }))}
+      />
       {/* 월간 요약 */}
       <div className="mb-4 px-1">
         <div className="text-[13px] text-[var(--color-g500)] dark:text-[var(--color-muted)]">
           <span className="font-bold text-[var(--color-text)]">{monthLabel}</span>
           {" — "}
-          <span className="text-[var(--color-positive)]">매수 {buyCount}회</span>
-          {" / "}
-          <span className="text-[#F07D05]">매도 {sellCount}회</span>
-          {" / "}
-          순매수{" "}
-          <span className={netBuy >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}>
-            {netBuy >= 0 ? "+" : "-"}₩{formatKRW(Math.abs(netBuy))}
-          </span>
+          {tradeType === "BUY" ? (
+            <>
+              <span className="text-[var(--color-positive)]">매수 {buyCount}회, ₩{Math.floor(buyTotal).toLocaleString()}</span>
+              {" / "}
+              순매수{" "}
+              <span className={monthNetBuy >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}>
+                {monthNetBuy >= 0 ? "+" : "-"}₩{Math.floor(Math.abs(monthNetBuy)).toLocaleString()}
+              </span>
+            </>
+          ) : tradeType === "SELL" ? (
+            <span className="text-[#F07D05]">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
+          ) : tradeType === "DIVIDEND" ? (
+            <span className="text-[#8B5CF6]">
+              배당 {divCount}회
+              {divKrw > 0 && ` ₩${Math.floor(divKrw).toLocaleString()}`}
+              {divUsd > 0 && ` $${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              {divCount === 0 && "없음"}
+            </span>
+          ) : (
+            <>
+              <span className="text-[var(--color-positive)]">매수 {buyCount}회, ₩{Math.floor(buyTotal).toLocaleString()}</span>
+              {" / "}
+              <span className="text-[#F07D05]">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
+              {" / "}
+              순매수{" "}
+              <span className={netBuy >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}>
+                {netBuy >= 0 ? "+" : "-"}₩{Math.floor(Math.abs(netBuy)).toLocaleString()}
+              </span>
+              {divCount > 0 && (
+                <>
+                  {" / "}
+                  <span className="text-[#8B5CF6]">
+                    배당 {divCount}회, {divKrw > 0 && `₩${Math.floor(divKrw).toLocaleString()}`}{divUsd > 0 && ` $${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </span>
+                </>
+              )}
+            </>
+          )}
         </div>
+      </div>
+
+      {/* 범례 */}
+      <div className="flex items-center gap-3 mb-4 px-1 flex-wrap">
+        {[
+          { color: "bg-[var(--color-positive)]", label: "매수", show: tradeType === "" || tradeType === "BUY" },
+          { color: "bg-[#F07D05]", label: "매도", show: tradeType === "" || tradeType === "SELL" },
+          { color: "bg-[#8B5CF6]", label: "배당", show: tradeType === "" || tradeType === "DIVIDEND" },
+          { color: "bg-[#60A5FA]", label: "메모", show: tradeType === "" && market === "" },
+        ].filter(({ show }) => show).map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-1">
+            <span className={`w-2 h-2 rounded-full ${color}`} />
+            <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">{label}</span>
+          </div>
+        ))}
       </div>
 
       {loading ? (
@@ -251,9 +387,14 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               DayButton: ({ day, ...props }) => {
                 const key = toDateKey(day.date);
                 const dayTrades = tradesByDate[key];
-                const hasBuy = dayTrades?.some((t) => t.type === "BUY");
-                const hasSell = dayTrades?.some((t) => t.type === "SELL");
-                const hasMemo = memoedDates.has(key);
+                const hasBuy = (tradeType === "" || tradeType === "BUY") && dayTrades?.some((t) => t.type === "BUY");
+                const hasSell = (tradeType === "" || tradeType === "SELL") && dayTrades?.some((t) => t.type === "SELL");
+                const hasMemo = tradeType === "" && market === "" && memoedDates.has(key);
+                const hasDividend = (tradeType === "" || tradeType === "DIVIDEND") && (dividendsByDate[key] ?? []).filter((d) => {
+                  if (!market) return true;
+                  const isDomestic = d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW";
+                  return market === "KR" ? isDomestic : !isDomestic;
+                }).length > 0;
                 const isSelected = selectedDate === key;
                 return (
                   <button
@@ -265,10 +406,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     }`}
                   >
                     {day.date.getDate()}
-                    {(hasBuy || hasSell || hasMemo) && (
+                    {(hasBuy || hasSell || hasMemo || hasDividend) && (
                       <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
                         {hasBuy && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-positive)]" />}
                         {hasSell && <span className="w-1.5 h-1.5 rounded-full bg-[#F07D05]" />}
+                        {hasDividend && <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" />}
                         {hasMemo && <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />}
                       </span>
                     )}
@@ -285,14 +427,62 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                 <div className="text-[13px] font-bold text-[var(--color-text)] mb-3 px-1">
                   {selectedDate.slice(5).replace("-", "월 ")}일
                   <span className="ml-1.5 text-[11px] font-medium text-[#9AA99A] dark:text-[#5A6A5A]">
-                    {selectedTrades.length}건
+                    {tradeType === "DIVIDEND"
+                      ? `배당 ${selectedDividends.length}건`
+                      : `${selectedTrades.length}건${selectedDividends.length > 0 ? ` · 배당 ${selectedDividends.length}건` : ""}`}
                   </span>
                 </div>
 
+                {/* 배당 목록 */}
+                {selectedDividends.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-[11px] font-medium text-[#8B5CF6] mb-1.5 px-1">배당</div>
+                    <div className="space-y-0">
+                      {selectedDividends.map((d) => {
+                        const isDomestic = d.ticker
+                          ? /^\d{6}$/.test(d.ticker)
+                          : d.currency === "KRW";
+                        return (
+                        <div
+                          key={d.id}
+                          className="px-1 py-2.5 border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0"
+                        >
+                          <div className="flex justify-between items-center mb-0.5">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap bg-[#F3F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">
+                                배당
+                              </span>
+                              <span className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
+                                isDomestic
+                                  ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
+                                  : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"
+                              }`}>
+                                {isDomestic ? "국내" : "해외"}
+                              </span>
+                              <span className="text-[14px] font-medium text-[var(--color-text)] truncate">
+                                {(d.memo && d.memo !== "배당금") ? d.memo : (d.ticker ?? "배당금")}
+                              </span>
+                            </div>
+                            <span className="text-[14px] font-medium text-[#8B5CF6] shrink-0 ml-2 tabular-nums">
+                              {d.currency === "USD"
+                                ? `$${d.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                : `₩${Math.floor(d.amount).toLocaleString()}`}
+                            </span>
+                          </div>
+                          <div className="text-[12px] text-[#9AA99A] dark:text-[#5A6A5A] px-0.5">
+                            {d.account.brokerageCompany.name}{d.account.memo ? ` · ${d.account.memo}` : ""}
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* 매매 목록 */}
-                {selectedTrades.length === 0 ? (
+                {selectedTrades.length === 0 && selectedDividends.length === 0 ? (
                   <EmptyState message="해당 날짜에 매매 기록이 없습니다." />
-                ) : (
+                ) : selectedTrades.length === 0 ? null : (
                   <div className="space-y-0">
                     {selectedTrades.map((t) => (
                       <div

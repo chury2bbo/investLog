@@ -21,10 +21,11 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
     onChange({ ...filters, [key]: value });
 
   const hasActiveFilter = !!(filters.dateFrom || filters.dateTo || filters.accountId || filters.keyword || filters.tagStatus);
+  const isDividend = filters.tradeType === "DIVIDEND";
 
   return (
     <div className="sticky top-0 z-30 bg-[var(--color-bg)] dark:bg-[var(--color-bg)] border-b border-[var(--color-g200)] dark:border-[var(--color-border)]">
-      {/* 타이틀 행 — 계좌 관리와 동일 */}
+      {/* 타이틀 행 */}
       <div className="flex items-center justify-between px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
           <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
@@ -37,14 +38,14 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
         <ThemeToggle />
       </div>
 
-      {/* 필터 행 — 타이틀 아래 */}
+      {/* 필터 행 */}
       <div className="flex items-center justify-between px-5 pb-3">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-          {/* 매수/매도 */}
+          {/* 구분 (전체/매수/매도/배당) */}
           <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5 shrink-0">
-            {(["", "BUY", "SELL"] as const).map((t) => {
+            {(["", "BUY", "SELL", "DIVIDEND"] as const).map((t) => {
               const active = filters.tradeType === t;
-              const label = t === "" ? null : t === "BUY" ? "매수" : "매도";
+              const label = t === "" ? null : t === "BUY" ? "매수" : t === "SELL" ? "매도" : "배당";
               return (
                 <button
                   key={t}
@@ -68,37 +69,39 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
             })}
           </div>
 
-          {/* 국내/해외 */}
-          <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5 shrink-0">
-            {(["", "KR", "US"] as const).map((m) => {
-              const active = filters.market === m;
-              const label = m === "" ? null : m === "KR" ? "국내" : "해외";
-              return (
-                <button
-                  key={m}
-                  onClick={() => set("market", m)}
-                  className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center ${
-                    active
-                      ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
-                      : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
-                  }`}
-                >
-                  {label ?? (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                      <rect x="0" y="0" width="5" height="5" rx="1"/>
-                      <rect x="7" y="0" width="5" height="5" rx="1"/>
-                      <rect x="0" y="7" width="5" height="5" rx="1"/>
-                      <rect x="7" y="7" width="5" height="5" rx="1"/>
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {/* 국내/해외 — 배당 모드 제외 */}
+          {!isDividend && (
+            <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5 shrink-0">
+              {(["", "KR", "US"] as const).map((m) => {
+                const active = filters.market === m;
+                const label = m === "" ? null : m === "KR" ? "국내" : "해외";
+                return (
+                  <button
+                    key={m}
+                    onClick={() => set("market", m)}
+                    className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center ${
+                      active
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    {label ?? (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <rect x="0" y="0" width="5" height="5" rx="1"/>
+                        <rect x="7" y="0" width="5" height="5" rx="1"/>
+                        <rect x="0" y="7" width="5" height="5" rx="1"/>
+                        <rect x="7" y="7" width="5" height="5" rx="1"/>
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0 ml-2">
-          {/* 뷰 전환 아이콘 */}
+          {/* 뷰 전환 */}
           <button
             onClick={onToggleView}
             className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"

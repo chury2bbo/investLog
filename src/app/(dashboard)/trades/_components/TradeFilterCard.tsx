@@ -15,6 +15,7 @@ interface TradeFilterCardProps {
 
 export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearching }: TradeFilterCardProps) {
   const [quickDropOpen, setQuickDropOpen] = useState(false);
+  const isDividend = filters.tradeType === "DIVIDEND";
 
   const set = (key: keyof Filters, value: string) =>
     onChange({ ...filters, [key]: value });
@@ -22,7 +23,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
   return (
     <Card className="!p-4 mb-4">
       <div className="space-y-3">
-        {/* 1행: 날짜 + 빠른선택 + 계좌 + 종목검색 + 버튼 */}
+        {/* 1행: 날짜 + 빠른선택 + 계좌 + 버튼 */}
         <div className="flex flex-wrap items-end gap-2.5">
           {/* 기간 */}
           <div className="flex items-center gap-1.5">
@@ -101,10 +102,10 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
           </button>
         </div>
 
-        {/* 2행: 종목 검색 + 매수/매도 + 국내/해외 세그먼트 */}
+        {/* 2행: 종목검색(배당모드 제외) + 구분 + 국내/해외(배당모드 제외) + 미입력(배당모드 제외) */}
         <div className="flex items-center gap-4 pt-2 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
           {/* 종목 검색 */}
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-[160px] max-w-[220px]">
             <StockSearchInput
               value={filters.keyword}
               onChange={(v) => set("keyword", v)}
@@ -113,15 +114,15 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
               className="w-full px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] placeholder:text-[var(--color-g400)] dark:placeholder:text-[#4A5A4A] outline-none"
             />
           </div>
-
           <div className="w-px h-5 bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
 
+          {/* 구분 (전체/매수/매도/배당) */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">매수/매도</span>
+            <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">구분</span>
             <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
-              {(["", "BUY", "SELL"] as const).map((t) => {
+              {(["", "BUY", "SELL", "DIVIDEND"] as const).map((t) => {
                 const active = filters.tradeType === t;
-                const label = t === "" ? "전체" : t === "BUY" ? "매수" : "매도";
+                const label = t === "" ? "전체" : t === "BUY" ? "매수" : t === "SELL" ? "매도" : "배당";
                 return (
                   <button
                     key={t}
@@ -139,8 +140,8 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
             </div>
           </div>
 
+          {/* 국내/해외 — 항상 표시 */}
           <div className="w-px h-5 bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
-
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">국내/해외</span>
             <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
@@ -164,30 +165,34 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
             </div>
           </div>
 
-          <div className="w-px h-5 bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
-
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">미입력</span>
-            <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
-              {(["", "noTag", "noEmotion"] as const).map((s) => {
-                const active = filters.tagStatus === s;
-                const label = s === "" ? "전체" : s === "noTag" ? "태그" : "심리";
-                return (
-                  <button
-                    key={s}
-                    onClick={() => set("tagStatus", s)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
-                      active
-                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
-                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* 미입력 — 배당 모드 제외 */}
+          {!isDividend && (
+            <>
+              <div className="w-px h-5 bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] mr-1">미입력</span>
+                <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
+                  {(["", "noTag", "noEmotion"] as const).map((s) => {
+                    const active = filters.tagStatus === s;
+                    const label = s === "" ? "전체" : s === "noTag" ? "태그" : "심리";
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => set("tagStatus", s)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                          active
+                            ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
+                            : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Card>

@@ -28,10 +28,25 @@ export interface Filters {
   dateFrom: string;
   dateTo: string;
   accountId: string;
-  tradeType: "" | "BUY" | "SELL";
+  tradeType: "" | "BUY" | "SELL" | "DIVIDEND";
   market: "" | "KR" | "US";
   keyword: string;
   tagStatus: "" | "noTag" | "noEmotion";
+}
+
+export interface DividendLog {
+  id: number;
+  date: string;
+  ticker: string | null;
+  stockName: string | null;
+  memo: string | null;
+  currency: string;
+  amount: number;
+  accountId: number;
+  account: {
+    memo: string | null;
+    brokerageCompany: { name: string };
+  };
 }
 
 export const INITIAL_FILTERS: Filters = {

@@ -22,13 +22,17 @@ import { TradeTopBar } from "./_components/TradeTopBar";
 import { TradeFilterPanel } from "./_components/TradeFilterPanel";
 import { TradesList } from "./_components/TradesList";
 import { SummaryChips } from "./_components/SummaryChips";
+import { MarketBadge } from "./_components/MarketBadge";
 import TradeCalendar from "@/components/trades/TradeCalendar";
+import { DividendModal } from "@/components/DividendModal";
 import {
   type TradeLog,
   type AccountOption,
   type Filters,
+  type DividendLog,
   INITIAL_FILTERS,
   getCountryFromTicker,
+  formatTradeDate,
 } from "./_components/types";
 
 // ─── 이유 태그 & 심리 상태 (공통 상수) ──────────────────
@@ -108,6 +112,10 @@ export default function TradesPage() {
   const [formCountry, setFormCountry] = useState("KR");
   const [formPrice, setFormPrice] = useState("");
   const [formQuantity, setFormQuantity] = useState("");
+  const [dividendLogs, setDividendLogs] = useState<DividendLog[]>([]);
+  const [divSortCol, setDivSortCol] = useState<"date" | "amount">("date");
+  const [divSortDir, setDivSortDir] = useState<1 | -1>(-1);
+  const [dividendModalOpen, setDividendModalOpen] = useState(false);
   const [formReasonTags, setFormReasonTags] = useState<string[]>([]);
   const [formEmotion, setFormEmotion] = useState<string>("");
   const [formMemo, setFormMemo] = useState("");
@@ -141,7 +149,9 @@ export default function TradesPage() {
   // ─── 데이터 로딩 ───────────────────────────────────────
 
   const fetchTrades = useCallback(async () => {
+    if (appliedFilters.tradeType === "DIVIDEND") return;
     setLoading(true);
+    setDividendLogs([]);
     try {
       const params = new URLSearchParams();
       if (appliedFilters.accountId) params.set("accountId", appliedFilters.accountId);
@@ -210,8 +220,30 @@ export default function TradesPage() {
     }
   }, [pageSize]);
 
+  const fetchDividends = useCallback(async () => {
+    if (appliedFilters.tradeType !== "DIVIDEND") return;
+    setLoading(true);
+    setTrades([]);
+    tradesRef.current = [];
+    try {
+      const params = new URLSearchParams();
+      params.set("type", "DIVIDEND");
+      if (appliedFilters.accountId) params.set("accountId", appliedFilters.accountId);
+      if (appliedFilters.dateFrom) params.set("dateFrom", appliedFilters.dateFrom);
+      if (appliedFilters.dateTo) params.set("dateTo", appliedFilters.dateTo);
+      if (appliedFilters.keyword) params.set("keyword", appliedFilters.keyword);
+      const res = await fetch(`/api/cash?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDividendLogs(Array.isArray(data) ? data : []);
+      }
+    } catch { /* 조회 실패 */ }
+    finally { setLoading(false); }
+  }, [appliedFilters]);
+
   // 필터 변경 시 모바일 리스트 초기화
   useEffect(() => {
+    if (appliedFilters.tradeType === "DIVIDEND") return;
     mobileFiltersRef.current = appliedFilters;
     mobilePageRef.current = 0;
     fetchMobileTrades(0, false);
@@ -251,6 +283,10 @@ export default function TradesPage() {
   }, [fetchTrades]);
 
   useEffect(() => {
+    fetchDividends();
+  }, [fetchDividends]);
+
+  useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
 
@@ -276,6 +312,10 @@ export default function TradesPage() {
 
   // draft 필터 변경 (입력 중 — fetch 안 함)
   function handleFilterChange(f: Filters) {
+    // 배당 모드로 전환 시 관련 없는 필터 초기화
+    if (f.tradeType === "DIVIDEND" && draftFilters.tradeType !== "DIVIDEND") {
+      f = { ...f, market: "", tagStatus: "" };
+    }
     // 매수/매도, 국내/해외 토글은 즉시 반영
     if (f.tradeType !== draftFilters.tradeType || f.market !== draftFilters.market || f.tagStatus !== draftFilters.tagStatus) {
       setDraftFilters(f);
@@ -292,7 +332,16 @@ export default function TradesPage() {
     setPage(0);
   }
 
-  // ─── 요약 계산 ───────────────────────────────────────���─
+  // ─── 요약 계산 ──────────────────────────────────────────
+
+  const isDividendMode = appliedFilters.tradeType === "DIVIDEND";
+  const marketFilteredDividends = dividendLogs.filter((d) => {
+    if (!appliedFilters.market) return true;
+    const isDomestic = d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW";
+    return appliedFilters.market === "KR" ? isDomestic : !isDomestic;
+  });
+  const divKrw = marketFilteredDividends.filter(d => d.currency === "KRW").reduce((s, d) => s + Math.abs(d.amount), 0);
+  const divUsd = marketFilteredDividends.filter(d => d.currency === "USD").reduce((s, d) => s + Math.abs(d.amount), 0);
 
   const buyCount = trades.filter((t) => t.type === "BUY").length;
   const sellCount = trades.filter((t) => t.type === "SELL").length;
@@ -597,7 +646,7 @@ export default function TradesPage() {
 
   // ─── 로딩 ──────────────────────────────────────────────
 
-  if (loading && trades.length === 0) {
+  if (loading && trades.length === 0 && dividendLogs.length === 0) {
     return (
       <div className="animate-[fadeIn_0.2s_ease-out]">
         {/* ══════════ PC 스켈레톤 (md 이상) ══════════ */}
@@ -707,6 +756,17 @@ export default function TradesPage() {
         onClose={() => setToast((p) => ({ ...p, visible: false }))}
       />
 
+      {/* 배당 등록 모달 */}
+      <DividendModal
+        open={dividendModalOpen}
+        onClose={() => setDividendModalOpen(false)}
+        onSuccess={() => {
+          fetchDividends();
+          showToast("배당금 등록 완료", "배당 이력에서 확인하세요.", { variant: "success" });
+        }}
+        accounts={accounts}
+      />
+
       {/* ══════════════════════════════════════════════════ */}
       {/* PC 버전 (md 이상) */}
       {/* ══════════════════════════════════════════════════ */}
@@ -746,13 +806,137 @@ export default function TradesPage() {
                 </svg>
               )}
             </button>
+            <Button size="sm" variant="outline" onClick={() => setDividendModalOpen(true)}>
+              + 배당 등록
+            </Button>
             <Button size="sm" onClick={openModal}>
               + 매매 등록
             </Button>
           </div>
         </div>
 
-        {viewMode === "list" ? (
+        {viewMode === "calendar" ? (
+          <>
+            {/* 캘린더용 세그먼트 필터 */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
+                {(["", "BUY", "SELL", "DIVIDEND"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => handleFilterChange({ ...appliedFilters, tradeType: t })}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      appliedFilters.tradeType === t
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    {t === "" ? "전체" : t === "BUY" ? "매수" : t === "SELL" ? "매도" : "배당"}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
+                {(["", "KR", "US"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => handleFilterChange({ ...appliedFilters, market: m })}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      appliedFilters.market === m
+                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
+                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                    }`}
+                  >
+                    {m === "" ? "전체" : m === "KR" ? "국내" : "해외"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
+          </>
+        ) : isDividendMode ? (
+          /* ── 배당 이력 뷰 ── */
+          <>
+            <TradeFilterCard
+              filters={draftFilters}
+              onChange={handleFilterChange}
+              onSearch={handleSearch}
+              accounts={accounts}
+              isSearching={loading && dividendLogs.length > 0}
+            />
+            <div className="mb-3">
+              <SummaryChips
+                totalCount={marketFilteredDividends.length}
+                buyCount={0} sellCount={0} buyKrw={0} buyUsd={0} sellKrw={0} sellUsd={0}
+                divCount={marketFilteredDividends.length} divKrw={divKrw} divUsd={divUsd} isDividendMode
+              />
+            </div>
+            {dividendLogs.length === 0 ? (
+              <EmptyState message="배당 이력이 없어요." />
+            ) : (() => {
+              const handleDivSort = (col: "date" | "amount") => {
+                if (divSortCol === col) setDivSortDir((d) => (d * -1) as 1 | -1);
+                else { setDivSortCol(col); setDivSortDir(-1); }
+              };
+              const divSortIcon = (col: "date" | "amount") =>
+                divSortCol !== col ? "↕" : divSortDir === -1 ? "↓" : "↑";
+              const sortedDividends = [...dividendLogs]
+                .filter((d) => {
+                  if (!appliedFilters.market) return true;
+                  const mkt: "KR" | "US" = (d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW") ? "KR" : "US";
+                  return mkt === appliedFilters.market;
+                })
+                .sort((a, b) => {
+                  const cmp = divSortCol === "date"
+                    ? new Date(a.date).getTime() - new Date(b.date).getTime()
+                    : Math.abs(a.amount) - Math.abs(b.amount);
+                  return cmp * divSortDir;
+                });
+              return (
+                <div className="overflow-x-auto rounded-2xl bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-[var(--color-g200)] dark:border-[var(--color-border)] text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] uppercase tracking-wider">
+                        <th className="px-3 py-2.5 w-[86px] font-medium text-center">
+                          <button onClick={() => handleDivSort("date")} className="inline-flex items-center gap-1 hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
+                            일자 <span className="text-[10px]">{divSortIcon("date")}</span>
+                          </button>
+                        </th>
+                        <th className="px-2 py-2.5 w-[64px] font-medium text-center">시장</th>
+                        <th className="px-2 py-2.5 font-medium text-left">종목</th>
+                        <th className="px-3 py-2.5 w-[130px] font-medium text-right">
+                          <button onClick={() => handleDivSort("amount")} className="flex items-center gap-1 ml-auto hover:text-[var(--color-g500)] dark:hover:text-[var(--color-muted)] cursor-pointer">
+                            배당금 <span className="text-[10px]">{divSortIcon("amount")}</span>
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedDividends.map((d) => {
+                        const market: "KR" | "US" = (d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW") ? "KR" : "US";
+                        const displayName = d.stockName ?? (d.memo && d.memo !== "배당금" ? d.memo : null) ?? d.ticker ?? "배당금";
+                        const amt = Math.abs(d.amount);
+                        const amtStr = d.currency === "KRW" ? `₩${Math.floor(amt).toLocaleString()}` : `$${amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        const acctName = `${d.account.brokerageCompany.name}${d.account.memo ? ` · ${d.account.memo}` : ""}`;
+                        return (
+                          <tr key={d.id} className="border-b border-[var(--color-g100)]/60 dark:border-[var(--color-border)]/60 hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors">
+                            <td className="px-3 py-2.5 text-xs text-[var(--color-text)]">{formatTradeDate(d.date)}</td>
+                            <td className="px-2 py-2.5"><div className="flex justify-center"><MarketBadge market={market} /></div></td>
+                            <td className="px-2 py-2.5">
+                              <div className="text-[13px] font-medium text-[var(--color-text)] leading-tight">{displayName}</div>
+                              <div className="text-[11px] text-[var(--color-g400)] dark:text-[var(--color-muted)] leading-tight">
+                                {d.ticker ? `${d.ticker} · ` : ""}{acctName}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2.5 text-sm text-right font-semibold text-[#8B5CF6] tabular-nums">{amtStr}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+          </>
+        ) : (
           <>
             {/* 필터 — 타이틀 아래 */}
             <TradeFilterCard
@@ -782,43 +966,6 @@ export default function TradesPage() {
               />
             )}
           </>
-        ) : (
-          <>
-            {/* 캘린더용 세그먼트 필터 */}
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
-                {(["", "BUY", "SELL"] as const).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => handleFilterChange({ ...appliedFilters, tradeType: t })}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      appliedFilters.tradeType === t
-                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
-                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
-                    }`}
-                  >
-                    {t === "" ? "전체" : t === "BUY" ? "매수" : "매도"}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-0.5 rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] p-0.5">
-                {(["", "KR", "US"] as const).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => handleFilterChange({ ...appliedFilters, market: m })}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      appliedFilters.market === m
-                        ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] shadow-sm"
-                        : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)]"
-                    }`}
-                  >
-                    {m === "" ? "전체" : m === "KR" ? "국내" : "해외"}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
-          </>
         )}
       </div>
 
@@ -839,7 +986,68 @@ export default function TradesPage() {
         />
 
 
-        {viewMode === "list" ? (
+        {viewMode === "calendar" ? (
+          <div className="px-4 py-2.5">
+            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
+          </div>
+        ) : isDividendMode ? (
+          /* ── 모바일 배당 이력 뷰 ── */
+          <>
+            {mobileFilterOpen && (
+              <TradeFilterPanel
+                filters={draftFilters}
+                onChange={handleFilterChange}
+                onSearch={() => { handleSearch(); setMobileFilterOpen(false); }}
+                accounts={accounts}
+                isSearching={loading && dividendLogs.length > 0}
+              />
+            )}
+            <div className="px-4 py-2.5">
+              <SummaryChips
+                totalCount={marketFilteredDividends.length}
+                buyCount={0} sellCount={0} buyKrw={0} buyUsd={0} sellKrw={0} sellUsd={0}
+                divCount={marketFilteredDividends.length} divKrw={divKrw} divUsd={divUsd} isDividendMode
+              />
+            </div>
+            <div className="px-4">
+              {dividendLogs.length === 0 ? (
+                <EmptyState message="배당 이력이 없어요." />
+              ) : (
+                <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)] dark:bg-[var(--color-card)]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                  {dividendLogs.filter((d) => {
+                    if (!appliedFilters.market) return true;
+                    const mkt: "KR" | "US" = (d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW") ? "KR" : "US";
+                    return mkt === appliedFilters.market;
+                  }).map((d) => {
+                    const isDomestic = d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW";
+                    const stockName = d.memo && d.memo !== "배당금" ? d.memo : (d.ticker ?? "배당금");
+                    const amt = Math.abs(d.amount);
+                    const amtStr = d.currency === "KRW" ? `₩${Math.floor(amt).toLocaleString()}` : `$${amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    const acctName = `${d.account.brokerageCompany.name}${d.account.memo ? ` · ${d.account.memo}` : ""}`;
+                    const date = new Date(d.date);
+                    const dateStr = `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+                    return (
+                      <div key={d.id} className="px-3.5 py-3 border-b border-[var(--color-g100)] dark:border-[var(--color-border)] last:border-0">
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-xs text-[var(--color-g400)] shrink-0">{dateStr}</span>
+                            <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{isDomestic ? "국내" : "해외"}</span>
+                            <span className="text-sm font-semibold text-[var(--color-text)] truncate">{stockName}</span>
+                          </div>
+                          <span className="text-sm font-bold text-[var(--color-positive)] shrink-0 ml-2">{amtStr}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] text-[var(--color-g400)]">{acctName}</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">배당</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
           <>
             {/* 필터 패널 (토글) */}
             {mobileFilterOpen && (
@@ -874,10 +1082,6 @@ export default function TradesPage() {
               </div>
             )}
           </>
-        ) : (
-          <div className="px-4 py-2.5">
-            <Card><TradeCalendar tradeType={appliedFilters.tradeType} market={appliedFilters.market} onSelect={(t) => openDetail(t as unknown as TradeLog)} /></Card>
-          </div>
         )}
 
         {/* FAB 버튼 */}
@@ -1264,7 +1468,7 @@ export default function TradesPage() {
                   value={fmtNum(formPrice)}
                   onChange={(e) => setFormPrice(stripNum(e.target.value, true))}
                   placeholder={formPriceLoading ? "조회 중..." : "72,000"}
-                  disabled={formPriceLoading}
+                  disabled={formPriceLoading || !formTicker}
                 />
               </div>
               <div>
@@ -1293,6 +1497,7 @@ export default function TradesPage() {
                     if (e.key === "ArrowDown") { e.preventDefault(); setFormQuantity((v) => String(Math.max(1, parseInt(v || "0") - 1))); }
                   }}
                   placeholder="10"
+                  disabled={!formTicker}
                 />
               </div>
             </div>

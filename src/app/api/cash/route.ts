@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-// ─── GET: 입출금 이력 조회 ───────────────────────────────
+// ─── GET: 입출금/배당 이력 조회 ──────────────────────────────
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -12,7 +12,74 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const accountId = searchParams.get("accountId");
   const type = searchParams.get("type");
+  const dateFrom = searchParams.get("dateFrom");
+  const dateTo = searchParams.get("dateTo");
+  const keyword = searchParams.get("keyword");
 
+  // ─── 배당 이력 조회 (전체 계좌 또는 특정 계좌) ────────────
+  if (type === "DIVIDEND") {
+    const userAccounts = await prisma.investAccount.findMany({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+    const userAccountIds = userAccounts.map((a) => a.id);
+
+    const parsedAccountId = accountId ? parseInt(accountId, 10) : null;
+    if (parsedAccountId && !userAccountIds.includes(parsedAccountId)) {
+      return Response.json({ error: "계좌를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    const logs = await prisma.cashLog.findMany({
+      where: {
+        accountId: parsedAccountId ? parsedAccountId : { in: userAccountIds },
+        type: "DIVIDEND",
+        ...(dateFrom || dateTo
+          ? {
+              date: {
+                ...(dateFrom ? { gte: new Date(dateFrom) } : {}),
+                ...(dateTo ? { lte: new Date(dateTo + "T23:59:59") } : {}),
+              },
+            }
+          : {}),
+        ...(keyword
+          ? {
+              OR: [
+                { ticker: { contains: keyword, mode: "insensitive" } },
+                { memo: { contains: keyword, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+      include: {
+        account: {
+          select: {
+            memo: true,
+            brokerageCompany: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    });
+
+    // StockMaster에서 종목명 일괄 조회
+    const tickers = [...new Set(logs.map((l) => l.ticker).filter(Boolean) as string[])];
+    const stocks = tickers.length > 0
+      ? await prisma.stockMaster.findMany({
+          where: { ticker: { in: tickers } },
+          select: { ticker: true, name: true },
+        })
+      : [];
+    const stockNameMap: Record<string, string> = Object.fromEntries(stocks.map((s) => [s.ticker, s.name]));
+
+    return Response.json(
+      logs.map((l) => ({
+        ...l,
+        stockName: l.ticker ? (stockNameMap[l.ticker] ?? null) : null,
+      }))
+    );
+  }
+
+  // ─── 기존: 입출금 이력 조회 (accountId 필수) ──────────────
   if (!accountId) {
     return Response.json({ error: "accountId 필요" }, { status: 400 });
   }
@@ -20,7 +87,6 @@ export async function GET(req: Request) {
   const parsedAccountId = parseInt(accountId, 10);
   if (isNaN(parsedAccountId)) return Response.json({ error: "잘못된 accountId" }, { status: 400 });
 
-  // 계좌 소유권 확인
   const account = await prisma.investAccount.findFirst({
     where: { id: parsedAccountId, userId: session.user.id },
   });
