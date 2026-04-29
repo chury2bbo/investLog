@@ -137,7 +137,7 @@ function SlideBackground({ T }: { T: Theme }) {
   const cards = [
     { icon: I.chart,      iconColor: T.primary,
       title: "엑셀로 관리하던 가족 계좌",
-      desc: <><strong style={{ color: T.text }}>"왜 샀는지"는 어디에도 남길 수 없었다</strong> — 수기 관리의 한계</> },
+      desc: <><strong style={{ color: T.text }}>이유를 기록할 수 있는 구조 자체가 없었다</strong> — 엑셀 수기 관리의 한계</> },
     { icon: I.smartphone, iconColor: T.warning,
       title: "증권사 앱의 구조적 한계",
       desc: <><strong style={{ color: T.text }}>잦은 매매 유도 구조</strong> — 장기투자자에게 맞지 않음</> },
@@ -614,7 +614,7 @@ function Slide5({ T }: { T: Theme }) {
   ];
   const techSections = [
     { label: "Frontend",      techs: "Next.js 16 · Tailwind v4 · Recharts 3" },
-    { label: "Backend · DB",  techs: "NextAuth v5 · Prisma 7 · Supabase" },
+    { label: "Backend · DB",  techs: "NextAuth v5 · Prisma 7 · PostgreSQL · Supabase" },
     { label: "시세 · 데이터", techs: "KIS Open API · yahoo-finance2 · R-ONE API" },
   ];
   const stats = [
@@ -696,7 +696,7 @@ function Slide6({ T }: { T: Theme }) {
         <div className="grid grid-cols-3 gap-3 fade-up-2">
           {[
             { num: weeks, suffix: "주", label: "개발 기간",  sub: "업무 중 틈틈이 · 2인 팀" },
-            { num: apis,  suffix: "+",  label: "API Route",  sub: "자체 개발 · 별도 서버 없음" },
+            { num: apis,  suffix: "",   label: "API Route",  sub: "자체 개발 · 별도 서버 없음" },
             { num: pages, suffix: "",   label: "페이지",      sub: "반응형 · 다크모드 전체 지원" },
           ].map((s) => (
             <div key={s.label} className="flex items-center gap-3 px-5 py-3.5 rounded-2xl"
