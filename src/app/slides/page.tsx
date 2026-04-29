@@ -824,7 +824,7 @@ function Slide7({ T }: { T: Theme }) {
         {/* 데모 큐카드 */}
         <div className="grid grid-cols-4 gap-3 fade-up-3">
           {[
-            { num: "01", icon: I.camera, label: "온보딩",      desc: "OCR로 보유종목\n일괄 등록" },
+            { num: "01", icon: I.camera, label: "온보딩",      desc: "Claude Vision으로\n보유종목 등록" },
             { num: "02", icon: I.edit,   label: "매매 기록",  desc: "이유 태그 + 심리\n상태 기록" },
             { num: "03", icon: I.brain,  label: "AI 성향 진단", desc: "FOMO 패턴\n시각화", badge: "AI 실시간 생성 · 약 20초" },
             { num: "04", icon: I.cpu,    label: "AI 코칭",    desc: "잘한 것 / 실수\n이번 달 목표" },
