@@ -618,7 +618,7 @@ function Slide5({ T }: { T: Theme }) {
     { label: "시세 · 데이터", techs: "KIS Open API · yahoo-finance2 · R-ONE API" },
   ];
   const stats = [
-    { num: "5",   label: "Claude API 호출 포인트", sub: "Vision · 종목분석 · 성향진단 · 코칭 · 기업요약" },
+    { num: "4",   label: "Claude API 호출 포인트", sub: "Vision · 종목분석 · 성향진단·코칭 · 기업요약" },
     { num: "$0",  label: "DB 비용",                sub: "Supabase 무료 티어로 운영" },
     { num: "~$9", label: "Claude API 월 예상비용",  sub: "캐시 전략으로 실사용 최소화" },
   ];
