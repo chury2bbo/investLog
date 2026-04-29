@@ -273,7 +273,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
 
   // 선택된 날짜의 매매 / 배당
   const selectedTrades = selectedDate ? tradesByDate[selectedDate] ?? [] : [];
-  const selectedDividends = selectedDate ? dividendsByDate[selectedDate] ?? [] : [];
+  const selectedDividends = (selectedDate ? dividendsByDate[selectedDate] ?? [] : []).filter((d) => {
+    if (!market) return true;
+    const isDomestic = d.ticker ? /^\d{6}$/.test(d.ticker) : d.currency === "KRW";
+    return market === "KR" ? isDomestic : !isDomestic;
+  });
 
   // 날짜 클릭
   function handleDayClick(day: Date) {
@@ -309,12 +313,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
           ) : tradeType === "SELL" ? (
             <span className="text-[#F07D05]">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
           ) : tradeType === "DIVIDEND" ? (
-            <span className="text-[#8B5CF6]">
-              배당 {divCount}회
-              {divKrw > 0 && ` ₩${Math.floor(divKrw).toLocaleString()}`}
-              {divUsd > 0 && ` $${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              {divCount === 0 && "없음"}
-            </span>
+            <>
+              <span className="text-[#8B5CF6]">배당 {divCount}회{divCount === 0 && " 없음"}</span>
+              {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
+              {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
+            </>
           ) : (
             <>
               <span className="text-[var(--color-positive)]">매수 {buyCount}회, ₩{Math.floor(buyTotal).toLocaleString()}</span>
@@ -328,9 +331,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               {divCount > 0 && (
                 <>
                   {" / "}
-                  <span className="text-[#8B5CF6]">
-                    배당 {divCount}회, {divKrw > 0 && `₩${Math.floor(divKrw).toLocaleString()}`}{divUsd > 0 && ` $${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  </span>
+                  <span className="text-[#8B5CF6]">배당 {divCount}회</span>
+                  {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
+                  {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
                 </>
               )}
             </>
@@ -436,7 +439,6 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                 {/* 배당 목록 */}
                 {selectedDividends.length > 0 && (
                   <div className="mb-3">
-                    <div className="text-[11px] font-medium text-[#8B5CF6] mb-1.5 px-1">배당</div>
                     <div className="space-y-0">
                       {selectedDividends.map((d) => {
                         const isDomestic = d.ticker
