@@ -40,6 +40,33 @@ export async function POST(req: Request) {
     );
   }
 
+  // 동일 증권사 계좌가 이미 있고, 계좌번호·계좌명 둘 다 비어있으면 구분 불가
+  if (!accountNumber && !memo) {
+    const sameCompany = await prisma.investAccount.findFirst({
+      where: { userId: session.user.id, accountCode },
+    });
+    if (sameCompany) {
+      return Response.json(
+        { error: "동일한 증권사 계좌가 이미 있습니다.\n계좌번호 또는 계좌명을 입력해주세요." },
+        { status: 400 }
+      );
+    }
+  }
+
+  // 중복 계좌 체크: 동일 증권사 AND (동일 계좌번호 OR 동일 계좌명)
+  const orConditions: { accountNumber?: string; memo?: string }[] = [];
+  if (accountNumber) orConditions.push({ accountNumber });
+  if (memo) orConditions.push({ memo });
+
+  if (orConditions.length > 0) {
+    const duplicate = await prisma.investAccount.findFirst({
+      where: { userId: session.user.id, accountCode, OR: orConditions },
+    });
+    if (duplicate) {
+      return Response.json({ error: "동일한 계좌가 이미 존재합니다." }, { status: 409 });
+    }
+  }
+
   let account;
   try {
     account = await prisma.investAccount.create({

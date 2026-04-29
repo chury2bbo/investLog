@@ -201,7 +201,11 @@ export default function AccountsPage() {
         showToast("계좌 추가 완료", "새 계좌가 등록되었습니다.", { variant: "success" });
       } else {
         const data = await res.json();
-        setFormError(data.error ?? "계좌 추가에 실패했습니다.");
+        if (res.status === 409) {
+          showToast("중복 계좌", data.error ?? "동일한 계좌가 이미 존재합니다.", { variant: "error" });
+        } else {
+          setFormError(data.error ?? "계좌 추가에 실패했습니다.");
+        }
       }
     } catch {
       setFormError("네트워크 오류가 발생했습니다.");
@@ -586,7 +590,15 @@ export default function AccountsPage() {
       {/* 계좌 추가 바텀시트 */}
       <BottomSheet
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setFormCode(brokerages.length > 0 ? brokerages[0].code : "");
+          setFormAccountNumber("");
+          setFormMemo("");
+          setFormCashKRW("");
+          setFormCashUSD("");
+          setFormError("");
+        }}
         title="계좌 추가"
       >
         <div className="space-y-5">
@@ -635,7 +647,7 @@ export default function AccountsPage() {
           </div>
 
           {formError && (
-            <p className="text-sm text-[var(--color-negative)] text-center -mt-1">{formError}</p>
+            <p className="text-sm text-[var(--color-negative)] text-center -mt-1 whitespace-pre-wrap">{formError}</p>
           )}
 
           <Button
