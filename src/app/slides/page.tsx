@@ -382,15 +382,25 @@ function SlideCompetitor({ T }: { T: Theme }) {
 }
 
 // ─── S3-1: 핵심 기능 ─────────────────────────────────────────────────────────
-function OcrVideo({ T }: { T: Theme }) {
+function OcrVideo({ T, active }: { T: Theme; active: boolean }) {
   const [err, setErr] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (active) {
+      ref.current.currentTime = 0;
+      ref.current.play().catch(() => {});
+    } else {
+      ref.current.pause();
+    }
+  }, [active]);
 
   const handleEnded = () => {
     setTimeout(() => {
       if (!ref.current) return;
       ref.current.currentTime = 0;
-      ref.current.play();
+      ref.current.play().catch(() => {});
     }, 200);
   };
 
@@ -406,7 +416,7 @@ function OcrVideo({ T }: { T: Theme }) {
     <div className="relative w-full h-full flex items-start justify-center overflow-hidden">
       <video
         ref={ref}
-        autoPlay muted playsInline
+        muted playsInline
         className="w-full"
         style={{ objectFit: "contain", objectPosition: "top" }}
         src="/slides/portfolio.mp4"
@@ -422,6 +432,9 @@ function OcrVideo({ T }: { T: Theme }) {
 }
 
 function Slide4a({ T }: { T: Theme }) {
+  const [activeCards, setActiveCards] = useState<Set<number>>(new Set([0]));
+  const activate = (idx: number) => setActiveCards(prev => new Set([...prev, idx]));
+
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ padding: "28px 64px" }}>
       <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0 gap-7">
@@ -429,8 +442,29 @@ function Slide4a({ T }: { T: Theme }) {
         <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
 
           {/* 통합 포트폴리오 */}
-          <div className="rounded-2xl flex flex-col fade-up-2 overflow-hidden"
-            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+          <div className="rounded-2xl flex flex-col fade-up-2 overflow-hidden relative"
+            style={{
+              backgroundColor: T.card,
+              border: `1px solid ${T.border}`,
+              opacity: activeCards.has(0) ? 1 : 0.38,
+              filter: activeCards.has(0) ? "none" : "grayscale(0.9)",
+              transform: activeCards.has(0) ? "scale(1)" : "scale(0.97)",
+              cursor: activeCards.has(0) ? "default" : "pointer",
+              transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
+            }}
+            onClick={() => !activeCards.has(0) && activate(0)}
+          >
+            {!activeCards.has(0) && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
+                  style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0m-4 8V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" /><path d="m18 11-2 9H6l-2-9h14Z" />
+                  </svg>
+                  <span className="text-[11px] font-bold text-white">클릭</span>
+                </div>
+              </div>
+            )}
             <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
@@ -454,8 +488,30 @@ function Slide4a({ T }: { T: Theme }) {
           </div>
 
           {/* 매매일지 — 핵심 기능 */}
-          <div className="rounded-2xl flex flex-col fade-up-3 overflow-hidden"
-            style={{ backgroundColor: T.card, border: `1.5px solid ${T.primary}70`, boxShadow: `0 0 28px ${T.primary}18` }}>
+          <div className="rounded-2xl flex flex-col fade-up-3 overflow-hidden relative"
+            style={{
+              backgroundColor: T.card,
+              border: activeCards.has(1) ? `1.5px solid ${T.primary}70` : `1px solid ${T.border}`,
+              boxShadow: activeCards.has(1) ? `0 0 28px ${T.primary}18` : "none",
+              opacity: activeCards.has(1) ? 1 : 0.38,
+              filter: activeCards.has(1) ? "none" : "grayscale(0.9)",
+              transform: activeCards.has(1) ? "scale(1)" : "scale(0.97)",
+              cursor: activeCards.has(1) ? "default" : "pointer",
+              transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.45s ease, border-color 0.45s ease",
+            }}
+            onClick={() => !activeCards.has(1) && activate(1)}
+          >
+            {!activeCards.has(1) && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
+                  style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0m-4 8V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" /><path d="m18 11-2 9H6l-2-9h14Z" />
+                  </svg>
+                  <span className="text-[11px] font-bold text-white">클릭</span>
+                </div>
+              </div>
+            )}
             <div className="relative flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: T.primarySoft }}>
@@ -493,8 +549,29 @@ function Slide4a({ T }: { T: Theme }) {
           </div>
 
           {/* 스크린샷 등록 */}
-          <div className="rounded-2xl flex flex-col fade-up-4 overflow-hidden"
-            style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
+          <div className="rounded-2xl flex flex-col fade-up-4 overflow-hidden relative"
+            style={{
+              backgroundColor: T.card,
+              border: `1px solid ${T.border}`,
+              opacity: activeCards.has(2) ? 1 : 0.38,
+              filter: activeCards.has(2) ? "none" : "grayscale(0.9)",
+              transform: activeCards.has(2) ? "scale(1)" : "scale(0.97)",
+              cursor: activeCards.has(2) ? "default" : "pointer",
+              transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
+            }}
+            onClick={() => !activeCards.has(2) && activate(2)}
+          >
+            {!activeCards.has(2) && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
+                  style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0m-4 8V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" /><path d="m18 11-2 9H6l-2-9h14Z" />
+                  </svg>
+                  <span className="text-[11px] font-bold text-white">클릭</span>
+                </div>
+              </div>
+            )}
             <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
@@ -512,7 +589,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden" style={{ borderTop: `1px solid ${T.border}` }}>
-              <OcrVideo T={T} />
+              <OcrVideo T={T} active={activeCards.has(2)} />
             </div>
           </div>
 
@@ -614,7 +691,7 @@ function Slide5({ T }: { T: Theme }) {
   ];
   const techSections = [
     { label: "Frontend",      techs: "Next.js 16 · Tailwind v4 · Recharts 3" },
-    { label: "Backend · DB",  techs: "NextAuth v5 · Prisma 7 · PostgreSQL · Supabase" },
+    { label: "Backend · DB",  techs: "PostgreSQL · Prisma 7 · Supabase · NextAuth v5" },
     { label: "시세 · 데이터", techs: "KIS Open API · yahoo-finance2 · R-ONE API" },
   ];
   const stats = [
