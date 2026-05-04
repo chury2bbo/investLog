@@ -431,9 +431,10 @@ function OcrVideo({ T, active }: { T: Theme; active: boolean }) {
   );
 }
 
-function Slide4a({ T }: { T: Theme }) {
+function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
   const [activeCards, setActiveCards] = useState<Set<number>>(new Set([0]));
   const activate = (idx: number) => setActiveCards(prev => new Set([...prev, idx]));
+  const isActive = (idx: number) => printMode || activeCards.has(idx);
 
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ padding: "28px 64px" }}>
@@ -446,15 +447,15 @@ function Slide4a({ T }: { T: Theme }) {
             style={{
               backgroundColor: T.card,
               border: `1px solid ${T.border}`,
-              opacity: activeCards.has(0) ? 1 : 0.38,
-              filter: activeCards.has(0) ? "none" : "grayscale(0.9)",
-              transform: activeCards.has(0) ? "scale(1)" : "scale(0.97)",
-              cursor: activeCards.has(0) ? "default" : "pointer",
+              opacity: isActive(0) ? 1 : 0.38,
+              filter: isActive(0) ? "none" : "grayscale(0.9)",
+              transform: isActive(0) ? "scale(1)" : "scale(0.97)",
+              cursor: isActive(0) ? "default" : "pointer",
               transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
             }}
-            onClick={() => !activeCards.has(0) && activate(0)}
+            onClick={() => !isActive(0) && activate(0)}
           >
-            {!activeCards.has(0) && (
+            {!isActive(0) && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
                   style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
@@ -491,17 +492,17 @@ function Slide4a({ T }: { T: Theme }) {
           <div className="rounded-2xl flex flex-col fade-up-3 overflow-hidden relative"
             style={{
               backgroundColor: T.card,
-              border: activeCards.has(1) ? `1.5px solid ${T.primary}70` : `1px solid ${T.border}`,
-              boxShadow: activeCards.has(1) ? `0 0 28px ${T.primary}18` : "none",
-              opacity: activeCards.has(1) ? 1 : 0.38,
-              filter: activeCards.has(1) ? "none" : "grayscale(0.9)",
-              transform: activeCards.has(1) ? "scale(1)" : "scale(0.97)",
-              cursor: activeCards.has(1) ? "default" : "pointer",
+              border: isActive(1) ? `1.5px solid ${T.primary}70` : `1px solid ${T.border}`,
+              boxShadow: isActive(1) ? `0 0 28px ${T.primary}18` : "none",
+              opacity: isActive(1) ? 1 : 0.38,
+              filter: isActive(1) ? "none" : "grayscale(0.9)",
+              transform: isActive(1) ? "scale(1)" : "scale(0.97)",
+              cursor: isActive(1) ? "default" : "pointer",
               transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.45s ease, border-color 0.45s ease",
             }}
-            onClick={() => !activeCards.has(1) && activate(1)}
+            onClick={() => !isActive(1) && activate(1)}
           >
-            {!activeCards.has(1) && (
+            {!isActive(1) && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
                   style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
@@ -553,15 +554,15 @@ function Slide4a({ T }: { T: Theme }) {
             style={{
               backgroundColor: T.card,
               border: `1px solid ${T.border}`,
-              opacity: activeCards.has(2) ? 1 : 0.38,
-              filter: activeCards.has(2) ? "none" : "grayscale(0.9)",
-              transform: activeCards.has(2) ? "scale(1)" : "scale(0.97)",
-              cursor: activeCards.has(2) ? "default" : "pointer",
+              opacity: isActive(2) ? 1 : 0.38,
+              filter: isActive(2) ? "none" : "grayscale(0.9)",
+              transform: isActive(2) ? "scale(1)" : "scale(0.97)",
+              cursor: isActive(2) ? "default" : "pointer",
               transition: "opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
             }}
-            onClick={() => !activeCards.has(2) && activate(2)}
+            onClick={() => !isActive(2) && activate(2)}
           >
-            {!activeCards.has(2) && (
+            {!isActive(2) && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl"
                   style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
@@ -579,7 +580,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>스크린샷 등록</div>
-                <div className="text-[13px] font-semibold mt-0.5 mb-1" style={{ color: T.primary }}>캡처 한 장으로 즉시 등록</div>
+                <div className="text-[13px] font-semibold mt-0.5 mb-1" style={{ color: T.primary }}>캡처 한 장으로 계좌의 종목을 자동으로 인식</div>
                 <div className="text-[14px] leading-snug" style={{ color: T.dim }}>
                   캡처 한 장 → <span style={{ color: T.primary, fontWeight: 700 }}>자동 등록</span>
                 </div>
@@ -589,7 +590,7 @@ function Slide4a({ T }: { T: Theme }) {
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden" style={{ borderTop: `1px solid ${T.border}` }}>
-              <OcrVideo T={T} active={activeCards.has(2)} />
+              <OcrVideo T={T} active={isActive(2)} />
             </div>
           </div>
 
@@ -616,7 +617,7 @@ function Slide4b({ T }: { T: Theme }) {
             style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
             <div className="p-6 flex flex-col flex-1">
               <div className="flex items-center justify-between mb-3">
-                <div className="text-[13px] font-bold tracking-wide" style={{ color: T.muted }}>나의 투자자 유형</div>
+                <div className="text-[13px] font-bold tracking-wide" style={{ color: T.muted }}>투자자 유형 진단</div>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${T.primary}15`, color: T.primary, border: `1px solid ${T.primary}40` }}>실제 6개월 데이터</span>
               </div>
               <div className="text-4xl font-extrabold mb-4" style={{ color: T.text }}>FOMO형 중기 투자자</div>
@@ -1128,7 +1129,7 @@ export default function SlidesPage() {
         style={{ fontFamily: "'Pretendard','Apple SD Gothic Neo',-apple-system,system-ui,sans-serif" }}>
         {SLIDE_LIST.map((SlideComp, i) => (
           <div key={i} className="print-page" style={{ backgroundColor: T.bg }}>
-            <SlideComp T={T} />
+            {SlideComp === Slide4a ? <Slide4a T={T} printMode={true} /> : <SlideComp T={T} />}
             {i !== 0 && (
               <div style={{ position: "absolute", top: 20, right: 24, display: "flex", alignItems: "center", gap: 8, opacity: 0.4, pointerEvents: "none" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
