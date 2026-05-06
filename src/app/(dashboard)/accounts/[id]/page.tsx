@@ -1156,7 +1156,7 @@ export default function AccountDetailPage() {
                     <Tooltip text="섹터">
                     <button
                       onClick={(e) => { e.stopPropagation(); openSectorEdit(h); }}
-                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                     </button>
@@ -1165,7 +1165,7 @@ export default function AccountDetailPage() {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); openHoldingEdit(h); }}
-                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
@@ -1174,7 +1174,7 @@ export default function AccountDetailPage() {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setAvgDownHolding(h); const cp = quotes[h.ticker]?.price; setAvgDownPrice(cp ? String(h.country === "KR" ? Math.floor(cp) : cp) : ""); setAvgDownQty(""); }}
-                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors"
+                      className="p-1.5 rounded-lg cursor-pointer bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
                     </button>
@@ -1254,7 +1254,7 @@ export default function AccountDetailPage() {
                   </span>
                   <div>
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
                         {isDomestic ? "국내" : "해외"}
                       </span>
                       <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{t.name}</span>
@@ -1549,7 +1549,7 @@ export default function AccountDetailPage() {
               onClick={() => { setHCountry("US"); setHTicker(""); setHName(""); setHAvgPrice(""); setHQuantity(""); setHStockQuery(""); setHStockResults([]); setHShowDropdown(false); }}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 hCountry === "US"
-                  ? "bg-[#4285F4] text-white"
+                  ? "bg-(--color-foreign) text-white"
                   : "bg-white dark:bg-[var(--color-card)] text-[var(--color-g400)] dark:text-[var(--color-muted)]"
               }`}
             >
@@ -1607,11 +1607,11 @@ export default function AccountDetailPage() {
                         style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
                       >
                         <span
-                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#1D2720] z-10"
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-(--color-tooltip) z-10"
                           style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                         >
                           {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
-                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-tooltip)" }} />
                         </span>
                         {hIsListening && (
                           <span className="absolute inset-0 flex items-center justify-center">
@@ -1723,11 +1723,11 @@ export default function AccountDetailPage() {
                         style={{ color: hIsListening ? "var(--color-negative)" : "var(--color-g400)" }}
                       >
                         <span
-                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#1D2720] z-10"
+                          className="absolute bottom-full right-0 mb-2 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-(--color-tooltip) z-10"
                           style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
                         >
                           {hIsListening ? "음성 인식 중지" : "음성으로 종목 검색"}
-                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #1D2720" }} />
+                          <span className="absolute top-full right-3 w-0 h-0" style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid var(--color-tooltip)" }} />
                         </span>
                         {hIsListening && (
                           <span className="absolute inset-0 flex items-center justify-center">
@@ -1820,7 +1820,7 @@ export default function AccountDetailPage() {
 
           {/* 에러 */}
           {hError && (
-            <div className="rounded-xl px-4 py-2.5 text-sm bg-[var(--color-negative-soft)] dark:bg-[#3D1519] text-[var(--color-negative)]">
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-[var(--color-negative-soft)] dark:bg-(--color-negative-overlay) text-[var(--color-negative)]">
               {hError}
             </div>
           )}

@@ -109,7 +109,7 @@ export default function LoginPage() {
 
             {/* 에러 메시지 — 빨간 배경 배너 */}
             {error && (
-              <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-[#3D1519] text-(--color-negative)">
+              <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-(--color-negative-overlay) text-(--color-negative)">
                 {error}
               </div>
             )}
@@ -170,7 +170,7 @@ export default function LoginPage() {
               onClick={() => signIn("kakao", { callbackUrl: "/onboarding" })}
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#FEE500", color: "#191919" }}
+              style={{ backgroundColor: "var(--color-kakao)", color: "#191919" }}
             >
               <svg
                 width="18"

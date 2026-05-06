@@ -10,7 +10,7 @@ const SECTOR_COLORS = [
   "#8B5CF6", "#EC4899", "#F59E0B", "#06B6D4",
   "#EF4444", "#6366F1",
 ];
-const COLOR_OTHERS = "#9AA99A";
+const COLOR_OTHERS = "var(--color-g400)";
 
 // ── 유틸 ────────────────────────────────────────────────────
 function formatKRW(value: number): string {
@@ -104,7 +104,7 @@ function CustomTooltip({ active, payload, T }: TooltipProps) {
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
         <span style={{ color: T.textSecondary }}>비중</span>
-        <span style={{ color: "#05C072", fontWeight: 600 }}>{d.pct}%</span>
+        <span style={{ color: "var(--color-primary)", fontWeight: 600 }}>{d.pct}%</span>
       </div>
     </div>
   );
@@ -119,14 +119,14 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
     textPrimary:       isDark ? "#DCE8DC" : "#1A221A",
     textSecondary:     isDark ? "#5C7A5C" : "#6B7D6B",
     textMuted:         isDark ? "#3D5C3D" : "#9EAD9E",
-    surfaceHover:      isDark ? "#253022" : "#F0F4F0",
+    surfaceHover:      isDark ? "#253022" : "var(--color-g100)",
     border:            isDark ? "#2A3828" : "#E4EAE4",
     tabActiveBg:       isDark ? "#0D2B1A" : "#E8FBF3",
     tabActiveBorder:   "#05C072",
     tabActiveColor:    isDark ? "#05C072" : "#027A47",
     tabInactiveColor:  isDark ? "#5C7A5C" : "#6B7D6B",
     tabInactiveBorder: isDark ? "#2A3828" : "#E4EAE4",
-    tooltipBg:         isDark ? "#1D2720" : "#FFFFFF",
+    tooltipBg:         isDark ? "var(--color-tooltip)" : "#FFFFFF",
     tooltipBorder:     isDark ? "#2A3828" : "#E4EAE4",
     tooltipShadow:     isDark
       ? "0 4px 16px rgba(0,0,0,0.4)"
@@ -210,7 +210,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
                   outerRadius={95}
                   dataKey="value"
                   strokeWidth={2}
-                  stroke={isDark ? "#1D2720" : "#FFFFFF"}
+                  stroke={isDark ? "var(--color-tooltip)" : "#FFFFFF"}
                   onMouseEnter={(_, index) => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >

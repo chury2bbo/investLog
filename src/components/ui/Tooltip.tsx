@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-const BG = "#1D2720";
+const BG = "var(--color-tooltip)";
 
 interface TooltipProps {
   text: string;

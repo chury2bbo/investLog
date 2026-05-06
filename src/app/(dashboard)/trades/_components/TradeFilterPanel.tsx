@@ -20,7 +20,7 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
     onChange({ ...filters, [key]: value });
 
   return (
-    <div className="px-4 py-3 space-y-2.5 border-b border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[#F8FAF8] dark:bg-[#111A14]">
+    <div className="px-4 py-3 space-y-2.5 border-b border-[var(--color-g200)] dark:border-[var(--color-border)] bg-(--color-g100) dark:bg-(--color-surface-dark)">
       {/* 1행: from~to + 기간선택 */}
       <div className="flex items-center gap-1.5">
         <DatePicker
@@ -130,7 +130,7 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
         <button
           onClick={onSearch}
           disabled={isSearching}
-          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-[#03A862] text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-(--color-primary-hover) text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isSearching ? "조회 중..." : "조회"}
         </button>

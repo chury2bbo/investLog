@@ -311,18 +311,18 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               </span>
             </>
           ) : tradeType === "SELL" ? (
-            <span className="text-[#F07D05]">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
+            <span className="text-(--color-sell)">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
           ) : tradeType === "DIVIDEND" ? (
             <>
-              <span className="text-[#8B5CF6]">배당 {divCount}회{divCount === 0 && " 없음"}</span>
-              {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
-              {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
+              <span className="text-(--color-dividend)">배당 {divCount}회{divCount === 0 && " 없음"}</span>
+              {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-(--color-dividend)">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
+              {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-(--color-dividend)">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
             </>
           ) : (
             <>
               <span className="text-[var(--color-positive)]">매수 {buyCount}회, ₩{Math.floor(buyTotal).toLocaleString()}</span>
               {" / "}
-              <span className="text-[#F07D05]">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
+              <span className="text-(--color-sell)">매도 {sellCount}회, ₩{Math.floor(sellTotal).toLocaleString()}</span>
               {" / "}
               순매수{" "}
               <span className={netBuy >= 0 ? "text-[var(--color-positive)]" : "text-[var(--color-negative)]"}>
@@ -331,9 +331,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               {divCount > 0 && (
                 <>
                   {" / "}
-                  <span className="text-[#8B5CF6]">배당 {divCount}회</span>
-                  {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
-                  {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-[#8B5CF6]">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
+                  <span className="text-(--color-dividend)">배당 {divCount}회</span>
+                  {divKrw > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-(--color-dividend)">원화 ₩{Math.floor(divKrw).toLocaleString()}</span></>}
+                  {divUsd > 0 && <><span className="text-[var(--color-g300)] mx-1">·</span><span className="text-(--color-dividend)">달러 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}
                 </>
               )}
             </>
@@ -345,9 +345,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
       <div className="flex items-center gap-3 mb-4 px-1 flex-wrap">
         {[
           { color: "bg-[var(--color-positive)]", label: "매수", show: tradeType === "" || tradeType === "BUY" },
-          { color: "bg-[#F07D05]", label: "매도", show: tradeType === "" || tradeType === "SELL" },
-          { color: "bg-[#8B5CF6]", label: "배당", show: tradeType === "" || tradeType === "DIVIDEND" },
-          { color: "bg-[#60A5FA]", label: "메모", show: tradeType === "" && market === "" },
+          { color: "bg-(--color-sell)", label: "매도", show: tradeType === "" || tradeType === "SELL" },
+          { color: "bg-(--color-dividend)", label: "배당", show: tradeType === "" || tradeType === "DIVIDEND" },
+          { color: "bg-(--color-memo)", label: "메모", show: tradeType === "" && market === "" },
         ].filter(({ show }) => show).map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1">
             <span className={`w-2 h-2 rounded-full ${color}`} />
@@ -378,13 +378,13 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               month_caption: "text-[15px] font-bold text-[var(--color-text)] text-center py-1",
               months: "w-full relative",
               weekdays: "grid grid-cols-7",
-              weekday: "text-[11px] font-medium text-[#9AA99A] dark:text-[#5A6A5A] text-center py-2",
+              weekday: "text-[11px] font-medium text-(--color-g400) dark:text-[#5A6A5A] text-center py-2",
               week: "grid grid-cols-7",
               day: "relative text-center py-1",
               day_button: "w-10 h-10 rounded-lg text-[13px] text-[var(--color-text)] hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer mx-auto flex items-center justify-center",
               today: "font-bold",
               selected: "",
-              outside: "text-[#D4DDD4] dark:text-[#3D4D40]",
+              outside: "text-(--color-g300) dark:text-[#3D4D40]",
             }}
             components={{
               DayButton: ({ day, ...props }) => {
@@ -412,9 +412,9 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                     {(hasBuy || hasSell || hasMemo || hasDividend) && (
                       <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
                         {hasBuy && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-positive)]" />}
-                        {hasSell && <span className="w-1.5 h-1.5 rounded-full bg-[#F07D05]" />}
-                        {hasDividend && <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" />}
-                        {hasMemo && <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />}
+                        {hasSell && <span className="w-1.5 h-1.5 rounded-full bg-(--color-sell)" />}
+                        {hasDividend && <span className="w-1.5 h-1.5 rounded-full bg-(--color-dividend)" />}
+                        {hasMemo && <span className="w-1.5 h-1.5 rounded-full bg-(--color-memo)" />}
                       </span>
                     )}
                   </button>
@@ -429,7 +429,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
               <>
                 <div className="text-[13px] font-bold text-[var(--color-text)] mb-3 px-1">
                   {selectedDate.slice(5).replace("-", "월 ")}일
-                  <span className="ml-1.5 text-[11px] font-medium text-[#9AA99A] dark:text-[#5A6A5A]">
+                  <span className="ml-1.5 text-[11px] font-medium text-(--color-g400) dark:text-[#5A6A5A]">
                     {tradeType === "DIVIDEND"
                       ? `배당 ${selectedDividends.length}건`
                       : `${selectedTrades.length}건${selectedDividends.length > 0 ? ` · 배당 ${selectedDividends.length}건` : ""}`}
@@ -451,13 +451,13 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                         >
                           <div className="flex justify-between items-center mb-0.5">
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap bg-[#F3F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">
+                              <span className="text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap bg-(--color-dividend-bg) dark:bg-[rgba(139,92,246,0.15)] text-(--color-dividend)">
                                 배당
                               </span>
                               <span className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
                                 isDomestic
                                   ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
-                                  : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"
+                                  : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"
                               }`}>
                                 {isDomestic ? "국내" : "해외"}
                               </span>
@@ -465,13 +465,13 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                                 {(d.memo && d.memo !== "배당금") ? d.memo : (d.ticker ?? "배당금")}
                               </span>
                             </div>
-                            <span className="text-[14px] font-medium text-[#8B5CF6] shrink-0 ml-2 tabular-nums">
+                            <span className="text-[14px] font-medium text-(--color-dividend) shrink-0 ml-2 tabular-nums">
                               {d.currency === "USD"
                                 ? `$${d.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 : `₩${Math.floor(d.amount).toLocaleString()}`}
                             </span>
                           </div>
-                          <div className="text-[12px] text-[#9AA99A] dark:text-[#5A6A5A] px-0.5">
+                          <div className="text-[12px] text-(--color-g400) dark:text-[#5A6A5A] px-0.5">
                             {d.account.brokerageCompany.name}{d.account.memo ? ` · ${d.account.memo}` : ""}
                           </div>
                         </div>
@@ -498,7 +498,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                               className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
                                 t.type === "BUY"
                                   ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
-                                  : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"
+                                  : "bg-(--color-sell-bg) dark:bg-[rgba(255,123,0,0.15)] text-(--color-warning)"
                               }`}
                             >
                               {t.type === "BUY" ? "매수" : "매도"}
@@ -507,7 +507,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                               className={`text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ${
                                 getCountry(t.ticker) === "KR"
                                   ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]"
-                                  : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"
+                                  : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"
                               }`}
                             >
                               {getCountry(t.ticker) === "KR" ? "국내" : "해외"}
@@ -521,7 +521,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-[12px] text-[#9AA99A] dark:text-[#5A6A5A] truncate">
+                          <span className="text-[12px] text-(--color-g400) dark:text-[#5A6A5A] truncate">
                             {formatPrice(t.price, t.ticker)} × {t.quantity}주 · {t.account.brokerageCompany.name}
                           </span>
                           <div className="shrink-0 ml-2">
@@ -536,11 +536,11 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                 {/* 일별 메모 섹션 */}
                 <div className="mt-4 pt-4 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
                   <div className="flex items-center gap-1.5 mb-2 px-1">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-[#9AA99A] dark:text-[#5A6A5A] shrink-0">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-(--color-g400) dark:text-[#5A6A5A] shrink-0">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span className="text-[12px] font-medium text-[#9AA99A] dark:text-[#5A6A5A]">오늘의 메모</span>
+                    <span className="text-[12px] font-medium text-(--color-g400) dark:text-[#5A6A5A]">오늘의 메모</span>
                   </div>
                   {!memoLoaded ? (
                     <div className="px-1 space-y-2">
@@ -571,7 +571,7 @@ export default function TradeCalendar({ tradeType = "", market = "", onSelect }:
                 </div>
               </>
             ) : (
-              <p className="text-[12px] text-center text-[#9AA99A] dark:text-[#5A6A5A] py-4">
+              <p className="text-[12px] text-center text-(--color-g400) dark:text-[#5A6A5A] py-4">
                 날짜를 선택하면 매매 기록이 표시됩니다
               </p>
             )}

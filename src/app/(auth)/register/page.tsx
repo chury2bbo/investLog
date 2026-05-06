@@ -157,7 +157,7 @@ export default function RegisterPage() {
 
                 {/* 에러 메시지 — 빨간 배경 배너 */}
                 {error && (
-                  <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-[#3D1519] text-(--color-negative)">
+                  <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-soft) dark:bg-(--color-negative-overlay) text-(--color-negative)">
                     {error}
                   </div>
                 )}

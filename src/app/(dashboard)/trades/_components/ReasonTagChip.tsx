@@ -31,7 +31,7 @@ export function ReasonTagChip({ tags }: ReasonTagChipProps) {
       {tags.length > 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-          className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer"
+          className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors cursor-pointer"
         >
           +{tags.length - 1}
         </button>

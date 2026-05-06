@@ -171,9 +171,9 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)] rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-positive)] hover:bg-[var(--color-primary-soft)] dark:hover:bg-[#0D2A1D] transition-all"
+                className="border-2 border-dashed border-[var(--color-g200)] dark:border-[var(--color-border)] rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-positive)] hover:bg-[var(--color-primary-soft)] dark:hover:bg-(--color-primary-overlay) transition-all"
               >
-                <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] dark:bg-(--color-primary-overlay) flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-positive)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
@@ -193,7 +193,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                 <div className="space-y-1.5">
                   {["증권사 앱의 보유 종목 / 잔고 화면을 캡처", "종목명, 수량, 평단가가 모두 보이도록", "여러 화면은 한 장씩 업로드"].map((tip, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="w-4 h-4 rounded-full bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D] text-[var(--color-positive)] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                      <span className="w-4 h-4 rounded-full bg-[var(--color-primary-soft)] dark:bg-(--color-primary-overlay) text-[var(--color-positive)] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                       <p className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)]">{tip}</p>
                     </div>
                   ))}
@@ -258,7 +258,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                   <div className="flex gap-2">
                     {cashBalances.map((c) => (
                       <div key={c.currency} className="flex-1 bg-[var(--color-bg)] dark:bg-[var(--color-border)] rounded-xl px-3 py-2">
-                        <p className="text-[10px] text-[#9AA99A]">{c.currency}</p>
+                        <p className="text-[10px] text-(--color-g400)">{c.currency}</p>
                         <p className="text-sm font-bold text-[var(--color-text)]">
                           {c.currency === "KRW" ? `₩${c.amount.toLocaleString()}` : `$${c.amount}`}
                         </p>
@@ -271,22 +271,22 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
               <Card>
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-[var(--color-g500)] dark:text-[var(--color-muted)]">보유 종목</p>
-                  <span className="text-xs text-[#9AA99A]">{holdings.length}종목</span>
+                  <span className="text-xs text-(--color-g400)">{holdings.length}종목</span>
                 </div>
                 <div className="space-y-3">
                   {holdings.map((h, i) => (
-                    <div key={i} className={`rounded-xl border p-3 transition-colors ${h.checked ? "border-[var(--color-positive)] bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]" : "border-[var(--color-g200)] dark:border-[var(--color-border)] opacity-50"}`}>
+                    <div key={i} className={`rounded-xl border p-3 transition-colors ${h.checked ? "border-[var(--color-positive)] bg-[var(--color-primary-soft)] dark:bg-(--color-primary-overlay)" : "border-[var(--color-g200)] dark:border-[var(--color-border)] opacity-50"}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <input type="checkbox" checked={h.checked}
                           onChange={(e) => updateHolding(i, "checked", e.target.checked)}
                           className="accent-[var(--color-positive)] w-4 h-4 shrink-0 cursor-pointer" />
                         <span className="text-sm font-semibold text-[var(--color-text)] flex-1 truncate">{h.name}</span>
-                        <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                        <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
                           {h.country === "KR" ? "국내" : "해외"}
                         </span>
                       </div>
                       <div className="mb-2">
-                        <label className="text-[10px] text-[#9AA99A] block mb-0.5">종목코드</label>
+                        <label className="text-[10px] text-(--color-g400) block mb-0.5">종목코드</label>
                         <input
                           type="text"
                           value={h.ticker}
@@ -301,7 +301,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-[10px] text-[#9AA99A] block mb-0.5">평단가</label>
+                          <label className="text-[10px] text-(--color-g400) block mb-0.5">평단가</label>
                           <input type="text" value={h.avgPrice ? Number(h.avgPrice).toLocaleString() : ""}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
@@ -312,7 +312,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
                             placeholder="평단가" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-[#9AA99A] block mb-0.5">수량</label>
+                          <label className="text-[10px] text-(--color-g400) block mb-0.5">수량</label>
                           <input type="text" value={h.quantity ? Number(h.quantity).toLocaleString() : ""}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
@@ -330,7 +330,7 @@ export function ImportModal({ open, onClose, onConfirm }: ImportModalProps) {
 
               <div className="flex gap-2">
                 <button onClick={() => { setStep("upload"); setPreviewUrl(null); setHoldings([]); }}
-                  className="flex-1 py-3 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] text-sm font-semibold text-[#6B7B6B] cursor-pointer hover:bg-[#F0F4F0] dark:hover:bg-[#2D3D30] transition-colors">
+                  className="flex-1 py-3 rounded-xl border border-[var(--color-g200)] dark:border-[var(--color-border)] text-sm font-semibold text-(--color-g500) cursor-pointer hover:bg-(--color-g100) dark:hover:bg-(--color-border-strong) transition-colors">
                   다시 업로드
                 </button>
                 <button

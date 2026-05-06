@@ -769,7 +769,7 @@ export default function AnalysisPage() {
                 </ResponsiveContainer>
 
                 {/* 자연어 해석 */}
-                <div className="mt-3 px-3 py-2.5 rounded-xl bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                <div className="mt-3 px-3 py-2.5 rounded-xl bg-[var(--color-negative-soft)] dark:bg-(--color-negative-overlay)">
                   <p className="text-sm text-[var(--color-negative)] font-medium">
                     이 기간 내 최대 <strong>{minMdd.toFixed(1)}%</strong> 하락한 적이 있어요
                   </p>
@@ -835,11 +835,11 @@ export default function AnalysisPage() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]">
+                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-(--color-primary-overlay)">
                     <div className="text-[11px] text-[var(--color-positive)] mb-1">적정 매수가</div>
                     <div className="text-base font-bold text-[var(--color-positive)]">{report.targetBuy.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
-                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-(--color-negative-overlay)">
                     <div className="text-[11px] text-[var(--color-negative)] mb-1">적정 매도가</div>
                     <div className="text-base font-bold text-[var(--color-negative)]">{report.targetSell.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
                   </div>
@@ -850,19 +850,19 @@ export default function AnalysisPage() {
               <Card>
                 <div className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-3">SWOT 분석</div>
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-[#0D2A1D]">
+                  <div className="rounded-xl p-3 bg-[var(--color-primary-soft)] dark:bg-(--color-primary-overlay)">
                     <div className="text-[11px] font-bold text-[var(--color-positive)] mb-1">S 강점</div>
                     <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotStrength}</p>
                   </div>
-                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-[#3D1519]">
+                  <div className="rounded-xl p-3 bg-[var(--color-negative-soft)] dark:bg-(--color-negative-overlay)">
                     <div className="text-[11px] font-bold text-[var(--color-negative)] mb-1">W 약점</div>
                     <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotWeakness}</p>
                   </div>
-                  <div className="rounded-xl p-3 bg-[#E8F0FE] dark:bg-[#0D1A2A]">
-                    <div className="text-[11px] font-bold text-[#4285F4] mb-1">O 기회</div>
+                  <div className="rounded-xl p-3 bg-(--color-foreign-bg) dark:bg-(--color-blue-overlay)">
+                    <div className="text-[11px] font-bold text-(--color-foreign) mb-1">O 기회</div>
                     <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotOpportunity}</p>
                   </div>
-                  <div className="rounded-xl p-3 bg-[#FFF3E8] dark:bg-[#2A1D0D]">
+                  <div className="rounded-xl p-3 bg-(--color-threat-light) dark:bg-(--color-warning-overlay)">
                     <div className="text-[11px] font-bold text-[var(--color-warning)] mb-1">T 위협</div>
                     <p className="text-xs text-[var(--color-text)] dark:text-[var(--color-text)] leading-relaxed">{report.swotThreat}</p>
                   </div>
@@ -890,14 +890,14 @@ export default function AnalysisPage() {
                   <Card>
                     <div className="flex items-center gap-1.5 mb-3">
                       <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">최근 주요 이슈</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E8] dark:bg-[#2A1D0D] text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-(--color-threat-light) dark:bg-(--color-warning-overlay) text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
                     </div>
 
                     {hasParsed ? (
                       <div className="space-y-2.5">
                         {positive && (
                           <div className="flex items-start gap-2">
-                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#E8F7EE] dark:bg-[#0F2A1A] text-[var(--color-positive)]">
+                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-(--color-positive-light) dark:bg-(--color-positive-badge) text-[var(--color-positive)]">
                               호재
                             </span>
                             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed flex-1">
@@ -907,7 +907,7 @@ export default function AnalysisPage() {
                         )}
                         {negative && (
                           <div className="flex items-start gap-2">
-                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#FCE8EA] dark:bg-[#2A0F12] text-[var(--color-negative)]">
+                            <span className="shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-(--color-negative-light) dark:bg-(--color-negative-badge) text-[var(--color-negative)]">
                               악재
                             </span>
                             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed flex-1">

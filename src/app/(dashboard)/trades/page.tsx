@@ -926,7 +926,7 @@ export default function TradesPage() {
                                 {d.ticker ? `${d.ticker} · ` : ""}{acctName}
                               </div>
                             </td>
-                            <td className="px-3 py-2.5 text-sm text-right font-semibold text-[#8B5CF6] tabular-nums">{amtStr}</td>
+                            <td className="px-3 py-2.5 text-sm text-right font-semibold text-(--color-dividend) tabular-nums">{amtStr}</td>
                           </tr>
                         );
                       })}
@@ -1031,14 +1031,14 @@ export default function TradesPage() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="text-xs text-[var(--color-g400)] shrink-0">{dateStr}</span>
-                            <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{isDomestic ? "국내" : "해외"}</span>
+                            <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>{isDomestic ? "국내" : "해외"}</span>
                             <span className="text-sm font-semibold text-[var(--color-text)] truncate">{stockName}</span>
                           </div>
                           <span className="text-sm font-bold text-[var(--color-positive)] shrink-0 ml-2">{amtStr}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-[11px] text-[var(--color-g400)]">{acctName}</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.15)] text-[#8B5CF6]">배당</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-(--color-dividend-bg) dark:bg-[rgba(139,92,246,0.15)] text-(--color-dividend)">배당</span>
                         </div>
                       </div>
                     );
@@ -1115,10 +1115,10 @@ export default function TradesPage() {
             <div className="space-y-4">
               {/* 종목 + 유형 */}
               <div className="flex items-center gap-2">
-                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${isBuy ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#FFFBF5] dark:bg-[rgba(255,123,0,0.15)] text-[var(--color-warning)]"}`}>
+                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${isBuy ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-sell-bg) dark:bg-[rgba(255,123,0,0.15)] text-(--color-warning)"}`}>
                   {isBuy ? "매수" : "매도"}
                 </span>
-                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-md ${country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
                   {country === "KR" ? "국내" : "해외"}
                 </span>
                 <span className="min-w-0 text-base font-bold text-[var(--color-text)] truncate">{detailTrade.name}</span>
@@ -1193,7 +1193,7 @@ export default function TradesPage() {
                         onClick={() => setDetailEmotion(detailEmotion === em.label ? "" : em.label)}
                         className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
                           detailEmotion === em.label
-                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
+                            ? "bg-(--color-dividend-bg) dark:bg-[rgba(139,92,246,0.35)] text-(--color-dividend) dark:text-white ring-2 ring-(--color-dividend)"
                             : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
                         }`}
                       >
@@ -1209,7 +1209,7 @@ export default function TradesPage() {
                         key={em.label}
                         className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs ${
                           detailTrade.emotion === em.label
-                            ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
+                            ? "bg-(--color-dividend-bg) dark:bg-[rgba(139,92,246,0.35)] text-(--color-dividend) dark:text-white ring-2 ring-(--color-dividend)"
                             : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] opacity-30"
                         }`}
                       >
@@ -1522,12 +1522,12 @@ export default function TradesPage() {
                   className={`group relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     formReasonTags.includes(tag.label)
                       ? "bg-[var(--color-primary)] text-white"
-                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"
+                      : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover)"
                   }`}
                   title={tag.desc}
                 >
                   {tag.label}
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-[#1D2720] text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block whitespace-nowrap bg-(--color-tooltip) text-white text-[10px] px-2 py-1 rounded-md shadow-lg">{tag.desc}</span>
                 </button>
               ))}
             </div>
@@ -1544,7 +1544,7 @@ export default function TradesPage() {
                   onClick={() => setFormEmotion(formEmotion === em.label ? "" : em.label)}
                   className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-colors cursor-pointer ${
                     formEmotion === em.label
-                      ? "bg-[#F5F0FF] dark:bg-[rgba(139,92,246,0.35)] text-[#8B5CF6] dark:text-white ring-2 ring-[#8B5CF6]"
+                      ? "bg-(--color-dividend-bg) dark:bg-[rgba(139,92,246,0.35)] text-(--color-dividend) dark:text-white ring-2 ring-(--color-dividend)"
                       : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)]"
                   }`}
                 >
@@ -1569,10 +1569,10 @@ export default function TradesPage() {
 
           {/* 에러/경고 */}
           {submitError && (
-            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FEE8EA] dark:bg-[#3D1519] text-[var(--color-negative)]">{submitError}</div>
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-negative-light) dark:bg-(--color-negative-overlay) text-[var(--color-negative)]">{submitError}</div>
           )}
           {cashWarning && (
-            <div className="rounded-xl px-4 py-2.5 text-sm bg-[#FFF8E8] dark:bg-[#2D2810] text-[#B8860B]">예수금이 부족하지만 매매가 등록되었습니다.</div>
+            <div className="rounded-xl px-4 py-2.5 text-sm bg-(--color-warning-light) dark:bg-(--color-warning-bg) text-(--color-warning-text)">예수금이 부족하지만 매매가 등록되었습니다.</div>
           )}
 
           {/* 등록 버튼 */}

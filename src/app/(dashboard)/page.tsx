@@ -640,7 +640,7 @@ export default function DashboardPage() {
     <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6 animate-[fadeIn_0.4s_ease-out]">
       {/* 지연 시세 안내 */}
       {staleQuote && (
-        <div className="rounded-lg px-3 py-2 text-xs mb-4 bg-[#FFF8E8] dark:bg-[#2D2810] text-[#B8860B]">
+        <div className="rounded-lg px-3 py-2 text-xs mb-4 bg-(--color-warning-light) dark:bg-(--color-warning-bg) text-(--color-warning-text)">
           현재가 조회에 실패하여 마지막 저장값으로 표시 중입니다 (지연된 시세)
         </div>
       )}
@@ -665,7 +665,7 @@ export default function DashboardPage() {
           <button
             onClick={refreshFx}
             disabled={fxRefreshing}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035] transition-colors cursor-pointer disabled:cursor-default"
+            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors cursor-pointer disabled:cursor-default"
             style={{ opacity: fxRefreshing ? 0.5 : 1 }}
           >
             <svg
@@ -1225,7 +1225,7 @@ export default function DashboardPage() {
                     <div key={h.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: DONUT_COLORS[i % DONUT_COLORS.length] }} />
-                        <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>{h.country === "KR" ? "국내" : "해외"}</span>
+                        <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>{h.country === "KR" ? "국내" : "해외"}</span>
                         <span
                           className="text-xs text-[var(--color-text)] truncate max-w-[80px] cursor-default"
                           onMouseEnter={(e) => {
@@ -1474,7 +1474,7 @@ export default function DashboardPage() {
               <div key={h.name} className="flex items-center">
                 {/* 종목명 + 배지 */}
                 <div className="w-[32%] flex items-center gap-1.5 min-w-0 pr-1">
-                  <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-[#E8F0FE] dark:bg-[rgba(66,133,244,0.15)] text-[#4285F4]"}`}>
+                  <span className={`text-[10px] font-bold px-1 py-0.5 rounded shrink-0 ${h.country === "KR" ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-primary)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
                     {h.country === "KR" ? "국" : "해"}
                   </span>
                   <span className={`text-xs truncate ${isTop ? "font-bold text-[var(--color-text)]" : "text-[var(--color-g500)] dark:text-[var(--color-muted)]"}`}>

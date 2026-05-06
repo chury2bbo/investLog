@@ -41,16 +41,16 @@ export function SummaryChips({ totalCount, buyCount, sellCount, buyKrw, buyUsd, 
           /* 배당 모드 */
           <>
             <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center gap-2 sm:gap-0 flex-1 min-w-0">
-              <div className="text-[10px] text-[#8B5CF6] shrink-0 sm:mb-0.5">원화 배당</div>
-              <div className="text-sm font-bold text-[#8B5CF6] truncate sm:text-center text-right">
+              <div className="text-[10px] text-(--color-dividend) shrink-0 sm:mb-0.5">원화 배당</div>
+              <div className="text-sm font-bold text-(--color-dividend) truncate sm:text-center text-right">
                 ₩{Math.floor(divKrw).toLocaleString()}
               </div>
             </div>
             <div className="hidden sm:block w-px self-stretch bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
             <div className="sm:hidden h-px w-full bg-[var(--color-g200)] dark:bg-[var(--color-border)]" />
             <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center gap-2 sm:gap-0 flex-1 min-w-0">
-              <div className="text-[10px] text-[#8B5CF6] shrink-0 sm:mb-0.5">달러 배당</div>
-              <div className="text-sm font-bold text-[#8B5CF6] truncate sm:text-center text-right">
+              <div className="text-[10px] text-(--color-dividend) shrink-0 sm:mb-0.5">달러 배당</div>
+              <div className="text-sm font-bold text-(--color-dividend) truncate sm:text-center text-right">
                 ${divUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>

@@ -128,7 +128,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           {/* 필터 버튼 */}
           <button
             onClick={onToggleFilter}
-            className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${filterOpen ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-[#354035]"}`}
+            className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${filterOpen ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover)"}`}
             aria-label="필터"
           >
             {hasActiveFilter && (
