@@ -1248,16 +1248,16 @@ export default function AccountDetailPage() {
                 key={t.id}
                 className={`flex justify-between items-center py-2.5 ${i < account.tradeLogs.length - 1 ? "border-b border-[var(--color-g200)] dark:border-[var(--color-border)]" : ""}`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-[var(--color-g400)] w-9">
+                <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+                  <span className="text-xs text-[var(--color-g400)] w-9 shrink-0">
                     {dateStr}
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${isDomestic ? "bg-[var(--color-primary-soft)] dark:bg-[rgba(45,184,122,0.15)] text-[var(--color-positive)]" : "bg-(--color-foreign-bg) dark:bg-[rgba(66,133,244,0.15)] text-(--color-foreign)"}`}>
                         {isDomestic ? "국내" : "해외"}
                       </span>
-                      <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)]">{t.name}</span>
+                      <span className="text-sm font-semibold text-[var(--color-text)] dark:text-[var(--color-text)] truncate">{t.name}</span>
                     </div>
                     <div className="text-[11px] text-[var(--color-g400)]">
                       {t.quantity}주 · {t.ticker.length <= 6 && /^\d+$/.test(t.ticker) ? `₩${Math.floor(t.price).toLocaleString()}` : `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}

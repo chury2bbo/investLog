@@ -12,7 +12,7 @@ export function Tag({ label, color = "gray" }: TagProps) {
   };
 
   return (
-    <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide ${styles[color]}`}>
+    <span className={`text-[11px] font-bold px-[7px] py-[2px] rounded-[5px] tracking-wide whitespace-nowrap shrink-0 ${styles[color]}`}>
       {label}
     </span>
   );
