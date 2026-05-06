@@ -2069,7 +2069,7 @@ export default function AccountDetailPage() {
 
               {/* 결과 */}
               {hasInput && (
-                <div className="p-4 rounded-xl border border-[var(--color-primary)] bg-[rgba(5,192,114,0.05)] space-y-3">
+                <div className="p-4 rounded-xl border border-[var(--color-primary)] dark:border-[rgba(5,192,114,0.25)] bg-[rgba(5,192,114,0.05)] dark:bg-(--color-primary-overlay) space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-[var(--color-g500)] dark:text-[var(--color-muted)]">매수 후 평단가</span>
                     <span className="text-base font-bold text-[var(--color-primary)]">{fmt(newAvgPrice)}</span>
