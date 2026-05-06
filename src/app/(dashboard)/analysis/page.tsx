@@ -172,6 +172,8 @@ export default function AnalysisPage() {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [report, setReport] = useState<ReportData | null>(null);
   const [reportCached, setReportCached] = useState(false);
+  const [reportFallback, setReportFallback] = useState(false);
+  const [reportUsage, setReportUsage] = useState<{ count: number; limit: number } | null>(null);
   const [history, setHistory] = useState<MddPoint[]>([]);
 
   // 로딩
@@ -265,6 +267,12 @@ export default function AnalysisPage() {
     setShowDropdown(false);
     setActiveIndex(-1);
     setReport(null);
+
+    // 분석 사용량 조회
+    fetch("/api/analysis/usage")
+      .then((r) => r.json())
+      .then((d) => { if (d.count !== undefined) setReportUsage(d); })
+      .catch(() => {});
 
     // 사용자 분석 이력 기록
     fetch("/api/analysis/history", {
@@ -360,6 +368,8 @@ export default function AnalysisPage() {
       if (res.ok) {
         setReport(d.report ?? null);
         setReportCached(d.cached ?? false);
+        setReportFallback(d.fallback ?? false);
+        if (d.usage) setReportUsage(d.usage);
       } else {
         showToast("분석 실패", d.error ?? "AI 분석 리포트를 생성할 수 없습니다.", { variant: "error" });
       }
@@ -794,7 +804,7 @@ export default function AnalysisPage() {
                   AI가 {selected.name}({selected.ticker})을 분석합니다
                 </p>
                 <Button size="lg" onClick={generateReport} disabled={reportLoading}>
-                  분석 생성
+                  분석 생성{reportUsage ? ` (잔여 ${reportUsage.limit - reportUsage.count}회)` : ""}
                 </Button>
               </div>
             </Card>
@@ -822,7 +832,7 @@ export default function AnalysisPage() {
                           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                         </svg>
                         <span className="text-[10px] text-[var(--color-g400)] dark:text-[var(--color-muted)]">
-                          Claude AI · {report.cachedDate} 분석{reportCached ? " (캐시)" : ""}
+                          {reportFallback ? "지표 기반 분석" : "Claude AI"} · {report.cachedDate} 분석{reportCached ? " (캐시)" : ""}
                         </span>
                       </div>
                     )}
@@ -872,9 +882,20 @@ export default function AnalysisPage() {
               {/* 종합 의견 */}
               <Card>
                 <div className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)] mb-2">종합 투자 의견</div>
-                <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed">
-                  {report.reasoning}
-                </p>
+                <div className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed space-y-2">
+                  {report.reasoning.split("\n").map((line, i) => {
+                    const isHeading = line.startsWith("【");
+                    const isBullet = line.startsWith("•");
+                    if (isHeading) {
+                      return <div key={i} className="font-semibold text-[var(--color-text)] dark:text-[var(--color-text)] mt-2 first:mt-0">{line}</div>;
+                    }
+                    if (isBullet) {
+                      return <div key={i} className="pl-3">{line}</div>;
+                    }
+                    if (line.trim() === "") return null;
+                    return <div key={i} className="pl-3">{line}</div>;
+                  })}
+                </div>
               </Card>
 
               {/* 최근 이슈 */}
@@ -890,7 +911,9 @@ export default function AnalysisPage() {
                   <Card>
                     <div className="flex items-center gap-1.5 mb-3">
                       <span className="text-sm font-bold text-[var(--color-text)] dark:text-[var(--color-text)]">최근 주요 이슈</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-(--color-threat-light) dark:bg-(--color-warning-overlay) text-[var(--color-warning)] font-semibold">AI 학습 기반</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold ${reportFallback ? "bg-(--color-primary-soft) text-(--color-primary)" : "bg-(--color-threat-light) dark:bg-(--color-warning-overlay) text-[var(--color-warning)]"}`}>
+                        {reportFallback ? "뉴스 기반" : "AI 학습 기반"}
+                      </span>
                     </div>
 
                     {hasParsed ? (
@@ -917,9 +940,25 @@ export default function AnalysisPage() {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)] leading-relaxed whitespace-pre-line">
-                        {text}
-                      </p>
+                      <div className="space-y-1.5">
+                        {text.split("\n").map((line, i) => {
+                          // "1. 제목|URL" 형식 파싱
+                          const pipeIdx = line.indexOf("|");
+                          if (pipeIdx > -1 && line.match(/^\d+\.\s/)) {
+                            const title = line.slice(0, pipeIdx);
+                            const url = line.slice(pipeIdx + 1);
+                            if (url && url.startsWith("http")) {
+                              return (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-[var(--color-primary)] underline underline-offset-2 hover:opacity-80 transition-opacity">
+                                  {title}
+                                </a>
+                              );
+                            }
+                            return <p key={i} className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">{title}</p>;
+                          }
+                          return <p key={i} className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">{line}</p>;
+                        })}
+                      </div>
                     )}
                   </Card>
                 );
