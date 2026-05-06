@@ -811,7 +811,7 @@ function BottomSheetPreview({ open, onClose }: { open: boolean; onClose: () => v
       />
       {/* 모바일: 바텀시트 슬라이드업 / PC: 중앙 팝업 스케일 */}
       <div
-        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-[#1D2720] dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-(--color-tooltip) dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
         style={{
           maxHeight: "85vh",
           transform: animating
@@ -1097,7 +1097,7 @@ function ConfirmDialogPreview({ open, onClose }: { open: boolean; onClose: () =>
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-[#1A2320] rounded-2xl w-full max-w-xs shadow-2xl transition-all duration-200"
+        className="bg-white dark:bg-(--color-overlay) rounded-2xl w-full max-w-xs shadow-2xl transition-all duration-200"
         style={{
           transform: animating ? "scale(1)" : "scale(0.9)",
           opacity: animating ? 1 : 0,
@@ -1110,17 +1110,17 @@ function ConfirmDialogPreview({ open, onClose }: { open: boolean; onClose: () =>
             키움증권 계좌의 보유 종목, 매매 기록, 예수금이{"\n"}모두 삭제되며 복구할 수 없습니다.
           </p>
         </div>
-        <div className="flex border-t border-[#F0F4F0] dark:border-[#2D3D30]">
+        <div className="flex border-t border-[#F0F4F0] dark:border-(--color-border-strong)">
           <button
             onClick={onClose}
-            className="flex-1 py-3.5 text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F5F7F5] dark:hover:bg-[#2D3D30] rounded-bl-2xl transition-colors cursor-pointer"
+            className="flex-1 py-3.5 text-sm font-semibold text-[#6B7B6B] dark:text-[#7A8A7A] hover:bg-[#F5F7F5] dark:hover:bg-(--color-border-strong) rounded-bl-2xl transition-colors cursor-pointer"
           >
             취소
           </button>
-          <div className="w-px bg-[#F0F4F0] dark:bg-[#2D3D30]" />
+          <div className="w-px bg-[#F0F4F0] dark:bg-(--color-border-strong)" />
           <button
             onClick={onClose}
-            className="flex-1 py-3.5 text-sm font-bold text-[#F04452] hover:bg-[#FFF0F1] dark:hover:bg-[#3D1519] rounded-br-2xl transition-colors cursor-pointer"
+            className="flex-1 py-3.5 text-sm font-bold text-[#F04452] hover:bg-[#FFF0F1] dark:hover:bg-(--color-negative-overlay) rounded-br-2xl transition-colors cursor-pointer"
           >
             삭제
           </button>
@@ -1155,7 +1155,7 @@ function ImportModalPreview({ open, onClose }: { open: boolean; onClose: () => v
         onClick={onClose}
       />
       <div
-        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-[#1D2720] dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
+        className="relative w-full md:w-[420px] md:max-w-[90vw] rounded-t-[20px] md:rounded-[18px] overflow-hidden bg-white dark:bg-(--color-tooltip) dark:border dark:border-[#2A3828] transition-all duration-300 ease-out"
         style={{
           maxHeight: "85vh",
           transform: animating
@@ -1210,7 +1210,7 @@ export function PopupPreviewPage() {
 
         <div className="space-y-3">
           {/* 1. BottomSheet */}
-          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+          <div className="bg-white dark:bg-(--color-tooltip) rounded-2xl p-5">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">BottomSheet</h3>
@@ -1238,7 +1238,7 @@ export function PopupPreviewPage() {
           </div>
 
           {/* 2. ConfirmDialog */}
-          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+          <div className="bg-white dark:bg-(--color-tooltip) rounded-2xl p-5">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">ConfirmDialog</h3>
@@ -1264,7 +1264,7 @@ export function PopupPreviewPage() {
           </div>
 
           {/* 3. ImportModal */}
-          <div className="bg-white dark:bg-[#1D2720] rounded-2xl p-5">
+          <div className="bg-white dark:bg-(--color-tooltip) rounded-2xl p-5">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-[15px] font-bold text-[#1A221A] dark:text-[#DCE8DC]">ImportModal</h3>

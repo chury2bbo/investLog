@@ -48,22 +48,22 @@
    ──────────────────────────────────────────────────────────── */
 .dark {
   /* ── 기본 배경·표면 ── */
-  --color-bg:      #0D1210;  /* 페이지 배경 */
-  --color-surface: #151C14;  /* 카드·모달 표면 */
-  --color-card:    #1C2420;  /* 중첩 카드·리스트 아이템 */
-  --color-border:  #283426;  /* 기본 테두리·구분선 */
-  --color-text:    #D8E8D8;  /* 본문 텍스트 */
-  --color-muted:   #56725A;  /* 흐린 보조 텍스트 */
+  --color-bg:      #0E0F0E;  /* 페이지 배경 */
+  --color-surface: #171818;  /* 카드·모달 표면 */
+  --color-card:    #1E1F1F;  /* 중첩 카드·리스트 아이템 */
+  --color-border:  #2A2C2A;  /* 기본 테두리·구분선 */
+  --color-text:    #E2E5E2;  /* 본문 텍스트 */
+  --color-muted:   #666D66;  /* 흐린 보조 텍스트 */
 
   /* ── 확장 다크 팔레트 ── */
-  --color-tooltip:          #1D2720;  /* 툴팁·팝오버 배경 */
-  --color-overlay:          #1A2320;  /* 다이얼로그·모달 배경 */
-  --color-border-strong:    #2D3D30;  /* 강조 테두리·호버 */
+  --color-tooltip:          #1E1F1E;  /* 툴팁·팝오버 배경 */
+  --color-overlay:          #1B1C1B;  /* 다이얼로그·모달 배경 */
+  --color-border-strong:    #2E3030;  /* 강조 테두리·호버 */
   --color-primary-overlay:  #0D2A1D;  /* 그린 강조 배경 (선택·활성) */
   --color-negative-overlay: #3D1519;  /* 레드 강조 배경 (에러) */
   --color-warning-bg:       #2D2810;  /* 경고 배너 배경 */
-  --color-hover:            #354035;  /* 범용 호버 배경 */
-  --color-surface-dark:     #111A14;  /* 필터·서브 패널 (surface보다 어두움) */
+  --color-hover:            #323332;  /* 범용 호버 배경 */
+  --color-surface-dark:     #131414;  /* 필터·서브 패널 (surface보다 어두움) */
   --color-primary-surface:  #1D3D2A;  /* primary 계열 아이콘 배경 */
   --color-blue-overlay:     #0D1A2A;  /* 파란 계열 배경 (SWOT 기회) */
   --color-warning-overlay:  #2A1D0D;  /* 경고 계열 배경 (SWOT 위협) */

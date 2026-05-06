@@ -13,9 +13,9 @@ const LIGHT = {
   glow: "radial-gradient(circle, rgba(5,192,114,0.22) 0%, rgba(5,192,114,0.07) 45%, rgba(245,247,245,0) 70%)",
 };
 const DARK = {
-  bg: "#0D1210", card: "#1D2720", cardAlt: "#151C14", border: "#2A3828",
+  bg: "#0E0F0E", card: "#1E1F1F", cardAlt: "#171818", border: "#2A2C2A",
   primary: "#05C072", primaryDark: "#027A47", primaryMid: "#1F9E64", primarySoft: "rgba(5,192,114,0.14)",
-  text: "#DCE8DC", muted: "#9DAD9D", dim: "#4A6A4A",
+  text: "#E2E5E2", muted: "#A0A5A0", dim: "#606464",
   negative: "#F04452", negativeSoft: "rgba(240,68,82,0.12)",
   warning: "#FF7B00", warningSoft: "rgba(255,123,0,0.12)",
   blue: "#4285F4",
