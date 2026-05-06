@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 // ─── 테마 토큰 ───────────────────────────────────────────────────────────────
 const LIGHT = {
-  bg: "#F5F7F5", card: "#FFFFFF", cardAlt: "#F0F4F0", border: "#E4EAE4",
+  bg: "#F5F6F6", card: "#FFFFFF", cardAlt: "#F2F3F3", border: "#E6E8E8",
   primary: "#05C072", primaryDark: "#027A47", primaryMid: "#1F9E64", primarySoft: "#E8F5EF",
-  text: "#1A221A", muted: "#6B7B6B", dim: "#9DAD9D",
+  text: "#1A221A", muted: "#6B7B6B", dim: "#7A8880",
   negative: "#F04452", negativeSoft: "#FFF0F1",
   warning: "#FF7B00", warningSoft: "#FFF5ED",
   blue: "#4285F4",
@@ -15,7 +15,7 @@ const LIGHT = {
 const DARK = {
   bg: "#0E0F0E", card: "#1E1F1F", cardAlt: "#171818", border: "#2A2C2A",
   primary: "#05C072", primaryDark: "#027A47", primaryMid: "#1F9E64", primarySoft: "rgba(5,192,114,0.14)",
-  text: "#E2E5E2", muted: "#A0A5A0", dim: "#606464",
+  text: "#E2E5E2", muted: "#A0A5A0", dim: "#929696",
   negative: "#F04452", negativeSoft: "rgba(240,68,82,0.12)",
   warning: "#FF7B00", warningSoft: "rgba(255,123,0,0.12)",
   blue: "#4285F4",

@@ -16,14 +16,21 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  // JSON 문자열 → 배열 파싱
-  const parsed = history.map((h) => ({
-    id: h.id,
-    strengths: JSON.parse(h.strengths),
-    mistakes: JSON.parse(h.mistakes),
-    goals: JSON.parse(h.goals),
-    createdAt: h.createdAt,
-  }));
+  // JSON 문자열 → 배열 파싱 (깨진 레코드는 스킵)
+  const parsed = history.flatMap((h) => {
+    try {
+      return [{
+        id: h.id,
+        strengths: JSON.parse(h.strengths),
+        mistakes: JSON.parse(h.mistakes),
+        goals: JSON.parse(h.goals),
+        createdAt: h.createdAt,
+      }];
+    } catch {
+      console.warn(`코칭 히스토리 파싱 실패 (id: ${h.id}) — 스킵`);
+      return [];
+    }
+  });
 
   // 오늘 잔여 횟수
   const today = new Date().toISOString().slice(0, 10);
