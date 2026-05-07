@@ -435,6 +435,8 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
   const [activeCards, setActiveCards] = useState<Set<number>>(new Set([0]));
   const [expandedImg, setExpandedImg] = useState(false);
   const [expandedVideo, setExpandedVideo] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.5);
+  const overlayVideoRef = useRef<HTMLVideoElement>(null);
   const activate = (idx: number) => setActiveCards(prev => new Set([...prev, idx]));
   const isActive = (idx: number) => printMode || activeCards.has(idx);
 
@@ -619,10 +621,40 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
             onClick={e => e.stopPropagation()}
           >
             <video
+              ref={overlayVideoRef}
               autoPlay muted playsInline loop
               src="/slides/portfolio.mp4"
+              onPlay={(e) => { e.currentTarget.playbackRate = playbackRate; }}
               style={{ maxHeight: "84vh", maxWidth: "74vw", borderRadius: 20, boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)", display: "block" }}
             />
+            {/* 배속 버튼 */}
+            <div
+              style={{
+                position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)",
+                display: "flex", gap: 6, backgroundColor: "rgba(0,0,0,0.55)", borderRadius: 20,
+                padding: "5px 10px", backdropFilter: "blur(6px)",
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {([1, 1.5, 2] as const).map((rate) => (
+                <button
+                  key={rate}
+                  onClick={() => {
+                    setPlaybackRate(rate);
+                    if (overlayVideoRef.current) overlayVideoRef.current.playbackRate = rate;
+                  }}
+                  style={{
+                    padding: "3px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600,
+                    cursor: "pointer", border: "none",
+                    backgroundColor: playbackRate === rate ? "#05C072" : "rgba(255,255,255,0.12)",
+                    color: playbackRate === rate ? "#fff" : "rgba(255,255,255,0.7)",
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                >
+                  {rate}x
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => setExpandedVideo(false)}
               style={{
