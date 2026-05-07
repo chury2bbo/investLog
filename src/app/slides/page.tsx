@@ -433,6 +433,8 @@ function OcrVideo({ T, active }: { T: Theme; active: boolean }) {
 
 function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
   const [activeCards, setActiveCards] = useState<Set<number>>(new Set([0]));
+  const [expandedImg, setExpandedImg] = useState(false);
+  const [expandedVideo, setExpandedVideo] = useState(false);
   const activate = (idx: number) => setActiveCards(prev => new Set([...prev, idx]));
   const isActive = (idx: number) => printMode || activeCards.has(idx);
 
@@ -543,7 +545,11 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
                 핵심 기능
               </span>
             </div>
-            <div className="flex-1 min-h-0 overflow-hidden flex items-start justify-center" style={{ borderTop: `1px solid ${T.primary}25`, backgroundColor: T.cardAlt }}>
+            <div
+              className="flex-1 min-h-0 overflow-hidden flex items-start justify-center"
+              style={{ borderTop: `1px solid ${T.primary}25`, backgroundColor: T.cardAlt, cursor: isActive(1) ? "zoom-in" : "default" }}
+              onClick={() => isActive(1) && setExpandedImg(true)}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/slides/img_portfolio_3.png" alt="매매등록" className="w-full object-contain object-top" style={{ display: "block" }} />
             </div>
@@ -575,8 +581,8 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
             )}
             <div className="flex items-start gap-3 p-5 shrink-0" style={{ minHeight: 165 }}>
               <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
-                <Icon d={I.camera} size={20} color="white" strokeWidth={2} />
+                style={{ backgroundColor: T.primarySoft }}>
+                <Icon d={I.camera} size={20} color={T.primary} strokeWidth={2} />
               </div>
               <div>
                 <div className="text-[17px] font-extrabold" style={{ color: T.text }}>스크린샷 등록</div>
@@ -589,13 +595,84 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
                 </div>
               </div>
             </div>
-            <div className="flex-1 min-h-0 overflow-hidden" style={{ borderTop: `1px solid ${T.border}` }}>
-              <OcrVideo T={T} active={isActive(2)} />
+            <div
+              className="flex-1 min-h-0 overflow-hidden"
+              style={{ borderTop: `1px solid ${T.border}`, cursor: isActive(2) ? "zoom-in" : "default" }}
+              onClick={() => isActive(2) && setExpandedVideo(true)}
+            >
+              <OcrVideo T={T} active={isActive(2) && !expandedVideo} />
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* 스크린샷 등록 영상 확대 오버레이 */}
+      {expandedVideo && !printMode && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)", animation: "fadeUp 0.25s ease both" }}
+          onClick={() => setExpandedVideo(false)}
+        >
+          <div
+            style={{ position: "relative", animation: "imgZoomIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <video
+              autoPlay muted playsInline loop
+              src="/slides/portfolio.mp4"
+              style={{ maxHeight: "84vh", maxWidth: "74vw", borderRadius: 20, boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)", display: "block" }}
+            />
+            <button
+              onClick={() => setExpandedVideo(false)}
+              style={{
+                position: "absolute", top: -14, right: -14,
+                width: 36, height: 36, borderRadius: "50%",
+                backgroundColor: "#1E1F1F", border: "1px solid rgba(255,255,255,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: "#E2E5E2", fontSize: 16, fontWeight: 700,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 매매일지 이미지 확대 오버레이 */}
+      {expandedImg && !printMode && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.80)", backdropFilter: "blur(6px)", animation: "fadeUp 0.25s ease both" }}
+          onClick={() => setExpandedImg(false)}
+        >
+          <div
+            style={{ position: "relative", animation: "imgZoomIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/slides/img_portfolio_3.png"
+              alt="매매일지"
+              style={{ maxHeight: "84vh", maxWidth: "74vw", borderRadius: 20, boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)" }}
+            />
+            <button
+              onClick={() => setExpandedImg(false)}
+              style={{
+                position: "absolute", top: -14, right: -14,
+                width: 36, height: 36, borderRadius: "50%",
+                backgroundColor: "#1E1F1F", border: "1px solid rgba(255,255,255,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: "#E2E5E2", fontSize: 16, fontWeight: 700,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -604,10 +681,6 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
 function Slide4b({ T }: { T: Theme }) {
   return (
     <div className="absolute inset-0 flex flex-col justify-center overflow-hidden" style={{ padding: "0 64px" }}>
-      {/* subtle AI 그린 글로우 */}
-      <div className="print-hide absolute rounded-full pointer-events-none"
-        style={{ width: 700, height: 700, background: "radial-gradient(circle, rgba(5,192,114,0.1) 0%, transparent 65%)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
-
       <div className="relative max-w-5xl mx-auto w-full flex flex-col gap-7">
         <SlideHeader num="05" title="AI가 만드는 차별점" T={T} />
         <div className="grid grid-cols-2 gap-6">
@@ -911,8 +984,8 @@ function Slide7({ T }: { T: Theme }) {
               style={{ backgroundColor: T.card, border: `1px solid ${T.border}` }}>
               <div className="flex flex-col items-center text-center gap-2">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `linear-gradient(135deg, ${T.primaryDark}, ${T.primary})` }}>
-                  <Icon d={s.icon} size={18} color="white" strokeWidth={2} />
+                  style={{ backgroundColor: T.primarySoft }}>
+                  <Icon d={s.icon} size={18} color={T.primary} strokeWidth={2} />
                 </div>
                 <div className="text-[12px] font-bold" style={{ color: T.primary }}>STEP {s.num}</div>
                 <div className="text-sm font-bold" style={{ color: T.text }}>{s.label}</div>
@@ -1034,6 +1107,10 @@ export default function SlidesPage() {
         .fade-up-4  { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 360ms both; }
         .fade-up-5  { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 480ms both; }
         .fade-up-6  { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 600ms both; }
+        @keyframes imgZoomIn {
+          from { opacity: 0; transform: scale(0.72); }
+          to   { opacity: 1; transform: scale(1); }
+        }
 
         /* ── 인쇄 ── */
         @page { size: landscape; margin: 0; }

@@ -60,6 +60,7 @@ export async function GET(req: Request) {
   const buyTrades = trades.filter((t) => t.type === "BUY");
   const sellTrades = trades.filter((t) => t.type === "SELL");
   const usedSellIds = new Set<number>();
+  const today = new Date();
 
   interface MatchedTrade {
     pnlRate: number;
@@ -68,19 +69,30 @@ export async function GET(req: Request) {
     emotion: string | null;
   }
 
+  interface BuyHolding {
+    holdingDays: number;
+    emotion: string | null;
+  }
+
   const matchedTrades: MatchedTrade[] = [];
+  const allBuyHoldings: BuyHolding[] = [];
 
   buyTrades.forEach((buy) => {
     const matchingSell = sellTrades.find(
       (s) => s.ticker === buy.ticker && new Date(s.date) > new Date(buy.date) && !usedSellIds.has(s.id)
     );
+
+    const endDate = matchingSell ? new Date(matchingSell.date) : today;
+    const holdingDays = Math.round(
+      (endDate.getTime() - new Date(buy.date).getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    allBuyHoldings.push({ holdingDays, emotion: buy.emotion });
+
     if (!matchingSell) return;
     usedSellIds.add(matchingSell.id);
 
     const pnlRate = ((matchingSell.price - buy.price) / buy.price) * 100;
-    const holdingDays = Math.round(
-      (new Date(matchingSell.date).getTime() - new Date(buy.date).getTime()) / (1000 * 60 * 60 * 24)
-    );
     matchedTrades.push({
       pnlRate: Math.round(pnlRate * 100) / 100,
       holdingDays,
@@ -126,6 +138,15 @@ export async function GET(req: Request) {
     }))
     .sort((a, b) => b.avgPnl - a.avgPnl);
 
+  const emotionDistMap: Record<string, number> = {};
+  buyTrades.forEach((t) => {
+    if (!t.emotion) return;
+    emotionDistMap[t.emotion] = (emotionDistMap[t.emotion] ?? 0) + 1;
+  });
+  const emotionDistribution = Object.entries(emotionDistMap)
+    .map(([emotion, count]) => ({ emotion, count }))
+    .sort((a, b) => b.count - a.count);
+
   // ─── 보유 기간 패턴 + 기간별 PnL ─────────────────────
 
   const rangeConfig = [
@@ -137,19 +158,22 @@ export async function GET(req: Request) {
 
   const holdingRanges = rangeConfig
     .map((range) => {
-      const inRange = matchedTrades.filter(
+      const inRange = allBuyHoldings.filter(
         (t) => t.holdingDays >= range.min && t.holdingDays <= range.max
       );
       const count = inRange.length;
-      const avgPnl = count > 0
-        ? Math.round((inRange.reduce((s, t) => s + t.pnlRate, 0) / count) * 100) / 100
+      const matchedInRange = matchedTrades.filter(
+        (t) => t.holdingDays >= range.min && t.holdingDays <= range.max
+      );
+      const avgPnl = matchedInRange.length > 0
+        ? Math.round((matchedInRange.reduce((s, t) => s + t.pnlRate, 0) / matchedInRange.length) * 100) / 100
         : 0;
       return { label: range.label, count, avgPnl };
     })
     .filter((r) => r.count > 0);
 
-  const avgHoldingDays = matchedTrades.length > 0
-    ? Math.round(matchedTrades.reduce((a, b) => a + b.holdingDays, 0) / matchedTrades.length)
+  const avgHoldingDays = allBuyHoldings.length > 0
+    ? Math.round(allBuyHoldings.reduce((a, b) => a + b.holdingDays, 0) / allBuyHoldings.length)
     : 0;
 
   // ─── 섹터 집중도 ──────────────────────────────────────
@@ -200,9 +224,11 @@ export async function GET(req: Request) {
   return Response.json({
     locked: false,
     totalCount,
+    holdingCount: holdings.length,
     tagDistribution,
     tagPnl,
     emotionPnl,
+    emotionDistribution,
     avgHoldingDays,
     holdingRanges,
     sectorConcentration,

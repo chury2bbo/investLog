@@ -579,7 +579,9 @@ export default function TradesPage() {
       } else {
         showToast(
           `${tradeName} ${typeLabel} 등록 완료`,
-          `${formQuantity}주 · ${Number(formPrice).toLocaleString()}원`,
+          formCountry === "KR"
+            ? `${formQuantity}주 · ${Number(formPrice).toLocaleString()}원`
+            : `${formQuantity}주 · $${Number(formPrice).toLocaleString()}`,
           { variant: "success" },
         );
       }

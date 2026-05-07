@@ -32,6 +32,10 @@ interface EmotionPnl {
   avgPnl: number;
   count: number;
 }
+interface EmotionDist {
+  emotion: string;
+  count: number;
+}
 interface HoldingRange {
   label: string;
   count: number;
@@ -50,6 +54,7 @@ interface StatsData {
   tagDistribution?: TagDist[];
   tagPnl?: TagPnl[];
   emotionPnl?: EmotionPnl[];
+  emotionDistribution?: EmotionDist[];
   avgHoldingDays?: number;
   holdingRanges?: HoldingRange[];
   sectorConcentration?: SectorItem[];
@@ -297,6 +302,7 @@ export default function PersonalityPage() {
     tagDistribution = [],
     tagPnl = [],
     emotionPnl = [],
+    emotionDistribution = [],
     avgHoldingDays = 0,
     holdingRanges = [],
     sectorConcentration = [],
@@ -495,14 +501,40 @@ export default function PersonalityPage() {
                 </div>
               )}
             </>
+          ) : tagDistribution.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-3">태그별 매매 건수</p>
+              {tagDistribution.slice(0, 6).map((item) => {
+                const maxVal = tagDistribution[0].total;
+                const pct = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
+                return (
+                  <div key={item.tag}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-medium text-[var(--color-text)]">{item.tag}</span>
+                      <span className="text-[var(--color-g400)]">매수 {item.buy} · 매도 {item.sell}</span>
+                    </div>
+                    <div className="h-2 rounded bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                      <div
+                        className="h-full rounded"
+                        style={{
+                          width: `${pct}%`,
+                          background: `linear-gradient(90deg, var(--color-positive) ${item.total > 0 ? (item.buy / item.total) * 100 : 0}%, var(--color-warning) ${item.total > 0 ? (item.buy / item.total) * 100 : 0}%)`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 이유별 수익률이 표시돼요</p>
+            </div>
           ) : (
             <p className="text-sm text-center text-[var(--color-g400)] py-6">
-              매수→매도 매칭 데이터가 부족합니다.
+              매매 이유 태그를 입력하면 패턴이 보여요.
             </p>
           )}
 
           {/* 태그 분포 (매수/매도 건수) — 접기/펼치기 */}
-          {tagDistribution.length > 0 && (
+          {tagPnl.length > 0 && tagDistribution.length > 0 && (
             <>
               <Divider />
               <button
@@ -595,6 +627,34 @@ export default function PersonalityPage() {
                 </div>
               )}
             </>
+          ) : emotionDistribution.length > 0 ? (
+            <div>
+              <p className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-3">감정별 매매 건수</p>
+              <div className="space-y-3">
+                {emotionDistribution.map((item) => {
+                  const maxCount = emotionDistribution[0].count;
+                  const pct = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+                  return (
+                    <div key={item.emotion}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[var(--color-g500)]">{EMOTION_ICONS[item.emotion] ?? null}</span>
+                          <span className="text-sm font-medium text-[var(--color-text)]">{item.emotion}</span>
+                        </div>
+                        <span className="text-sm font-bold text-[var(--color-text)]">{item.count}건</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${pct}%`, backgroundColor: "var(--color-primary)", opacity: 0.7, minWidth: 4 }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 감정별 수익률이 표시돼요</p>
+            </div>
           ) : (
             <p className="text-sm text-center text-[var(--color-g400)] py-6">
               감정 기록이 있는 매매 데이터가 부족합니다.
@@ -674,6 +734,7 @@ export default function PersonalityPage() {
               <div className="text-center mb-4">
                 <span className="text-2xl font-extrabold text-[var(--color-positive)]">{avgHoldingDays}일</span>
                 <span className="text-sm text-[var(--color-g400)] ml-2">평균 보유</span>
+                <p className="text-xs text-[var(--color-g400)] mt-1">미매도 종목은 오늘 기준으로 계산돼요</p>
               </div>
               <div className="space-y-2.5">
                 {holdingRanges.map((r) => {
