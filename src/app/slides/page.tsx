@@ -442,8 +442,8 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
   const isActive = (idx: number) => printMode || activeCards.has(idx);
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ padding: "28px 64px" }}>
-      <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0 gap-7">
+    <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden" style={{ padding: "28px 64px" }}>
+      <div className="max-w-5xl w-full flex flex-col gap-7" style={{ height: "min(820px, calc(100% - 56px))" }}>
         <SlideHeader num="04" title="핵심 기능" T={T} />
         <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
 
