@@ -224,6 +224,7 @@ export async function GET(req: Request) {
   return Response.json({
     locked: false,
     totalCount,
+    matchedCount: matchedTrades.length,
     holdingCount: holdings.length,
     tagDistribution,
     tagPnl,

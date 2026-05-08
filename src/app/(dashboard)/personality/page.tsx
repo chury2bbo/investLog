@@ -49,6 +49,7 @@ interface SectorItem {
 interface StatsData {
   locked: boolean;
   totalCount: number;
+  matchedCount?: number;
   remaining?: number;
   holdingCount?: number;
   tagDistribution?: TagDist[];
@@ -308,7 +309,10 @@ export default function PersonalityPage() {
     sectorConcentration = [],
     manualSectorConcentration = [],
     noTagCount = 0,
+    matchedCount = 0,
   } = stats;
+
+  const MATCHED_THRESHOLD = 3;
 
   const holdingCount = stats.holdingCount ?? 0;
   const canShowHero = totalCount >= 5 || holdingCount >= 1;
@@ -448,6 +452,9 @@ export default function PersonalityPage() {
       {/* ══════════ 섹션 2 — 데이터로 보는 내 패턴 (매매 3건 이상에서만) ══════════ */}
       {!stats.locked && <>
       <SectionTitle title="데이터로 보는 내 패턴" />
+      <p className="text-xs text-[var(--color-g400)] dark:text-[var(--color-muted)] mb-4 -mt-2">
+        수익률은 매수→매도 완료된 거래만 집계해요. 아직 보유 중인 종목은 미반영이에요.
+      </p>
 
       {/* 탭 바 */}
       <Tabs
@@ -466,8 +473,15 @@ export default function PersonalityPage() {
       {/* ── [매매 이유] 탭 ── */}
       {activeTab === "reason" && (
         <Card className="mb-6">
-          {tagPnl.length > 0 ? (
+          {matchedCount >= MATCHED_THRESHOLD && tagPnl.length > 0 ? (
             <>
+              {/* 매도완료 N건 기준 뱃지 */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)]">태그별 평균 수익률</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g400)]">
+                  매도완료 {matchedCount}건 기준
+                </span>
+              </div>
               <div className="space-y-2.5">
                 {tagPnl.map((item) => {
                   const maxAbs = Math.max(...tagPnl.map((t) => Math.abs(t.avgPnl)), 1);
@@ -503,7 +517,14 @@ export default function PersonalityPage() {
             </>
           ) : tagDistribution.length > 0 ? (
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-3">태그별 매매 건수</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)]">태그별 거래 건수</span>
+                {matchedCount > 0 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g400)]">
+                    매도완료 {matchedCount}건 · {MATCHED_THRESHOLD - matchedCount}건 더 완료 시 수익률 분석
+                  </span>
+                )}
+              </div>
               {tagDistribution.slice(0, 6).map((item) => {
                 const maxVal = tagDistribution[0].total;
                 const pct = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
@@ -525,7 +546,9 @@ export default function PersonalityPage() {
                   </div>
                 );
               })}
-              <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 이유별 수익률이 표시돼요</p>
+              {matchedCount === 0 && (
+                <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 이유별 수익률이 표시돼요</p>
+              )}
             </div>
           ) : (
             <p className="text-sm text-center text-[var(--color-g400)] py-6">
@@ -533,8 +556,8 @@ export default function PersonalityPage() {
             </p>
           )}
 
-          {/* 태그 분포 (매수/매도 건수) — 접기/펼치기 */}
-          {tagPnl.length > 0 && tagDistribution.length > 0 && (
+          {/* 태그 분포 (매수/매도 건수) — 접기/펼치기 (수익률 뷰일 때만) */}
+          {matchedCount >= MATCHED_THRESHOLD && tagPnl.length > 0 && tagDistribution.length > 0 && (
             <>
               <Divider />
               <button
@@ -586,8 +609,14 @@ export default function PersonalityPage() {
       {/* ── [감정] 탭 ── */}
       {activeTab === "emotion" && (
         <Card className="mb-6">
-          {emotionPnl.length > 0 ? (
+          {matchedCount >= MATCHED_THRESHOLD && emotionPnl.length > 0 ? (
             <>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)]">감정별 평균 수익률</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g400)]">
+                  매도완료 {matchedCount}건 기준
+                </span>
+              </div>
               <div className="space-y-3">
                 {emotionPnl.map((item) => {
                   const maxAbs = Math.max(...emotionPnl.map((e) => Math.abs(e.avgPnl)), 1);
@@ -629,7 +658,14 @@ export default function PersonalityPage() {
             </>
           ) : emotionDistribution.length > 0 ? (
             <div>
-              <p className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)] mb-3">감정별 매매 건수</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-[var(--color-g500)] dark:text-[var(--color-muted)]">감정별 매매 건수</span>
+                {matchedCount > 0 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g400)]">
+                    매도완료 {matchedCount}건 · {MATCHED_THRESHOLD - matchedCount}건 더 완료 시 수익률 분석
+                  </span>
+                )}
+              </div>
               <div className="space-y-3">
                 {emotionDistribution.map((item) => {
                   const maxCount = emotionDistribution[0].count;
@@ -653,7 +689,9 @@ export default function PersonalityPage() {
                   );
                 })}
               </div>
-              <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 감정별 수익률이 표시돼요</p>
+              {matchedCount === 0 && (
+                <p className="text-xs text-[var(--color-g400)] mt-3">매수→매도 완료 후 감정별 수익률이 표시돼요</p>
+              )}
             </div>
           ) : (
             <p className="text-sm text-center text-[var(--color-g400)] py-6">
@@ -735,6 +773,11 @@ export default function PersonalityPage() {
                 <span className="text-2xl font-extrabold text-[var(--color-positive)]">{avgHoldingDays}일</span>
                 <span className="text-sm text-[var(--color-g400)] ml-2">평균 보유</span>
                 <p className="text-xs text-[var(--color-g400)] mt-1">미매도 종목은 오늘 기준으로 계산돼요</p>
+                {matchedCount < MATCHED_THRESHOLD && (
+                  <p className="text-[10px] text-[var(--color-g400)] mt-0.5">
+                    수익률은 매도완료 {matchedCount}건 기준 — 데이터가 적어 참고용으로만 보세요
+                  </p>
+                )}
               </div>
               <div className="space-y-2.5">
                 {holdingRanges.map((r) => {
