@@ -433,6 +433,7 @@ function OcrVideo({ T, active }: { T: Theme; active: boolean }) {
 
 function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
   const [activeCards, setActiveCards] = useState<Set<number>>(new Set([0]));
+  const [expandedImg0, setExpandedImg0] = useState(false);
   const [expandedImg, setExpandedImg] = useState(false);
   const [expandedVideo, setExpandedVideo] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1.5);
@@ -486,7 +487,11 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
                 </div>
               </div>
             </div>
-            <div className="flex-1 min-h-0 overflow-hidden flex items-start justify-center" style={{ borderTop: `1px solid ${T.border}`, backgroundColor: T.cardAlt }}>
+            <div
+              className="flex-1 min-h-0 overflow-hidden flex items-start justify-center"
+              style={{ borderTop: `1px solid ${T.border}`, backgroundColor: T.cardAlt, cursor: isActive(0) ? "zoom-in" : "default" }}
+              onClick={() => isActive(0) && setExpandedImg0(true)}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/slides/img_portfolio_1.png" alt="대시보드" className="w-full object-contain object-top" style={{ display: "block" }} />
             </div>
@@ -608,6 +613,40 @@ function Slide4a({ T, printMode }: { T: Theme; printMode?: boolean }) {
 
         </div>
       </div>
+
+      {/* 통합 포트폴리오 이미지 확대 오버레이 */}
+      {expandedImg0 && !printMode && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.80)", backdropFilter: "blur(6px)", animation: "fadeUp 0.25s ease both" }}
+          onClick={() => setExpandedImg0(false)}
+        >
+          <div
+            style={{ position: "relative", animation: "imgZoomIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/slides/img_portfolio_2.png"
+              alt="통합 포트폴리오"
+              style={{ maxHeight: "84vh", maxWidth: "74vw", borderRadius: 20, boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)" }}
+            />
+            <button
+              onClick={() => setExpandedImg0(false)}
+              style={{
+                position: "absolute", top: -14, right: -14,
+                width: 36, height: 36, borderRadius: "50%",
+                backgroundColor: "#1E1F1F", border: "1px solid rgba(255,255,255,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: "#E2E5E2", fontSize: 16, fontWeight: 700,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 스크린샷 등록 영상 확대 오버레이 */}
       {expandedVideo && !printMode && (
