@@ -533,21 +533,21 @@ async function main() {
   const coachingData = [
     {
       createdAt: new Date("2026-01-15T09:00:00Z"),
-      strengths: "이번 달 처음으로 매매 이유를 메모로 남기기 시작했어요\nNVDA 분할매수 계획을 세우고 1·2차를 실행했어요",
-      mistakes: "FOMO 고점 추격 매수 후 패닉셀 패턴이 반복됩니다 (MSTR, TSLA 12월→1월)\nTSLA를 $477에 추가 매수 후 3주 만에 $336에 손절 → -29% 실현손실\n메모 없이 매매한 건이 전체의 75%입니다",
-      goals: "이번 달은 매매 전 반드시 reasonMemo 한 줄 이상 작성하기\n충동이 느껴질 때 48시간 기다려보기",
+      strengths: JSON.stringify(["이번 달 처음으로 매매 이유를 메모로 남기기 시작했어요", "NVDA 분할매수 계획을 세우고 1·2차를 실행했어요"]),
+      mistakes:  JSON.stringify(["FOMO 고점 추격 매수 후 패닉셀 패턴이 반복됩니다 (MSTR, TSLA 12월→1월)", "TSLA를 $477에 추가 매수 후 3주 만에 $336에 손절 → -29% 실현손실", "메모 없이 매매한 건이 전체의 75%입니다"]),
+      goals:     JSON.stringify(["이번 달은 매매 전 반드시 reasonMemo 한 줄 이상 작성하기", "충동이 느껴질 때 48시간 기다려보기"]),
     },
     {
       createdAt: new Date("2026-02-20T09:00:00Z"),
-      strengths: "분할매수 3회 계획을 완수했어요 (NVDA)\n실적 기반 진입 비율이 늘었어요 (PLTR 재진입, META 진입)",
-      mistakes: "아직 TSLA 비중이 포트의 30%로 과집중 상태입니다\n매도 타이밍을 감정으로 결정하는 경향이 남아있어요",
-      goals: "TSLA 비중을 20% 이하로 조정하는 리밸런싱 계획 세우기\n목표가 사전 설정 후 도달 시 기계적 익절 연습",
+      strengths: JSON.stringify(["분할매수 3회 계획을 완수했어요 (NVDA)", "실적 기반 진입 비율이 늘었어요 (PLTR 재진입, META 진입)"]),
+      mistakes:  JSON.stringify(["아직 TSLA 비중이 포트의 30%로 과집중 상태입니다", "매도 타이밍을 감정으로 결정하는 경향이 남아있어요"]),
+      goals:     JSON.stringify(["TSLA 비중을 20% 이하로 조정하는 리밸런싱 계획 세우기", "목표가 사전 설정 후 도달 시 기계적 익절 연습"]),
     },
     {
       createdAt: new Date("2026-03-25T09:00:00Z"),
-      strengths: "TSLA 리밸런싱을 실행했어요. 계획 실행력이 크게 향상됐습니다\n이란 전쟁 우려 구간에서도 패닉셀 없이 오히려 추가 매수했어요",
-      mistakes: "배당주(현대차) 편입 근거가 다소 단순합니다. 기업 펀더멘털 분석 깊이를 늘려보세요",
-      goals: "현대차 IR 자료 한 번 읽어보기\n4월에도 정기 분할매수 루틴 유지하기",
+      strengths: JSON.stringify(["TSLA 리밸런싱을 실행했어요. 계획 실행력이 크게 향상됐습니다", "이란 전쟁 우려 구간에서도 패닉셀 없이 오히려 추가 매수했어요"]),
+      mistakes:  JSON.stringify(["배당주(현대차) 편입 근거가 다소 단순합니다. 기업 펀더멘털 분석 깊이를 늘려보세요"]),
+      goals:     JSON.stringify(["현대차 IR 자료 한 번 읽어보기", "4월에도 정기 분할매수 루틴 유지하기"]),
     },
   ];
 
