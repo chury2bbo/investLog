@@ -1143,7 +1143,7 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-2.5">
             {accountSummaries.map((acc) => (
-              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer">
+              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer active:scale-[0.98] active:opacity-70 transition-all">
                 <Card>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1408,7 +1408,7 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-2.5">
             {accountSummaries.map((acc) => (
-              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer">
+              <div key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)} className="cursor-pointer active:scale-[0.98] active:opacity-70 transition-all">
                 <Card>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

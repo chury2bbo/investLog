@@ -387,7 +387,11 @@ export default function AccountsPage() {
                 : `₩${Math.floor(v).toLocaleString()}`;
 
             return (
-              <Card key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)}>
+              <Card key={acc.id}>
+                <div
+                  className="cursor-pointer active:scale-[0.98] active:opacity-70 transition-all"
+                  onClick={() => router.push(`/accounts/${acc.id}`)}
+                >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-(--color-primary-surface)">
@@ -467,6 +471,7 @@ export default function AccountsPage() {
                   )}
                 </div>
 
+                </div>{/* 클릭 영역 끝 */}
                 {/* 수정 / 삭제 버튼 */}
                 <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-[var(--color-g100)] dark:border-[var(--color-border)]">
                   <Tooltip text="수정">

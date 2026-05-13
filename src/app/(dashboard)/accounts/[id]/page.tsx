@@ -1093,8 +1093,11 @@ export default function AccountDetailPage() {
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
-              <Card key={h.id} onClick={() => openHoldingTrades(h)}>
-                <div>
+              <Card key={h.id}>
+                <div
+                  className="cursor-pointer active:scale-[0.98] active:opacity-70 transition-all"
+                  onClick={() => openHoldingTrades(h)}
+                >
                 <div className="flex justify-between items-start gap-3 mb-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">
