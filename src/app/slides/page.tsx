@@ -1135,8 +1135,26 @@ function Slide8({ T }: { T: Theme }) {
   );
 }
 
+// ─── S8: Q&A ─────────────────────────────────────────────────────────────────
+function SlideQnA({ T }: { T: Theme }) {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center overflow-hidden"
+      style={{ backgroundColor: T.bg }}>
+      <div className="print-hide absolute inset-0 opacity-[0.06]"
+        style={{ backgroundImage: `radial-gradient(circle, ${T.primary} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
+      <div className="print-hide absolute rounded-full pointer-events-none"
+        style={{ width: 800, height: 800, background: T.glow, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        <h2 className="text-9xl font-extrabold tracking-tight fade-up-1" style={{ color: T.text }}>Q & A</h2>
+        <p className="text-2xl fade-up-2" style={{ color: T.muted }}>궁금하신 점이 있으시면 질문해주세요.</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── 메인 ────────────────────────────────────────────────────────────────────
-const SLIDE_LIST = [Slide1, SlideBackground, Slide3, SlideCompetitor, Slide4a, Slide4b, Slide5, Slide6, Slide7, Slide8];
+const SLIDE_LIST = [Slide1, SlideBackground, Slide3, SlideCompetitor, Slide4a, Slide4b, Slide5, Slide6, Slide7, Slide8, SlideQnA];
 const TOTAL = SLIDE_LIST.length;
 
 export default function SlidesPage() {
