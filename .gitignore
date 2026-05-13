@@ -49,3 +49,5 @@ scripts/seed-snapshot.ts
 
 # Claude Code 로컬 설정
 .claude/settings.local.json
+.claude/settings.json
+.claude/settings.local.json

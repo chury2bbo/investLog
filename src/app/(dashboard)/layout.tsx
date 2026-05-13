@@ -198,7 +198,7 @@ function BottomNav() {
           <Link
             key={item.id}
             href={item.id}
-            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-2 cursor-pointer min-h-[44px] justify-center"
+            className="flex flex-col items-center gap-0.5 bg-transparent border-none px-3 py-2 cursor-pointer min-h-[44px] justify-center transition-transform active:scale-85"
             style={{ opacity: active ? 1 : 0.4 }}
           >
             <NavIcon name={item.icon} size={22} active={active} />

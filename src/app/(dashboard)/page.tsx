@@ -549,7 +549,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-              안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline">{userName}님</Link>
+              안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline inline-block py-2 -my-2 px-1 -mx-1 active:opacity-60 transition-opacity">{userName}님</Link>
             </p>
             <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] mt-0.5">
               내 투자 현황
@@ -649,7 +649,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <p className="text-sm text-[var(--color-g500)] dark:text-[var(--color-muted)]">
-            안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline">{userName}님</Link>
+            안녕하세요, <Link href="/profile" className="md:pointer-events-none underline underline-offset-2 md:no-underline inline-block py-2 -my-2 px-1 -mx-1 active:opacity-60 transition-opacity">{userName}님</Link>
           </p>
           <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)] mt-0.5">
             내 투자 현황
