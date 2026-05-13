@@ -166,7 +166,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
+                  className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-95 active:opacity-70"
                   style={{
                     backgroundColor: "var(--color-primary)",
                     opacity: loading ? 0.6 : 1,

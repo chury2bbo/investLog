@@ -89,14 +89,14 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
           {/* 버튼 */}
           <button
             onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "", tagStatus: "" })}
-            className="px-2.5 py-2 text-xs font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-colors cursor-pointer"
+            className="px-2.5 py-2 text-xs font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:bg-[var(--color-g200)] dark:hover:bg-(--color-hover) transition-all cursor-pointer active:scale-95 active:opacity-70"
           >
             초기화
           </button>
           <button
             onClick={onSearch}
             disabled={isSearching}
-            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-(--color-primary-hover) text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-3 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] hover:bg-(--color-primary-hover) text-white transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 active:opacity-70"
           >
             {isSearching ? "조회 중..." : "조회"}
           </button>
@@ -127,7 +127,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
                   <button
                     key={t}
                     onClick={() => set("tradeType", t)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer active:opacity-70 ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                         : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
@@ -152,7 +152,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
                   <button
                     key={m}
                     onClick={() => set("market", m)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer active:opacity-70 ${
                       active
                         ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                         : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
@@ -179,7 +179,7 @@ export function TradeFilterCard({ filters, onChange, onSearch, accounts, isSearc
                       <button
                         key={s}
                         onClick={() => set("tagStatus", s)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer active:opacity-70 ${
                           active
                             ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                             : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"

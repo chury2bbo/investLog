@@ -88,7 +88,17 @@ export async function GET(req: Request) {
   const total = trades.length;
   const paginated = trades.slice(skip, skip + take);
 
-  return Response.json({ data: paginated, total });
+  const isDomestic = (ticker: string) => /^\d{6}$/.test(ticker);
+  const summary = {
+    buyCount:  trades.filter(t => t.type === "BUY").length,
+    sellCount: trades.filter(t => t.type === "SELL").length,
+    buyKrw:  trades.filter(t => t.type === "BUY"  && isDomestic(t.ticker)).reduce((s, t) => s + t.price * t.quantity, 0),
+    buyUsd:  trades.filter(t => t.type === "BUY"  && !isDomestic(t.ticker)).reduce((s, t) => s + t.price * t.quantity, 0),
+    sellKrw: trades.filter(t => t.type === "SELL" && isDomestic(t.ticker)).reduce((s, t) => s + t.price * t.quantity, 0),
+    sellUsd: trades.filter(t => t.type === "SELL" && !isDomestic(t.ticker)).reduce((s, t) => s + t.price * t.quantity, 0),
+  };
+
+  return Response.json({ data: paginated, total, summary });
 }
 
 // ─── POST: 매매 등록 ────────────────────────────────────

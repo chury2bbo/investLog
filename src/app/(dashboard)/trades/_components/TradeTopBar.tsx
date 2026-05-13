@@ -28,7 +28,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
       {/* 타이틀 행 */}
       <div className="flex items-center justify-between px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -104,7 +104,7 @@ export function TradeTopBar({ totalCount, filters, onChange, filterOpen, onToggl
           {/* 뷰 전환 */}
           <button
             onClick={onToggleView}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]"
             aria-label="뷰 전환"
           >
             {viewMode === "list" ? (

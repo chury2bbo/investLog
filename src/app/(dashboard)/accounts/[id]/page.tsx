@@ -726,7 +726,7 @@ export default function AccountDetailPage() {
       <div className="w-full max-w-2xl md:max-w-5xl mx-auto px-5 py-6 pb-28 md:pb-6">
         {/* 헤더 (즉시 표시) */}
         <div className="flex items-center gap-2 mb-6">
-          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)]">
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div>
@@ -841,7 +841,7 @@ export default function AccountDetailPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors">
+          <button onClick={() => router.push("/accounts")} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div>
@@ -972,7 +972,7 @@ export default function AccountDetailPage() {
               setCashCurrency("KRW");
               setCashModal("deposit_choose");
             }}
-            className="flex-1 py-2.5 rounded-[10px] text-sm font-bold text-white cursor-pointer"
+            className="flex-1 py-2.5 rounded-[10px] text-sm font-bold text-white cursor-pointer transition-all active:scale-95 active:opacity-70"
             style={{
               background: "rgba(255,255,255,0.2)",
               border: "1px solid rgba(255,255,255,0.3)",
@@ -985,7 +985,7 @@ export default function AccountDetailPage() {
               setCashCurrency("KRW");
               setCashModal("withdraw");
             }}
-            className="flex-1 py-2.5 rounded-[10px] text-sm font-semibold text-white cursor-pointer"
+            className="flex-1 py-2.5 rounded-[10px] text-sm font-semibold text-white cursor-pointer transition-all active:scale-95 active:opacity-70"
             style={{
               background: "rgba(255,255,255,0.1)",
               border: "1px solid rgba(255,255,255,0.2)",
@@ -1093,11 +1093,8 @@ export default function AccountDetailPage() {
             const pnlColor = pnl > 0 ? "var(--color-positive)" : pnl < 0 ? "var(--color-negative)" : "var(--color-g400)";
 
             return (
-              <Card key={h.id}>
-                <div
-                  onClick={() => openHoldingTrades(h)}
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                >
+              <Card key={h.id} onClick={() => openHoldingTrades(h)}>
+                <div>
                 <div className="flex justify-between items-start gap-3 mb-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 min-w-0">

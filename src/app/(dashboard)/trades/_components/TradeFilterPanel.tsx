@@ -39,7 +39,7 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
         <div className="relative shrink-0">
           <button
             onClick={() => setQuickDropOpen((v) => !v)}
-            className="px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g500)] dark:text-[var(--color-muted)] whitespace-nowrap cursor-pointer"
+            className="px-2.5 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-g500)] dark:text-[var(--color-muted)] whitespace-nowrap cursor-pointer transition-all active:scale-95 active:opacity-70"
           >
             기간 ▾
           </button>
@@ -56,7 +56,7 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
                     });
                     setQuickDropOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[var(--color-g100)] dark:hover:bg-[var(--color-border)] text-[var(--color-text)] dark:text-[var(--color-text)] transition-all cursor-pointer active:opacity-70"
                 >
                   {opt.label}
                 </button>
@@ -90,7 +90,7 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
               <button
                 key={s}
                 onClick={() => set("tagStatus", s)}
-                className={`px-2 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer flex items-center justify-center ${
+                className={`px-2 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center active:opacity-70 ${
                   active
                     ? "bg-[var(--color-surface)] dark:bg-[var(--color-card)] text-[var(--color-text)] dark:text-[var(--color-text)] shadow-sm"
                     : "text-[var(--color-g500)] dark:text-[var(--color-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-text)]"
@@ -123,14 +123,14 @@ export function TradeFilterPanel({ filters, onChange, onSearch, accounts, isSear
       <div className="flex items-center gap-2">
         <button
           onClick={() => onChange({ dateFrom: "", dateTo: "", accountId: "", tradeType: "", market: "", keyword: "", tagStatus: "" })}
-          className="flex-1 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] cursor-pointer"
+          className="flex-1 py-2.5 text-xs rounded-lg border border-[var(--color-g200)] dark:border-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-muted)] cursor-pointer transition-all active:scale-95 active:opacity-70"
         >
           초기화
         </button>
         <button
           onClick={onSearch}
           disabled={isSearching}
-          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-(--color-primary-hover) text-white transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 text-xs font-medium rounded-lg bg-[var(--color-primary)] hover:bg-(--color-primary-hover) text-white transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 active:opacity-70"
         >
           {isSearching ? "조회 중..." : "조회"}
         </button>

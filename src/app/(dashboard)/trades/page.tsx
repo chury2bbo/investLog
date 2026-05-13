@@ -67,6 +67,7 @@ export default function TradesPage() {
   const [trades, setTrades] = useState<TradeLog[]>([]);
   const tradesRef = useRef<TradeLog[]>([]);
   const [total, setTotal] = useState(0);
+  const [summary, setSummary] = useState({ buyCount: 0, sellCount: 0, buyKrw: 0, buyUsd: 0, sellKrw: 0, sellUsd: 0 });
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -171,6 +172,7 @@ export default function TradesPage() {
           setTrades(data.data);
           tradesRef.current = data.data;
           setTotal(data.total);
+          if (data.summary) setSummary(data.summary);
         } else {
           // API가 아직 paginated 응답이 아닌 경우 호환
           const arr = Array.isArray(data) ? data : [];
@@ -208,6 +210,10 @@ export default function TradesPage() {
         const items: TradeLog[] = data.data ?? [];
         const totalCount: number = data.total ?? 0;
         setMobileList(prev => append ? [...prev, ...items] : items);
+        if (!append) {
+          setTotal(totalCount);
+          if (data.summary) setSummary(data.summary);
+        }
         mobilePageRef.current = pageNum;
         const hasMore = (pageNum + 1) * pageSize < totalCount;
         mobileHasMoreRef.current = hasMore;
@@ -656,7 +662,7 @@ export default function TradesPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
+              <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
               </button>
               <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">매매일지</h1>
@@ -776,7 +782,7 @@ export default function TradesPage() {
         {/* 타이틀 — 계좌 관리와 동일 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
+            <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -787,7 +793,7 @@ export default function TradesPage() {
             {/* 뷰 전환 아이콘 */}
             <button
               onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]"
               aria-label="뷰 전환"
             >
               {viewMode === "list" ? (
@@ -951,7 +957,7 @@ export default function TradesPage() {
 
             {/* 요약 칩 */}
             <div className="mb-3">
-              <SummaryChips totalCount={total} buyCount={buyCount} sellCount={sellCount} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} />
+              <SummaryChips totalCount={total} buyCount={summary.buyCount} sellCount={summary.sellCount} buyKrw={summary.buyKrw} buyUsd={summary.buyUsd} sellKrw={summary.sellKrw} sellUsd={summary.sellUsd} />
             </div>
 
             {/* 테이블 or 빈 상태 */}
@@ -1064,7 +1070,7 @@ export default function TradesPage() {
 
             {/* 요약 칩 */}
             <div className="px-4 py-2.5">
-              <SummaryChips totalCount={total} buyCount={buyCount} sellCount={sellCount} buyKrw={buyKrw} buyUsd={buyUsd} sellKrw={sellKrw} sellUsd={sellUsd} />
+              <SummaryChips totalCount={total} buyCount={summary.buyCount} sellCount={summary.sellCount} buyKrw={summary.buyKrw} buyUsd={summary.buyUsd} sellKrw={summary.sellKrw} sellUsd={summary.sellUsd} />
             </div>
 
             {/* 리스트 or 빈 상태 */}
@@ -1249,7 +1255,7 @@ export default function TradesPage() {
                   <button
                     type="button"
                     onClick={() => setDetailEditing(true)}
-                    className="flex-1 py-3 flex items-center justify-center gap-1.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-colors cursor-pointer"
+                    className="flex-1 py-3 flex items-center justify-center gap-1.5 rounded-xl text-sm font-semibold bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-all cursor-pointer active:scale-95 active:opacity-70"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     수정
@@ -1257,7 +1263,7 @@ export default function TradesPage() {
                   <button
                     type="button"
                     onClick={() => setDetailDeleteConfirm(true)}
-                    className="flex-1 py-3 flex items-center justify-center gap-1.5 rounded-xl text-sm font-semibold bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-colors cursor-pointer"
+                    className="flex-1 py-3 flex items-center justify-center gap-1.5 rounded-xl text-sm font-semibold bg-[var(--color-negative-soft)] dark:bg-[var(--color-border)] text-[var(--color-negative)] hover:bg-[rgba(240,68,82,0.2)] dark:hover:bg-[rgba(240,68,82,0.15)] transition-all cursor-pointer active:scale-95 active:opacity-70"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                     삭제
@@ -1267,14 +1273,14 @@ export default function TradesPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setDetailEditing(false); setDetailTags(detailTrade.reasonTags); setDetailEmotion(detailTrade.emotion ?? ""); setDetailMemo(detailTrade.memo ?? ""); }}
-                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-colors cursor-pointer"
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--color-g100)] dark:bg-[var(--color-border)] text-[var(--color-g500)] dark:text-[var(--color-text)] hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-card)] transition-all cursor-pointer active:scale-95 active:opacity-70"
                   >
                     취소
                   </button>
                   <button
                     onClick={saveDetail}
                     disabled={detailSaving}
-                    className="flex-1 py-3 text-sm font-semibold rounded-xl text-white cursor-pointer disabled:opacity-50"
+                    className="flex-1 py-3 text-sm font-semibold rounded-xl text-white cursor-pointer disabled:opacity-50 transition-all active:scale-95 active:opacity-70"
                     style={{ backgroundColor: "var(--color-primary)" }}
                   >
                     {detailSaving ? "저장 중..." : "저장"}

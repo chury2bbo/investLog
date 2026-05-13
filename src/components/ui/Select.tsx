@@ -107,7 +107,7 @@ export function Select({
         onClick={() => { if (!disabled) { setOpen(!open); setActiveIndex(-1); } }}
         onKeyDown={disabled ? undefined : handleTriggerKeyDown}
         disabled={disabled}
-        className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b-2 border-[var(--color-g200)] text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full flex items-center justify-between pb-2 text-sm bg-transparent outline-none border-b-2 border-[var(--color-g200)] text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:opacity-70 transition-opacity"
       >
         <span>{selected?.label ?? placeholder}</span>
         <svg

@@ -16,7 +16,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-[var(--color-card)] hover:opacity-80 transition-opacity cursor-pointer"
+      className="w-7 h-7 rounded-lg flex items-center justify-center bg-(--color-g100) dark:bg-(--color-card) hover:opacity-80 transition-all cursor-pointer active:scale-90 active:opacity-70"
       aria-label="다크모드 토글"
     >
       {isDark ? (

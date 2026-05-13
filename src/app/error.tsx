@@ -38,7 +38,7 @@ export default function GlobalError({
         <div className="flex flex-col gap-2.5">
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 active:opacity-70"
             style={{ backgroundColor: "var(--color-primary)" }}
           >
             <svg

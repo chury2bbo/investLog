@@ -288,7 +288,7 @@ export default function AccountsPage() {
       {/* 헤더 (항상 즉시 표시) */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-colors cursor-pointer">
+          <button onClick={() => router.back()} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-g100)] dark:bg-transparent hover:bg-[var(--color-g200)] dark:hover:bg-[var(--color-border)] transition-all cursor-pointer active:scale-90 active:bg-[var(--color-g200)] dark:active:bg-[rgba(255,255,255,0.15)]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text)] dark:text-[var(--color-text)]"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)] dark:text-[var(--color-text)]">
@@ -387,11 +387,8 @@ export default function AccountsPage() {
                 : `₩${Math.floor(v).toLocaleString()}`;
 
             return (
-              <Card key={acc.id}>
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => router.push(`/accounts/${acc.id}`)}
-                >
+              <Card key={acc.id} onClick={() => router.push(`/accounts/${acc.id}`)}>
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-[42px] h-[42px] rounded-xl flex items-center justify-center text-xl bg-[var(--color-primary-soft)] dark:bg-(--color-primary-surface)">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M16 12h.01" /><path d="M2 10h20" /></svg>

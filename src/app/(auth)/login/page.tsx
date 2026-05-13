@@ -118,7 +118,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity"
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-95 active:opacity-70"
               style={{
                 backgroundColor: "var(--color-primary)",
                 opacity: loading ? 0.6 : 1,
@@ -143,7 +143,7 @@ export default function LoginPage() {
             <button
               onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-colors hover:bg-(--color-g100) dark:hover:bg-(--color-card) border-(--color-g200) dark:border-(--color-border) text-(--color-text) bg-(--color-surface)"
+              className="w-full py-3.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-all hover:bg-(--color-g100) dark:hover:bg-(--color-card) border-(--color-g200) dark:border-(--color-border) text-(--color-text) bg-(--color-surface) active:scale-95 active:opacity-70"
             >
               <svg width="18" height="18" viewBox="0 0 18 18">
                 <path
@@ -169,7 +169,7 @@ export default function LoginPage() {
             <button
               onClick={() => signIn("kakao", { callbackUrl: "/onboarding" })}
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+              className="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95 active:opacity-70"
               style={{ backgroundColor: "var(--color-kakao)", color: "#191919" }}
             >
               <svg

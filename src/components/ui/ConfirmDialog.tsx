@@ -62,7 +62,7 @@ export function ConfirmDialog({
         <div className="flex border-t border-(--color-g100) dark:border-(--color-border-strong)">
           <button
             onClick={onCancel}
-            className="flex-1 py-3.5 text-sm font-semibold text-(--color-g400) dark:text-(--color-muted) hover:bg-(--color-bg) dark:hover:bg-(--color-border) rounded-bl-2xl transition-colors cursor-pointer"
+            className="flex-1 py-3.5 text-sm font-semibold text-(--color-g400) dark:text-(--color-muted) hover:bg-(--color-bg) dark:hover:bg-(--color-border) rounded-bl-2xl transition-all cursor-pointer active:opacity-70"
           >
             {cancelLabel}
           </button>
@@ -70,7 +70,7 @@ export function ConfirmDialog({
           <button
             onClick={onConfirm}
             disabled={confirmLoading}
-            className={`flex-1 py-3.5 text-sm font-bold rounded-br-2xl transition-colors cursor-pointer disabled:opacity-50 ${
+            className={`flex-1 py-3.5 text-sm font-bold rounded-br-2xl transition-all cursor-pointer disabled:opacity-50 active:opacity-70 ${
               destructive
                 ? "text-(--color-negative) hover:bg-(--color-negative-soft) dark:hover:bg-(--color-negative-overlay)"
                 : "text-(--color-positive) hover:bg-(--color-primary-soft) dark:hover:bg-(--color-primary-overlay)"
