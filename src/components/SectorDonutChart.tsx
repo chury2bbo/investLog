@@ -39,6 +39,14 @@ interface SectorItem {
   color: string;
 }
 
+interface HoldingRow {
+  ticker: string;
+  name: string;
+  country: string;
+  value: number;
+  pct: number;
+}
+
 interface SectorDonutChartProps {
   holdings: HoldingInput[];
 }
@@ -136,10 +144,35 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
   const hasManualSector = holdings.some((h) => h.sectorManual);
   const [sectorTab, setSectorTab] = useState<"auto" | "manual">(hasManualSector ? "manual" : "auto");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const { items: sectorData, total: totalValue } = useMemo(
     () => calcSectors(holdings, sectorTab),
     [holdings, sectorTab]
   );
+
+  const selectedHoldings = useMemo<HoldingRow[]>(() => {
+    if (!selectedSector) return [];
+    const rows = holdings
+      .filter((h) => {
+        const sector =
+          sectorTab === "auto"
+            ? h.sectorAuto ?? "미분류"
+            : h.sectorManual ?? (h.sectorAuto ?? "미지정");
+        return sector === selectedSector;
+      })
+      .map((h) => {
+        const price = h.currentPrice ?? h.avgPrice;
+        const rate = h.exchangeRate ?? 1;
+        const value = price * h.quantity * rate;
+        return { ticker: h.ticker, name: h.name, country: h.country, value };
+      })
+      .sort((a, b) => b.value - a.value);
+    const sectorTotal = rows.reduce((s, r) => s + r.value, 0);
+    return rows.map((r) => ({
+      ...r,
+      pct: sectorTotal > 0 ? parseFloat(((r.value / sectorTotal) * 100).toFixed(1)) : 0,
+    }));
+  }, [selectedSector, holdings, sectorTab]);
 
   const renderTooltip = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,22 +274,58 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
 
           {/* 범례 */}
           <div className="mt-3 space-y-1">
-            {sectorData.map((item, index) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors"
-                style={{ background: hoveredIndex === index ? T.surfaceHover : "transparent" }}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
-                  <span className="text-[13px] font-medium" style={{ color: T.textPrimary }}>{item.label}</span>
-                  <span className="text-[11px]" style={{ color: T.textMuted }}>₩{formatKRW(item.value)}</span>
+            {sectorData.map((item, index) => {
+              const isSelected = selectedSector === item.label;
+              return (
+                <div key={item.label}>
+                  <div
+                    className="flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    style={{ background: isSelected ? T.tabActiveBg : hoveredIndex === index ? T.surfaceHover : "transparent" }}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    onClick={() => setSelectedSector(isSelected ? null : item.label)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
+                      <span className="text-[13px] font-medium" style={{ color: isSelected ? T.tabActiveColor : T.textPrimary }}>{item.label}</span>
+                      <span className="text-[11px]" style={{ color: T.textMuted }}>₩{formatKRW(item.value)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-bold" style={{ color: isSelected ? T.tabActiveColor : T.textPrimary }}>{item.pct}%</span>
+                      <span className="text-[11px]" style={{ color: T.textMuted }}>{isSelected ? "▲" : "▼"}</span>
+                    </div>
+                  </div>
+
+                  {/* 섹터 클릭 시 종목 목록 */}
+                  {isSelected && (
+                    <div className="mx-2 mb-1 mt-0.5 rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+                      {selectedHoldings.map((h, i) => (
+                        <div
+                          key={h.ticker}
+                          className="flex items-center justify-between px-3 py-2"
+                          style={{
+                            borderTop: i > 0 ? `1px solid ${T.border}` : "none",
+                            background: isDark ? "var(--color-card)" : "var(--color-g100)",
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.border, color: T.textSecondary }}>
+                              {h.country}
+                            </span>
+                            <span className="text-[13px] font-medium" style={{ color: T.textPrimary }}>{h.name}</span>
+                            <span className="text-[11px]" style={{ color: T.textMuted }}>{h.ticker}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px]" style={{ color: T.textSecondary }}>₩{formatKRW(h.value)}</span>
+                            <span className="text-[12px] font-bold" style={{ color: T.tabActiveColor }}>{h.pct}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className="text-[13px] font-bold" style={{ color: T.textPrimary }}>{item.pct}%</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* 안내 문구 */}

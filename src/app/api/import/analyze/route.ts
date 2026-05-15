@@ -83,16 +83,16 @@ export async function POST(req: Request) {
       return Response.json({ error: "이미지에서 종목 정보를 찾을 수 없습니다." }, { status: 400 });
     }
 
-    // ticker 빈값 종목에 대해 자동 보완
+    // ticker 보완 — KR은 항상 DB로 검증, US는 빈 경우만 yahoo 보완
     if (Array.isArray(parsed.holdings)) {
       await Promise.all(
         parsed.holdings.map(async (h: { ticker: string; name: string; country: string }) => {
-          if (h.ticker) return;
           if (!h.name || !h.name.trim()) return;
 
           try {
             if (h.country === "KR") {
-              // 정확 일치 우선 → 없으면 contains 폴백
+              // KR은 DB 이름 기반 조회 우선 — DB 없으면 Claude 티커 폴백
+              const claudeTicker = h.ticker;
               const exact = await prisma.stockMaster.findFirst({
                 where: { name: h.name },
                 select: { ticker: true },
@@ -105,14 +105,15 @@ export async function POST(req: Request) {
                   select: { ticker: true },
                 });
                 if (partial) h.ticker = partial.ticker;
+                else if (claudeTicker) h.ticker = claudeTicker;
               }
             } else {
+              if (h.ticker) return;
               const results = await getYahooSearch(h.name);
               if (results.length > 0) h.ticker = results[0].ticker;
             }
           } catch (lookupErr) {
             console.warn(`Ticker lookup failed for "${h.name}":`, lookupErr instanceof Error ? lookupErr.message : lookupErr);
-            // 한 종목 실패가 전체 분석을 막지 않도록 무시
           }
         })
       );
