@@ -302,23 +302,18 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
                       {selectedHoldings.map((h, i) => (
                         <div
                           key={h.ticker}
-                          className="flex items-center justify-between px-3 py-2"
+                          className="flex items-center gap-2 px-3 py-2"
                           style={{
                             borderTop: i > 0 ? `1px solid ${T.border}` : "none",
                             background: isDark ? "var(--color-card)" : "var(--color-g100)",
                           }}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.border, color: T.textSecondary }}>
-                              {h.country}
-                            </span>
-                            <span className="text-[13px] font-medium" style={{ color: T.textPrimary }}>{h.name}</span>
-                            <span className="text-[11px]" style={{ color: T.textMuted }}>{h.ticker}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px]" style={{ color: T.textSecondary }}>₩{formatKRW(h.value)}</span>
-                            <span className="text-[12px] font-bold" style={{ color: T.tabActiveColor }}>{h.pct}%</span>
-                          </div>
+                          <span className="shrink-0 text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.border, color: T.textSecondary }}>
+                            {h.country}
+                          </span>
+                          <span className="min-w-0 flex-1 text-[13px] font-medium truncate" style={{ color: T.textPrimary }}>{h.name}</span>
+                          <span className="shrink-0 text-[11px]" style={{ color: T.textMuted }}>{h.ticker}</span>
+                          <span className="shrink-0 text-[12px] font-bold" style={{ color: T.tabActiveColor }}>{h.pct}%</span>
                         </div>
                       ))}
                     </div>
