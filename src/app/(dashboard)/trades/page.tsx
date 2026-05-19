@@ -275,14 +275,13 @@ export default function TradesPage() {
         const data = await res.json();
         const accList = Array.isArray(data) ? data : [];
         setAccounts(accList);
-        if (accList.length > 0 && !formAccountId) {
-          setFormAccountId(accList[0].id);
-        }
+        // 선택된 계좌 없을 때만 첫 번째 계좌 자동 선택 (함수형 업데이트로 최신 상태 참조)
+        setFormAccountId((prev) => (prev == null && accList.length > 0 ? accList[0].id : prev));
       }
     } catch {
       /* 조회 실패 */
     }
-  }, [formAccountId]);
+  }, []);
 
   useEffect(() => {
     fetchTrades();
@@ -441,7 +440,7 @@ export default function TradesPage() {
 
   function openModal() {
     resetForm();
-    if (accounts.length > 0 && !formAccountId) setFormAccountId(accounts[0].id);
+    fetchAccounts(); // 팝업 열릴 때마다 최신 예수금 반영
     setModalOpen(true);
   }
 
