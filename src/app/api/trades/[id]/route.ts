@@ -132,14 +132,22 @@ export async function DELETE(
         data: { quantity: holding.quantity + trade.quantity },
       });
     } else {
-      // Holding이 삭제된 경우 — 다시 생성
+      // Holding이 삭제된 경우 — 매수 기록에서 평단가 재계산 후 다시 생성
+      const buys = await prisma.tradeLog.findMany({
+        where: { accountId: trade.accountId, ticker: trade.ticker, type: "BUY" },
+        select: { price: true, quantity: true },
+      });
+      const totalBuyQty = buys.reduce((s, t) => s + t.quantity, 0);
+      const totalBuyCost = buys.reduce((s, t) => s + t.price * t.quantity, 0);
+      const avgPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : trade.price;
+
       await prisma.holding.create({
         data: {
           accountId: trade.accountId,
           ticker: trade.ticker,
           name: trade.name,
           country,
-          avgPrice: trade.price,
+          avgPrice,
           quantity: trade.quantity,
         },
       });
