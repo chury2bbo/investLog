@@ -732,9 +732,9 @@ export default function AnalysisPage() {
                       domain={["auto", "auto"]}
                     />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-border)", backgroundColor: "var(--color-tooltip)", color: "var(--color-text)" }}
-                      labelStyle={{ color: "var(--color-text)" }}
-                      itemStyle={{ color: "var(--color-text)" }}
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-border)", backgroundColor: "var(--color-tooltip)", color: "var(--color-tooltip-text)" }}
+                      labelStyle={{ color: "var(--color-tooltip-text)" }}
+                      itemStyle={{ color: "var(--color-tooltip-text)" }}
                       formatter={(v: unknown) => [formatPrice(v as number, selected.country), "주가"]}
                       labelFormatter={(l) => l}
                     />
@@ -764,9 +764,9 @@ export default function AnalysisPage() {
                       domain={["auto", 0]}
                     />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-border)", backgroundColor: "var(--color-tooltip)", color: "var(--color-text)" }}
-                      labelStyle={{ color: "var(--color-text)" }}
-                      itemStyle={{ color: "var(--color-text)" }}
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-border)", backgroundColor: "var(--color-tooltip)", color: "var(--color-tooltip-text)" }}
+                      labelStyle={{ color: "var(--color-tooltip-text)" }}
+                      itemStyle={{ color: "var(--color-tooltip-text)" }}
                       formatter={(v: unknown) => [`${(v as number).toFixed(2)}%`, "MDD"]}
                       labelFormatter={(l) => l}
                     />

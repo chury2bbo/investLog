@@ -152,7 +152,10 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
 
   const selectedHoldings = useMemo<HoldingRow[]>(() => {
     if (!selectedSector) return [];
-    const rows = holdings
+
+    // 같은 섹터 종목 필터 후 ticker 기준 합산 (여러 계좌에 동일 종목 보유 시)
+    const map = new Map<string, HoldingRow>();
+    holdings
       .filter((h) => {
         const sector =
           sectorTab === "auto"
@@ -160,13 +163,19 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
             : h.sectorManual ?? (h.sectorAuto ?? "미지정");
         return sector === selectedSector;
       })
-      .map((h) => {
+      .forEach((h) => {
         const price = h.currentPrice ?? h.avgPrice;
         const rate = h.exchangeRate ?? 1;
         const value = price * h.quantity * rate;
-        return { ticker: h.ticker, name: h.name, country: h.country, value };
-      })
-      .sort((a, b) => b.value - a.value);
+        const existing = map.get(h.ticker);
+        if (existing) {
+          existing.value += value;
+        } else {
+          map.set(h.ticker, { ticker: h.ticker, name: h.name, country: h.country, value });
+        }
+      });
+
+    const rows = Array.from(map.values()).sort((a, b) => b.value - a.value);
     const sectorTotal = rows.reduce((s, r) => s + r.value, 0);
     return rows.map((r) => ({
       ...r,
