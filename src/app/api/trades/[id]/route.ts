@@ -88,26 +88,29 @@ export async function DELETE(
   const cashBalance = trade.account.cashBalances.find((c) => c.currency === currency);
 
   if (trade.type === "BUY") {
-    // ── 매수 삭제 → Holding 재집계 + 예수금 복원 ──
+    // ── 매수 삭제 → Holding 차분 복원 + 예수금 복원 ──
+    // [Phase 1] TradeLog 재집계 방식은 종목 등록(holdings 직접 생성)의
+    // 초기 보유분(TradeLog 없음)을 무시하여 holding이 통째로 삭제되는
+    // 버그가 있어 차분(delta) 방식으로 임시 대응.
+    // Phase 2에서 initialQty/initialAvgPrice 필드 추가 + 시간순 시뮬레이션으로 정밀화 예정.
 
     if (holding) {
-      // 삭제 대상 제외한 전체 매매 재집계
-      const remaining = await prisma.tradeLog.findMany({
-        where: { accountId: trade.accountId, ticker: trade.ticker, id: { not: tradeId } },
-        select: { type: true, price: true, quantity: true },
-      });
-      const buys = remaining.filter((t) => t.type === "BUY");
-      const sellQty = remaining.filter((t) => t.type === "SELL").reduce((s, t) => s + t.quantity, 0);
-      const totalBuyQty = buys.reduce((s, t) => s + t.quantity, 0);
-      const newQty = totalBuyQty - sellQty;
+      const newQty = holding.quantity - trade.quantity;
 
-      if (newQty <= 0 || buys.length === 0) {
+      if (newQty <= 0) {
         await prisma.holding.delete({ where: { id: holding.id } });
       } else {
-        const totalBuyCost = buys.reduce((s, t) => s + t.price * t.quantity, 0);
+        // 평단가 역산: (현재 총비용 - 삭제분 비용) / 새 수량
+        const totalCost = holding.avgPrice * holding.quantity;
+        const deletedCost = trade.price * trade.quantity;
+        const newAvgPrice = (totalCost - deletedCost) / newQty;
+
         await prisma.holding.update({
           where: { id: holding.id },
-          data: { quantity: newQty, avgPrice: totalBuyCost / totalBuyQty },
+          data: {
+            quantity: newQty,
+            avgPrice: Math.max(0, newAvgPrice),
+          },
         });
       }
     }
