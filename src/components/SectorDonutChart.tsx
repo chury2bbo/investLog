@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useTheme } from "next-themes";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import type { TooltipContentProps, TooltipValueType } from "recharts";
 
 // ── 섹터 색상 (모드 무관 고정) ─────────────────────────────
 const SECTOR_COLORS = [
@@ -85,13 +86,13 @@ function calcSectors(holdings: HoldingInput[], type: "auto" | "manual") {
 }
 
 // ── 커스텀 툴팁 ──────────────────────────────────────────────
-interface TooltipProps {
+interface SectorTooltipProps {
   active?: boolean;
-  payload?: { payload: SectorItem }[];
+  payload?: readonly { payload: SectorItem }[];
   T: Record<string, string>;
 }
 
-function CustomTooltip({ active, payload, T }: TooltipProps) {
+function CustomTooltip({ active, payload, T }: SectorTooltipProps) {
   if (!active || !payload?.[0]) return null;
   const d = payload[0].payload;
   return (
@@ -123,7 +124,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  const T = {
+  const T = useMemo(() => ({
     textPrimary:       isDark ? "#DCE8DC" : "#1A221A",
     textSecondary:     isDark ? "#5C7A5C" : "#6B7D6B",
     textMuted:         isDark ? "#3D5C3D" : "#9EAD9E",
@@ -139,7 +140,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
     tooltipShadow:     isDark
       ? "0 4px 16px rgba(0,0,0,0.4)"
       : "0 4px 16px rgba(0,0,0,0.08)",
-  };
+  }), [isDark]);
 
   const hasManualSector = holdings.some((h) => h.sectorManual);
   const [sectorTab, setSectorTab] = useState<"auto" | "manual">(hasManualSector ? "manual" : "auto");
@@ -171,7 +172,7 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
         if (existing) {
           existing.value += value;
         } else {
-          map.set(h.ticker, { ticker: h.ticker, name: h.name, country: h.country, value });
+          map.set(h.ticker, { ticker: h.ticker, name: h.name, country: h.country, value, pct: 0 });
         }
       });
 
@@ -184,11 +185,11 @@ export default function SectorDonutChart({ holdings }: SectorDonutChartProps) {
   }, [selectedSector, holdings, sectorTab]);
 
   const renderTooltip = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (props: any) => (
-      <CustomTooltip {...props} T={T} />
-    ),
-    [isDark]
+    (props: TooltipContentProps<TooltipValueType, string | number>) => {
+      const payload = props.payload as readonly { payload: SectorItem }[] | undefined;
+      return <CustomTooltip active={props.active} payload={payload} T={T} />;
+    },
+    [T]
   );
 
   if (holdings.length === 0) {

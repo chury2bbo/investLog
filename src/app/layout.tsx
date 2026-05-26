@@ -27,7 +27,7 @@ export default function RootLayout({
       className={`${pretendard.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>

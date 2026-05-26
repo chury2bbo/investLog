@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import iconImg from "@/app/icon.png";
 
 export default function GlobalError({
@@ -57,12 +58,12 @@ export default function GlobalError({
             다시 시도
           </button>
 
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold border transition-colors hover:bg-(--color-g100) dark:hover:bg-(--color-card) border-(--color-g200) dark:border-(--color-border) text-(--color-text)"
           >
             홈으로 돌아가기
-          </a>
+          </Link>
         </div>
       </div>
     </div>
